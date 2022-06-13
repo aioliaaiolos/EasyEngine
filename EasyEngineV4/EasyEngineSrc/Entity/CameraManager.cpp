@@ -42,15 +42,15 @@ ICamera* CCameraManager::CreateCamera( TCameraType type, float fFov)
 		/*if (!m_pActiveCamera)
 			m_pActiveCamera = pCamera;*/
 		break;
-	case ICameraManager::T_LINKED_CAMERA:
+	case ICameraManager::TLinked:
 		pCamera = new CLinkedCamera(m_oInterface, fFov);
 		sCameraName = "LinkedCamera";
 		break;
-	case ICameraManager::T_MAP_CAMERA:
+	case ICameraManager::TMap:
 		pCamera = new CFreeCamera(m_oInterface, fFov);
 		sCameraName = "MapCamera";
 		break;
-	case ICameraManager::T_GUI_MAP_CAMERA:
+	case ICameraManager::TGuiMap:
 		pCamera = new CFreeCamera(m_oInterface, fFov);
 		sCameraName = "GuiMapCamera";
 		break;

@@ -11,7 +11,7 @@ CMinimapWindow::CMinimapWindow(IGUIManager* pGUIManager, IScene& oScene, IRessou
 	m_oRenderer(oRenderer),
 	m_oMinimap(512, 288)
 {
-	int screenWidth, screenHeight;
+	unsigned int screenWidth, screenHeight;
 	m_oRenderer.GetResolution(screenWidth, screenHeight);
 	SetPosition(screenWidth - GetDimension().GetWidth(), 0);
 	CRectangle skin;

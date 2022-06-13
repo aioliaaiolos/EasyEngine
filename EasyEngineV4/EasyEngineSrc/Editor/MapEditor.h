@@ -39,6 +39,8 @@ public:
 	void							SetGroundAdaptationHeight(float fHeight);
 	string							GetName() override;
 	void							Edit(string id) override;
+	void							AdaptGroundToAllEntities();
+	void							SetBias(float fBias);
 
 private:
 		
@@ -48,7 +50,7 @@ private:
 	void							OnEntityAdded();
 	void							UpdateGround();
 	bool							CreateLevelFolderIfNotExists(string levelName, string& levelFolder);
-	void							SaveMap(string sFileName);
+	void							SaveMap(string sFileName, float fBias);
 	void							ClearCharacters(vector<ILoader::CObjectInfos*>& objects);
 	void							OnEntitySelected() override;
 	float							GetPlanHeight() override;
@@ -78,6 +80,7 @@ private:
 	string							m_sTmpAdaptedHeightMapFileName;
 	string							m_sTmpFolder;
 	string							m_sCurrentMapName;
+	float							m_fBias;
 
 	static void						SaveResponseCallback(string sResponse, void* pData);	
 

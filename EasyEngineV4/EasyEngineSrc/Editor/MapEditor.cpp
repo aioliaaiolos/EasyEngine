@@ -27,7 +27,8 @@ m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("Resso
 m_oFileSystem(*static_cast<IFileSystem*>(oInterface.GetPlugin("FileSystem"))),
 m_fPlanHeight(3000.f),
 m_fGroundAdaptationHeight(0.f),
-m_pHeightMap(nullptr)
+m_pHeightMap(nullptr),
+m_fBias(0.f)
 {
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(oInterface.GetPlugin("EventDispatcher"));
 	pEventDispatcher->AbonneToEntityEvent(this, OnSceneLoadRessource);
@@ -41,6 +42,25 @@ m_pHeightMap(nullptr)
 void CMapEditor::OnEntityAdded()
 {
 	AdaptGroundToEntity(m_pEditingEntity);
+}
+
+void CMapEditor::AdaptGroundToAllEntities()
+{
+	if (!m_bEditionMode) {
+		CEException e("Error : You can use 'AdaptGroundToAllEntities' only in map edition mode");
+		throw e;
+	}
+	else {
+		for (int i = 0; i < m_pScene->GetChildCount(); i++) {
+			IEntity* pEntity = dynamic_cast<IEntity*>(m_pScene->GetChild(i));
+			AdaptGroundToEntity(pEntity);
+		}
+	}
+}
+
+void CMapEditor::SetBias(float fBias)
+{
+	m_fBias = fBias;
 }
 
 void CMapEditor::AdaptGroundToEntity(IEntity* pEntity)
@@ -229,7 +249,7 @@ void CMapEditor::Save(string mapName)
 					CopyFileA(srcPath.c_str(), destPath.c_str(), FALSE);
 				}
 			}
-			SaveMap(levelFolder + mapName + ".bse");
+			SaveMap(levelFolder + mapName + ".bse", m_fBias);
 		}
 	}
 	else {
@@ -238,12 +258,14 @@ void CMapEditor::Save(string mapName)
 	}
 }
 
-void CMapEditor::SaveMap(string sFileName)
+void CMapEditor::SaveMap(string sFileName, float fBias)
 {
 	ILoader::CSceneInfos si;
 	m_pScene->GetInfos(si);
 	ClearCharacters(si.m_vObject);
 	m_oLoaderManager.Export(sFileName, si);
+	string sLevelPath = sFileName.substr(0, sFileName.find_last_of('/'));
+	m_pScene->CreateCollisionMaps(sLevelPath, fBias);
 }
 
 void CMapEditor::Load(string sFileName)
@@ -370,7 +392,7 @@ void CMapEditor::SpawnEntity(string sEntityFileName)
 	if(!m_bEditionMode)
 		SetEditionMode(true);
 	m_eEditorMode = Type::eAdding;
-	m_pEditingEntity = m_oEntityManager.CreateEntity(string("Meshes/") + sEntityFileName, "");
+	m_pEditingEntity = m_oEntityManager.CreateEntity(sEntityFileName, "");
 	InitSpawnedEntity();
 }
 

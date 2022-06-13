@@ -52,7 +52,7 @@ public:
 	void									Setfocus();
 	void									SetForeground();
 	HWND									GetHandle();
-	void									GetDimension( int& nWidth, int& nHeight )const;
+	void									GetDimension(unsigned int& nWidth, unsigned int& nHeight )const;
 	void									AddChild( IWidget* pChild );
 	string									GetName() override;
 	void									SetFullScreenMode(bool fullscreen) override;

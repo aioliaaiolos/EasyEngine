@@ -42,30 +42,27 @@ void CBSELoader::Export( string sFileName, IRessourceInfos& ri )
 	CStringUtils::GetExtension(sFileName, sExt);
 
 	const CSceneInfos* pInfos = static_cast< const CSceneInfos* >( &ri );
-	if (sExt == "bse") {
-		CBinaryFileStorage fs;
-		fs.OpenFile(sFileName, IFileStorage::TOpenMode::eWrite);
-		fs << *pInfos;
-		fs.CloseFile();
-	}
-	else {
-		CAsciiFileStorage fs;
-		fs.OpenFile(sFileName, IFileStorage::TOpenMode::eWrite);
-		fs << *pInfos;
-		fs.CloseFile();
-	}
+	CBinaryFileStorage fs;
+	fs.OpenFile(sFileName, IFileStorage::TOpenMode::eWrite);
+	fs << *pInfos;
+	fs.CloseFile();	
 }
 
-void CBSELoader::Load( string sFileName, IRessourceInfos& ri, IFileSystem& )
+void CBSELoader::Load( string sFileName, IRessourceInfos& ri, IFileSystem& oFileSystem)
 {
 	CSceneInfos& si = static_cast< CSceneInfos&>(ri);
-	CBinaryFileStorage fs;
-	if (fs.OpenFile(sFileName, IFileStorage::TOpenMode::eRead)) {
-		fs >> si;
-		fs.CloseFile();
+	CBinaryFileStorage fs;	
+	if (!fs.OpenFile(sFileName, IFileStorage::TOpenMode::eRead)) {
+		FILE* pFile = oFileSystem.OpenFile(sFileName, "r");
+		if (pFile)
+			fclose(pFile);
+		string sDir;
+		oFileSystem.GetLastDirectory(sDir);
+		if (!fs.OpenFile(sDir + "/" + sFileName, IFileStorage::TOpenMode::eRead)) {
+			CFileNotFoundException e(sFileName);
+			throw e;
+		}
 	}
-	else {
-		CFileNotFoundException e(sFileName);
-		throw e;
-	}
+	fs >> si;
+	fs.CloseFile();
 }

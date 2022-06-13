@@ -44,7 +44,6 @@ public:
 	virtual float			GetMapHeight( int nHeightMapID, float xModel, float yModel ) = 0;
 	virtual void			DisplayHeightMap( IMesh* pMesh ) = 0;
 	virtual void			StopDisplayHeightMap() = 0;
-	virtual void			ExtractHeightMapFromTexture( string sFileName, string sOutFileName ) = 0;
 	virtual	void			SetHeightMapPrecision( int nPrecision ) = 0;
 	virtual bool			IsIntersection( const IBox& b, const ISphere& s ) = 0;
 	virtual bool			IsIntersection( const ISegment& s, const IBox& b2 ) = 0;
@@ -62,20 +61,21 @@ public:
 	// Collision map
 	virtual void	DisplayCollisionMap() = 0;
 	virtual void	StopDisplayCollisionMap() = 0;
-	virtual void	CreateCollisionMap(ILoader::CTextureInfos& ti, vector<IEntity*> collides, IEntity* pScene, IRenderer::TPixelFormat format = IRenderer::T_RGB) = 0;
-	virtual void	LoadCollisionMap(string sFileName, IEntity* pScene) = 0;
-	virtual void	DisplayGrid() = 0;
-	virtual void	ComputeRowAndColumnCount(int& rowCount, int& columnCount) = 0;
-	virtual void	GetCellCoordFromPosition(float x, float y, int& row, int& column) = 0;
+	virtual void	CreateCollisionMap(string sFileName, IEntity* pRoot, int cellSize, float fBias) = 0;
+	virtual void	CreateCollisionMapByRendering(ILoader::CTextureInfos& ti, vector<IEntity*> collides, IEntity* pScene, IRenderer::TPixelFormat format = IRenderer::T_RGB) = 0;
+	virtual void	CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& vGrid, int nCellSize, float fBias) = 0;
+	virtual void	CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid) = 0;
+	virtual void	DisplayGrid(int nCellSize) = 0;
+	virtual void	ComputeRowAndColumnCount(int& rowCount, int& columnCount, int nCellSize) = 0;
+	virtual void	GetCellCoordFromPosition(float x, float y, int& cellx, int& celly, int nCellSize) = 0;
 	virtual void	GetPositionFromCellCoord(int row, int column, float& x, float& y) = 0;
-	virtual bool	TestCellObstacle(int iRow, int iColumn) = 0;
+	virtual bool	TestCellObstacle(const ILoader::CTextureInfos& textureInfos, int x, int y) = 0;
+	virtual void	AttachCollisionMapToScene(const ILoader::CTextureInfos& m_oCollisionMap, IEntity* pScene) = 0;
+	virtual void	LoadCollisionMapComputedByRendering(string sFileName, IEntity* pScene, ILoader::CTextureInfos& collisionMap) = 0;
 
 	virtual void	EnableHMHack(bool enable) = 0;
 	virtual void	EnableHMHack2(bool enable) = 0;
 
-	// temp
-	virtual void	Test(IEntityManager* pEntityManager) = 0;
-	virtual void	Test2() = 0;
 	virtual void	SetEntityManager(IEntityManager* pEntityManager) = 0;
 };
 

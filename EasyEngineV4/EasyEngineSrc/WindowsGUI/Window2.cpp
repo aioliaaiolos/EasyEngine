@@ -202,7 +202,7 @@ void CWindow2::ShowModal()
 		}
 		else	
 		{
-			int nWidth, nHeight;
+			unsigned int nWidth, nHeight;
 			GetDimension( nWidth, nHeight );
 			m_oEventDispatcher.DispatchWindowEvent( IEventDispatcher::T_WINDOWUPDATE, nWidth, nHeight );
 		}
@@ -332,7 +332,7 @@ HWND CWindow2::GetHandle()
 	return CWidget::GetHandle();
 }
 
-void CWindow2::GetDimension( int& nWidth, int& nHeight )const
+void CWindow2::GetDimension(unsigned int& nWidth, unsigned int& nHeight )const
 {
 	CWidget::GetDimension( nWidth, nHeight );
 }

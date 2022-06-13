@@ -11,6 +11,7 @@ public:
 	void	Update() override;
 	void	GetEntityName(string& sName) override;
 	void	Colorize(float r, float g, float b, float a) override;
+	int		GetCellSize() { throw 1; return -1.f; };
 
 private:
 	IMesh*	m_pMesh;

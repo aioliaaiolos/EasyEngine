@@ -14,7 +14,7 @@ CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
 	m_sName = "Player";
 	m_pPlayerWindow = m_oGUIManager.CreatePlayerWindow(600, 800);
 	ICameraManager& oCameraManager = static_cast<ICameraManager&>(*oInterface.GetPlugin("CameraManager"));
-	m_pLinkCamera = oCameraManager.CreateCamera(ICameraManager::T_LINKED_CAMERA, 60.f);
+	m_pLinkCamera = oCameraManager.CreateCamera(ICameraManager::TLinked, 60.f);
 }
 
 

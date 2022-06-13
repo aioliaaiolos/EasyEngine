@@ -21,7 +21,7 @@ void CRenderUtils::ScreenCapture( string sFileName, IRenderer* pRenderer, ILoade
 	pScene->Update();
 	if( pGUIManager )
 		pGUIManager->OnRender();
-	int w, h;
+	unsigned int w, h;
 	pRenderer->GetResolution( w, h );
 	pRenderer->ReadPixels( 0, 0, w, h, vPixels, IRenderer::T_BGR );
 	pRenderer->EndRender();

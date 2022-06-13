@@ -46,7 +46,7 @@ m_pScene(nullptr)
 {
 	ISceneManager* pSceneManager = static_cast<ISceneManager*>(oInterface.GetPlugin("SceneManager"));
 	m_pScene = dynamic_cast<IScene*>(pSceneManager->GetScene("Game"));
-	int nResWidth, nResHeight;
+	unsigned int nResWidth, nResHeight;
 	m_oRenderer.GetResolution( nResWidth, nResHeight );	
 	m_pShader = m_oRenderer.GetShader( "GUI" );
 	CGUIWidget::Init( nResWidth, nResHeight, m_pShader );
@@ -202,7 +202,7 @@ CGUIWidget* CGUIManager::CreateImageFromSkin( const string& sSkinPath, unsigned 
 	string sImageName = sSkinPath.substr( 0, nDotPos ) + ".tga";
 	ITexture* pTexture = static_cast< ITexture* > ( m_oRessourceManager.GetRessource(sImageName) );
 	pTexture->SetShader( m_oRenderer.GetShader( "gui" ) );
-	int nResWidth, nResHeight;
+	unsigned int nResWidth, nResHeight;
 	m_oRenderer.GetResolution( nResWidth, nResHeight );
 	
 	ILoader::CMeshInfos mi;
@@ -334,7 +334,7 @@ void CGUIManager::OnRender()
 		// test
 		int x, y;
 		m_oInputManager.GetVirtualCursorPos( x, y );
-		int nResWidth, nResHeight;
+		unsigned int nResWidth, nResHeight;
 		m_oRenderer.GetResolution( nResWidth, nResHeight );
 #ifdef DISPLAYCURSOR
 		if ( x > nResWidth - m_pCursor->GetDimension().GetWidth() )
@@ -502,7 +502,7 @@ int CGUIManager::CreateStaticText( vector< string >& vText, int nPosX, int nPosY
 	float fOffsetY = 0.f;
 	float fLogicalFontHeight;
 	CGUIWidget oTestWidget = *m_mWidgetFontWhite[ 'a' ];
-	int nScreenWidth, nScreenHeight;
+	unsigned int nScreenWidth, nScreenHeight;
 	m_oRenderer.GetResolution( nScreenWidth, nScreenHeight );
 	float fFontDimX, fFontDimY;
 	oTestWidget.GetLogicalDimension( fFontDimX, fFontDimY, nScreenWidth, nScreenHeight );

@@ -348,32 +348,43 @@ void CGrid::UpdateOpenList(CCell& cell)
 	}
 }
 
-void CGrid::ProcessNode(int row, int column)
+void CGrid::ProcessGrid(int startRow, int startColumn)
+{
+	int currentRow = startRow, currentColumn = startColumn, nextRow = -1, nextColumn = -1;
+	bool complete = false;
+	while (!complete) {
+		complete = ProcessNode(currentRow, currentColumn, nextRow, nextColumn);
+		currentRow = nextRow;
+		currentColumn = nextColumn;		
+	}
+}
+
+bool CGrid::ProcessNode(int currentRow, int currentColumn, int& nextRow, int& nextColumn)
 {
 	//static int n = 32;
-	CCell& current = m_grid[row][column];
+	CCell& current = m_grid[currentRow][currentColumn];
 	if (current.GetCellType() & IGrid::ICell::eArrivee)
-		return;
+		return true;
 	if (current.GetCellType() & ICell::eClose)
-		return;
-	if (m_grid[row][column].GetCellType() == IGrid::ICell::eDepart) {
+		return false;
+	if (m_grid[currentRow][currentColumn].GetCellType() == IGrid::ICell::eDepart) {
 		current.Update(NULL, m_pDestination);
 	}
 	current.RemoveNodeFlag(IGrid::ICell::eOpen);
 	current.AddNodeFlag(IGrid::ICell::eClose);
 	m_vCloseList.push_back(&current);
-	int index = GetNodeInOpenList(row, column);
+	int index = GetNodeInOpenList(currentRow, currentColumn);
 	if(index != -1)
 		m_vOpenList.erase(m_vOpenList.begin() + index);
 	for (int iRow = -1; iRow <= 1; iRow++) {
 		for (int iColumn = -1; iColumn <= 1; iColumn++) {
 			if ( (iColumn == 0) && (iRow == 0) )
 				continue;
-			if ( (column + iColumn < 0) || ( (column + iColumn) >= m_nColumnCount ) )
+			if ( (currentColumn + iColumn < 0) || ( (currentColumn + iColumn) >= m_nColumnCount ) )
 				continue;
-			if ( (row + iRow < 0) || ((row + iRow) >= m_nRowCount) ) 
+			if ( (currentRow + iRow < 0) || ((currentRow + iRow) >= m_nRowCount) )
 				continue;
-			CCell& cell = m_grid[row + iRow][column + iColumn];
+			CCell& cell = m_grid[currentRow + iRow][currentColumn + iColumn];
 			if (cell.GetCellType() & CCell::eObstacle)
 				continue;
 			if ( (cell.GetCellType() == CCell::eUninitialized) || (cell.GetCellType() == CCell::eArrivee) ) {
@@ -388,20 +399,24 @@ void CGrid::ProcessNode(int row, int column)
 					cell.Init(cell2);
 					UpdateOpenList(cell);
 				}
-			}			
+			}
 		}
 	}
 
 	if (m_bManualMode)
-		return;
+		return true;
 
 	vector<ICell*>::iterator itBest = m_vOpenList.begin();
-	ICell* cell = *itBest;
-	m_vCloseList.push_back(cell);
-	m_vOpenList.erase(itBest);
-	int r, c;
-	cell->GetCoordinates(r, c);
-	ProcessNode(r, c);
+	if (itBest != m_vOpenList.end()) {
+		ICell* cell = *itBest;
+		m_vCloseList.push_back(cell);
+		m_vOpenList.erase(itBest);
+		int r, c;
+		cell->GetCoordinates(r, c);
+		nextRow = r;
+		nextColumn = c;
+	}
+	return false;
 }
 
 void CGrid::BuildPath()
@@ -479,7 +494,8 @@ void CGrid::InsertToClose(CCell* b)
 }
 
 
-CPathFinder::CPathFinder(EEInterface& oInterface)
+CPathFinder::CPathFinder(EEInterface& oInterface) :
+	m_bSaveAStarGrid(false)
 {
 }
 
@@ -490,16 +506,48 @@ IGrid* CPathFinder::CreateGrid(int rowCount, int columnCount)
 
 void CPathFinder::FindPath(IGrid* grid)
 {
+	if (m_bSaveAStarGrid)
+		SaveAStarGrid(grid);
 	int row, column;
 	CGrid* pGrid = static_cast<CGrid*>(grid);
 	pGrid->GetDepart()->GetCoordinates(row, column);
-	pGrid->ProcessNode(row, column);
+	pGrid->ProcessGrid(row, column);
 	pGrid->BuildPath();
 }
 
 string CPathFinder::GetName()
 {
 	return "PathFinder";
+}
+
+void CPathFinder::EnableSaveGrid(bool bEnable)
+{
+	m_bSaveAStarGrid = bEnable;
+}
+
+void CPathFinder::SaveAStarGrid(IGrid* pGrid)
+{
+	WIN32_FIND_DATAA fd;
+	ZeroMemory(&fd, sizeof(fd));
+	string fileName;
+	HANDLE hFile = FindFirstFileA("..\\Data\\grid*.bin", &fd);
+	int index = 0;
+	do {
+		fileName = fd.cFileName;
+		if (!fileName.empty()) {
+			int first = strlen("grid");
+			int dotPos = fileName.find(".");
+			int n = dotPos - first;
+			string sIndex = fileName.substr(first, n);
+			int i = atoi(sIndex.c_str());
+			if (i > index)
+				index = i;
+		}
+	} while (FindNextFileA(hFile, &fd));
+
+	ostringstream oss;
+	oss << "..\\Data\\grid" << index + 1 << ".bin";
+	pGrid->Save(oss.str());
 }
 
 extern "C" _declspec(dllexport) CPathFinder* CreatePathFinder(EEInterface& oInterface)

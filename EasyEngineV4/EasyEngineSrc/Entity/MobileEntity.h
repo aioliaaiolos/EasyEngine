@@ -35,12 +35,14 @@ public:
 	void						WearArmorToDummy(string armorName);
 	void						WearShoes(string shoesName) override;
 	void						AddHairs(string sHairsPath) override;
+	void						SetBody(string sBodyName) override;
 	void						Yaw(float fAngle);
 	void						Pitch(float fAngle);
 	void						Roll(float fAngle);
 	IAnimation*					GetCurrentAnimation();
 	void						WearSkinnedClothFull(string sClothName);
-	static void					InitStatics();
+	void						WearCloth(string sClothName, string sDummyName);
+	static void					InitStatics();	
 
 	static map<string, IEntity::TAnimation>	s_mStringToAnimation;
 

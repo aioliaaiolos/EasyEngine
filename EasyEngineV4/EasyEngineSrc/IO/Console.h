@@ -96,7 +96,7 @@ private:
 	int												GetClientHeight() override;
 	void											SetPauseModeOn(ResumeProc callback, void* params) override;
 	void											SetPauseModeOff();
-	void											UpdateConsoleHeight();
+	bool											UpdateConsoleHeight();
 
 	static void										OnKeyAction(CPlugin*, unsigned int key, IInputManager::KEY_STATE);
 };

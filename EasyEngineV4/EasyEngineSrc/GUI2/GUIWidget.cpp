@@ -270,7 +270,7 @@ void CGUIWidget::CreateQuadMeshInfosFromTexture(IRenderer& oRenderer, ITexture* 
 	pTexture->SetShader(pShader);
 
 	CRectangle oScreenRect;
-	int nResWidth, nResHeight;
+	unsigned int nResWidth, nResHeight;
 	oRenderer.GetResolution(nResWidth, nResHeight);
 	CDimension oScreenDim(nResWidth, nResHeight);
 	GetScreenCoordFromTexCoord(oFinalSkin, oScreenDim, oScreenRect);
@@ -329,7 +329,7 @@ void CGUIWidget::CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& qua
 		oFinalSkin.SetDimension(CDimension(quadSize.GetWidth(), quadSize.GetHeight()));
 
 	CRectangle oScreenRect;
-	int nResWidth, nResHeight;
+	unsigned int nResWidth, nResHeight;
 	oRenderer.GetResolution(nResWidth, nResHeight);
 	CDimension oScreenDim(nResWidth, nResHeight);
 	GetScreenCoordFromTexCoord(oFinalSkin, oScreenDim, oScreenRect);

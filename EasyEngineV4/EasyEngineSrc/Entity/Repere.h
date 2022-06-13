@@ -12,4 +12,5 @@ public:
 	void			GetEntityName(string& sName);
 	void			SetEntityName(string sName);
 	void			DrawCollisionBoundingBoxes(bool bDraw) {}
+	int				GetCellSize() { throw 1; return -1.f; };
 };

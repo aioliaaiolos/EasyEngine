@@ -29,6 +29,7 @@ public:
 	string GetName() override;
 	void Clear() override;
 	int GetLineCount() override;
+	int CHud::GetSlotCount() override;
 	int CreateNewSlot(int x, int y);
 	void AddToSlot(int slotId, string text);
 	void PrintInSlot(int nSlotPosition, int nLine, string text);

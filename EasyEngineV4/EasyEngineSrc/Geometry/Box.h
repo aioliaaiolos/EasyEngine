@@ -58,6 +58,7 @@ public:
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
 	IGeometry::TFace	GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	bool				IsIncludedInto(const IGeometry& oGeometry) override;
+	void				GetBBoxDimension(CVector& dim) override;
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
 	IPersistantObject& operator << (CBinaryFileStorage& store);

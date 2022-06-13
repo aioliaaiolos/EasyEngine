@@ -102,7 +102,7 @@ void CRenderer::InitOpengl()
 	m_pQuadricObj = gluNewQuadric();
 	m_oWindow.SetForeground();
 	m_oWindow.Setfocus();
-	int nWidth, nHeight;
+	unsigned int nWidth, nHeight;
 	m_oWindow.GetDimension( nWidth, nHeight );
 	glViewport( 0, 0, nWidth, nHeight );
 
@@ -162,7 +162,7 @@ void CRenderer::CalculProjectionMatrix( CMatrix& oMatrix, float l, float r, floa
 
 void CRenderer::CalculProjectionMatrix( CMatrix& oMatrix, float fov )
 {
-	int nWidth, nHeight;
+	unsigned int nWidth, nHeight;
 	m_oWindow.GetDimension( nWidth, nHeight );
 	float fRatio = (GLfloat)nWidth / (GLfloat)nHeight;
 	float fInvRatio = 1.f / fRatio;
@@ -877,7 +877,7 @@ void CRenderer::Set3DMode()
 	m_Mode = MODE_3D;
 }
 
-void CRenderer::GetResolution( int& nWidth, int& nHeight )
+void CRenderer::GetResolution( unsigned int& nWidth, unsigned int& nHeight )
 {
 	m_oWindow.GetDimension( nWidth, nHeight );
 }
@@ -1568,7 +1568,7 @@ void CRenderer::SetCurrentFBO(int fbo)
 
 float CRenderer::GetScreenRatio()
 {
-	int nWidth, nHeight;
+	unsigned int nWidth, nHeight;
 	m_oWindow.GetDimension(nWidth, nHeight);
 	return ((float)nWidth / (float)nHeight);
 }

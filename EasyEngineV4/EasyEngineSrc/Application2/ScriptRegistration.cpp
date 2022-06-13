@@ -21,11 +21,13 @@
 #include "IEditor.h"
 #include "../Utils2/RenderUtils.h"
 #include "../Utils2/DebugTool.h"
-
+#include "../Utils2/EasyFile.h"
+#include "../Utils2/StringUtils.h"
 
 // stl
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 extern EEInterface*			pInterface;
 extern IScene*				m_pScene;
@@ -47,6 +49,7 @@ extern IGeometryManager*	m_pGeometryManager;
 extern bool					m_bRenderScene;
 extern IEventDispatcher*	m_pEventDispatcher;
 extern IEditorManager*		m_pEditorManager;
+extern IPathFinder*			m_pPathFinder;
 
 IEntity* m_pRepere = NULL;
 vector< string > g_vStringsResumeMode;
@@ -55,6 +58,8 @@ IMapEditor* m_pMapEditor = nullptr;
 ICharacterEditor* m_pCharacterEditor = nullptr;
 IWorldEditor* m_pWorldEditor = nullptr;
 int g_nSlotPosition = 0;
+map<IEntity*, int> g_mSlots;
+bool g_bEnableWatchLog = false;
 
 enum TObjectType
 {
@@ -86,8 +91,6 @@ void InitScriptRegistration()
 	if (!m_pWorldEditor) {
 		m_pConsole->Println("Erreur, World Editor n'existe pas");
 	}
-
-	g_nSlotPosition = m_pHud->CreateNewSlot(800, 100);
 }
 
 IEntity* CreateEntity( string sName )
@@ -124,6 +127,12 @@ IEntity* CreateEntity( string sName )
 	}
 	m_pRessourceManager->EnableCatchingException( bak );
 	return pEntity;
+}
+
+void EnableWatchLog(IScriptState* pState)
+{
+	CScriptFuncArgInt* pEnable = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	g_bEnableWatchLog = pEnable->m_nValue != 0;
 }
 
 void DisplayOpenglVersion(IScriptState* pState)
@@ -226,6 +235,35 @@ void EditCharacter(IScriptState* pState)
 	}
 }
 
+void EditCloth(IScriptState* pState)
+{
+	CScriptFuncArgString* pClothName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	try {
+		m_pCharacterEditor->EditCloth(pClothName->m_sValue);
+	}
+	catch (CEException& e) {
+		m_pConsole->Println(e.what());
+	}
+}
+
+void OffsetCloth(IScriptState* pState)
+{
+	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	try {
+		m_pCharacterEditor->OffsetCloth(px->m_fValue, py->m_fValue, pz->m_fValue);
+	}
+	catch (CEException& e) {
+		m_pConsole->Println(e.what());
+	}
+}
+
+void SaveCloth(IScriptState* pState)
+{
+	m_pCharacterEditor->SaveCurrentEditableCloth();
+}
+
 void EditWorld(IScriptState* pState)
 {
 	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
@@ -250,6 +288,16 @@ void EditMap(IScriptState* pState)
 	}
 	catch (CEException& e)
 	{
+		m_pConsole->Println(e.what());
+	}
+}
+
+void AdaptGroundToAllEntities(IScriptState* pState)
+{
+	try {
+		m_pMapEditor->AdaptGroundToAllEntities();
+	}
+	catch (CEException& e) {
 		m_pConsole->Println(e.what());
 	}
 }
@@ -381,7 +429,7 @@ void RayTrace(IScriptState* pState)
 	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
 	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
 
-	int w, h;
+	unsigned int w, h;
 	m_pRenderer->GetResolution(w, h);
 	float logicalx = (px->m_fValue / (float)w - 0.5f) * 2.0f;
 	//float logicaly = (py->m_fValue / (float)h - 0.5f) * 2.0f;
@@ -413,15 +461,6 @@ void CreateRepere( IScriptState* pState )
 	oss << "Le repère a été créé avec l'identifiant " << id  << ".";
 	m_pConsole->Println( oss.str() );
 	pState->SetReturnValue(id);
-}
-
-void Test( IScriptState* pState )
-{
-}
-
-void Test2(IScriptState* pState)
-{
-	m_pCollisionManager->Test2();
 }
 
 void ChangeBase( IScriptState* pState )
@@ -666,11 +705,11 @@ void LocalTranslate( IScriptState* pState )
 ICameraManager::TCameraType GetCamTypeByString(string sCamType)
 {
 	if (sCamType == "link")
-		return ICameraManager::T_LINKED_CAMERA;
+		return ICameraManager::TLinked;
 	if(sCamType == "free")
 		return ICameraManager::TFree;
 	if (sCamType == "map")
-		return ICameraManager::T_MAP_CAMERA;
+		return ICameraManager::TMap;
 }
 
 void SetCameraType( IScriptState* pState )
@@ -728,9 +767,9 @@ void GetCameraID(IScriptState* pState)
 	CScriptFuncArgString* pType = (CScriptFuncArgString*)pState->GetArg(0);
 	ICameraManager::TCameraType type = ICameraManager::TFree;
 	if(pType->m_sValue == "link")
-		type = ICameraManager::T_LINKED_CAMERA;
+		type = ICameraManager::TLinked;
 	else if(pType->m_sValue == "map")
-		type = ICameraManager::T_MAP_CAMERA;
+		type = ICameraManager::TMap;
 	ICamera* pCamera = m_pCameraManager->GetCameraFromType(type);
 	pState->SetReturnValue(m_pEntityManager->GetEntityID(pCamera));
 }
@@ -1750,24 +1789,6 @@ void SetHMPrecision( IScriptState* pState )
 	m_pCollisionManager->SetHeightMapPrecision( pPrecision->m_nValue );
 }
 
-void ExtractHM( IScriptState* pState )
-{
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	string sFileName = pFileName->m_sValue + ".bmp";
-	string sOutFileName = pFileName->m_sValue + "_extract.bmp";
-	try
-	{
-		m_pCollisionManager->ExtractHeightMapFromTexture( sFileName, sOutFileName );
-	}
-	catch( CEException& e )
-	{
-		string sMessage;
-		e.GetErrorMessage( sMessage );
-		sMessage = string( "Erreur : ") + sMessage;
-		m_pConsole->Println( sMessage );
-	}
-}
-
 void StopDisplayHM( IScriptState* pState )
 {
 	m_pCollisionManager->StopDisplayHeightMap();
@@ -2027,7 +2048,7 @@ void ExportBSEToAscii(IScriptState* pState)
 
 void ClearScene( IScriptState* pState )
 {
-	ICamera* pLinkedCamera = m_pCameraManager->GetCameraFromType( ICameraManager::T_LINKED_CAMERA );
+	ICamera* pLinkedCamera = m_pCameraManager->GetCameraFromType( ICameraManager::TLinked );
 	if (pLinkedCamera) {
 		if (pLinkedCamera->GetParent())
 			pLinkedCamera->Unlink();
@@ -2286,11 +2307,11 @@ void CreateHMFromFile(IScriptState* pState)
 	}
 }
 
-void CreateCollisionMap(IScriptState* pState)
+void CreateCollisionMapByRendering(IScriptState* pState)
 {
 	try
 	{
-		m_pScene->CreateCollisionMap();
+		m_pScene->CreateCollisionMapByRendering();
 	}
 	catch (CEException& e)
 	{
@@ -2337,7 +2358,7 @@ void SetLightIntensity( IScriptState* pState )
 	}
 }
 
-void AddLight( IScriptState* pState )
+void CreateLight( IScriptState* pState )
 {
 	CScriptFuncArgInt* pr = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	CScriptFuncArgInt* pg = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
@@ -2391,6 +2412,44 @@ void CreateLightw( IScriptState* pState )
 	oss << "La lumière a été créée avec l'identifiant " << m_pEntityManager->GetEntityID( pEntity );
 	m_pConsole->Println( oss.str() );
 	pState->SetReturnValue(m_pEntityManager->GetEntityID(pEntity));
+}
+
+void CreateCollisionMap(IScriptState* pState)
+{
+	IEntity* pNode = nullptr;
+	CScriptFuncArgInt* pId = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CScriptFuncArgString* pFileName = static_cast<CScriptFuncArgString*>(pState->GetArg(1));
+	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
+	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(3));
+	if (pId->m_nValue == 0)
+		pNode = m_pScene;
+	else
+		pNode = dynamic_cast<IEntity*>(m_pEntityManager->GetEntity(pId->m_nValue));
+	vector<vector<bool>> vGrid;
+	m_pCollisionManager->CreateCollisionMap(pFileName->m_sValue, pNode, pCellSize->m_nValue, pBias->m_fValue);
+}
+
+void EnablePathFindSaving(IScriptState* pState)
+{
+	CScriptFuncArgInt* pEnable = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	m_pPathFinder->EnableSaveGrid(pEnable->m_nValue != 0);
+}
+
+void IsAbsolutePath(IScriptState* pState)
+{
+	CScriptFuncArgString* pPath = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	pState->SetReturnValue(CEasyFile::IsAbsolutePath(pPath->m_sValue) ? 1 : 0);
+}
+
+void TestRegExpr(IScriptState* pState)
+{
+	CScriptFuncArgString* pString= static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CScriptFuncArgString* pRegExpr = static_cast<CScriptFuncArgString*>(pState->GetArg(1));
+
+	regex reg(pRegExpr->m_sValue);
+	sregex_iterator itBegin = sregex_iterator(pString->m_sValue.begin(), pString->m_sValue.end(), reg);
+	sregex_iterator itEnd = sregex_iterator();
+	pState->SetReturnValue(std::distance(itBegin, itEnd) > 0);
 }
 
 void RollEntity( IScriptState* pState )
@@ -2518,7 +2577,7 @@ void Kill(IScriptState* pState)
 
 void WearArmorToDummy(IScriptState* pState)
 {
-	CScriptFuncArgInt* pId = (CScriptFuncArgInt*)(pState->GetArg(0));
+ 	CScriptFuncArgInt* pId = (CScriptFuncArgInt*)(pState->GetArg(0));
 	CScriptFuncArgString* pArmor = (CScriptFuncArgString*)(pState->GetArg(1));
 	m_pEntityManager->WearArmorToDummy(pId->m_nValue, pArmor->m_sValue);
 }
@@ -2527,6 +2586,19 @@ void WearShoes(IScriptState* pState)
 {
 	CScriptFuncArgString* pShoes = (CScriptFuncArgString*)(pState->GetArg(0));
 	m_pCharacterEditor->WearShoes(pShoes->m_sValue);
+}
+
+void WearCloth(IScriptState* pState)
+{
+	CScriptFuncArgString* pClothPath = (CScriptFuncArgString*)(pState->GetArg(0));
+	CScriptFuncArgString* pDummyName = (CScriptFuncArgString*)(pState->GetArg(1));
+	m_pCharacterEditor->WearCloth(pClothPath->m_sValue, pDummyName->m_sValue);
+}
+
+void SetCharacterBody(IScriptState* pState)
+{
+	CScriptFuncArgString* pBody = (CScriptFuncArgString*)(pState->GetArg(0));
+	m_pCharacterEditor->SetBody(pBody->m_sValue);
 }
 
 void DisplayPickingRaySelected(IScriptState* pState)
@@ -2571,7 +2643,7 @@ void DisplayCharacters(IScriptState* pState)
 
 void DisplayEntitiesResume(void* params)
 {
-	int maxLineCount = m_pConsole->GetClientHeight() / m_pConsole->GetLineHeight();
+	int maxLineCount = m_pConsole->GetClientHeight() / m_pConsole->GetLineHeight() - 3;
 	vector<string>::iterator it = g_vStringsResumeMode.begin();
 	int index = 0;
 	while (it != g_vStringsResumeMode.end()) {
@@ -2606,14 +2678,27 @@ void GetEntityID( IScriptState* pState )
 	if( pEntity )
 	{
 		int nID = m_pEntityManager->GetEntityID( pEntity );
-		oss << nID;
-		m_pConsole->Println( oss.str() );
+		pState->SetReturnValue(nID);
 	}
 	else
+		pState->SetReturnValue(-1);
+}
+
+void GetCharacterID(IScriptState* pState)
+{
+	CScriptFuncArgString* pName = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	vector<IEntity*> characters; 
+	m_pScene->GetCharactersInfos(characters);
+	for (IEntity* entity : characters)
 	{
-		oss << "Entité \"" << pName->m_sValue << "\" introuvable";
-		m_pConsole->Println( oss.str() );
+		string name;
+		entity->GetEntityName(name);
+		if (name == pName->m_sValue) {
+			pState->SetReturnValue(entity->GetID());
+			return;
+		}
 	}
+	m_pConsole->Println(string("Error : character '" + pName->m_sValue + "' not found"));
 }
 
 void DisplayBBox( IScriptState* pState )
@@ -2683,15 +2768,29 @@ void EntityCallback(CPlugin*, IEventDispatcher::TEntityEvent e, IEntity* pEntity
 {
 	if (e == IEventDispatcher::TEntityEvent::T_UPDATE) {
 		CVector pos;
-		pEntity->GetLocalPosition(pos);
+		pEntity->GetWorldPosition(pos);
 		ostringstream oss;
 		oss << "Entity " << pEntity->GetID() << ", Position = (" << pos.m_x << ", " << pos.m_y << ", " << pos.m_z << ")";
-		m_pHud->PrintInSlot(g_nSlotPosition, 0, oss.str());
-		FILE* pFile = fopen("log.txt", "a");
-		if (pFile) {
-			oss << "\n";
-			fwrite(oss.str().c_str(), sizeof(char), oss.str().size(), pFile);
-			fclose(pFile);
+		int slot = 0;
+		if (g_mSlots.empty())
+			g_mSlots[pEntity] = m_pHud->CreateNewSlot(800, 100);
+		else {
+			map<IEntity*, int>::iterator itEntity = g_mSlots.find(pEntity);
+			if (itEntity == g_mSlots.end()) {
+				slot = m_pHud->CreateNewSlot(800, 100 + m_pHud->GetSlotCount() * 20);
+				g_mSlots[pEntity] = slot;
+			}
+			else
+				slot = itEntity->second;
+		}
+		m_pHud->PrintInSlot(slot, 0, oss.str());
+		if (g_bEnableWatchLog) {
+			FILE* pFile = fopen("log.txt", "a");
+			if (pFile) {
+				oss << "\n";
+				fwrite(oss.str().c_str(), sizeof(char), oss.str().size(), pFile);
+				fclose(pFile);
+			}
 		}
 	}
 }
@@ -2700,8 +2799,13 @@ void WatchEntityPosition(IScriptState* pState)
 {
 	CScriptFuncArgInt* pId = dynamic_cast<CScriptFuncArgInt*>((pState->GetArg(0)));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pId->m_nValue);
-	int i = 0;
-	pEntity->AbonneToEntityEvent(EntityCallback);
+	if(pEntity)
+		pEntity->AbonneToEntityEvent(EntityCallback);
+	else {
+		ostringstream oss;
+		oss << "Error : entity " << pId->m_nValue << " not found";
+		m_pConsole->Println(oss.str());
+	}
 }
 
 void StopWatchEntityPosition(IScriptState* pState)
@@ -2917,6 +3021,18 @@ void SaveWorld(IScriptState* pState)
 	}
 }
 
+void SaveGame(IScriptState* pState)
+{
+	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->SaveGame(pFileName->m_sValue);
+}
+
+void LoadGame(IScriptState* pState)
+{
+	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->Load(pFileName->m_sValue);
+}
+
 void Merge( IScriptState* pState )
 {
 	CScriptFuncArgString* pString = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
@@ -3074,7 +3190,7 @@ void SetProjectionMatrixType(IScriptState* pState)
 	CMatrix m;
 	if (pType->m_sValue == "2d") {
 		m.SetIdentity();
-		int nWidth, nHeight;
+		unsigned int nWidth, nHeight;
 		m_pRenderer->GetResolution(nWidth, nHeight);
 		m.m_00 = (float)nHeight / (float)nWidth;
 		m_pRenderer->SetProjectionMatrix(m);
@@ -3148,13 +3264,8 @@ void SetLineWidth(IScriptState* pState)
 
 void DisplayGrid(IScriptState* pState)
 {
-	m_pCollisionManager->DisplayGrid();
-}
-
-void SetCurrentCollisionMap(IScriptState* pState)
-{
-	CScriptFuncArgString* pName = (CScriptFuncArgString*)pState->GetArg(0);
-	m_pCollisionManager->LoadCollisionMap(pName->m_sValue, m_pScene);
+	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	m_pCollisionManager->DisplayGrid(pCellSize->m_nValue);
 }
 
 void PatchBMEMeshTextureName(IScriptState* pState)
@@ -3231,9 +3342,73 @@ void CreatePlaneEntity(IScriptState* pState)
 	pState->SetReturnValue(m_pEntityManager->GetEntityID(pEntity));
 }
 
+void SetCollisionMapBias(IScriptState* pState)
+{
+	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(0));
+	m_pMapEditor->SetBias(pBias->m_fValue);
+}
+
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+
+	vType.clear();
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetCollisionMapBias", SetCollisionMapBias, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("TestRegExpr", TestRegExpr, vType);	
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("IsAbsolutePath", IsAbsolutePath, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("EnablePathFindSaving", EnablePathFindSaving, vType);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("AdaptGroundToAllEntities", AdaptGroundToAllEntities, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("GetCharacterID", GetCharacterID, vType);
+	
+	
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SaveGame", SaveGame, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("LoadGame", LoadGame, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eString);
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("CreateCollisionMap", CreateCollisionMap, vType);
+		
+	vType.clear();
+	m_pScriptManager->RegisterFunction("SaveCloth", SaveCloth, vType);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("OffsetCloth", OffsetCloth, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("EditCloth", EditCloth, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SetCharacterBody", SetCharacterBody, vType);
 
 	vType.clear();
 	vType.push_back(eInt);
@@ -3370,11 +3545,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("PatchBMEMeshTextureName", PatchBMEMeshTextureName, vType);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("ResetFreeCamera", ResetFreeCamera, vType);
-
-	vType.clear();
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetCurrentCollisionMap", SetCurrentCollisionMap, vType);
+	m_pScriptManager->RegisterFunction("ResetFreeCamera", ResetFreeCamera, vType);	
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction("DisplayGrid", DisplayGrid, vType);
@@ -3516,7 +3687,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back( eInt );
 	vType.push_back( eString );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "AddLight", AddLight, vType );
+	m_pScriptManager->RegisterFunction( "CreateLight", CreateLight, vType );
 
 	vType.clear();
 	vType.push_back( eInt );
@@ -3543,7 +3714,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("CreateHMFromFile", CreateHMFromFile, vType);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("CreateCollisionMap", CreateCollisionMap, vType);
+	m_pScriptManager->RegisterFunction("CreateCollisionMapByRendering", CreateCollisionMapByRendering, vType);
 
 	vType.clear();
 	vType.push_back( eString );
@@ -3649,10 +3820,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction( "StopDisplayHM", StopDisplayHM, vType );
-
-	vType.clear();
-	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "ExtractHM", ExtractHM, vType );
 	
 	vType.clear();
 	vType.push_back( eInt );
@@ -3903,12 +4070,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction( "SetPreferedKeyBBox", SetPreferedKeyBBox, vType );
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "Test", Test, vType );
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("Test2", Test2, vType);
-
-	vType.clear();
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
@@ -4064,6 +4225,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("WearShoes", WearShoes, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("WearCloth", WearCloth, vType);
 
 	vType.clear();
 	vType.push_back(eString);

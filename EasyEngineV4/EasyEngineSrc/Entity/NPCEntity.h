@@ -29,12 +29,11 @@ public:
 	void					Goto( const CVector& oPosition, float fSpeed );
 	IBox*					GetFirstCollideBox();
 	IBox*					GetNextCollideBox();	
-	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints );
+	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints);	
 
 protected:
 	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
-	void					ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, bool saveGrid = false);
-	void					SaveAStarGrid(IGrid* pGrid);
+	void					ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize);
 
 private:
 	void					Turn(float fAngle);

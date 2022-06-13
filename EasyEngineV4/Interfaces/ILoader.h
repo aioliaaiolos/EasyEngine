@@ -114,8 +114,8 @@ public:
 	struct CTextureInfos : public IRessourceInfos
 	{
 		vector< unsigned char >			m_vTexels;
-		int								m_nWidth;
-		int								m_nHeight;
+		unsigned int					m_nWidth;
+		unsigned int					m_nHeight;
 		TPixelFormat					m_ePixelFormat;
 		bool							m_bFlip;
 		CTextureInfos() : m_bFlip( false ) {}

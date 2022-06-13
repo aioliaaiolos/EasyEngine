@@ -8,7 +8,7 @@ public:
 	void					Update();
 	void					GetEntityName(string& sName);
 	void					Colorize(float r, float g, float b, float a);
-
+	int						GetCellSize() { throw 1; return -1.f; };
 
 private:	
 

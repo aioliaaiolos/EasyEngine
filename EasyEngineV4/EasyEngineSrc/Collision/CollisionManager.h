@@ -15,6 +15,7 @@ class CBox;
 class ISphere;
 class ISegment2D;
 class IEntity;
+class INode;
 
 class CCollisionManager : public ICollisionManager
 {
@@ -29,7 +30,6 @@ public:
 	float			GetMapHeight( int nHeightMapID, float x, float z );
 	void 			DisplayHeightMap( IMesh* pMesh );
 	void 			StopDisplayHeightMap();
-	void 			ExtractHeightMapFromTexture( string sFileName, string sOutFileName);
 	void			SetHeightMapPrecision( int nPrecision );
 	bool			IsIntersection( const IBox& b, const ISphere& s );
 	bool			IsIntersection( const ISegment& s, const IBox& b2 );
@@ -46,16 +46,17 @@ public:
 	void			ClearHeightMaps() override;
 
 	// Collision map
-	void	CreateCollisionMap(ILoader::CTextureInfos& ti, vector<IEntity*> collides, IEntity* pScene, IRenderer::TPixelFormat format = IRenderer::T_RGB);
-	void	LoadCollisionMap(string sFileName, IEntity* pScene);
+	void	CreateCollisionMap(string sFileName, IEntity* pRoot, int cellSize, float fBias) override;
+	void	CreateCollisionMapByRendering(ILoader::CTextureInfos& ti, vector<IEntity*> collides, IEntity* pScene, IRenderer::TPixelFormat format = IRenderer::T_RGB);
+	void	CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid) override;
+	void	AttachCollisionMapToScene(const ILoader::CTextureInfos& m_oCollisionMap, IEntity* pScene);
+	void	LoadCollisionMapComputedByRendering(string sFileName, IEntity* pScene, ILoader::CTextureInfos& collisionMap);
 	void	SendCustomUniformValue(string name, float value);
 	void	DisplayCollisionMap();
 	void	StopDisplayCollisionMap();
-	void	DisplayGrid();
+	void	DisplayGrid(int nCellSize);
 
-	// temp
-	void	Test(IEntityManager* pEntityManager);
-	void	Test2();
+	// temp	
 	void	SetEntityManager(IEntityManager* pEntityManager);
 
 
@@ -63,6 +64,7 @@ private:
 	EEInterface&			m_oInterface;
 	IRenderer&				m_oRenderer;
 	ILoaderManager&			m_oLoaderManager;
+	IEntityManager&			m_oEntityManager;
 	IFileSystem*			m_pFileSystem;
 	map< int, CHeightMap* >	m_mHeigtMap;
 	CVector					m_oOriginBackgroundColor;
@@ -78,18 +80,14 @@ private:
 	float					m_fGroundHeight;
 	float					m_fScreenRatio;
 	float					m_fMaxLenght;
-	int						m_nScreenWidth;
-	int						m_nScreenHeight;
 
 	// Collision map
 	float						m_fGroundMapWidth;
 	float						m_fGroundMapHeight;
 	float						m_fWorldToScreenScaleFactor;
-	float						m_fGridCellSize;
 	float						m_fGridHeight;
 	char**						m_pCollisionGrid;
 	vector<IEntity*>			m_vGridElements;
-	ILoader::CTextureInfos		m_oCollisionMap;
 
 	// Height map
 	bool						m_bEnableHMHack;
@@ -112,25 +110,27 @@ private:
 	void RestoreOriginalShaders(const vector<IShader*>& vBackupStaticObjectShader, vector<IEntity*>& staticObjects);
 	void RenderCollisionGeometry(IShader* pCollisionShader, const CMatrix& groundModel, const IBox* const pBox);
 	bool IsSegmentInsideSegment(float fS1Center, float fS1Radius, float fS2Center, float fS2Radius);
-	void ComputeGroundMapDimensions(IMesh* pMesh, float& width, float& height, float& groundToScreenScaleFactor);
+	void ComputeGroundMapDimensions(IMesh* pMesh, int nScreenWidth, int nScreenHeight, float& width, float& height, float& groundToScreenScaleFactor);
 
 	// Collision map
-	void MarkBox(int row, int column, float r, float g, float b, IEntityManager* pEntityManager);
-	void MarkMapBox(int iRow, int iColumn, int r, int g, int b);
-	void MarkObstacles(IEntityManager* pEntityManager);
-	void GetCellCoordFromPosition(float x, float y, int& row, int& column);
+	void MarkBox(int row, int column, float r, float g, float b);
+	void GetCellCoordFromPosition(float x, float y, int& cellx, int& celly, int nCellSize);
 	void GetPositionFromCellCoord(int row, int column, float& x, float& y);
-	void ComputeRowAndColumnCount(int& rowCount, int& columnCount);
-	bool TestCellObstacle(int iRow, int iColumn);
-	float WorldToPixel(float worldLenght);
-	void ConvertLinearToCoord(int pixelNumber, int& x, int& y);
+	void ComputeRowAndColumnCount(int& rowCount, int& columnCount, int nCellSize);
+	bool TestCellObstacle(const ILoader::CTextureInfos& collisionMap, int x, int y);
+	float WorldToPixel(float worldLenght, int nMapWidth, int nMapHeight);
+	void ConvertLinearToCoord(int pixelNumber, int nTextureWidth, int& x, int& y);
+	void CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& vGrid, int nCelSize, float fBias);
+	void AddObjectToCollisionGrid(const CVector& rootDim, const CDimension& gridDimension, const CVector& objectDim, const CMatrix& modelTM, vector<vector<bool>>& vGrid, int nCelSize, float fBias);
+	void GetCollisionEntities(IEntity* pRoot, vector<IEntity*>& vCollisionEntities);
+	void SortObjectsByHeight(IEntity* pRoot, vector<pair<float, IEntity*>>& vSortedObjectHeight);
+	float GetFloors(const vector<pair<float, IEntity*>>& vSortedObjectHeight, vector<pair<float, IEntity*>>& floors, vector<pair<float, IEntity*>>& nonFloors);
+	void GetRoofs(float fFloorHeight, const vector<pair<float, IEntity*>>& nonFloors, vector<IEntity*>& roofs, vector<IEntity*>& nonRoofs);
+	static int ComputeOptimalCellSize(int nCellSize, const CDimension& modelDimension);
 
 	// Height map
 	void EnableHMHack(bool enable);
 	void EnableHMHack2(bool enable);
-
-	// Path finding
-	void FindPath(float fromX, float fromY, float toX, float toY, IEntityManager* pEntityManager);
 };
 
 extern "C" _declspec(dllexport) CCollisionManager* CreateCollisionManager(EEInterface& oInterface);

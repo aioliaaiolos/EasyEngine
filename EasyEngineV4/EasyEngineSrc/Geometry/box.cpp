@@ -535,6 +535,11 @@ bool CBox::IsIncludedInto(const IGeometry& oGeometry)
 	return true;
 }
 
+void CBox::GetBBoxDimension(CVector& dim)
+{
+	dim = m_oDimension;
+}
+
 IGeometry::TFace CBox::GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R)
 {
 	CBox temp(*this);

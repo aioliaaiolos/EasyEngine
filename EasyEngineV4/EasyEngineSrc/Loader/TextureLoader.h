@@ -60,8 +60,8 @@ public:
 	void			Load( string sFileName, IRessourceInfos& ti, IFileSystem& oFileSystem );
 	void			Load( std::string sFileName, IRessourceInfos& mi ){}
 	void			Export( string sFileName, ILoader::IRessourceInfos& ri );
-	void			CreateBMPFromData( const vector< unsigned char >& vData, int nWidth, int nHeight, int nBitPerPixel, string sFileName );
-	void			ReadBMP(string sFileName, vector< unsigned char >& vData, int& nWidth, int& nHeight, int& nBitPerPixel);
+	void			ReadBMP(string sFileName, vector< unsigned char >& vData, unsigned int& nWidth, unsigned int& nHeight, int& nBitPerPixel);
+	void			WriteBMP(string sFileName, const vector< unsigned char >& vData, unsigned int nWidth, unsigned int nHeight, int nBitPerPixel);
 };
 
 

@@ -290,7 +290,12 @@ IGeometry* CMobileEntity::GetBoundingGeometry()
 	else {
 		return m_pMesh->GetBBox();
 	}
-	return nullptr;
+	static bool bAlreadyThrown = false;
+	if (!bAlreadyThrown) {
+		bAlreadyThrown = true;
+		throw CEException("Warning : you don't associated current animation to bounding boxes for character '" + m_sEntityName + "', the default character box will be used");
+	}
+	return m_pMesh->GetBBox();
 }
 
 const string& CMobileEntity::GetAttackBoneName()
@@ -345,10 +350,21 @@ void CMobileEntity::WearShoes(string shoesPath)
 
 	// link new shoes
 	string shoesName = shoesPath.substr(shoesPath.find_last_of("/") + 1);
-	IEntity* Lshoes = m_pEntityManager->CreateEntity(string("meshes/clothes/shoes/") + sPrefix + "L" + shoesName + ".bme", "");
+	IEntity* Lshoes = m_pEntityManager->CreateEntity(string("clothes/shoes/") + sPrefix + "L" + shoesName + ".bme", "");
 	Lshoes->LinkDummyParentToDummyEntity(this, "BodyDummyLFoot");
-	IEntity* Rshoes = m_pEntityManager->CreateEntity(string("meshes/clothes/shoes/") + sPrefix + "R" + shoesName + ".bme", "");
+	IEntity* Rshoes = m_pEntityManager->CreateEntity(string("clothes/shoes/") + sPrefix + "R" + shoesName + ".bme", "");
 	Rshoes->LinkDummyParentToDummyEntity(this, "BodyDummyRFoot");
+}
+
+void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
+{
+	string clothPathLower = sClothPath;
+	std::transform(sClothPath.begin(), sClothPath.end(), clothPathLower.begin(), tolower);
+
+	// link new cloth
+	string sClothName = sClothPath.substr(sClothPath.find_last_of("/") + 1);
+	IEntity* pCloth = m_pEntityManager->CreateEntity(string("Clothes/") + sClothName + ".bme", "");
+	pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
 }
 
 void CMobileEntity::AddHairs(string hairsName)
@@ -363,9 +379,14 @@ void CMobileEntity::AddHairs(string hairsName)
 		pDummyHairs->Unlink();
 
 	// link new hairs
-	IEntity* hairs = m_pEntityManager->CreateEntity(string("meshes/hairs/") + hairsName + ".bme", "");
-	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");
-	
+	IEntity* hairs = m_pEntityManager->CreateEntity(string("hairs/") + hairsName + ".bme", "");
+	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");	
+}
+
+void CMobileEntity::SetBody(string sBodyName)
+{
+	SetRessource(string("Meshes/Bodies/") + sBodyName);
+	InitAnimations();
 }
 
 void CMobileEntity::RunAction( string sAction, bool bLoop )

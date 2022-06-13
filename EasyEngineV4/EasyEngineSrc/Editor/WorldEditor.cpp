@@ -6,6 +6,9 @@
 #include "IGeometry.h"
 #include "IConsole.h"
 #include "EditorManager.h"
+#include "../Utils2/StringUtils.h"
+
+#include <algorithm>
 
 CWorldEditor::CWorldEditor(EEInterface& oInterface, ICameraManager::TCameraType cameraType) :
 	CPlugin(nullptr, ""),
@@ -151,6 +154,29 @@ void CWorldEditor::Load(string fileName)
 void CWorldEditor::Save()
 {
 	Save(m_sCurrentWorldName);
+}
+
+
+void CWorldEditor::SaveGame(string fileName)
+{
+	if (!m_bEditionMode) {
+		string fileNameLower = fileName;;
+		transform(fileName.begin(), fileName.end(), fileNameLower.begin(), tolower);
+		if (fileNameLower == "world" || fileNameLower == "world.db") {
+			throw CEException("Erreur : Impossible de sauvegarder une partie dans un fichier qui se nomme 'world.db'");
+		}
+		vector<IEntity*> entities;
+		m_pScene->GetCharactersInfos(entities);
+		map<string, CMatrix> mBackupCharacterMatrices = m_mCharacterMatrices;
+		for (IEntity* pEntity : entities) {
+			string entityName;
+			pEntity->GetEntityName(entityName);
+			map<string, CMatrix>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
+			itCharacter->second = pEntity->GetWorldMatrix();
+		}
+		Save(fileName);
+		m_mCharacterMatrices = mBackupCharacterMatrices;
+	}
 }
 
 void CWorldEditor::Save(string fileName)

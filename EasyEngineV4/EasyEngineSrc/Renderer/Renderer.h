@@ -139,7 +139,7 @@ public:
 	void						EnableFog();
 	void						Set2DMode();
 	void						Set3DMode();
-	void						GetResolution( int& nWidth, int& nHeight );
+	void						GetResolution( unsigned int& nWidth, unsigned int& nHeight );
 	void						Translate2D(float fx, float fy);
 	void						EnableTextureBlend(bool bEnable);
 	void						SetModelViewToIdentity();

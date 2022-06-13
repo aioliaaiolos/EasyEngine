@@ -69,6 +69,7 @@ public:
 	virtual TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R) = 0;
 	virtual TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R) = 0;
 	virtual bool				IsIncludedInto(const IGeometry& oGeometry) = 0;
+	virtual void				GetBBoxDimension(CVector& dim) = 0;
 };
 
 class ILine

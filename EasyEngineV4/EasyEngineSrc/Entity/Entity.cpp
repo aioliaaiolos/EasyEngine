@@ -52,7 +52,8 @@ m_pBaseTexture(nullptr),
 m_pCustomTexture(nullptr),
 m_bIsOnTheGround(true),
 m_bUseCustomSpecular(false),
-m_pCloth(nullptr)
+m_pCloth(nullptr),
+m_pCollisionGrid(nullptr)
 {
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 }
@@ -87,13 +88,16 @@ m_pBaseTexture(nullptr),
 m_pCustomTexture(nullptr),
 m_bIsOnTheGround(true),
 m_bUseCustomSpecular(false),
-m_pCloth(nullptr)
+m_pCloth(nullptr),
+m_pCollisionGrid(nullptr)
 {
 	if( sFileName.size() > 0 )
 	{
 		SetRessource( sFileName);
 		if (m_pBoundingGeometry)
 			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
+		if (m_sEntityName.empty())
+			m_sEntityName = m_sName;
 	}
 }
 
@@ -133,6 +137,10 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 			m_pRessource->GetName( m_sName );
 			m_pOrgSkeletonRoot = dynamic_cast<CBone*>(pAMesh->GetSkeleton());
 			if (m_pOrgSkeletonRoot) {
+				if (m_pSkeletonRoot) {
+					m_pSkeletonRoot->Unlink();
+					delete m_pSkeletonRoot;
+				}
 				m_pSkeletonRoot = dynamic_cast<CBone*>(m_pOrgSkeletonRoot->DuplicateHierarchy());
 				m_pSkeletonRoot->Link(this);
 			}
@@ -209,6 +217,7 @@ void CEntity::CreateAndLinkCollisionChildren(string sFileName)
 			pChild->Link(this);
 			pChild->SetEntityName(oss.str());
 		}
+		m_sTypeName = "building";
 	}
 	catch (CFileNotFoundException& e) {
 		e = e;
@@ -272,7 +281,13 @@ bool CEntity::TestCollision(INode* pEntity)
 	bool ret = false;
 	if (GetBoundingSphereDistance(pEntity) < 0)
 	{
-		IGeometry* pCurrentGeometry = GetBoundingGeometry()->Duplicate();
+		IGeometry* pGeometry = GetBoundingGeometry();
+		if (!pGeometry) {
+			ostringstream oss;
+			oss << "Error : entity '" << m_sEntityName << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			throw CEException(oss.str());
+		}
+		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
 		IGeometry* pOtherGeometry = pEntity->GetBoundingGeometry() ? pEntity->GetBoundingGeometry()->Duplicate() : NULL;
 
 		if (pOtherGeometry) {
@@ -412,7 +427,20 @@ void CEntity::UpdateBoundingBox()
 
 float CEntity::GetHeight()
 {
-	return m_pBoundingGeometry->GetHeight();
+	if(m_pBoundingGeometry)
+		return m_pBoundingGeometry->GetHeight();
+	else {
+		static bool bAlreadyThrown = false;
+		if (!bAlreadyThrown) {
+			ostringstream oss;
+			oss << "Error in CEntity::GetHeight() : entity " << m_nID << " with name " << m_sEntityName << " has no bounding geometry";
+			bAlreadyThrown = true;
+			throw CEException(oss.str());
+		}
+		else {
+			return 165.f;
+		}
+	}
 }
 
 void CEntity::LocalTranslate(float dx, float dy, float dz)
@@ -615,6 +643,11 @@ void CEntity::GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix)
 	GetBonesMatrix(m_pOrgSkeletonRoot, m_pSkeletonRoot, vBoneMatrix);
 }
 
+int CEntity::GetCellSize()
+{
+	return m_nCollisionGridCellSize;
+}
+
 void CEntity::GetBonesMatrix( INode* pInitRoot, INode* pCurrentRoot, vector< CMatrix >& vMatrix )
 {
 	// m0 = base du node dans sa position initiale, m0i = inverse de m0
@@ -788,7 +821,7 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		pEntityInfos->m_fWeight = GetWeight();
 		for (unsigned int iChild = 0; iChild < GetChildCount(); iChild++) {
 			CEntity* pChild = dynamic_cast<CEntity*>(GetChild(iChild));
-			if (pChild) {
+			if (pChild && !dynamic_cast<CCollisionEntity*>(pChild)) {
 				ILoader::CObjectInfos* pChildInfos = nullptr;
 				pChild->GetEntityInfos(pChildInfos);
 				if (pChildInfos)

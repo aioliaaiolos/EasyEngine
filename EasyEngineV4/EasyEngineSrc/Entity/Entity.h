@@ -83,6 +83,7 @@ public:
 	void							DrawCollisionBoundingBoxes(bool bDraw) override;
 	static void						GetSkeletonEntities(CBone* pRoot, vector< CEntity* >& vEntity, string sFileFilter);
 	void							GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix);
+	int								GetCellSize();
 
 protected:
 	IRessource*										m_pRessource;
@@ -125,9 +126,11 @@ protected:
 	bool											m_bIsOnTheGround;
 	CVector											m_vCustomSpecular;
 	bool											m_bUseCustomSpecular;
-	CEntity*										m_pCloth;	
+	CEntity*										m_pCloth;
+	IGrid*											m_pCollisionGrid;
+	const int										m_nCollisionGridCellSize = 100;
 
-
+	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
 	void				GetBonesMatrix(INode* pInitRoot, INode* pCurrentRoot, std::vector< CMatrix >& vMatrix);
 	virtual void		UpdateCollision();

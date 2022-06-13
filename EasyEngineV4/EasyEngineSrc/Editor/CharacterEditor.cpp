@@ -13,11 +13,14 @@ CPlugin(nullptr, ""),
 ICharacterEditor(oInterface),
 m_bIsLeftMousePressed(false),
 m_pWorldEditor(nullptr),
-m_pCurrentCharacter(nullptr)
+m_pCurrentCharacter(nullptr),
+m_pCurrentEditableCloth(nullptr),
+m_oLoaderManager(static_cast<ILoaderManager&>(*oInterface.GetPlugin("LoaderManager")))
 {
 	m_pScene = m_oSceneManager.GetScene("Game");
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(oInterface.GetPlugin("EventDispatcher"));
 	pEventDispatcher->AbonneToMouseEvent(this, OnMouseEventCallback);
+	pEventDispatcher->AbonneToKeyEvent(this, OnKeyPressCallback);
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorCreation, this);
 }
 
@@ -99,7 +102,7 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 				if (sCharacterId == "Player")				
 					m_pCurrentCharacter = m_oEntityManager.CreatePlayer("body03");
 				else
-					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03", sCharacterId);
+					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body01", sCharacterId);
 				m_pCurrentCharacter->Link(m_pScene);
 			}
 			else
@@ -153,9 +156,28 @@ void CCharacterEditor::WearShoes(string sShoesName)
 	}
 }
 
+void CCharacterEditor::WearCloth(string sClothName, string sDummyName)
+{
+	try
+	{
+		m_pCurrentCharacter->WearCloth(sClothName, sDummyName);
+	}
+	catch (CEException& e) {
+		m_oConsole.Println(e.what());
+	}
+}
+
 void CCharacterEditor::SetTexture(string sTexture)
 {
 	m_pCurrentCharacter->SetDiffuseTexture(sTexture);
+}
+
+void CCharacterEditor::SetBody(string sBodyName)
+{
+	if (sBodyName.find(".bme") == -1)
+		sBodyName += ".bme";
+	m_pCurrentCharacter->SetBody(sBodyName);
+	InitSpawnedCharacter();
 }
 
 void CCharacterEditor::Edit(string id)
@@ -167,6 +189,40 @@ void CCharacterEditor::Edit(string id)
 void CCharacterEditor::SetSpecular(float r, float g, float b)
 {
 	m_pCurrentCharacter->SetCustomSpecular(CVector(r, g, b));
+}
+
+void CCharacterEditor::EditCloth(string sClothName)
+{
+	m_sCurrentEditableCloth = sClothName;
+	string sDummyName = "Dummy" + sClothName;
+	IBone* pCurrentEditableDummyCloth = m_pCurrentCharacter->GetSkeletonRoot()->GetChildBoneByName(sDummyName);
+	if (pCurrentEditableDummyCloth)
+		m_pCurrentEditableCloth = dynamic_cast<IEntity*>(pCurrentEditableDummyCloth->GetChild(0));
+	else
+		throw CEException(sDummyName + " not found");
+}
+
+void CCharacterEditor::OffsetCloth(float x, float y, float z)
+{
+	if (m_pCurrentEditableCloth) {
+		m_pCurrentEditableCloth->WorldTranslate(x, y, z);
+		m_offsetloth += CVector(x, y, z);
+	}
+	else
+		throw CEException("Error : no cloth selected");
+}
+
+void CCharacterEditor::SaveCurrentEditableCloth()
+{
+	string sFileName = string("Meshes/Clothes/") + m_sCurrentEditableCloth + ".bme";
+	ILoader::CAnimatableMeshData ami;
+	m_oLoaderManager.Load(sFileName, ami);
+	map<int, pair<string, CMatrix>>::iterator it = ami.m_mBones.begin();
+	CMatrix& tm = it->second.second;
+	tm.m_03 -= m_offsetloth.m_x;
+	tm.m_13 -= m_offsetloth.m_y;
+	tm.m_23 -= m_offsetloth.m_z;
+	m_oLoaderManager.Export(sFileName, ami);
 }
 
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)
@@ -188,4 +244,10 @@ void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 			}
 		}
 	}
+}
+
+
+void CCharacterEditor::OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
+{
+
 }

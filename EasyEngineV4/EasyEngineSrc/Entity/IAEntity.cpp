@@ -19,8 +19,6 @@ m_bFaceToTarget(false)
 {
 }
 
-
-
 void IAEntity::UpdateFightState()
 {
 	CVector oEnemyPos;
@@ -158,7 +156,7 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 	CVector oPos;
 	GetPosition( oPos );
 	CVector2D oDestination2D( oDestination.m_x, oDestination.m_z ), oPos2D( oPos.m_x, oPos.m_z );
-	ComputePathFind2D( oPos2D, oDestination2D, m_vCurrentPath );
+	ComputePathFind2D( oPos2D, oDestination2D, m_vCurrentPath);
 	if (!m_vCurrentPath.empty()) {
 		if (m_vCurrentPath.size() > 1)
 			m_fDestinationDeltaRadius = 50.f;
@@ -219,6 +217,9 @@ void IAEntity::Update()
 		UpdateFaceTo();
 		UpdateGoto();
 		UpdateFightState();
+	}
+	else {
+		UpdateGoto();
 	}
 }
 

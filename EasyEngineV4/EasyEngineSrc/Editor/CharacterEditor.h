@@ -30,19 +30,29 @@ public:
 	void					SetCurrentEditableNPC(ICharacter* pNPCEntity) override;
 	void					AddHairs(string sHairsName) override;
 	void					WearShoes(string sShoesName) override;
+	void					WearCloth(string sClothName, string sDummyName) override;
 	void					SetTexture(string sTexture) override;
+	void					SetBody(string sBodyName) override;
 	void					Edit(string id) override;
 	void					SetSpecular(float r, float g, float b) override;
+	void					EditCloth(string sClothName);
+	void					OffsetCloth(float x, float y, float z);
+	void					SaveCurrentEditableCloth();
 
 private:
 
 	void					InitSpawnedCharacter();
 	void					InitCamera(const CVector& pos);
 	static void				OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y);
+	static void				OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key);
 	static void				HandleEditorCreation(CPlugin* pPlugin, void* pDatar);
 	IScene*					m_pScene;
 	ICharacter*				m_pCurrentCharacter;
 	bool					m_bIsLeftMousePressed;
 	int						m_nMousePosX;
 	CWorldEditor*			m_pWorldEditor;
+	IEntity*				m_pCurrentEditableCloth;
+	CVector					m_offsetloth;
+	ILoaderManager&			m_oLoaderManager;
+	string					m_sCurrentEditableCloth;
 };

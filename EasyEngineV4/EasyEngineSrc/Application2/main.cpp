@@ -184,7 +184,7 @@ void UpdatePerso()
 	if(pPerso && !m_pConsole->IsOpen() && !m_pGUIManager->GetGUIMode())
 	{		
 		ICamera* pCamera = m_pCameraManager->GetActiveCamera();
-		if( pPerso && (m_pCameraManager->GetCameraType(pCamera) == ICameraManager::T_LINKED_CAMERA) ) {
+		if( pPerso && (m_pCameraManager->GetCameraType(pCamera) == ICameraManager::TLinked) ) {
 			IInputManager::KEY_STATE eStateWalk = m_pActionManager->GetKeyActionState( "AvancerPerso");
 			if( eStateWalk == IInputManager::JUST_PRESSED || eStateWalk == IInputManager::PRESSED )
 			{
@@ -215,7 +215,7 @@ void UpdatePerso()
 					pFighter->Hit();
 			}
 			
-			ICamera* pLinkedCamera = m_pCameraManager->GetCameraFromType(ICameraManager::T_LINKED_CAMERA);
+			ICamera* pLinkedCamera = m_pCameraManager->GetCameraFromType(ICameraManager::TLinked);
 			if (pLinkedCamera) {
 				IInputManager::TMouseButtonState eStateZoom = m_pActionManager->GetMouseActionState("Zoom");
 				if (eStateZoom == IInputManager::eMouseWheelUp)
@@ -225,7 +225,7 @@ void UpdatePerso()
 					pLinkedCamera->Zoom(-1);
 			}
 			
-			if( m_pCameraManager->GetCameraType( m_pCameraManager->GetActiveCamera() ) == ICameraManager::T_LINKED_CAMERA )
+			if( m_pCameraManager->GetCameraType( m_pCameraManager->GetActiveCamera() ) == ICameraManager::TLinked)
 			{
 				int x, y;
 				m_pInputManager->GetOffsetMouse( x, y );
@@ -255,7 +255,7 @@ void OnUpdateWindow()
 		if (bCapture)
 		{
 			vector< unsigned char > vPixels;
-			int w, h;
+			unsigned int w, h;
 			m_pRenderer->GetResolution(w, h);
 			m_pRenderer->ReadPixels(0, 0, w, h, vPixels, IRenderer::T_BGR);
 			ILoader::CTextureInfos ti;

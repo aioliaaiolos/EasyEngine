@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 
+using namespace std;
+
 class IFileSystem;
 
 class  CEasyFile 
@@ -29,6 +31,7 @@ public:
 	void 							Close();
 	void							Reopen( IFileSystem& oFileSystem );
 	void							GetName( std::string& sName );
+	static bool						IsAbsolutePath(string sPath);
 
 	static void 					_SearchFile( std::string sFileName, const char* szDir, std::string& szFoundDir, bool& bFound );
 	static void 					SearchFile(const char* szRoot="",const char* szFileName="", std::string& szFoundDir = std::string(""));

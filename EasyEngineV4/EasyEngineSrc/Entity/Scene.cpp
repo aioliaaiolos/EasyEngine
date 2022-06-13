@@ -49,9 +49,7 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_nHeightMapID(-1),
-	m_bCollisionMapCreated(true),
 	m_bHeightMapCreated(true),
-	m_pCollisionGrid(NULL),
 	m_sMapFirstPassShaderName("mapFirstPass"),
 	m_sMapSecondPassShaderName("mapSecondPass2D"),
 	m_pPlayer(NULL),
@@ -68,16 +66,17 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_LoadingCompleteCallback(nullptr),
 	m_pLoadingCompleteData(nullptr)
 {
+	m_nID = 0;
 	SetName("Scene");
 	SetEntityName("Scene");
 	m_pRessource = NULL;
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 
 
-	ICamera* pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::T_MAP_CAMERA, 40.f);
+	ICamera* pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::TMap, 40.f);
 	pMapCamera->Link(this);
 
-	m_pMapCamera = m_oCameraManager.GetCameraFromType(ICameraManager::T_MAP_CAMERA);
+	m_pMapCamera = m_oCameraManager.GetCameraFromType(ICameraManager::TMap);
 	m_pMapCamera->SetWorldPosition(0, 40000, 0);
 	m_pMapCamera->Pitch(-90);
 
@@ -96,7 +95,7 @@ CScene::~CScene()
 
 ITexture* CScene::CreateMinimapTexture()
 {
-	int nMinimapWidth, nMinimapHeight;
+	unsigned int nMinimapWidth, nMinimapHeight;
 	m_oRenderer.GetResolution(nMinimapWidth, nMinimapHeight);
 	ITexture* pMinimapTexture = m_oRessourceManager.CreateRenderTexture(nMinimapWidth, nMinimapHeight, m_sMapSecondPassShaderName);
 	return pMinimapTexture;
@@ -128,13 +127,23 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 
 	bool forceReloadHeightMap = true;
 	int nDotPos = (int)sFileName.find('.');
+	string sLevelDirectory;
 	if (m_bUseDisplacementMap) {
 		m_sHMFileName = sFileName;
 		int sliceCount = m_nMapLength / 500;
 		string prefix = "/HMA_";
-		string levelFileName = m_sHMFileName.substr(m_sHMFileName.find("/HMA_") + prefix.size());
-		string levelName = levelFileName.substr(0, levelFileName.find('.'));
-		string levelPath = string("/levels/") + levelName + "/ground.bme";
+		int startIdx = m_sHMFileName.find("/HMA_");
+		string levelFileName;
+		if (startIdx >= 0)
+		{
+			levelFileName = m_sHMFileName.substr(startIdx + prefix.size());
+			m_sCurrentLevelName = levelFileName.substr(0, levelFileName.find('.'));
+		}
+		else
+			m_sCurrentLevelName = "tmp";
+		sLevelDirectory = string("/levels/") + m_sCurrentLevelName + "/";
+		string levelPath = sLevelDirectory + "ground.bme";
+		
 		try {
 			IAnimatableMesh* pAnimatableMesh = dynamic_cast<IAnimatableMesh*>(m_oRessourceManager.GetRessource(levelPath));
 			m_pRessource = pAnimatableMesh->GetMesh(0);
@@ -164,16 +173,16 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 		m_sHMFileName = string("hm_") + sFileName.substr(0, nDotPos) + ".bmp";
 		CEntity::SetRessource(sFileName, bDuplicate);
 	}
-	IMesh* pMesh = static_cast< IMesh* >(m_pRessource);
+	m_pMesh = static_cast< IMesh* >(m_pRessource);
 
 	try
 	{
 		if (m_bUseDisplacementMap) {
 			int w, h;
-			pMesh->GetTexture(0)->GetDimension(w, h);
-			m_fTiling = 4.f * pMesh->GetBBox()->GetDimension().m_x / w;
+			m_pMesh->GetTexture(0)->GetDimension(w, h);
+			m_fTiling = 4.f * m_pMesh->GetBBox()->GetDimension().m_x / w;
 		}
-		IBox* pBox = pMesh->GetBBox();
+		IBox* pBox = m_pMesh->GetBBox();
 		m_nHeightMapID = m_oCollisionManager.LoadHeightMap(m_sHMFileName, pBox, forceReloadHeightMap);
 		m_oCollisionManager.SetGroundBoxHeight(m_nHeightMapID, m_fMapHeight);
 	}
@@ -182,30 +191,34 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 		m_bHeightMapCreated = false;
 	}
 	
-
+	string sCollisionFileName;
 	if (m_bUseDisplacementMap) {
 		nDotPos = (int)m_sDiffuseFileName.find('.');
-		m_sCollisionFileName = string("collision_") + m_sDiffuseFileName.substr(0, nDotPos) + ".bmp";
+		ostringstream oss;
+		oss << sLevelDirectory << "collision" << m_nID << ".bmp";
+		sCollisionFileName = oss.str();
 	}
 	else {
 		nDotPos = (int)sFileName.find('.');
-		m_sCollisionFileName = string("collision_") + sFileName.substr(0, nDotPos) + ".bmp";
+		sCollisionFileName = string("collision_") + sFileName.substr(0, nDotPos) + ".bmp";
 	}
-	try{
-		m_oCollisionManager.LoadCollisionMap(m_sCollisionFileName, this);
-		m_bCollisionMapCreated = true;
+		
+	WIN32_FIND_DATAA fd;
+	HANDLE hFile = m_oFileSystem.FindFirstFile_EE(sCollisionFileName, fd);
+	if (hFile != INVALID_HANDLE_VALUE) {
+		m_oLoaderManager.LoadTexture(sCollisionFileName, m_oCollisionMap);
+		m_oCollisionManager.AttachCollisionMapToScene(m_oCollisionMap, this);
 		CreateCollisionGrid();
 	}
-	catch (CFileNotFoundException& e) {
-		m_bCollisionMapCreated = false;
-	}
-
+	
 	m_pGroundShader = m_oRenderer.GetShader("ground");
 	m_pRessource->SetShader(m_pGroundShader);
 	
-	m_pHeightMaptexture = static_cast< ITexture* > (m_oRessourceManager.CreateTexture2D(m_sHMFileName, false));
-	m_pHeightMaptexture->SetUnitTexture(4);
-	m_pHeightMaptexture->SetUnitName("heightMap");
+	if (m_nHeightMapID != -1) {
+		m_pHeightMaptexture = static_cast<ITexture*> (m_oRessourceManager.CreateTexture2D(m_sHMFileName, false));
+		m_pHeightMaptexture->SetUnitTexture(4);
+		m_pHeightMaptexture->SetUnitName("heightMap");
+	}
 
 	for (int i = 0; i < m_vEntityCallback.size(); i++) {
 		m_vEntityCallback[i](nullptr, IEventDispatcher::TEntityEvent::T_LOAD_RESSOURCE, this);
@@ -225,7 +238,7 @@ IGrid* CScene::GetCollisionGrid()
 	return m_pCollisionGrid;
 }
 
-void CScene::CreateCollisionMap()
+void CScene::CreateCollisionMapByRendering()
 {
 	IMesh* pGroundMesh = dynamic_cast<IMesh*>(GetRessource());
 	if(pGroundMesh){
@@ -236,13 +249,14 @@ void CScene::CreateCollisionMap()
 			pCollideEntity = m_pEntityManager->GetNextCollideEntity();
 		}
 		ILoader::CTextureInfos ti;
-		m_oCollisionManager.CreateCollisionMap(ti, collides, this, IRenderer::T_BGR);
+		m_oCollisionManager.CreateCollisionMapByRendering(ti, collides, this, IRenderer::T_BGR);
 		ti.m_ePixelFormat = ILoader::eBGR;
 		string sGroundName;
 		pGroundMesh->GetName(sGroundName);
-		m_oLoaderManager.Export(m_sCollisionFileName, ti);
-		m_oCollisionManager.LoadCollisionMap(m_sCollisionFileName, this);
-		m_bCollisionMapCreated = true;
+		ostringstream collisionFileName;
+		collisionFileName << "levels/" << m_sCurrentLevelName << "/Collision" << m_nID;
+		m_oLoaderManager.Export(collisionFileName.str(), ti);
+		m_oCollisionManager.LoadCollisionMapComputedByRendering(collisionFileName.str(), this, m_oCollisionMap);
 	}
 	else {
 		CEException e("Erreur : La scène ne possède pas de map");
@@ -263,18 +277,25 @@ void CScene::CreateHeightMap()
 
 void CScene::CreateCollisionGrid()
 {
-	int rowCount, columnCount;
-	m_oCollisionManager.ComputeRowAndColumnCount(rowCount, columnCount);
-	m_pCollisionGrid = m_oPathFinder.CreateGrid(rowCount, columnCount);
+	CVector groundDim = m_pMesh->GetBBox()->GetDimension();
+	
+	int nGridWidth = groundDim.m_x / m_nCollisionGridCellSize;
+	int nGridHeight = groundDim.m_z / m_nCollisionGridCellSize;
+	nGridWidth = nGridWidth % 4 ? ((nGridWidth) >> 2) << 2 : nGridWidth;
+	nGridHeight = nGridHeight % 2 ? (nGridHeight >> 1) << 1 : nGridHeight;
 
-	for (int iRow = 0; iRow < rowCount; iRow++) {
-		for (int iColumn = 0; iColumn < columnCount; iColumn++) {
-			bool obstacle = m_oCollisionManager.TestCellObstacle(iRow, iColumn);
+	m_pCollisionGrid = m_oPathFinder.CreateGrid(nGridHeight, nGridWidth);
+
+	for (int y = 0; y < nGridHeight; y++) {
+		for (int x = 0; x < nGridWidth; x++) {
+			bool obstacle = m_oCollisionManager.TestCellObstacle(m_oCollisionMap, x, y);
 			if (obstacle)
-				m_pCollisionGrid->AddObstacle(iRow, iColumn);
+				m_pCollisionGrid->AddObstacle(y, x);
 		}
 	}
 }
+
+
 
 IEntity* CScene::Merge( string sRessourceName, float x, float y, float z )
 {
@@ -294,18 +315,6 @@ IEntity* CScene::Merge( string sRessourceName, CMatrix& oXForm )
 
 void CScene::Update()
 {
-	static int counter = 0;
-	
-	/*if (m_bHeightMapCreated && !m_bCollisionMapCreated && counter++ == 10) {
-		CreateCollisionMap();
-		CreateCollisionGrid();
-	}*/
-	if(!m_bCollisionMapCreated && counter++ == 20)
-		CreateCollisionMap();
-	
-	if (!m_bHeightMapCreated && counter++ == 20 ){
-		CreateHeightMap();
-	}
 	if (m_vMapEntities.size() == 0) {
 		OnChangeSector();
 	}
@@ -390,6 +399,27 @@ void CScene::UnhandleLoadingComplete()
 {
 	m_LoadingCompleteCallback = nullptr;
 	m_pLoadingCompleteData = nullptr;
+}
+
+void CScene::CreateCollisionMaps(string sLevelPath, float fBias)
+{
+	ostringstream ossCollisionFileName;
+	string sCollisionPrefixName = sLevelPath + "/Collision";
+	ossCollisionFileName << sCollisionPrefixName << m_nID << ".bmp";
+	m_oCollisionManager.CreateCollisionMap(ossCollisionFileName.str(), this, m_nCollisionGridCellSize, fBias);
+	
+	for (INode* pNode : m_vChild) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(pNode);
+		
+		if (pEntity) {
+			IBox* pBBox = dynamic_cast<IBox*>(pEntity->GetBoundingGeometry());
+			if (pBBox && pEntity->GetChildCount() > 0) {
+				ossCollisionFileName.str("");
+				ossCollisionFileName << sCollisionPrefixName << pEntity->GetID() << ".bmp";
+				m_oCollisionManager.CreateCollisionMap(ossCollisionFileName.str(), pEntity, m_nCollisionGridCellSize, fBias);
+			}
+		}
+	}
 }
 
 void  CScene::RenderScene()
@@ -508,7 +538,7 @@ void CScene::RenderInstances()
 	}
 }
 
-void CScene::DisplayEntities(vector<IEntity*>& entities)
+void CScene::DisplayEntities(const vector<IEntity*>& entities)
 {
 	if (m_pPlayer) {
 		ICamera* pActiveCamera = m_oCameraManager.GetActiveCamera();
@@ -584,6 +614,19 @@ void CScene::GetInfos( ILoader::CSceneInfos& si )
 	}
 }
 
+void CScene::GetCharactersInfos(vector<IEntity*>& si, INode* pRoot)
+{
+	if (pRoot == nullptr)
+		pRoot = this;
+	for (unsigned int i = 0; i < pRoot->GetChildCount(); i++) {
+		ILoader::CObjectInfos* pInfos = nullptr;
+		CMobileEntity* pEntity = dynamic_cast< CMobileEntity* >(pRoot->GetChild(i));
+		if (pEntity)
+			si.push_back(pEntity);
+		GetCharactersInfos(si, pRoot->GetChild(i));
+	}
+}
+
 void CScene::LoadSceneObject( const ILoader::CObjectInfos* pSceneObjInfos, CEntity* pParent )
 {
 	string sRessourceFileName = pSceneObjInfos->m_sRessourceFileName;
@@ -598,7 +641,6 @@ void CScene::LoadSceneObject( const ILoader::CObjectInfos* pSceneObjInfos, CEnti
 			pEntity->BuildFromInfos(*pLightEntityInfos, pParent);
 		} else {
 			const ILoader::CEntityInfos* pEntityInfos = dynamic_cast< const ILoader::CEntityInfos* >( pSceneObjInfos );
-			sRessourceFileName = string("Meshes/Buildings/") + sRessourceFileName;
 			CEntity* pEntity = m_pEntityManager->CreateEntityFromType( sRessourceFileName, pEntityInfos->m_sTypeName, pEntityInfos->m_sObjectName);
 			pEntity->BuildFromInfos(*pSceneObjInfos, pParent);
 			m_vCollideEntities.push_back(pEntity);
@@ -650,6 +692,9 @@ void CScene::Clear()
 	m_pRessource = NULL;
 	m_pEntityManager->Clear();
 	m_oCollisionManager.ClearHeightMaps();
+	m_vCollideEntities.clear();
+	ICamera* pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::TFree, 40.f);
+	pMapCamera->Link(this);
 }
 
 void CScene::ClearCharacters()

@@ -57,7 +57,8 @@ public:
 	void FindPath();
 	int RowCount() const;
 	int ColumnCount() const;
-	void ProcessNode(int row, int column);
+	bool ProcessNode(int currentRow, int currentColumn, int& nextRow, int& nextColumn);
+	void ProcessGrid(int startRow, int startColumn);
 	void BuildPath();
 	void GetOpenList(vector<ICell*>& openList);
 	void GetCloseList(vector<ICell*>& closeList);
@@ -97,9 +98,11 @@ public:
 	IGrid* CreateGrid(int rowCount, int columnCount);
 	void FindPath(IGrid* grid);
 	string GetName() override;
+	void EnableSaveGrid(bool bEnable) override;
 
 private:
-
+	void	SaveAStarGrid(IGrid* pGrid);
+	bool	m_bSaveAStarGrid;
 };
 
 

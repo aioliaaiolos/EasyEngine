@@ -29,12 +29,14 @@ ILoaderManager(),
 m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem")))
 {
 	m_mLoaderByExtension[ "ase" ] = new CAseLoader;
+	m_mLoaderByExtension["asav"] = m_mLoaderByExtension["ase"];
 	m_mLoaderByExtension[ "ale" ] = new CLightLoader;
 	m_mLoaderByExtension[ "bmp" ] = new CBMPLoader;
 	m_mLoaderByExtension[ "tga" ] = new CTGALoader;
 	m_mLoaderByExtension[ "bme" ] = new CBMELoader(m_oFileSystem, static_cast<IGeometryManager&>(*oInterface.GetPlugin("GeometryManager")));
 	m_mLoaderByExtension[ "bke" ] = new CBKELoader(m_oFileSystem);
 	m_mLoaderByExtension[ "bse" ] = new CBSELoader(m_oFileSystem);
+	m_mLoaderByExtension[ "sav" ] = m_mLoaderByExtension["bse"];
 	m_mLoaderByExtension[ "col" ] = new CColLoader(static_cast<IGeometryManager&>(*oInterface.GetPlugin("GeometryManager")));
 	m_mLoaderByExtension[ "bbox"] = new CBBoxLoader(m_oFileSystem, static_cast<IGeometryManager&>(*oInterface.GetPlugin("GeometryManager")));
 }
@@ -42,8 +44,10 @@ m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem")))
 CLoaderManager::~CLoaderManager()
 {
 	map< string, ILoader* >::iterator itLoader = m_mLoaderByExtension.begin();
-	for( ; itLoader != m_mLoaderByExtension.end(); itLoader++ )
-		delete itLoader->second;
+	for (; itLoader != m_mLoaderByExtension.end(); itLoader++) {
+		if(itLoader->first != "asav" && itLoader->first != "sav")
+			delete itLoader->second;
+	}
 }
 
 ILoader* CLoaderManager::GetLoader( std::string sExtension )
@@ -103,7 +107,7 @@ void CLoaderManager::Export( string sFileName, ILoader::IRessourceInfos& ri )
 		m_oFileSystem.GetLastDirectory( sDir );
 		string sFilePath;
 		string sPrefix = sFileName.substr( 0, 3 );
-		if( sPrefix != "c:\\" && sPrefix != "C:\\" )
+		if(!CEasyFile::IsAbsolutePath(sFileName))
 			sFilePath = sDir + "\\" + sFileName;
 		else
 			sFilePath = sFileName;
@@ -132,7 +136,7 @@ void CLoaderManager::ExportAHMO( const string& sFileName, CChunk& oChunk )
 void CLoaderManager::CreateBMPFromData( const vector< unsigned char >& vData, int nWidth, int nHeight, int nBitPerPixel, string sFileName )
 {
 	CBMPLoader* pLoader = static_cast< CBMPLoader* >( m_mLoaderByExtension[ "bmp" ] );
-	pLoader->CreateBMPFromData( vData, nWidth, nHeight, nBitPerPixel, sFileName );
+	pLoader->WriteBMP(sFileName , vData, nWidth, nHeight, nBitPerPixel);
 }
 
 string CLoaderManager::GetName()

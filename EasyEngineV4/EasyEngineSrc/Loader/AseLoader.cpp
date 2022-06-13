@@ -34,7 +34,17 @@ void CAseLoader::Export( const string& sFileName, const CChunk& chunk )
 	
 }
 
+void CAseLoader::Export(string sFileName, ILoader::IRessourceInfos& ri)
+{
+	string sExt;
+	CStringUtils::GetExtension(sFileName, sExt);
 
+	const CSceneInfos* pInfos = static_cast< const CSceneInfos* >(&ri);
+	CAsciiFileStorage fs;
+	fs.OpenFile(sFileName, IFileStorage::TOpenMode::eWrite);
+	fs << *pInfos;
+	fs.CloseFile();
+}
 
 
 //	Charge le tableau d'index 

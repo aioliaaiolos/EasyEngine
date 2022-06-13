@@ -14,4 +14,5 @@ public:
 	void				Colorize(float r, float g, float b, float a) {}
 	void				GetEntityName(string& sName);
 	IGeometry*			GetBoundingGeometry();
+	int					GetCellSize() { throw 1; return -1.f; };
 };

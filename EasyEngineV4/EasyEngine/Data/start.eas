@@ -6,8 +6,9 @@ l=CreateLightw("omni", 1)
 SetEntityPos(l, 0, 700, 0);
 SetCameraType("free");
 
-/*
+
 EnableInstancingMode(0);
+/*
 npc1=CreateNPC("body03", "q");
 SetEntityWeight(npc1, 0);
 SetEntityPos(npc1, 0, 0, 0);
@@ -15,7 +16,35 @@ WearSkinnedClothFull(npc1, "clothes/dresses/robe3");
 Walk(npc1);
 */
 
-LoadWorld("");
+//LoadWorld("");
+LoadGame("save");
+
+//EditMap("hopital02");
+//CreateCollisionMap(0, "cm-100.bmp", 100, 0);
+
+
+//ger=GetEntityID("Geraldine");
+//Goto(ger, 3110, 0, -893);
+
+
+/*player=GetEntityID("Player");
+ger=GetEntityID("Geraldine");
+WatchEntityPosition(cam);
+WatchEntityPosition(player);
+WatchEntityPosition(ger);*/
+
+
+//EditCharacter("test");
+//SetCharacterBody("body03");
+//WearCloth("slip", "BodyDummyJupe");
+
+//EditCloth("Slip");
+//OffsetCloth(0, 0, 1);
+/*
+
+SetCharacterBody("Body03");
+WearCloth("slip", "BodyDummyJupe");
+*/
 return;
 
 /*

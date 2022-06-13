@@ -60,7 +60,7 @@ public:
 	void								SetRessource( string sFileName, bool bDuplicate = false );
 	IGeometry*							GetBoundingGeometry();
 	IGrid*								GetCollisionGrid();
-	void								CreateCollisionMap();
+	void								CreateCollisionMapByRendering();
 	void								RenderScene();
 	void								RenderMinimap();
 	ITexture*							CreateMinimapTexture();
@@ -78,6 +78,7 @@ public:
 	void								DeleteTempDirectories() override;
 	void								HandleLoadingComplete(LevelCompleteProc callback, void* pData) override;
 	void								UnhandleLoadingComplete();
+	void								CreateCollisionMaps(string sLevelPath, float fBias) override;
 
 private:
 	ICameraManager&						m_oCameraManager;
@@ -87,11 +88,9 @@ private:
 	IPathFinder&						m_oPathFinder;
 	IFileSystem&						m_oFileSystem;
 	int									m_nHeightMapID;
-	string								m_sCollisionFileName;
 	string								m_sHMFileName;
-	bool								m_bCollisionMapCreated;
+	ILoader::CTextureInfos				m_oCollisionMap;
 	bool								m_bHeightMapCreated;
-	IGrid*								m_pCollisionGrid;
 	ICamera*							m_pMapCamera;
 	const string						m_sMapFirstPassShaderName;
 	const string						m_sMapSecondPassShaderName;
@@ -113,14 +112,16 @@ private:
 	vector<CEntity*>					m_vCollideEntities;
 	LevelCompleteProc					m_LoadingCompleteCallback;
 	void*								m_pLoadingCompleteData;
+	string								m_sCurrentLevelName;
 
 	void								GetInfos(ILoader::CSceneInfos& si);
+	void								GetCharactersInfos(vector<IEntity*>& si, INode* pRoot = nullptr) override;
 	void								Load(const ILoader::CSceneInfos& si);
 	void								LoadSceneObject(const ILoader::CObjectInfos* pSceneObjInfos, CEntity* pParent);
 	void								CreateCollisionGrid();
 	void								CreateHeightMap();
 	void								CollectMinimapEntities(vector<IEntity*>& entities);
-	void								DisplayEntities(vector<IEntity*>& entities);
+	void								DisplayEntities(const vector<IEntity*>& entities);
 	void								OnChangeSector() override;
 	void								UpdateMapEntities();
 	bool								IsLoadingComplete();

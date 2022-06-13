@@ -12,6 +12,13 @@ class IAEntity : public virtual IFighterEntity, public IAEntityInterface
 {
 friend class CFightSystem;
 
+
+public:
+	IAEntity();
+	virtual void				Goto(const CVector& oPosition, float fSpeed);
+
+	void						Update();
+
 private:
 	enum TFightState
 	{
@@ -55,7 +62,7 @@ private:
 	void						FaceTo(const CVector& point);
 	void						Attack(IFighterEntity* pEntity);
 	void						Attack(IFighterEntityInterface* pEntity);
-	virtual void				ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints ) = 0;
+	virtual void				ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints) = 0;
 	virtual void				SetDestination( const CVector& oDestination );
 
 	virtual void				Turn( float fAngle ) = 0;
@@ -71,10 +78,4 @@ private:
 protected:
 
 	static void 				OnCollision( IAEntity* pEntity );
-
-public:
-	IAEntity();
-	virtual void				Goto( const CVector& oPosition, float fSpeed );
-
-	void						Update();
 };

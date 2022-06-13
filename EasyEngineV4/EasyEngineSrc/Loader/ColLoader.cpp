@@ -2,6 +2,8 @@
 #include "IGeometry.h"
 #include "IFileSystem.h"
 
+using namespace std;
+
 CColLoader::CColLoader(IGeometryManager& oGeometryManager):
 	m_oGeometryManager(oGeometryManager)
 {
@@ -53,11 +55,16 @@ void CColLoader::Export(string sFileName, ILoader::IRessourceInfos& ri)
 	if (pCmi) {
 		const ILoader::CCollisionModelInfos& cmi = *pCmi;
 		CBinaryFileStorage fs;
-		fs.OpenFile(sFileName, IFileStorage::eWrite);
-		fs << (int)cmi.m_vPrimitives.size();
-		for (int i = 0; i < cmi.m_vPrimitives.size(); i++)
-			(*cmi.m_vPrimitives[i]) >> fs;
-		fs.CloseFile();
+		if (fs.OpenFile(sFileName, IFileStorage::eWrite)) {
+			fs << (int)cmi.m_vPrimitives.size();
+			for (int i = 0; i < cmi.m_vPrimitives.size(); i++)
+				(*cmi.m_vPrimitives[i]) >> fs;
+			fs.CloseFile();
+		}
+		else{			
+			CFileNotFoundException e(sFileName);
+			throw e;
+		}
 	}
 }
 

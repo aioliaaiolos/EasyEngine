@@ -32,8 +32,6 @@ public:
 	void	RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDim, string originalHeightMap) override;
 	void	GetFileName(string& fileName) override;
 
-	static	void	ExtractHeightMapFromTexture( string sFileName, ILoaderManager& oLoaderManager, IFileSystem* pFileSystem, string sOutFileName );
-
 private:
 	float	GetHeight(const CVector& p);
 	void	ModelToMap(int xModel, int zModel, float& xMap, float& yMap);

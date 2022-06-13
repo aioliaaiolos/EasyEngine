@@ -43,6 +43,8 @@ class IMapEditor : virtual public ISpawnableEditor
 public:
 	IMapEditor(EEInterface& oInterface) : ISpawnableEditor(oInterface) {}
 	virtual void	SetGroundAdaptationHeight(float fHeight) = 0;
+	virtual void	AdaptGroundToAllEntities() = 0;
+	virtual void	SetBias(float fBias) = 0;
 };
 
 class ICharacterEditor : public IEditor
@@ -53,9 +55,14 @@ public:
 	virtual void	SetCurrentEditableNPC(ICharacter* pNPCEntity) = 0;
 	virtual void	AddHairs(string sHairsName) = 0;
 	virtual void	WearShoes(string sShoesName) = 0;
+	virtual void	WearCloth(string sClothPath, string sDummyName) = 0;
 	virtual void	SetTexture(string sTexture) = 0;
+	virtual void	SetBody(string sBodyName) = 0;
 	virtual void	Save() = 0;
 	virtual void	SetSpecular(float r, float g, float b) = 0;
+	virtual void	EditCloth(string sClothName) = 0;
+	virtual void	OffsetCloth(float x, float y, float z) = 0;
+	virtual void	SaveCurrentEditableCloth() = 0;
 };
 
 class IWorldEditor : virtual public ISpawnableEditor
@@ -65,6 +72,7 @@ public:
 	virtual ~IWorldEditor() = 0 {}
 	virtual void	SpawnCharacter(string sID) = 0;
 	virtual void	RemoveCharacter(string sID) = 0;
+	virtual void	SaveGame(string fileName) = 0;
 };
 
 

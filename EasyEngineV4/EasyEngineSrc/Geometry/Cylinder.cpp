@@ -399,10 +399,14 @@ IGeometry::TFace CCylinder::GetReactionYAlignedBox(IGeometry& firstPositionBox, 
 	if (isnan(Rx) || isnan(Rz))
 		Rx = Rx;
 	Rlocal.Fill(Rx, 0, Rz, 1.f);
-	R = OPBase * Rlocal;
-
-	
+	R = OPBase * Rlocal;	
 
 	return eFace;
+}
 
+void CCylinder::GetBBoxDimension(CVector& dim)
+{ 
+	dim.m_x = m_fRadius * 2.f;
+	dim.m_y = m_fHeight;
+	dim.m_z = m_fRadius * 2.f;
 }

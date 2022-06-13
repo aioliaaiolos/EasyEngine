@@ -176,7 +176,7 @@ void CSpawnableEditor::RayCast(int x, int y, CVector& p1, CVector& ray)
 	CMatrix Vinv;
 	m_oCameraManager.GetActiveCamera()->GetWorldMatrix(Vinv);
 
-	int width, height;
+	unsigned int width, height;
 	m_oRenderer.GetResolution(width, height);
 	float logicalx = (2.f * (float)x / (float)width) - 1.f;
 	float logicaly = 1.f - (2.f * (float)y / (float)height);

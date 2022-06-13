@@ -1,13 +1,10 @@
 //#include <windows.h>
 #include <io.h>
+#include <regex>
 #include "easyfile.h"
 #include "Exception.h"
 #include "../utils2/StringUtils.h"
 #include "IFileSystem.h"
-
-
-using namespace std;
-
 
 
 CEasyFile::CEasyFile() :
@@ -256,4 +253,12 @@ string CEasyFile::GetValidDirectoryName(const char* szDirectoryName)
 void CEasyFile::GetName( string& sName )
 {
 	sName = m_sName;
+}
+
+bool CEasyFile::IsAbsolutePath(string sPath)
+{
+	regex absolutePath("[a-zA-Z]:[\\\\/]");
+	sregex_iterator itBegin = sregex_iterator(sPath.begin(), sPath.end(), absolutePath);
+	sregex_iterator itEnd = sregex_iterator();
+	return (std::distance(itBegin, itEnd) > 0);
 }

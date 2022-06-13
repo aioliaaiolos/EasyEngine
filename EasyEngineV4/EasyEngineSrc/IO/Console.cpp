@@ -207,9 +207,12 @@ void CConsole::OnPressEnter()
 	m_vLines.back() = m_sLinePrefix + m_vLines.back();
 	if (m_nStaticTextID != -1)
 		m_oGUIManager.DestroyStaticTest(m_nStaticTextID);
-	m_nStaticTextID = m_oGUIManager.CreateStaticText(m_vLines, m_xPos, m_yPos);
-	m_vLines.resize( m_vLines.size() + 1 );
-	UpdateConsoleHeight();
+	vector< string >& vLines = m_vLines;
+	m_vLines.resize(m_vLines.size() + 1);
+	if (UpdateConsoleHeight())
+		vLines.erase(vLines.begin());
+	m_nStaticTextID = m_oGUIManager.CreateStaticText(vLines, m_xPos, m_yPos);
+	
 	m_nCursorPos = 0;
 	try
 	{
@@ -233,6 +236,11 @@ void CConsole::OnPressEnter()
 		AddString( "Erreur : " );
 		AddString( e.what() );
 	}
+	catch (CFileNotFoundException& e) {
+		string msg;
+		e.GetErrorMessage(msg);
+		Println(string("Erreur : '") + msg + "' introuvable");
+	}
 	catch (CFileException& e) {
 		string msg;
 		e.GetErrorMessage(msg);
@@ -242,6 +250,9 @@ void CConsole::OnPressEnter()
 		string id;
 		e.GetErrorMessage(id);
 		Println(string("Erreur : le personnage '" + id + " existe deja."));
+	}
+	catch (CMethodNotImplementedException& e) {
+		Println(string("Erreur : Utilisation de la methode '") + e.what() + " non implémentée.");
 	}
 	catch (CEException& e) {
 		string msg;
@@ -434,14 +445,17 @@ void CConsole::AddString( string s )
 		m_vLines.back().insert( m_vLines.back().end(), s.begin(), s.end() );
 }
 
-void CConsole::UpdateConsoleHeight()
+bool CConsole::UpdateConsoleHeight()
 {
+	bool bUpdated = false;
 	m_nCurrentHeight = m_vLines.size() * m_oGUIManager.GetCurrentFontHeight();
 	while (m_nCurrentHeight > m_nHeight)
 	{
 		m_vLines.erase(m_vLines.begin());
 		m_nCurrentHeight = (int)m_vLines.size() * m_oGUIManager.GetCurrentFontHeight();
+		bUpdated = true;
 	}
+	return bUpdated;
 }
 
 void CConsole::NewLine()

@@ -63,6 +63,7 @@ void CEntityManager::AddEntity( IEntity* pEntity, string sName, int id )
 	}
 	m_mIDEntities[id] = pEntity;
 	m_mEntitiesID[ pEntity ] = id;
+	pEntity->SetID(id);
 	m_mNameEntities[ sName ] = pEntity;
 	m_mEntitiesName[ pEntity ] = sName;
 	IAEntity* pIAEntity = dynamic_cast< IAEntity* >( pEntity );
@@ -257,7 +258,7 @@ ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEnt
 void CEntityManager::SetPlayer(IPlayer* player)
 {
 	m_pPlayer = dynamic_cast<CPlayer*>(player);
-	ICamera* pCamera = m_oCameraManager.GetCameraFromType(ICameraManager::T_LINKED_CAMERA);
+	ICamera* pCamera = m_oCameraManager.GetCameraFromType(ICameraManager::TLinked);
 	m_oCameraManager.SetActiveCamera(pCamera);
 	pCamera->Link(m_pPlayer);
 }
@@ -328,7 +329,8 @@ int	CEntityManager::GetEntityID( IEntity* pEntity )
 	map< IEntity*, int >::iterator itEntity = m_mEntitiesID.find( pEntity );
 	if( itEntity != m_mEntitiesID.end() )
 		return itEntity->second;
-	return -1;
+	AddEntity(pEntity);
+	return pEntity->GetID();
 }
 
 int CEntityManager::GetEntityCount()
@@ -403,6 +405,8 @@ void CEntityManager::Clear()
 	m_nLastEntityID = -1;
 	m_pPlayer = nullptr;
 	m_oRessourceManager.RemoveAllLights();
+	m_mCollideEntities.clear();
+	m_mFighterEntities.clear();
 }
 
 void CEntityManager::DestroyAll()

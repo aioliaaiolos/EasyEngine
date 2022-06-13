@@ -39,8 +39,9 @@ IBox* CHeightMap::GetModelBBox()
 
 void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector modelDim, float groundAdaptationHeight)
 {
-	float xMargin = modelDim.m_y;
-	float zMargin = modelDim.m_y;
+	float xMargin = modelDim.m_y / 2;
+	float zMargin = modelDim.m_y / 2;
+	
 	float x0, z0, x1, z1;
 	MapToModel(0, 0, x0, z0);
 	MapToModel(1, 1, x1, z1);
@@ -58,14 +59,10 @@ void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector mod
 			CVector PTransform = modelTM * P;
 			float xMap = 0, yMap = 0;
 			ModelToMap(PTransform.m_x, PTransform.m_z, xMap, yMap);
-			if (xMap < 0.f) 
-				xMap = 0.f;
-			if (yMap < 0.f) 
-				yMap = 0.f;
-			if (xMap > m_nWidth) 
-				xMap = m_nWidth;
-			if (yMap > m_nHeight) 
-				yMap = m_nHeight;
+			if (xMap >= m_nWidth || xMap < 0 || yMap >= m_nHeight || yMap < 0) {
+				zModel += modelUnit;
+				continue;
+			}			
 			CVector pixel;
 			GetPixel(xMap, yMap, pixel);
 			float height = GetHeight(pixel);
@@ -88,14 +85,10 @@ void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector mod
 			CVector PTransform = modelTM * P;
 			float xMap = 0, yMap = 0;
 			ModelToMap(PTransform.m_x, PTransform.m_z, xMap, yMap);
-			if (xMap < 0.f)
-				xMap = 0.f;
-			if (yMap < 0.f)
-				yMap = 0.f;
-			if (xMap > m_nWidth)
-				xMap = m_nWidth;
-			if (yMap > m_nHeight)
-				yMap = m_nHeight;
+			if (xMap >= m_nWidth || xMap < 0 || yMap >= m_nHeight || yMap < 0) {
+				zModel += modelUnit;
+				continue;
+			}
 			SetPixelValue(xMap, yMap, hMin);
 			zModel += modelUnit;
 		}
@@ -106,7 +99,7 @@ void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector mod
 void CHeightMap::RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDim, string originalHeightMap)
 {
 	ILoader::CTextureInfos ti;
-	ti.m_bFlip = true;
+	ti.m_bFlip = false;
 	m_pLoaderManager->Load(originalHeightMap, ti);
 	ti.m_vTexels;
 	
@@ -130,16 +123,11 @@ void CHeightMap::RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDi
 			CVector PTransform = modelTM * P;
 			float xMap = 0, yMap = 0;
 			ModelToMap(PTransform.m_x, PTransform.m_z, xMap, yMap);
-			/*
-			if (xMap < 0.f)
-				xMap = 0.f;
-			if (yMap < 0.f)
-				yMap = 0.f;
-			if (xMap > m_nWidth)
-				xMap = m_nWidth;
-			if (yMap > m_nHeight)
-				yMap = m_nHeight;*/
 			CVector pixel;
+			if (xMap >= m_nWidth || xMap < 0 || yMap >= m_nHeight || yMap < 0) {
+				zModel += modelUnit;
+				continue;
+			}
 			GetPixel(ti, xMap, yMap, pixel);
 			float height = GetHeight(pixel);
 			SetPixelValue(xMap, yMap, height);
@@ -157,13 +145,13 @@ void CHeightMap::GetFileName(string& fileName)
 void CHeightMap::Load(string sFileName)
 {
 	ILoader::CTextureInfos ti;
-	ti.m_bFlip = true;
+	ti.m_bFlip = false;
 	m_pLoaderManager->Load( sFileName, ti );
 
 	double l = log2(ti.m_nWidth);
 	int il = (int)l;
 	if (l - il != 0) {
-		exception e("Erreur : La texture utilisee pour la height map doit avoir une taille en puissance de 2");
+		CEException e("Erreur : La texture utilisee pour la height map doit avoir une taille en puissance de 2");
 		throw e;
 	}
 
@@ -176,7 +164,7 @@ void CHeightMap::Load(string sFileName)
 void CHeightMap::Save(string sFileName)
 {
 	ILoader::CTextureInfos ti;
-	ti.m_bFlip = true;
+	ti.m_bFlip = false;
 	ti.m_nWidth = m_nWidth;
 	ti.m_nHeight = m_nHeight;
 	ti.m_vTexels = m_vPixels;
@@ -238,7 +226,6 @@ void CHeightMap::ModelToMap( int xModel, int zModel, int& xMap, int& yMap )
 	yMap = - m_nHeight * (( zModel - m_pModelBox->GetMinPoint().m_z - m_pModelBox->GetDimension().m_z ) / m_pModelBox->GetDimension().m_z) - 1;
 }
 
-
 void CHeightMap::ModelToMap( int xModel, int zModel, float& xMap, float& yMap )
 {
 	float dimx = m_pModelBox->GetDimension().m_x;
@@ -246,7 +233,7 @@ void CHeightMap::ModelToMap( int xModel, int zModel, float& xMap, float& yMap )
 	float h = m_pModelBox->GetDimension().m_y;
 
 	xMap = ((m_nWidth - 1) / 2.f) * (1 + 2 * xModel / dimx );
-	yMap = ( (1 - m_nWidth) / 2.f) * ( (2 * zModel  / dimz) - 1);
+	yMap = zModel * m_nHeight / dimz + m_nHeight / 2;
 }
 
 float CHeightMap::GetHeight( float xModel, float zModel )
@@ -299,75 +286,6 @@ float CHeightMap::GetHeightFromPixelValue(float pixelValue)
 float CHeightMap::GetPixelValueFromHeight(float height)
 {
 	return 255.f * (height - m_pModelBox->GetMinPoint().m_y ) / m_pModelBox->GetDimension().m_y;
-}
-
-void CHeightMap::ExtractHeightMapFromTexture( string sFileName, ILoaderManager& oLoaderManager, IFileSystem* pFileSystem, string sOutFileName )
-{
-	ILoader::CTextureInfos ti;
-	oLoaderManager.Load( sFileName, ti );
-	int bpp = 3;
-	int nMinX = 0;
-	int nMinY = 0;
-	int nMaxX = 0;
-	int nMaxY = 0;
-	bool bFoundGray = false;
-	for( int i = 0; i < ti.m_nHeight; i++ )
-	{
-		for( int j = 0; j < ti.m_nWidth; j++ )
-		{
-			int nIndice = GetPixelNumberFromCoord( ti.m_nWidth, i, j, bpp ); // i * ti.m_nWidth * bpp + j * bpp;
-			int r = ti.m_vTexels[ nIndice ];
-			int g = ti.m_vTexels[ nIndice + 1 ];
-			int b = ti.m_vTexels[ nIndice + 2 ];
-			bool bGray = ( r == g && r == b );
-			if( bGray )
-			{
-				if( !bFoundGray )
-				{
-					nMinX = j;
-					nMinY = i;
-					bFoundGray = true;
-				}
-				else
-				{
-					if( j > nMaxX )
-						nMaxX = j;
-					if( i > nMaxY )
-						nMaxY = i;
-				}
-			}
-		}
-	}
-	vector< unsigned char > vPixels;
-	int nRestPixel = ( nMaxX - nMinX + 1 ) % 4;
-	int nPixelAdd = min( nRestPixel, 4 - nRestPixel );
-	if( nPixelAdd < 2 )
-		nPixelAdd = -nPixelAdd;
-	for( int i = nMinY; i <= nMaxY; i++ )
-	{
-		for( int j = nMinX; j <= nMaxX; j++ )
-		{
-			int nIndice = GetPixelNumberFromCoord( ti.m_nWidth, i, j, bpp );
-			for( int k = 0; k < bpp; k++ )
-				vPixels.push_back( ti.m_vTexels[ nIndice + k ] );
-		}
-		if( nPixelAdd > 0 )
-		{
-			for( int k = 0; k < nPixelAdd * bpp; k++ )
-				vPixels.push_back( 0 );
-		}
-		else if( nPixelAdd < 0 )
-		{
-			for( int k = 0; k < - nPixelAdd * bpp; k++ )
-				vPixels.pop_back();
-		}
-	}
-	int nNewWidth = nMaxX + 1 - nMinX + nPixelAdd;
-	string sDir;
-	if( pFileSystem )
-		pFileSystem->GetLastDirectory( sDir );
-	string sOutPath = sDir + "\\" + sOutFileName;
-	oLoaderManager.CreateBMPFromData( vPixels, nNewWidth, nMaxY + 1 - nMinY, bpp * 8, sOutPath );
 }
 
 int	CHeightMap::GetPixelNumberFromCoord( int nWidth, int nRow, int nColumn, int bpp )

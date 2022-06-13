@@ -25,6 +25,7 @@ private:
 	string											GetName() override;
 	void											Save(string sFileName) override;
 	void											Save();
+	void											SaveGame(string fileName) override;
 	void											SpawnEntity(string sFileName) override;
 	void											RemoveCharacter(string sID) override;
 	void											SpawnCharacter(string sID) override;

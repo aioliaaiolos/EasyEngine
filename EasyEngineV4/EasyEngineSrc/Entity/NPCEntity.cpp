@@ -195,46 +195,19 @@ IBox* CNPCEntity::GetNextCollideBox()
 	return pBoxRet;
 }
 
-void CNPCEntity::ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints )
+void CNPCEntity::ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints)
 {
-	ComputePathFind2DAStar(oOrigin, oDestination, vPoints);
+	ComputePathFind2DAStar(oOrigin, oDestination, vPoints, m_pScene->GetCellSize());
 }
 
-void CNPCEntity::SaveAStarGrid(IGrid* pGrid)
+void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize)
 {
-	WIN32_FIND_DATAA fd;
-	ZeroMemory(&fd, sizeof(fd));
-	string fileName;
-	HANDLE hFile = FindFirstFileA("..\\Data\\grid*.bin", &fd);
-	int index = 0;
-	do {
-		fileName = fd.cFileName;
-		if (!fileName.empty()) {
-			int first = strlen("grid");
-			int dotPos = fileName.find(".");
-			int n = dotPos - first;
-			string sIndex = fileName.substr(first, n);
-			int i = atoi(sIndex.c_str());
-			if (i > index)
-				index = i;
-		}
-	} while (FindNextFileA(hFile, &fd));
-
-	ostringstream oss;
-	oss << "..\\Data\\grid" << index + 1 << ".bin";
-	pGrid->Save(oss.str());
-}
-
-void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, bool saveGrid)
-{
-	int originRow, originColumn, destinationRow, destinationColumn;
-	m_oCollisionManager.GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originRow, originColumn);
-	m_oCollisionManager.GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationRow, destinationColumn);
+	int originx, originy, destinationx, destinationy;
+	m_oCollisionManager.GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originx, originy, nCellSize);
+	m_oCollisionManager.GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationx, destinationy, nCellSize);
 	IGrid* pGrid = m_pScene->GetCollisionGrid();
-	pGrid->SetDepart(originRow, originColumn);
-	pGrid->SetDestination(destinationRow, destinationColumn);
-	if(saveGrid)
-		SaveAStarGrid(pGrid);
+	pGrid->SetDepart(originx, originy);
+	pGrid->SetDestination(destinationx, destinationy);
 	m_oPathFinder.FindPath(pGrid);
 	vector<IGrid::ICell*> path;
 	pGrid->GetPath(path);

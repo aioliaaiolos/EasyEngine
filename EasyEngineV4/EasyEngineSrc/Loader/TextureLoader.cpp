@@ -23,54 +23,53 @@ CBMPLoader::~CBMPLoader(void)
 {
 }
 
-
-void CBMPLoader::ReadBMP(string sFileName, vector< unsigned char >& vData, int& nWidth, int& nHeight, int& nBitPerPixel)
+void CBMPLoader::ReadBMP(string sFileName, vector< unsigned char >& vData, unsigned int& nWidth, unsigned int& nHeight, int& nBitPerPixel)
 {
-	// file header
+	BITMAPFILEHEADER header;
+	BITMAPINFOHEADER infoHeader;
+
+	ZeroMemory(&header, sizeof(BITMAPFILEHEADER));
+	ZeroMemory(&infoHeader, sizeof(BITMAPINFOHEADER));
 	FILE* pFile = fopen(sFileName.c_str(), "rb");
-	char sMagic[3];
-	ZeroMemory(sMagic, 2 * sizeof(char));
-	fread(sMagic, 1, 2, pFile);
-	sMagic[2] = 0;
-	if (strcmp(sMagic, "BM") != 0)
-	{
-		CFileNotFoundException e(sFileName);
-		throw e;
-	}
-	int nDataSize = 0;
-	fread(&nDataSize, 4, 1, pFile);
-	int id = 0;
-	fread(&id, 1, 2, pFile);
-	fread(&id, 1, 2, pFile);
-	int DataAdress = 0;
-	//int nDataAdressOffset = ftell(pFile);
-	fread(&DataAdress, 4, 1, pFile);
+	
+	fread(&header, sizeof(BITMAPFILEHEADER), 1, pFile);
+	fread(&infoHeader, sizeof(BITMAPINFOHEADER), 1, pFile);	
+	
+	rewind(pFile);
+	fseek(pFile, header.bfOffBits, SEEK_SET);
+	int sizeImage = infoHeader.biSizeImage ? infoHeader.biSizeImage : infoHeader.biWidth * infoHeader.biHeight * infoHeader.biBitCount / 8;
+	vData.resize(sizeImage);
+	fread(&vData[0], sizeImage, 1, pFile);
+	nWidth = infoHeader.biWidth;
+	nHeight = infoHeader.biHeight;
+	nBitPerPixel = infoHeader.biBitCount;
+	fclose(pFile);
+}
 
-	// image header
-	int nHeaderSize = 0;
-	fread(&nHeaderSize, 4, 1, pFile);
-	fread(&nWidth, 4, 1, pFile);
-	fread(&nHeight, 4, 1, pFile);
-	int nPlanes = 1;
-	fread(&nPlanes, 2, 1, pFile);
-	fread(&nBitPerPixel, 2, 1, pFile);
-	int zero = 0;
-	fread(&zero, sizeof(int), 1, pFile);
-	int nImageSize = 0;
-	fread(&nImageSize, sizeof(int), 1, pFile);
-	int nResw = 0, nResh = 0;
-	fread(&nResw, sizeof(int), 1, pFile);
-	fread(&nResh, sizeof(int), 1, pFile);
-	fread(&zero, sizeof(int), 1, pFile);
-	fread(&zero, sizeof(int), 1, pFile);
+void CBMPLoader::WriteBMP(string sFileName, const vector< unsigned char >& vData, unsigned int nWidth, int unsigned nHeight, int nBitPerPixel)
+{
+	BITMAPFILEHEADER header;
+	BITMAPINFOHEADER infoHeader;
 
-	// Pixel data
-	if (nImageSize == 0)
-		nImageSize = nWidth * nHeight * nBitPerPixel / 8;
-	vData.resize(nImageSize);
-	fread(&vData[0], sizeof(unsigned char), nImageSize, pFile);
+	ZeroMemory(&header, sizeof(BITMAPFILEHEADER));
+	ZeroMemory(&infoHeader, sizeof(BITMAPINFOHEADER));
 
-	// complete
+	header.bfType = 0x4d42;
+	infoHeader.biBitCount = nBitPerPixel;
+	infoHeader.biHeight = nHeight;
+	infoHeader.biWidth = nWidth;
+	unsigned int nPixelSize = nBitPerPixel / 8;
+	infoHeader.biSizeImage = nWidth * nHeight * nPixelSize;
+	header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	header.bfSize = header.bfOffBits + infoHeader.biSizeImage;
+	infoHeader.biSize = sizeof(BITMAPINFOHEADER);
+	infoHeader.biPlanes = 1;
+
+	FILE* pFile = fopen(sFileName.c_str(), "wb");
+
+	fwrite(&header, sizeof(BITMAPFILEHEADER), 1, pFile);
+	fwrite(&infoHeader, sizeof(BITMAPINFOHEADER), 1, pFile);
+	fwrite(&vData[0], infoHeader.biSizeImage, 1, pFile);
 	fclose(pFile);
 }
 
@@ -146,8 +145,8 @@ void CBMPLoader::Export( string sFileName, ILoader::IRessourceInfos& ri )
 	if (pInfos->m_bFlip)
 		FlipImage(*pInfos);
 
-	int nWidth = pInfos->m_nWidth;
-	int nHeight = pInfos->m_nHeight;
+	unsigned int nWidth = pInfos->m_nWidth;
+	unsigned int nHeight = pInfos->m_nHeight;
 	const vector< unsigned char >& vData = pInfos->m_vTexels;
 	int nBitPerPixel = 0;
 	switch( pInfos->m_ePixelFormat )
@@ -162,64 +161,8 @@ void CBMPLoader::Export( string sFileName, ILoader::IRessourceInfos& ri )
 	}
 
 
-	CreateBMPFromData( vData, nWidth, nHeight, nBitPerPixel, sFileName );
+	WriteBMP(sFileName, vData, nWidth, nHeight, nBitPerPixel);
 
-}
-
-
-void CBMPLoader::CreateBMPFromData( const vector< unsigned char >& vData, int nWidth, int nHeight, int nBitPerPixel, string sFileName )
-{
-	int nExpectedByteCount = nWidth * nHeight * nBitPerPixel / 8;
-	if( nExpectedByteCount != vData.size() )
-	{
-		CEException e( "CBMPLoader::Export() : Mauvais format de texture" );
-		throw e;
-	}
-
-	// file header
-	FILE* pFile = fopen( sFileName.c_str(), "wb" );
-	if (!pFile) {
-		CFileException e(sFileName);
-		throw e;
-	}
-	char* sMagic = "BM";
-	fwrite( sMagic, 1, 2, pFile );	
-	int nSize = 0;
-	fwrite( &nSize, 4, 1, pFile );
-	int id = 0;
-	fwrite( &id, 1, 2, pFile );
-	fwrite( &id, 1, 2, pFile );
-	int DataAdress = 0;
-	int nDataAdressOffset = ftell(pFile);
-	fwrite( &DataAdress, 4, 1, pFile );
-
-	// image header
-	int nHeaderSize = 40;
-	fwrite( &nHeaderSize, 4, 1, pFile );
-	fwrite( &nWidth, 4, 1, pFile );
-	fwrite( &nHeight, 4, 1, pFile );
-	int nPlanes = 1;
-	fwrite( &nPlanes, 2, 1, pFile );
-	fwrite( &nBitPerPixel, 2, 1, pFile );
-	int zero = 0;
-	fwrite( &zero, sizeof( int ), 1, pFile );
-	int nImageSize = vData.size();
-	fwrite( &nImageSize, sizeof( int ), 1, pFile );
-	int nResw = 2835, nResh = 2835;
-	fwrite( &nResw, sizeof( int ), 1, pFile );
-	fwrite( &nResh, sizeof( int ), 1, pFile );
-	fwrite( &zero, sizeof( int ), 1, pFile );
-	fwrite( &zero, sizeof( int ), 1, pFile );
-	int nDataAdress = ftell(pFile);
-
-
-	// Pixel data
-	fwrite( &vData[ 0 ], sizeof( unsigned char ), vData.size(), pFile );
-
-	// complete
-	fseek( pFile, nDataAdressOffset, SEEK_SET );
-	fwrite( &nDataAdress, 4, 1, pFile );
-	fclose( pFile );
 }
 
 //------------------------------------------------------------------------------

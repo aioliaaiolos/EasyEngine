@@ -33,7 +33,7 @@ void CWidget::GetPosition( int& x, int& y )const
 	y = rect.top;
 }
 
-void CWidget::GetDimension( int& nWidth, int& nHeight )const
+void CWidget::GetDimension( unsigned int& nWidth, unsigned int& nHeight )const
 {
 	RECT rect;
 	GetWindowRect( m_hWnd, &rect );

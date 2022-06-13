@@ -24,6 +24,7 @@ public:
   	virtual void                		Pitch(float fAngle) = 0;
   	virtual void                		Roll(float fAngle) = 0;
   	virtual void                		LocalTranslate(float dx , float dy , float dz) = 0;
+	virtual void						WorldTranslate(float dx, float dy, float dz) = 0;
 	virtual void                		SetLocalPosition(float x, float y, float z) = 0;
 	virtual void                		SetLocalPosition(const CVector& vPos) = 0;
   	virtual void                		SetWorldPosition(float x, float y , float z) = 0;

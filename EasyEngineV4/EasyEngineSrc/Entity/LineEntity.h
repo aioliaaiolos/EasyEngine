@@ -17,4 +17,5 @@ public:
 	void				Colorize(float r, float g, float b, float a) {}
 	void				GetEntityName(string& sName);
 	void				GetPoints(CVector& first, CVector& last) const;
+	int					GetCellSize() { throw 1; return -1.f; };
 };

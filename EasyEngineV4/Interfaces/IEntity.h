@@ -124,14 +124,17 @@ public:
 	virtual void				DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void				SetCustomSpecular(const CVector& customSpecular) = 0;
 	virtual void				DrawCollisionBoundingBoxes(bool bDraw) = 0;
+	virtual int					GetCellSize() = 0;
 };
 
 class ICharacter : public virtual IEntity
 {
 public:
 	virtual void				WearShoes(string shoesName)  = 0;
+	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
 	virtual void				AddHairs(string sHairsPath) = 0;
 	virtual void				WearSkinnedClothFull(string sClothName) = 0;
+	virtual void				SetBody(string sBodyName) = 0;	
 };
 
 class IPlayer : public virtual ICharacter
@@ -153,13 +156,14 @@ public:
 	virtual void				SetGroundMargin(float margin) = 0;
 	virtual float				GetGroundMargin() = 0;
 	virtual void				GetInfos(ILoader::CSceneInfos& si) = 0;
+	virtual void				GetCharactersInfos(vector<IEntity*>& si, INode* pRoot = nullptr) = 0;
 	virtual void				GetOriginalSceneFileName(string& sFileName) = 0;
 	virtual void				SetOriginalSceneFileName(string sFileName) = 0;
 	virtual void				Clear() = 0;
 	virtual void				ClearCharacters() = 0;
 	virtual void				Load(const ILoader::CSceneInfos& si) = 0;
 	virtual IEntity*			Merge(string sRessourceName, float x, float y, float z) = 0;
-	virtual void				CreateCollisionMap() = 0;
+	virtual void				CreateCollisionMapByRendering() = 0;
 	virtual void				SetDiffuseFileName(string diffuseFileName) = 0;
 	virtual int					GetCurrentHeightMapIndex() = 0;
 	virtual void				SetLength(int length) = 0;
@@ -169,6 +173,7 @@ public:
 	virtual void				HandleLoadingComplete(LevelCompleteProc callback, void* pData) = 0;
 	virtual void				UnhandleLoadingComplete() = 0;
 	virtual void				OnChangeSector() = 0;
+	virtual void				CreateCollisionMaps(string sLevelPath, float fBias) = 0;
 };
 
 class IFighterEntityInterface

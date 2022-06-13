@@ -55,12 +55,18 @@ int CHud::GetLineCount()
 	return m_vText.size();
 }
 
+int CHud::GetSlotCount()
+{
+	return m_mSlots.size();
+}
+
+
 int CHud::CreateNewSlot(int x, int y)
 {
 	Slot s;
 	s.x = x;
 	s.y = y;
-	int id = m_mSlots.size() > 0 ? m_mSlots.rbegin()->first : 0;
+	int id = m_mSlots.size() > 0 ? m_mSlots.rbegin()->first + 1 : 0;
 	m_mSlots[id] = s;
 	return id;
 }

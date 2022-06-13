@@ -44,7 +44,7 @@ public:
 	};
 
 	virtual HWND	GetHandle() = 0;
-	virtual void	GetDimension( int& nWidth, int& nHeight )const = 0;
+	virtual void	GetDimension(unsigned int& nWidth, unsigned int& nHeight )const = 0;
 	virtual void	AddChild( IWidget* pChild ) = 0;
 	virtual void	CallCallback( CallbackArgs& args ) = 0;
 };

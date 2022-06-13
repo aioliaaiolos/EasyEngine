@@ -28,7 +28,7 @@ public:
 	
 	void						GetPosition( int& x, int& y )const;
 	void						GetClientPosition( int& x, int& y )const;
-	void						GetDimension( int& nWidth, int& nHeight )const;
+	void						GetDimension(unsigned int& nWidth, unsigned int& nHeight )const;
 	void						GetClientDimension( int& nWidth, int& nHeight )const;
 	int							GetChildCount()const;
 	IWidget*					GetChild( int iIndex )const;

@@ -47,10 +47,10 @@ public:
 	{
 		T_NONE,
 		TFree,
-		T_LINKED_CAMERA,
-		T_MAP_CAMERA,
-		T_GUI_MAP_CAMERA,
-		T_MAP_ENTITY_CAMERA,
+		TLinked,
+		TMap,
+		TGuiMap,
+		TMapEntity,
 		TEditor
 	};
 

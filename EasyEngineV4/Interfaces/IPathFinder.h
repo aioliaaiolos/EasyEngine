@@ -44,7 +44,7 @@ public:
 	virtual void GetCloseList(vector<ICell*>& closeList) = 0;
 	virtual void GetPath(vector<ICell*>& path) = 0;
 	virtual ICell& GetCell(int row, int column) = 0;
-	virtual void ProcessNode(int row, int column) = 0;
+	virtual bool ProcessNode(int row, int column, int& nextRow, int& nextColumn) = 0;
 	virtual void Reset() = 0;
 	virtual void ResetAllExceptObstacles() = 0;
 	virtual void Save(string sFileName) = 0;
@@ -61,6 +61,7 @@ public:
 
 	virtual IGrid* CreateGrid(int rowCount, int columnCount) = 0;
 	virtual void FindPath(IGrid* grid) = 0;
+	virtual void EnableSaveGrid(bool bEnable) = 0;
 
 protected:
 	IPathFinder(const Desc& oDesc) : CPlugin(oDesc.m_pParent, oDesc.m_sName) {}
