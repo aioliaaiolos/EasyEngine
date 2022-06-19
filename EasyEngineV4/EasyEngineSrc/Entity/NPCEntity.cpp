@@ -10,11 +10,17 @@
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
 CMobileEntity(oInterface, sFileName, sID),
-m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
+m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
+m_pGotoBox(nullptr),
+m_pBackupBoundingGeometry(nullptr)
 {
 	m_sTypeName = "NPC";
 	if( !m_pfnCollisionCallback )
 		m_pfnCollisionCallback = OnCollision;
+	
+	m_pGotoBox = dynamic_cast<IBox*>(m_pBoundingGeometry->Duplicate());
+	m_pGotoBox->SetX(m_pGotoBox->GetDimension().m_x - m_fBBoxReduction);
+	m_pGotoBox->SetMinPoint(CVector(m_pGotoBox->GetMinPoint().m_x + m_fBBoxReduction / 2.f, m_pGotoBox->GetMinPoint().m_y, m_pGotoBox->GetMinPoint().m_z));
 }
 
 int CNPCEntity::GetLife()
@@ -144,6 +150,8 @@ void CNPCEntity::OnCollision( CEntity* pThis, vector<INode*> entities)
 void CNPCEntity::Goto( const CVector& oPosition, float fSpeed )
 {
 	IAEntity::Goto( oPosition, fSpeed );
+	m_pBackupBoundingGeometry = m_pBoundingGeometry;
+	m_pBoundingGeometry = m_pGotoBox;
 }
 
 IBox* CNPCEntity::GetFirstCollideBox()
@@ -200,12 +208,25 @@ void CNPCEntity::ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& o
 	ComputePathFind2DAStar(oOrigin, oDestination, vPoints, m_pScene->GetCellSize());
 }
 
+void CNPCEntity::UpdateGoto()
+{
+	IAEntity::UpdateGoto();
+	if (IsArrivedAtDestination() && m_pBackupBoundingGeometry) {
+		m_pBoundingGeometry = m_pBackupBoundingGeometry;
+	}
+}
+
 void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize)
 {
 	int originx, originy, destinationx, destinationy;
-	m_oCollisionManager.GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originx, originy, nCellSize);
-	m_oCollisionManager.GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationx, destinationy, nCellSize);
+	m_pCollisionMap->GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originx, originy);
+	m_pCollisionMap->GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationx, destinationy);
 	IGrid* pGrid = m_pScene->GetCollisionGrid();
+	if (!pGrid) {
+		string sSceneName;
+		m_pScene->GetEntityName(sSceneName);
+		throw CEException(string("Error : no collision map found for scene '") + sSceneName);
+	}
 	pGrid->SetDepart(originx, originy);
 	pGrid->SetDestination(destinationx, destinationy);
 	m_oPathFinder.FindPath(pGrid);
@@ -218,7 +239,7 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2
 		int r, c;
 		float x, y;
 		pCell->GetCoordinates(r, c);
-		m_oCollisionManager.GetPositionFromCellCoord(r, c, x, y);
+		m_pCollisionMap->GetPositionFromCellCoord(r, c, x, y);
 		vPoints.push_back(CVector2D(x, y));
 	}
 	if(!vPoints.empty())

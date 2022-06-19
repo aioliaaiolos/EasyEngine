@@ -7,7 +7,7 @@ class ITexture;
 class CMinimapWindow :	public CGUIWindow
 {
 public:
-	CMinimapWindow(IGUIManager* pGUIManager, IScene& oScene, IRessourceManager& oRessourceManager, IRenderer& oRenderer, int nWidth, int nHeight);
+	CMinimapWindow(EEInterface& oInterface, IScene& oScene, int nWidth, int nHeight);
 	~CMinimapWindow();
 
 	void				Display();

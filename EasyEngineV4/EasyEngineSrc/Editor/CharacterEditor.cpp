@@ -39,9 +39,9 @@ void CCharacterEditor::SetEditionMode(bool bEditionMode)
 		CEditor::SetEditionMode(bEditionMode);
 		if (m_bEditionMode) {
 			m_pScene->Clear();
-			CVector pos(230, 150, -35);
-			InitCamera(pos);
+			ZoomCameraBody();
 			IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.1f);
+			CVector pos(230, 150, -35);
 			pLight->SetLocalPosition(pos);
 			pLight->Link(m_pScene);
 			m_oInputManager.ShowMouseCursor(true);
@@ -58,6 +58,44 @@ void CCharacterEditor::InitCamera(const CVector& pos)
 	m_pEditorCamera->Yaw(106);
 	m_pEditorCamera->Pitch(-14);
 	m_pEditorCamera->Roll(-1);
+	m_pEditorCamera->Update();
+}
+
+void CCharacterEditor::ZoomCameraBody()
+{
+	m_eZoomType = eBody;
+	CVector pos(230, 150, -35);
+	Zoom(pos, 106, -14, -1);
+}
+
+void CCharacterEditor::ZoomCameraHead()
+{
+	m_eZoomType = eHead;
+	CVector pos(30, 157, -10);
+	Zoom(pos, 106, -5, -1);
+}
+
+void CCharacterEditor::ZoomCameraEye()
+{
+	m_eZoomType = eEye;
+	static float x = 230;
+	static float y = 150;
+	static float z = -35;
+	static float yaw = 106;
+	static float pitch = -14;
+	static float roll = -1;
+	CVector pos(x, y, z);
+	Zoom(pos, yaw, pitch, roll);
+}
+
+void CCharacterEditor::Zoom(const CVector& pos, float fYaw, float fPitch, float fRoll)
+{
+	CMatrix m;
+	m_pEditorCamera->SetLocalMatrix(m);
+	m_pEditorCamera->SetLocalPosition(pos);
+	m_pEditorCamera->Yaw(fYaw);
+	m_pEditorCamera->Pitch(fPitch);
+	m_pEditorCamera->Roll(fRoll);
 	m_pEditorCamera->Update();
 }
 
@@ -90,6 +128,33 @@ bool CCharacterEditor::IsEnabled()
 	return m_bEditionMode;
 }
 
+void CCharacterEditor::InitEyeNodes(INode* pParent)
+{
+	for (int i = 0; i < pParent->GetChildCount(); i++) {
+		INode* pNode = pParent->GetChild(i);
+		if (pNode->GetName() == "OeilD") {
+			m_pRightEye = pNode;
+		}
+		if (pNode->GetName() == "OeilG") {
+			m_pLeftEye = pNode;
+		}
+		if (!m_pLeftEye || !m_pRightEye)
+			InitEyeNodes(pNode);
+	}
+}
+
+void CCharacterEditor::InitHeadNode(INode* pParent)
+{
+	for (int i = 0; i < pParent->GetChildCount(); i++) {
+		INode* pNode = pParent->GetChild(i);
+		if (pNode->GetName() == "Tete") {
+			m_pHeadNode = pNode;
+		}
+		if (m_pHeadNode)
+			InitHeadNode(pNode);
+	}
+}
+
 void CCharacterEditor::SpawnEntity(string sCharacterId)
 {
 	if(!m_bEditionMode)
@@ -111,6 +176,9 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 	}
 	InitSpawnedCharacter();
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
+
+	InitEyeNodes(m_pCurrentCharacter);
+	InitHeadNode(m_pCurrentCharacter);
 }
 
 void CCharacterEditor::InitSpawnedCharacter()
@@ -178,6 +246,8 @@ void CCharacterEditor::SetBody(string sBodyName)
 		sBodyName += ".bme";
 	m_pCurrentCharacter->SetBody(sBodyName);
 	InitSpawnedCharacter();
+	InitEyeNodes(m_pCurrentCharacter);
+	InitHeadNode(m_pCurrentCharacter);
 }
 
 void CCharacterEditor::Edit(string id)
@@ -206,10 +276,28 @@ void CCharacterEditor::OffsetCloth(float x, float y, float z)
 {
 	if (m_pCurrentEditableCloth) {
 		m_pCurrentEditableCloth->WorldTranslate(x, y, z);
-		m_offsetloth += CVector(x, y, z);
+		m_offsetCloth += CVector(x, y, z);
 	}
 	else
 		throw CEException("Error : no cloth selected");
+}
+
+void CCharacterEditor::OffsetEyes(float x, float y, float z)
+{
+	m_pRightEye->LocalTranslate(x, y, z);
+	m_pLeftEye->LocalTranslate(x, y, z);
+	m_vOffsetEyes += CVector(x, y, z);
+}
+
+void CCharacterEditor::TurnEyes(float fYaw, float fPitch, float fRoll)
+{
+	m_pRightEye->Yaw(fYaw);
+	m_pRightEye->Pitch(fPitch);
+	m_pRightEye->Roll(fRoll);
+
+	m_pLeftEye->Yaw(fYaw);
+	m_pLeftEye->Pitch(fPitch);
+	m_pLeftEye->Roll(fRoll);
 }
 
 void CCharacterEditor::SaveCurrentEditableCloth()
@@ -219,11 +307,24 @@ void CCharacterEditor::SaveCurrentEditableCloth()
 	m_oLoaderManager.Load(sFileName, ami);
 	map<int, pair<string, CMatrix>>::iterator it = ami.m_mBones.begin();
 	CMatrix& tm = it->second.second;
-	tm.m_03 -= m_offsetloth.m_x;
-	tm.m_13 -= m_offsetloth.m_y;
-	tm.m_23 -= m_offsetloth.m_z;
+	tm.m_03 -= m_offsetCloth.m_x;
+	tm.m_13 -= m_offsetCloth.m_y;
+	tm.m_23 -= m_offsetCloth.m_z;
 	m_oLoaderManager.Export(sFileName, ami);
 }
+
+void CCharacterEditor::SaveCurrentEditableBody()
+{
+	string sFileName;
+	m_pCurrentCharacter->GetRessource()->GetFileName(sFileName);
+	ILoader::CAnimatableMeshData ami;
+	m_oLoaderManager.Load(sFileName, ami);
+	for (ILoader::CMeshInfos& mi : ami.m_vMeshes)
+		if (mi.m_sName == "OeilD" || mi.m_sName == "OeilG")
+			mi.m_oOrgMaxPosition += m_vOffsetEyes;
+	m_oLoaderManager.Export(sFileName, ami);
+}
+
 
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)
 {
@@ -243,9 +344,37 @@ void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 				pEditor->m_nMousePosX = x;
 			}
 		}
+		else if (e == IEventDispatcher::TMouseEvent::T_WHEEL) {
+			if (x > 0) {
+				switch (pEditor->m_eZoomType)
+				{
+				case eBody:
+					pEditor->ZoomCameraHead();
+					break;
+				case eHead:
+					pEditor->ZoomCameraEye();
+					break;
+				default:
+					break;
+				}
+				
+			} else if (x < 0) {
+				switch (pEditor->m_eZoomType)
+				{
+				case eEye:
+					pEditor->ZoomCameraHead();
+					break;
+				case eHead:
+					pEditor->ZoomCameraBody();
+					break;
+				default:
+					break;
+				}
+
+			}
+		}
 	}
 }
-
 
 void CCharacterEditor::OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
 {

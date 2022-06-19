@@ -131,7 +131,10 @@ void CInputManager::OnMouseEventCallback( CPlugin* pPlugin, IEventDispatcher::TM
 		break;
 	case IEventDispatcher::T_RBUTTONDOWN:
 		b = eMouseButtonRight;
-		s = eMouseButtonStateDown;
+		if (s == eMouseButtonStateJustUp || s == eMouseButtonNone)
+			s = eMouseButtonStateJustDown;
+		else
+			s = eMouseButtonStateDown;
 		break;
 	case IEventDispatcher::T_LBUTTONUP:
 		b = eMouseButtonLeft;

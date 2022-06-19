@@ -1,5 +1,7 @@
 #include "pathFinder.h"
 
+#include "Exception.h"
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -7,6 +9,8 @@
 
 using namespace std;
 
+
+#define AVOID_DIAGONALE_OBSTACLE
 
 CGrid::CCell::CCell()
 {
@@ -183,20 +187,26 @@ void CGrid::Reset()
 
 void CGrid::ResetAllExceptObstacles()
 {
+	int r = -1, c = -1;
+	for (ICell* cell : m_vOpenList) {
+		cell->GetCoordinates(r, c);
+		m_grid[r][c].ResetAllExceptObstacles();
+	}
+	for (ICell* cell : m_vCloseList) {
+		cell->GetCoordinates(r, c);
+		m_grid[r][c].ResetAllExceptObstacles();
+	}
+
 	m_vOpenList.clear();
 	m_vCloseList.clear();
 	m_vPath.clear();
-
-	for (int row = 0; row < m_nRowCount; row++)
-		for (int column = 0; column < m_nColumnCount; column++)
-			m_grid[row][column].ResetAllExceptObstacles();
 
 	m_pDepart = NULL;
 	m_pDestination = NULL;
 }
 
 
-void CGrid::Save(string sFileName)
+void CGrid::Save(string sFileName, int xMin, int yMin, int xMax, int yMax)
 {
 	/* format
 	 row_count(int), 
@@ -214,22 +224,83 @@ void CGrid::Save(string sFileName)
 		}
 	 } */
 
+	if(xMin >= 0 && yMin >= 0 && xMax >=0 && yMax)
+		SavePart(sFileName, xMin, yMin, xMax, yMax);
+	else {
+		ofstream file;
+		file.open(sFileName.c_str(), ios::out | ios::binary);
+		int originRow, originColumn, destinationRow, destinationColumn;
+		m_pDepart->GetCoordinates(originRow, originColumn);
+		m_pDestination->GetCoordinates(destinationRow, destinationColumn);
+		file.write((char*)&m_nRowCount, sizeof(int));
+		file.write((char*)&m_nColumnCount, sizeof(int));
+		file.write((char*)&originRow, sizeof(int));
+		file.write((char*)&originColumn, sizeof(int));
+		file.write((char*)&destinationRow, sizeof(int));
+		file.write((char*)&destinationColumn, sizeof(int));
+		for (int row = 0; row < m_nRowCount; row++)
+			for (int column = 0; column < m_nColumnCount; column++)
+				m_grid[row][column] >> file;
+		file.close();
+	}
+}
+
+
+void CGrid::SavePart(string sFileName, int xMin, int yMin, int xMax, int yMax)
+{
+	/* 
+	format
+	row_count(int),
+	column_count(int),
+	originRow(int),
+	originColumn,
+	destinationRow(int),
+	destinationColumn(int),
+	Foreach row{
+		Foreach column{
+			type(int),
+			GCost(int),
+			HCost(int),
+			FCost(int)
+		}
+	} 
+	*/
+
 	ofstream file;
 	file.open(sFileName.c_str(), ios::out | ios::binary);
+
 	int originRow, originColumn, destinationRow, destinationColumn;
+	
 	m_pDepart->GetCoordinates(originRow, originColumn);
 	m_pDestination->GetCoordinates(destinationRow, destinationColumn);
-	file.write((char*)&m_nRowCount, sizeof(int));
-	file.write((char*)&m_nColumnCount, sizeof(int));
-	file.write((char*)&originRow, sizeof(int));
-	file.write((char*)&originColumn, sizeof(int));
-	file.write((char*)&destinationRow, sizeof(int));
-	file.write((char*)&destinationColumn, sizeof(int));
-	for (int row = 0; row < m_nRowCount; row++)
-		for (int column = 0; column < m_nColumnCount; column++)
-			m_grid[row][column] >> file;
+	int newRepereRow = originRow < destinationRow ? originRow : destinationRow;
+	newRepereRow -= yMin;
+	int newRepereColumn = originColumn < destinationColumn ? originColumn : destinationColumn;	
+	newRepereColumn -= xMin;
+
+	int newOriginRow = originRow - newRepereRow;
+	int newOriginColumn = originColumn - newRepereColumn;
+	int newDestinationRow = destinationRow - newRepereRow;
+	int newDestinationColumn = destinationColumn - newRepereColumn;
+	int newRowCount = newOriginRow > newDestinationRow ? newOriginRow + 1 : newDestinationRow + 1;
+	newRowCount += yMax;
+	int newColumnCount = newOriginColumn > newDestinationColumn ? newOriginColumn + 1 : newDestinationColumn + 1;
+	newColumnCount += xMax;
+
+	file.write((char*)&newRowCount, sizeof(int));
+	file.write((char*)&newColumnCount, sizeof(int));
+	file.write((char*)&newOriginRow, sizeof(int));
+	file.write((char*)&newOriginColumn, sizeof(int));
+	file.write((char*)&newDestinationRow, sizeof(int));
+	file.write((char*)&newDestinationColumn, sizeof(int));
+	for (int row = 0; row < newRowCount; row++) {
+		for (int column = 0; column < newColumnCount; column++) {
+			m_grid[newRepereRow + row][newRepereColumn + column] >> file;
+		}
+	}
 	file.close();
 }
+
 
 void CGrid::Load(string sFileName)
 {
@@ -254,12 +325,12 @@ void CGrid::Load(string sFileName)
 
 	Init();
 
-	SetDepart(originColumn, originRow);
-	SetDestination(destinationColumn, destinationRow);
-
 	for (int row = 0; row < m_nRowCount; row++)
 		for (int column = 0; column < m_nColumnCount; column++)
 			m_grid[row][column] << file;
+
+	SetDepart(originColumn, originRow);
+	SetDestination(destinationColumn, destinationRow);
 
 	file.close();
 }
@@ -284,6 +355,18 @@ void CGrid::RemoveObstacle(int row, int column)
 	m_grid[row][column].RemoveNodeFlag(CCell::eObstacle);
 }
 
+IGrid::ICell& CGrid::FindClosestNonObstacle(int row, int column)
+{
+	for (int iRow = -1; iRow <= 1; iRow++) {
+		for (int iColumn = -1; iColumn <= 1; iColumn++) {
+			ICell& cell = m_grid[row + iRow][column + iColumn];
+			if ( !(cell.GetCellType() & IGrid::ICell::eObstacle) ) {
+				return cell;
+			}
+		}
+	}
+}
+
 void CGrid::SetDepart(int column, int row)
 {
 	if(m_pDepart)
@@ -298,8 +381,10 @@ void CGrid::SetDestination(int column, int row)
 	if(m_pDestination)
 		m_pDestination->RemoveNodeFlag(CCell::eArrivee);
 	m_pDestination = &m_grid[row][column];
-	m_pDestination->AddNodeFlag(CCell::eArrivee);
-	
+	if (m_pDestination->GetCellType() & ICell::eObstacle) {
+		m_pDestination = (CCell*)&FindClosestNonObstacle(row, column);
+	}
+	m_pDestination->AddNodeFlag(CCell::eArrivee);	
 }
 
 IGrid::ICell* CGrid::GetDepart()
@@ -361,7 +446,6 @@ void CGrid::ProcessGrid(int startRow, int startColumn)
 
 bool CGrid::ProcessNode(int currentRow, int currentColumn, int& nextRow, int& nextColumn)
 {
-	//static int n = 32;
 	CCell& current = m_grid[currentRow][currentColumn];
 	if (current.GetCellType() & IGrid::ICell::eArrivee)
 		return true;
@@ -387,6 +471,16 @@ bool CGrid::ProcessNode(int currentRow, int currentColumn, int& nextRow, int& ne
 			CCell& cell = m_grid[currentRow + iRow][currentColumn + iColumn];
 			if (cell.GetCellType() & CCell::eObstacle)
 				continue;
+			
+#ifdef AVOID_DIAGONALE_OBSTACLE
+			if (iRow != 0 && iColumn != 0) {
+				if ( (m_grid[currentRow][currentColumn + iColumn].GetCellType() & CCell::eObstacle) ||
+					(m_grid[currentRow + iRow][currentColumn].GetCellType() & CCell::eObstacle) ) {
+					continue;
+				}
+			}
+#endif // AVOID_DIAGONALE_OBSTACLE
+
 			if ( (cell.GetCellType() == CCell::eUninitialized) || (cell.GetCellType() == CCell::eArrivee) ) {
 				cell.Update(&current, (CCell*)m_pDestination);
 				InsertToOpenV2(&cell);
@@ -495,7 +589,11 @@ void CGrid::InsertToClose(CCell* b)
 
 
 CPathFinder::CPathFinder(EEInterface& oInterface) :
-	m_bSaveAStarGrid(false)
+	m_bSaveAStarGrid(false),
+	m_xMinMargin(-1),
+	m_yMinMargin(-1),
+	m_xMaxMargin(-1),
+	m_yMaxMargin(-1)
 {
 }
 
@@ -507,7 +605,7 @@ IGrid* CPathFinder::CreateGrid(int rowCount, int columnCount)
 void CPathFinder::FindPath(IGrid* grid)
 {
 	if (m_bSaveAStarGrid)
-		SaveAStarGrid(grid);
+		SaveAStarGrid(grid, m_xMinMargin, m_yMinMargin, m_xMaxMargin, m_yMaxMargin);
 	int row, column;
 	CGrid* pGrid = static_cast<CGrid*>(grid);
 	pGrid->GetDepart()->GetCoordinates(row, column);
@@ -520,12 +618,16 @@ string CPathFinder::GetName()
 	return "PathFinder";
 }
 
-void CPathFinder::EnableSaveGrid(bool bEnable)
+void CPathFinder::EnableSaveGrid(bool bEnable, int xMinMargin, int yMinMargin, int xMaxMargin, int yMaxMargin)
 {
 	m_bSaveAStarGrid = bEnable;
+	m_xMinMargin = xMinMargin;
+	m_yMinMargin = yMinMargin;
+	m_xMaxMargin = xMaxMargin;
+	m_yMaxMargin = yMaxMargin;
 }
 
-void CPathFinder::SaveAStarGrid(IGrid* pGrid)
+void CPathFinder::SaveAStarGrid(IGrid* pGrid, int xMin, int yMin, int xMax, int yMax)
 {
 	WIN32_FIND_DATAA fd;
 	ZeroMemory(&fd, sizeof(fd));
@@ -547,7 +649,7 @@ void CPathFinder::SaveAStarGrid(IGrid* pGrid)
 
 	ostringstream oss;
 	oss << "..\\Data\\grid" << index + 1 << ".bin";
-	pGrid->Save(oss.str());
+	pGrid->Save(oss.str(), xMin, yMin, xMax, yMax);
 }
 
 extern "C" _declspec(dllexport) CPathFinder* CreatePathFinder(EEInterface& oInterface)

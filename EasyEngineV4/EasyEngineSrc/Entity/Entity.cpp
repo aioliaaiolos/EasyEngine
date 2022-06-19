@@ -18,6 +18,7 @@
 // Utils
 #include "Utils2/TimeManager.h"
 #include "Utils2/RenderUtils.h"
+#include "Utils2/StringUtils.h"
 
 using namespace std;
 
@@ -53,9 +54,12 @@ m_pCustomTexture(nullptr),
 m_bIsOnTheGround(true),
 m_bUseCustomSpecular(false),
 m_pCloth(nullptr),
-m_pCollisionGrid(nullptr)
+m_pCollisionGrid(nullptr),
+m_pCollisionMap(nullptr),
+m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
 {
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
+	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
 }
 
 CEntity::CEntity(EEInterface& oInterface, const string& sFileName, bool bDuplicate ):
@@ -89,8 +93,10 @@ m_pCustomTexture(nullptr),
 m_bIsOnTheGround(true),
 m_bUseCustomSpecular(false),
 m_pCloth(nullptr),
-m_pCollisionGrid(nullptr)
+m_pCollisionGrid(nullptr),
+m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
 {
+	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
 	if( sFileName.size() > 0 )
 	{
 		SetRessource( sFileName);
@@ -110,13 +116,69 @@ float CEntity::GetBoundingSphereRadius() const
 	return m_fBoundingSphereRadius;
 }
 
+void CEntity::CreateCollisionGrid()
+{
+	if (m_pMesh && m_pMesh->GetBBox()) {
+		CVector groundDim = m_pMesh->GetBBox()->GetDimension();
+		m_pCollisionGrid = m_oPathFinder.CreateGrid(m_pCollisionMap->GetHeight(), m_pCollisionMap->GetWidth());
 
+		for (int y = 0; y < m_pCollisionMap->GetHeight(); y++) {
+			for (int x = 0; x < m_pCollisionMap->GetWidth(); x++) {
+				bool obstacle = m_pCollisionMap->TestCellObstacle(x, y);
+				if (obstacle)
+					m_pCollisionGrid->AddObstacle(y, x);
+			}
+		}
+	}
+}
+
+
+void CEntity::CreateCollisionMaps(float fBias)
+{
+	string sFileName;
+	m_pMesh->GetFileName(sFileName);
+	string sFolder;
+	CStringUtils::GetFolderPathFromCompleteFileName(sFileName, sFolder);
+	m_pCollisionMap->Generate();
+
+	for (INode* pNode : m_vChild) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(pNode);
+		if (pEntity) {
+			IBox* pBBox = dynamic_cast<IBox*>(pEntity->GetBoundingGeometry());
+			if (pBBox && pEntity->GetChildCount() > 0) {
+				pEntity->CreateCollisionMaps(fBias);
+			}
+		}
+	}
+}
+
+void CEntity::LoadCollisionMaps()
+{
+	m_pCollisionMap = m_oCollisionManager.CreateCollisionMap(this, m_nCollisionGridCellSize, 0);
+	try {
+		m_pCollisionMap->Load();
+		CreateCollisionGrid();
+	}
+	catch (CEException& e) {
+
+	}
+
+	for (INode* pNode : m_vChild) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(pNode);
+		if (pEntity && dynamic_cast<IBox*>(pEntity->GetBoundingGeometry()))
+			pEntity->LoadCollisionMaps();
+	}
+}
+
+ICollisionMap* CEntity::GetCollisionMap()
+{
+	return m_pCollisionMap;
+}
 
 void CEntity::SetRenderingType( IRenderer::TRenderType t )
 {
 	m_eRenderType = t;
 }
-
 
 void CEntity::SetRessource( string sFileName, bool bDuplicate )
 {
@@ -162,11 +224,10 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 					LinkEntityToBone( pEntity, pParentBone );
 				}
 			}
-			ILoaderManager* pLoaderManager = static_cast<ILoaderManager*>(m_oInterface.GetPlugin("LoaderManager"));
 			string bboxFileName = sFileName.substr(0, sFileName.find(".")) + ".bbox";
 			ILoader::CAnimationBBoxInfos bboxInfos;
 			try {
-				pLoaderManager->Load(bboxFileName, bboxInfos);
+				m_pLoaderManager->Load(bboxFileName, bboxInfos);
 				m_oKeyBoundingBoxes = bboxInfos.mKeyBoundingBoxes;
 				map<string, map<int, IBox*> >::iterator itBoxes = m_oKeyBoundingBoxes.find("stand-normal");
 				if (itBoxes == m_oKeyBoundingBoxes.end()) {
@@ -215,9 +276,12 @@ void CEntity::CreateAndLinkCollisionChildren(string sFileName)
 			pChild->ForceAssignBoundingGeometry(pGeometry);
 			pChild->m_fBoundingSphereRadius = pGeometry->ComputeBoundingSphereRadius();
 			pChild->Link(this);
-			pChild->SetEntityName(oss.str());
+			string sCollisionEntityName;
+			CStringUtils::GetShortFileName(oss.str(), sCollisionEntityName);
+			pChild->SetEntityName(sCollisionEntityName);
 		}
 		m_sTypeName = "building";
+		LoadCollisionMaps();
 	}
 	catch (CFileNotFoundException& e) {
 		e = e;

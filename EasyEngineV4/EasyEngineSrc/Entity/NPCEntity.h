@@ -32,6 +32,7 @@ public:
 	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints);	
 
 protected:
+	void					UpdateGoto() override;
 	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
 	void					ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize);
 
@@ -39,4 +40,7 @@ private:
 	void					Turn(float fAngle);
 
 	IPathFinder&			m_oPathFinder;
+	const float				m_fBBoxReduction = 20.f;
+	IBox*					m_pGotoBox;
+	IGeometry*				m_pBackupBoundingGeometry;
 };

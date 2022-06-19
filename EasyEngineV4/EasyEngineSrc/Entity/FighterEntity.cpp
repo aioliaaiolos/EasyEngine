@@ -43,10 +43,18 @@ void IFighterEntity::OnHit( IFighterEntity* pAgressor, string sHitBoneName )
 	pAgressor->GetCurrentAnimation()->AddCallback( OnHitAnimationCallback, pAgressor );
 }
 
-void IFighterEntity::Hit()
+void IFighterEntity::MainHit()
 {
 	if (GetLife() > 0) {
 		PlayHitAnimation();
+		OnHit(this, GetAttackBoneName());
+	}
+}
+
+void IFighterEntity::SecondaryHit()
+{
+	if (GetLife() > 0) {
+		PlaySecondaryHitAnimation();
 		OnHit(this, GetAttackBoneName());
 	}
 }
@@ -109,7 +117,7 @@ bool IFighterEntity::IsHitIntersectEnemySphere( IFighterEntity* pEnemy )
 	CVector oEnemyWorldPosition;
 	pEnemy->GetPosition( oEnemyWorldPosition );
 	float fBoneDistance = ( pBoneSphere->GetCenter() - oEnemyWorldPosition ).Norm();
-	return fBoneDistance < ( pBoneSphere->GetRadius() / 2.f + pEnemy->GetBoundingSphereRadius() / 2.f );
+	return fBoneDistance < ( pBoneSphere->GetRadius() + pEnemy->GetBoundingSphereRadius());
 }
 
 bool IFighterEntity::IsHitIntersectEnemyBox( IFighterEntity* pEnemy )

@@ -33,6 +33,18 @@ public:
 	virtual void	ModelToMap(int xModel, int zModel, int& xMap, int& yMap)  = 0;
 };
 
+class ICollisionMap
+{
+public:
+	virtual bool TestCellObstacle(int x, int y) = 0;
+	virtual unsigned int GetWidth() = 0;
+	virtual unsigned int GetHeight() = 0;
+	virtual void GetCellCoordFromPosition(float x, float y, int& cellx, int& celly) = 0;
+	virtual void GetPositionFromCellCoord(int row, int column, float& x, float& y) = 0;
+	virtual void Generate() = 0;
+	virtual void Load() = 0;
+};
+
 class ICollisionManager : public CPlugin
 {
 public:	
@@ -51,7 +63,6 @@ public:
 	virtual void			Get2DLineIntersection( const CVector2D& oLine1First, const CVector2D& oLine1Last, const CVector2D& oLine2First, const CVector2D& oLine2Last, CVector2D& oIntersection ) = 0;
 	virtual bool			IsSegmentRectIntersect( const ISegment2D& s, float fRectw, float fRecth, const CMatrix2X2& oSquareTM ) = 0;
 	virtual bool			IsSegmentRectIntersect( const CVector2D& S1, const CVector2D& S2, float fRectw, float fRecth, const CMatrix2X2& oRectTM ) = 0;
-	virtual void			SendCustomUniformValue(string name, float value) = 0;
 	virtual IBox*			GetGroundBox(int nMapId) = 0;
 	virtual void			SetGroundBoxHeight(int nMapId, float height) = 0;
 	virtual void			SetGroundBoxMinPoint(int nMapId, float height) = 0;
@@ -59,19 +70,7 @@ public:
 	virtual void			ClearHeightMaps() = 0;
 	
 	// Collision map
-	virtual void	DisplayCollisionMap() = 0;
-	virtual void	StopDisplayCollisionMap() = 0;
-	virtual void	CreateCollisionMap(string sFileName, IEntity* pRoot, int cellSize, float fBias) = 0;
-	virtual void	CreateCollisionMapByRendering(ILoader::CTextureInfos& ti, vector<IEntity*> collides, IEntity* pScene, IRenderer::TPixelFormat format = IRenderer::T_RGB) = 0;
-	virtual void	CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& vGrid, int nCellSize, float fBias) = 0;
-	virtual void	CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid) = 0;
-	virtual void	DisplayGrid(int nCellSize) = 0;
-	virtual void	ComputeRowAndColumnCount(int& rowCount, int& columnCount, int nCellSize) = 0;
-	virtual void	GetCellCoordFromPosition(float x, float y, int& cellx, int& celly, int nCellSize) = 0;
-	virtual void	GetPositionFromCellCoord(int row, int column, float& x, float& y) = 0;
-	virtual bool	TestCellObstacle(const ILoader::CTextureInfos& textureInfos, int x, int y) = 0;
-	virtual void	AttachCollisionMapToScene(const ILoader::CTextureInfos& m_oCollisionMap, IEntity* pScene) = 0;
-	virtual void	LoadCollisionMapComputedByRendering(string sFileName, IEntity* pScene, ILoader::CTextureInfos& collisionMap) = 0;
+	virtual ICollisionMap*	CreateCollisionMap(IEntity* pScene, int cellSize, float fBias) = 0;
 
 	virtual void	EnableHMHack(bool enable) = 0;
 	virtual void	EnableHMHack2(bool enable) = 0;

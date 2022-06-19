@@ -14,6 +14,7 @@ class CEntityManager;
 class IGUIManager;
 class CNode;
 class CBone;
+class ICollisionMap;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 
@@ -84,6 +85,10 @@ public:
 	static void						GetSkeletonEntities(CBone* pRoot, vector< CEntity* >& vEntity, string sFileFilter);
 	void							GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix);
 	int								GetCellSize();
+	void							CreateCollisionGrid();
+	void							CreateCollisionMaps(float fBias) override;
+	void							LoadCollisionMaps();
+	ICollisionMap*					GetCollisionMap();
 
 protected:
 	IRessource*										m_pRessource;
@@ -92,6 +97,7 @@ protected:
 	CEntityManager*									m_pEntityManager;
 	IGeometryManager&								m_oGeometryManager;
 	ICollisionManager&								m_oCollisionManager;
+	ILoaderManager*									m_pLoaderManager;
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
@@ -128,7 +134,9 @@ protected:
 	bool											m_bUseCustomSpecular;
 	CEntity*										m_pCloth;
 	IGrid*											m_pCollisionGrid;
-	const int										m_nCollisionGridCellSize = 100;
+	const int										m_nCollisionGridCellSize = 200;
+	IPathFinder&									m_oPathFinder;
+	ICollisionMap*									m_pCollisionMap;	
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -143,7 +151,7 @@ protected:
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
 	void				SendBonesToShader();
 	void				DispatchEntityEvent();
-	static void			OnAnimationCallback(IAnimation::TEvent e, void*);
+	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
 };
 
 class CCollisionEntity : public CEntity

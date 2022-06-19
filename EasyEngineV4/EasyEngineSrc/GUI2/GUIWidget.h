@@ -20,26 +20,14 @@ class IRenderer;
 
 class CGUIWidget
 {
-	CListener*				_pListener;
-	bool					_bIsCursorInWidget;
-	std::string				_strSkinName;
-	static int				s_nScreenResWidth;
-	static int				s_nScreenResHeight;
-	static IShader*			s_pShader;
-
 
 public:
 
 							CGUIWidget( int nWidth, int nHeight );
-							CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, CRectangle& oSkin);
-							CGUIWidget(
-								IRenderer& oRenderer, 
-								IRessourceManager& oRessourceManager, 
-								ITexture* pTexture, CRectangle& oSkin, 
-								ILoader::CMeshInfos& outMeshInfos, 
-								IRessource*& pOutMaterial);
-							CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sFileName, int width, int height);
-							CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& windowSize, const CRectangle& skin);
+							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin);
+							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial);
+							CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height);
+							CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual					~CGUIWidget(void);
 
 	bool					operator==( const CGUIWidget& w );
@@ -72,14 +60,22 @@ protected:
 	void					CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& dimQuad, const CRectangle& oSkin, ILoader::CMeshInfos& mi) const;
 	IMesh*					CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin, const CDimension& oImageSize) const;
 	IMesh*					CreateQuad(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& quadSize, const CRectangle& skin) const;
+	void					InitManagers(EEInterface& oInterface);
 
-
-	CPosition				_NextCursorPos;
+	CPosition				m_oNextCursorPos;
 	CGUIWidget*				m_pParent;
 	IShader*				m_pShader;
 	IMesh*					m_pMesh;
-	CDimension				_Dimension;
-	CPosition				_Position;
+	CDimension				m_oDimension;
+	CPosition				m_oPosition;
+	CListener*				_pListener;
+	bool					_bIsCursorInWidget;
+	std::string				_strSkinName;
+	IRenderer*				m_pRenderer;
+	IRessourceManager*		m_pRessourceManager;
+	static int				s_nScreenResWidth;
+	static int				s_nScreenResHeight;
+	static IShader*			s_pShader;
 
 };
 

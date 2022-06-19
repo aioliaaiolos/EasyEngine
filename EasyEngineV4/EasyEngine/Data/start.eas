@@ -16,8 +16,11 @@ WearSkinnedClothFull(npc1, "clothes/dresses/robe3");
 Walk(npc1);
 */
 
-//LoadWorld("");
-LoadGame("save");
+LoadWorld("");
+//EditWorld("");
+//LoadWorld("TestHopital");
+//LoadWorld("test03");
+//LoadGame("save");
 
 //EditMap("hopital02");
 //CreateCollisionMap(0, "cm-100.bmp", 100, 0);
@@ -27,14 +30,20 @@ LoadGame("save");
 //Goto(ger, 3110, 0, -893);
 
 
-/*player=GetEntityID("Player");
-ger=GetEntityID("Geraldine");
-WatchEntityPosition(cam);
-WatchEntityPosition(player);
-WatchEntityPosition(ger);*/
+/*
+p=GetEntityID("Player");
+g=GetEntityID("Geraldine");
+DisplayBBox(g, 1);
+WatchEntityPosition(p);
+EnablePathFindSaving(1, 15, 15, 15, 15);
+Goto(g, -131797, 0, -235912);
+Goto(g, -130414, 0, -235919);
+*/
 
 
 //EditCharacter("test");
+//EditCharacter("Geraldine");
+//OffsetEyes(0, 1.2, 0);
 //SetCharacterBody("body03");
 //WearCloth("slip", "BodyDummyJupe");
 

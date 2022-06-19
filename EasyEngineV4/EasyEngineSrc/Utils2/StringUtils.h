@@ -16,6 +16,8 @@ public:
 	static void 	GetWordByIndex( const std::string& sString, const unsigned int nIndex, std::string& sRetWord );
 	static void		GetExtension( std::string sFileName, std::string& sExtension );
 	static void		GetFileNameWithoutExtension( string sFileName, string& sOut );
+	static void		GetFolderPathFromCompleteFileName(string sFileName, string& sPath);
+	static void		GetShortFileName(string sPathFile, string& sFileName);
 	static void		ConvertStringToWString(const std::string& s, std::wstring& w);
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
 };

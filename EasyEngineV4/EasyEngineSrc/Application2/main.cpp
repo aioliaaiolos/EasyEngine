@@ -212,7 +212,15 @@ void UpdatePerso()
 			{
 				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPerso);
 				if (pFighter)
-					pFighter->Hit();
+					pFighter->SecondaryHit();
+			}
+
+			IInputManager::TMouseButtonState eStateRightFist = m_pActionManager->GetMouseActionState("HitRightArm");
+			if (eStateRightFist == IInputManager::eMouseButtonStateJustDown)
+			{
+				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPerso);
+				if (pFighter)
+					pFighter->MainHit();
 			}
 			
 			ICamera* pLinkedCamera = m_pCameraManager->GetCameraFromType(ICameraManager::TLinked);
@@ -374,7 +382,8 @@ void InitKeyActions()
 
 	m_pActionManager->AddKeyAction("AvancerPerso", 'T');
 	m_pActionManager->AddKeyAction("SautPerso", ' ');
-	m_pActionManager->AddMouseAction("HitLeftFoot", IInputManager::eMouseButtonLeft, IInputManager::eMouseButtonStateJustDown);
+	m_pActionManager->AddMouseAction("HitLeftFoot", IInputManager::eMouseButtonRight, IInputManager::eMouseButtonStateJustDown);
+	m_pActionManager->AddMouseAction("HitRightArm", IInputManager::eMouseButtonLeft, IInputManager::eMouseButtonStateJustDown);
 	m_pActionManager->AddMouseAction("Zoom", IInputManager::eMouseWheel, IInputManager::eMouseWheelUp);
 	m_pActionManager->AddMouseAction("Unzoom", IInputManager::eMouseWheel, IInputManager::eMouseWheelDown);
 }

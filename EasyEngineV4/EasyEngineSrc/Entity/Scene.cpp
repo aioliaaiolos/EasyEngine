@@ -34,8 +34,7 @@ m_pCamera( pCamera ),
 m_oCameraManager( oCameraManager ),
 m_oLoaderManager( oLoaderManager ),
 m_oCollisionManager( oCollisionManager ),
-m_oGeometryManager( oGeometryManager ),
-m_oPathFinder(oPathFinder)
+m_oGeometryManager( oGeometryManager )
 {
 m_pEntityManager = pEntityManager;
 }
@@ -46,7 +45,6 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_oLoaderManager(static_cast<ILoaderManager&>(*oInterface.GetPlugin("LoaderManager"))),
 	m_oCollisionManager(static_cast<ICollisionManager&>(*oInterface.GetPlugin("CollisionManager"))),
 	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
-	m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_nHeightMapID(-1),
 	m_bHeightMapCreated(true),
@@ -202,14 +200,8 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 		nDotPos = (int)sFileName.find('.');
 		sCollisionFileName = string("collision_") + sFileName.substr(0, nDotPos) + ".bmp";
 	}
-		
-	WIN32_FIND_DATAA fd;
-	HANDLE hFile = m_oFileSystem.FindFirstFile_EE(sCollisionFileName, fd);
-	if (hFile != INVALID_HANDLE_VALUE) {
-		m_oLoaderManager.LoadTexture(sCollisionFileName, m_oCollisionMap);
-		m_oCollisionManager.AttachCollisionMapToScene(m_oCollisionMap, this);
-		CreateCollisionGrid();
-	}
+	
+	LoadCollisionMaps();
 	
 	m_pGroundShader = m_oRenderer.GetShader("ground");
 	m_pRessource->SetShader(m_pGroundShader);
@@ -238,32 +230,6 @@ IGrid* CScene::GetCollisionGrid()
 	return m_pCollisionGrid;
 }
 
-void CScene::CreateCollisionMapByRendering()
-{
-	IMesh* pGroundMesh = dynamic_cast<IMesh*>(GetRessource());
-	if(pGroundMesh){
-		vector<IEntity*> collides;
-		IEntity* pCollideEntity = m_pEntityManager->GetFirstCollideEntity();
-		while (pCollideEntity) {
-			collides.push_back(pCollideEntity);
-			pCollideEntity = m_pEntityManager->GetNextCollideEntity();
-		}
-		ILoader::CTextureInfos ti;
-		m_oCollisionManager.CreateCollisionMapByRendering(ti, collides, this, IRenderer::T_BGR);
-		ti.m_ePixelFormat = ILoader::eBGR;
-		string sGroundName;
-		pGroundMesh->GetName(sGroundName);
-		ostringstream collisionFileName;
-		collisionFileName << "levels/" << m_sCurrentLevelName << "/Collision" << m_nID;
-		m_oLoaderManager.Export(collisionFileName.str(), ti);
-		m_oCollisionManager.LoadCollisionMapComputedByRendering(collisionFileName.str(), this, m_oCollisionMap);
-	}
-	else {
-		CEException e("Erreur : La scène ne possède pas de map");
-		throw e;
-	}
-}
-
 void CScene::CreateHeightMap()
 {
 	IMesh* pMesh = static_cast< IMesh* >(m_pRessource);
@@ -274,28 +240,6 @@ void CScene::CreateHeightMap()
 	m_nHeightMapID = m_oCollisionManager.LoadHeightMap(m_sHMFileName, pMesh->GetBBox());
 	m_bHeightMapCreated = true;
 }
-
-void CScene::CreateCollisionGrid()
-{
-	CVector groundDim = m_pMesh->GetBBox()->GetDimension();
-	
-	int nGridWidth = groundDim.m_x / m_nCollisionGridCellSize;
-	int nGridHeight = groundDim.m_z / m_nCollisionGridCellSize;
-	nGridWidth = nGridWidth % 4 ? ((nGridWidth) >> 2) << 2 : nGridWidth;
-	nGridHeight = nGridHeight % 2 ? (nGridHeight >> 1) << 1 : nGridHeight;
-
-	m_pCollisionGrid = m_oPathFinder.CreateGrid(nGridHeight, nGridWidth);
-
-	for (int y = 0; y < nGridHeight; y++) {
-		for (int x = 0; x < nGridWidth; x++) {
-			bool obstacle = m_oCollisionManager.TestCellObstacle(m_oCollisionMap, x, y);
-			if (obstacle)
-				m_pCollisionGrid->AddObstacle(y, x);
-		}
-	}
-}
-
-
 
 IEntity* CScene::Merge( string sRessourceName, float x, float y, float z )
 {
@@ -401,26 +345,6 @@ void CScene::UnhandleLoadingComplete()
 	m_pLoadingCompleteData = nullptr;
 }
 
-void CScene::CreateCollisionMaps(string sLevelPath, float fBias)
-{
-	ostringstream ossCollisionFileName;
-	string sCollisionPrefixName = sLevelPath + "/Collision";
-	ossCollisionFileName << sCollisionPrefixName << m_nID << ".bmp";
-	m_oCollisionManager.CreateCollisionMap(ossCollisionFileName.str(), this, m_nCollisionGridCellSize, fBias);
-	
-	for (INode* pNode : m_vChild) {
-		CEntity* pEntity = dynamic_cast<CEntity*>(pNode);
-		
-		if (pEntity) {
-			IBox* pBBox = dynamic_cast<IBox*>(pEntity->GetBoundingGeometry());
-			if (pBBox && pEntity->GetChildCount() > 0) {
-				ossCollisionFileName.str("");
-				ossCollisionFileName << sCollisionPrefixName << pEntity->GetID() << ".bmp";
-				m_oCollisionManager.CreateCollisionMap(ossCollisionFileName.str(), pEntity, m_nCollisionGridCellSize, fBias);
-			}
-		}
-	}
-}
 
 void  CScene::RenderScene()
 {

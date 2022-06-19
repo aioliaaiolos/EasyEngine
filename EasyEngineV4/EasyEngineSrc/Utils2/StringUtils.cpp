@@ -123,3 +123,21 @@ void CStringUtils::ConvertWStringToString(const wstring& w, string& s)
 	std::wstring_convert<convert_typeX, wchar_t> converterX;
 	s = converterX.to_bytes(w);
 }
+
+void CStringUtils::GetFolderPathFromCompleteFileName(string sFileName, string& sPath)
+{
+	int idx = sFileName.find_last_of('/');
+	if (idx == -1) {
+		idx = sFileName.find_last_of('\\');
+	}
+	if (idx != -1) {
+		sPath = sFileName.substr(0, idx);
+	}
+}
+
+void CStringUtils::GetShortFileName(string sPathFile, string& sFileName)
+{
+	int idx = sPathFile.find_last_of('/');
+	if(idx >= 0)
+		sFileName = sPathFile.substr(idx + 1);
+}

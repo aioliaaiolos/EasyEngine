@@ -35,7 +35,6 @@ public:
 		ILoaderManager&		m_oLoaderManager;
 		ICollisionManager&	m_oCollisionManager;
 		IGeometryManager&	m_oGeometryManager;
-		IPathFinder&		m_oPathFinder;
 		Desc(	IRessourceManager& oRessourceManager, IRenderer& pRenderer, IEntityManager* pEntityManager, 
 				ICamera* pCamera, ICameraManager& oCameraManager, ILoaderManager& oLoaderManager, 
 				ICollisionManager& oCollisionManager, IGeometryManager& oGeometryManager, IPathFinder& oPathFinder);
@@ -60,7 +59,6 @@ public:
 	void								SetRessource( string sFileName, bool bDuplicate = false );
 	IGeometry*							GetBoundingGeometry();
 	IGrid*								GetCollisionGrid();
-	void								CreateCollisionMapByRendering();
 	void								RenderScene();
 	void								RenderMinimap();
 	ITexture*							CreateMinimapTexture();
@@ -78,14 +76,12 @@ public:
 	void								DeleteTempDirectories() override;
 	void								HandleLoadingComplete(LevelCompleteProc callback, void* pData) override;
 	void								UnhandleLoadingComplete();
-	void								CreateCollisionMaps(string sLevelPath, float fBias) override;
 
 private:
 	ICameraManager&						m_oCameraManager;
 	ILoaderManager&						m_oLoaderManager;
 	ICollisionManager&					m_oCollisionManager;
 	IRessourceManager&					m_oRessourceManager;
-	IPathFinder&						m_oPathFinder;
 	IFileSystem&						m_oFileSystem;
 	int									m_nHeightMapID;
 	string								m_sHMFileName;
@@ -118,7 +114,6 @@ private:
 	void								GetCharactersInfos(vector<IEntity*>& si, INode* pRoot = nullptr) override;
 	void								Load(const ILoader::CSceneInfos& si);
 	void								LoadSceneObject(const ILoader::CObjectInfos* pSceneObjInfos, CEntity* pParent);
-	void								CreateCollisionGrid();
 	void								CreateHeightMap();
 	void								CollectMinimapEntities(vector<IEntity*>& entities);
 	void								DisplayEntities(const vector<IEntity*>& entities);

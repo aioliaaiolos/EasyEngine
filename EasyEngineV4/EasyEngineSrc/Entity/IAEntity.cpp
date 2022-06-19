@@ -53,7 +53,7 @@ void IAEntity::UpdateFightState()
 		Stand();
 		break;
 	case eBeginLaunchAttack:
-		Hit();
+		MainHit();
 		m_eFightState = eLaunchingAttack;
 		break;
 	case eLaunchingAttack:
@@ -260,6 +260,11 @@ float IAEntity::GetAngleBetween2Vectors(CVector& v1, CVector& v2)
 	if (up.m_y < 0)
 		alpha = -alpha;
 	return alpha;
+}
+
+bool IAEntity::IsArrivedAtDestination()
+{
+	return m_bArriveAtDestination;
 }
 
 void IAEntity::OnCollision( IAEntity* pEntity )

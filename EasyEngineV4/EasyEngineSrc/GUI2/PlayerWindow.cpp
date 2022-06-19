@@ -1,17 +1,19 @@
+#include "Interface.h"
 #include "PlayerWindow.h"
 #include "GUIManager.h"
 #include "Utils2/rectangle.h"
 #include "IRessource.h"
 
-CPlayerWindow::CPlayerWindow(IGUIManager* pGUIManager, IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize):
-	CGUIWindow(oRessourceManager, oRenderer, windowSize, CRectangle(0, 0, windowSize.GetWidth(), windowSize.GetHeight())),
-	m_pGUIManager((CGUIManager*)pGUIManager),
+CPlayerWindow::CPlayerWindow(EEInterface& oInterface, const CDimension& windowSize):
+	CGUIWindow(oInterface, windowSize, CRectangle(0, 0, windowSize.GetWidth(), windowSize.GetHeight())),
+	m_pGUIManager(static_cast<CGUIManager*>(oInterface.GetPlugin("GUIManager"))),
 	m_pWindowBackground(NULL)
 {
 	m_pArmorWindow = new CGUIWidget(windowSize.GetWidth(), windowSize.GetHeight());
 	SetPosition(100, 100);
 
-	ITexture* pTexture = static_cast< ITexture* > (oRessourceManager.GetRessource("Gui/PlayerWindow.bmp"));
+	IRessourceManager* pRessourceManager = static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
+	ITexture* pTexture = static_cast< ITexture* > (pRessourceManager->GetRessource("Gui/PlayerWindow.bmp"));
 	m_pMesh->SetTexture(pTexture);
 	SetGUIMode(true);
 }

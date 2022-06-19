@@ -11,11 +11,11 @@ class IRessourceManager;
 class CRectangle;
 class CDimension;
 
-class CGUIWindow  : public CGUIWidget, public IGUIWindow
+class CGUIWindow  : public CGUIWidget, public virtual IGUIWindow
 {
 public:
-								CGUIWindow(string fileName, IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize);
-								CGUIWindow(IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize, const CRectangle& skin);
+								CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize);
+								CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual						~CGUIWindow(void);
 	void						AddWidget(CGUIWidget* pWidget);
 	size_t						GetWidgetCount()const;
@@ -28,6 +28,7 @@ public:
 	bool						IsGUIMode();
 	void						SetGUIMode(bool bGUIMode);	
 	void						UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager::TMouseButtonState eButtonState);
+	virtual void				OnShow(bool bShow);
 
 protected:
 	std::vector< CGUIWidget* >	m_vWidget;

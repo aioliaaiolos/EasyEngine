@@ -189,9 +189,17 @@ m_sStandAnimation("stand-normal")
 	m_pNeck = m_pSkeletonRoot->GetChildBoneByName( "Cou" );
 
 	m_pfnCollisionCallback = OnCollision;
-	m_sAttackBoneName = "OrteilsG";
+	m_sSecondaryAttackBoneName = "OrteilsG";
+	m_sAttackBoneName = "MainD";
 	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));
 	pEntityManager->AddNewCharacter(this);
+
+	map< string, map< int, IBox* > >::iterator itBox = m_oKeyBoundingBoxes.find("stand-normal");
+	if (itBox != m_oKeyBoundingBoxes.end()) {
+		m_pBoundingGeometry = itBox->second.find(160)->second;
+	}
+
+	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 }
 
 void CMobileEntity::InitAnimations()
@@ -220,6 +228,7 @@ void CMobileEntity::InitStatics()
 	s_mAnimationStringToType["run"] = eRun;
 	s_mAnimationStringToType["stand"] = eStand;
 	s_mAnimationStringToType["HitLeftFoot"] = eHitLeftFoot;
+	s_mAnimationStringToType["HitRightArm"] = eHitRightArm;
 	s_mAnimationStringToType["jump"] = eJump;
 	s_mAnimationStringToType["dying"] = eDying;
 	s_mAnimationStringToType["guard"] = eGuard;
@@ -234,7 +243,6 @@ void CMobileEntity::InitStatics()
 	s_mActions["walk"] = Walk;
 	s_mActions["run"] = Run;
 	s_mActions["stand"] = Stand;
-	//s_mActions[ "HitLeftFoot" ] = HitLeftFoot;
 	s_mActions["PlayReceiveHit"] = PlayReceiveHit;
 	s_mActions["jump"] = Jump;
 	s_mActions["dying"] = Dying;
@@ -257,6 +265,7 @@ void CMobileEntity::OnCollision(CEntity* pThis, vector<INode*> entities)
 
 IGeometry* CMobileEntity::GetBoundingGeometry()
 {
+	return m_pBoundingGeometry;
 	if (m_pCurrentAnimation) {
 		string sAnimationName;
 		m_pCurrentAnimation->GetName(sAnimationName);
@@ -303,6 +312,10 @@ const string& CMobileEntity::GetAttackBoneName()
 	return m_sAttackBoneName;
 }
 
+const string& CMobileEntity::GetSecondaryAttackBoneName()
+{
+	return m_sSecondaryAttackBoneName;
+}
 
 void CMobileEntity::WearArmorToDummy(string armorName)
 {
@@ -365,6 +378,18 @@ void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
 	string sClothName = sClothPath.substr(sClothPath.find_last_of("/") + 1);
 	IEntity* pCloth = m_pEntityManager->CreateEntity(string("Clothes/") + sClothName + ".bme", "");
 	pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
+}
+
+void CMobileEntity::Link(INode* pParent)
+{
+	CEntity::Link(pParent);
+	CEntity* pParentEntity = dynamic_cast<CEntity*>(m_pParent);
+	m_pCollisionMap = pParentEntity->GetCollisionMap();
+}
+
+IBox* CMobileEntity::GetBoundingBox()
+{
+	return m_pBBox;
 }
 
 void CMobileEntity::AddHairs(string hairsName)
@@ -489,6 +514,11 @@ void CMobileEntity::OnDyingCallback(IAnimation::TEvent e, void* pEntity)
 }
 
 void CMobileEntity::PlayHitAnimation()
+{
+	SetPredefinedAnimation("HitRightArm", false);
+}
+
+void CMobileEntity::PlaySecondaryHitAnimation()
 {
 	SetPredefinedAnimation("HitLeftFoot", false);
 }
@@ -734,7 +764,7 @@ CMatrix& CMobileEntity::GetWorldTM()
 	return m_oWorldMatrix; 
 }
 
-IBox* CMobileEntity::GetBoundingBox()
-{
-	return (IBox*)m_pBoundingGeometry;
+float CMobileEntity::GetBoundingSphereRadius() 
+{ 
+	return m_fBoundingSphereRadius; 
 }

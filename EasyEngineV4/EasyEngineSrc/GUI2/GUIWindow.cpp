@@ -4,15 +4,15 @@
 #include "Utils2/Rectangle.h"
 #include "IRessource.h"
 
-CGUIWindow::CGUIWindow(string fileName, IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize) :
-	CGUIWidget(oRenderer, oRessourceManager, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
+CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize) :
+	CGUIWidget(oInterface, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bVisible(false),
 	m_bGUIMode(false)
 {
 }
 
-CGUIWindow::CGUIWindow(IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize, const CRectangle& skin):
-	CGUIWidget(oRenderer, oRessourceManager, windowSize, skin),
+CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
+	CGUIWidget(oInterface, windowSize, skin),
 	m_bVisible(false),
 	m_bGUIMode(false)
 {
@@ -30,7 +30,7 @@ void CGUIWindow::SetGUIMode(bool bGUIMode)
 void CGUIWindow::AddWidget(CGUIWidget* pWidget)
 {
 	m_vWidget.push_back(pWidget);
-	pWidget->SetPosition(pWidget->GetPosition().GetX() + _Position.GetX(), pWidget->GetPosition().GetY() + _Position.GetY());
+	pWidget->SetPosition(pWidget->GetPosition().GetX() + m_oPosition.GetX(), pWidget->GetPosition().GetY() + m_oPosition.GetY());
 	pWidget->SetParent(this);
 }
 
@@ -99,4 +99,9 @@ void CGUIWindow::UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager:
 		CGUIWidget* pWidget = GetWidget((unsigned int)i);
 		pWidget->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);
 	}
+}
+
+void CGUIWindow::OnShow(bool bShow)
+{
+
 }

@@ -264,8 +264,7 @@ void CMapEditor::SaveMap(string sFileName, float fBias)
 	m_pScene->GetInfos(si);
 	ClearCharacters(si.m_vObject);
 	m_oLoaderManager.Export(sFileName, si);
-	string sLevelPath = sFileName.substr(0, sFileName.find_last_of('/'));
-	m_pScene->CreateCollisionMaps(sLevelPath, fBias);
+	m_pScene->CreateCollisionMaps(fBias);
 }
 
 void CMapEditor::Load(string sFileName)

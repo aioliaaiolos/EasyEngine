@@ -63,6 +63,9 @@ public:
 	virtual void	EditCloth(string sClothName) = 0;
 	virtual void	OffsetCloth(float x, float y, float z) = 0;
 	virtual void	SaveCurrentEditableCloth() = 0;
+	virtual void	OffsetEyes(float x, float y, float z) = 0;
+	virtual void	SaveCurrentEditableBody() = 0;
+	virtual void	TurnEyes(float fYaw, float fPitch, float fRoll) = 0;
 };
 
 class IWorldEditor : virtual public ISpawnableEditor

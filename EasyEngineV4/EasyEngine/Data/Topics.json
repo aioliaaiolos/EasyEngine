@@ -1,0 +1,52 @@
+{
+	"Topics": [
+		{
+			"Title": "Bonjour",
+			"Text": ["Bonjour, je m'appelle <var>CharacterName</var>."]
+		},
+		{
+			"Title": "Que fais-je ici ?",
+			"Text": [
+				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient,",
+				"adressez-vous a l'<link>administration</link> quand vous vous sentirez pret à sortir"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Geraldine",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "République",
+			"Text": ["La République est une et indivisible !"]
+		},
+		{
+			"Title": "Armée républicaine", 
+			"Text": [
+				"Si vous cherchez du travail vous pouvez vous engager dans l'armée Républicaine. Vous trouverez",
+				"la caserne à l'Est de la ville."
+			]
+		},
+		{
+			"Title": "Mission", 
+			"Text": ["Je n'ai pas de mission à vous confier"]
+		},
+		{
+			"Title": "Administration", 
+			"Text": ["Cherchez la vous-meme, étranger, je n'ai pas de temps à perdre avec vous"]
+		},
+		{
+			"Title": "Administration", 
+			"Text": ["Vous la trouverez juste à coté de la chambre, adressez-vous à la préposée"],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Geraldine",
+					"Comp": "=="
+				}
+			]
+		}
+	]
+}

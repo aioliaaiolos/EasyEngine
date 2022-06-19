@@ -13,6 +13,7 @@
 #include "IRessource.h"
 #include "ICamera.h"
 #include "IEntity.h"
+#include "IFilesystem.h"
 #include "PlayerWindow.h"
 #include "TopicsWindow.h"
 #include "MapWindow.h"
@@ -20,6 +21,7 @@
 #include "Utils2/Dimension.h"
 #include "Utils2/Position.h"
 #include "Utils2/Rectangle.h"
+
 
 class CMaterial;
 using namespace std;
@@ -32,6 +34,7 @@ using namespace std;
 
 CGUIManager::CGUIManager(EEInterface& oInterface):
 IGUIManager(),
+m_oInterface(oInterface),
 m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
 m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
 m_oXMLParser(static_cast<IXMLParser&>(*oInterface.GetPlugin("XMLParser"))),
@@ -55,16 +58,8 @@ m_pScene(nullptr)
 	m_pCursor = CreateImageFromSkin("GUI.CURSOR", 20,29 );
 #endif // DISPLAYCURSOR
 	InitFontMap();
-
-	m_pTopicsWindow = new CTopicsWindow(m_oRessourceManager, m_oRenderer, *this, 900, 800);
-	m_pTopicsWindow->AddTopic("Bonjour", "Bonjour, je m'appelle Mirabelle.", -1);
-	m_pTopicsWindow->AddTopic("République", "La République est une et indivisible.", -1);
-	m_pTopicsWindow->AddTopic("Armée républicaine", "Si vous cherchez du travail vous pouvez vous engager dans l'armée Républicaine. Vous trouverez la caserne à l'Est de la ville.", -1);
-	m_pTopicsWindow->AddTopic("Guilde des forgerons", "La guilde des forgeron recrute en ce moment, vous trouverez leur responsable au siège de la guilde ici en ville.", -1);
-	m_pTopicsWindow->AddTopic("Service", "Pour l'instant la ville est toute récente donc vous ne trouverez pas grand chose en dehors d'un forgeron.", -1);
-	m_pTopicsWindow->AddTopic("Mission", "je n'ai pas de mission à vous confier.", -1);
-
-	m_pMapWindow = new CMinimapWindow(this, *m_pScene, m_oRessourceManager, m_oRenderer, 512, 512);
+	m_pTopicsWindow = new CTopicsWindow(oInterface, 900, 800);
+	m_pMapWindow = new CMinimapWindow(oInterface, *m_pScene, 512, 512);
 }
 
 
@@ -109,9 +104,9 @@ void CGUIManager::InitFontMap()
 		{
 			char c = (char) ( i * 16 + j );
 			CRectangle charRect( j * 16, 16 * i, vCharSize[ i * 16 + j ].m_x, vCharSize[ i * 16 + j ].m_y );			
-			m_mWidgetFontBlue[c] = new CGUIWidget(m_oRenderer, m_oRessourceManager, pFontTextureBlue, charRect);
-			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oRenderer, m_oRessourceManager, pFontTextureTurquoise, charRect);
-			m_mWidgetFontWhite[c] = new CGUIWidget(m_oRenderer, m_oRessourceManager, pFontTextureWhite, charRect, m_mWidgetFontInfos[c], m_pFontMaterial);
+			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, pFontTextureBlue, charRect);
+			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, pFontTextureTurquoise, charRect);
+			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, pFontTextureWhite, charRect, m_mWidgetFontInfos[c], m_pFontMaterial);
 		}
 	}
 }
@@ -416,22 +411,24 @@ CDimension CGUIManager::GetDimension(CGUIWidget* pWidget)
 
 void CGUIManager::AddWindow(IGUIWindow* pWindow)
 {
-	CGUIWindow* pGuiWindow = (CGUIWindow*)pWindow;
-	m_DisplayedWindowsSet.insert(pGuiWindow);
-	if (!m_bGUIMode && pGuiWindow->IsGUIMode())
+	CGUIWindow* pGUIWindow = dynamic_cast<CGUIWindow*>(pWindow);
+	m_DisplayedWindowsSet.insert(pGUIWindow);
+	pGUIWindow->OnShow(true);
+	if (!m_bGUIMode && pGUIWindow->IsGUIMode())
 		SetGUIMode(true);
 }
 
 bool CGUIManager::IsWindowDisplayed(IGUIWindow* pWindow)
 {
-	set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.find((CGUIWindow*)pWindow);
+	set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.find(dynamic_cast<CGUIWindow*>(pWindow));
 	return (itWindow != m_DisplayedWindowsSet.end());
 }
 
 void CGUIManager::RemoveWindow(IGUIWindow* pWindow)
 {
-	CGUIWindow* pGUIWindow = (CGUIWindow*)pWindow;
+	CGUIWindow* pGUIWindow = dynamic_cast<CGUIWindow*>(pWindow);
 	m_DisplayedWindowsSet.erase(pGUIWindow);
+	pGUIWindow->OnShow(false);
 	bool bGUIMode = false;
 	for (set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.begin(); itWindow != m_DisplayedWindowsSet.end(); itWindow++) {
 		if ((*itWindow)->IsGUIMode() == true) {
@@ -585,7 +582,7 @@ void CGUIManager::EnableStaticText( int nTextID, bool bEnable )
 		itText->second = bEnable;
 }
 
-IGUIWindow* CGUIManager::GetTopicsWindow()
+ITopicWindow* CGUIManager::GetTopicsWindow()
 {
 	return m_pTopicsWindow;
 }
@@ -713,7 +710,7 @@ bool CGUIManager::GetActive()
 
 IGUIWindow* CGUIManager::CreatePlayerWindow(int nWidth, int nHeight)
 {
-	IGUIWindow* playerWindow = new CPlayerWindow(this, m_oRessourceManager, m_oRenderer, CDimension(nWidth, nHeight));
+	IGUIWindow* playerWindow = new CPlayerWindow(m_oInterface, CDimension(nWidth, nHeight));
 	return playerWindow;
 }
 

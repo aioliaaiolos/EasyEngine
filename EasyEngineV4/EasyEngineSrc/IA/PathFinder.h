@@ -52,6 +52,7 @@ public:
 	void RemoveObstacle(int row, int column);
 	void SetDepart(int x, int y);
 	void SetDestination(int x, int y);
+	ICell& FindClosestNonObstacle(int row, int column);
 	IGrid::ICell* GetDepart();
 	IGrid::ICell* GetDestination();
 	void FindPath();
@@ -68,7 +69,8 @@ public:
 	void UpdateOpenList(CCell& cell);
 	void Reset();
 	void ResetAllExceptObstacles();
-	void Save(string sFileName);
+	void Save(string sFileName, int xMin = -1, int yMin = -1, int xMax = -1, int yMax = -1) override;
+	void SavePart(string sFileName, int xMin, int yMin, int xMax, int yMax);
 	void Load(string sFileName);
 	void SetManualMode(bool manual);
 	bool GetManualMode();
@@ -98,11 +100,15 @@ public:
 	IGrid* CreateGrid(int rowCount, int columnCount);
 	void FindPath(IGrid* grid);
 	string GetName() override;
-	void EnableSaveGrid(bool bEnable) override;
+	void EnableSaveGrid(bool bEnable, int xMinMargin, int yMinMargin, int xMaxMargin, int yMaxMargin) override;
 
 private:
-	void	SaveAStarGrid(IGrid* pGrid);
+	void	SaveAStarGrid(IGrid* pGrid, int xMin, int yMin, int xMax, int yMax);
 	bool	m_bSaveAStarGrid;
+	int		m_xMinMargin;
+	int		m_yMinMargin;
+	int		m_xMaxMargin;
+	int		m_yMaxMargin;
 };
 
 

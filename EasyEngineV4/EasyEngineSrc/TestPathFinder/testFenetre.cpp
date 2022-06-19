@@ -655,7 +655,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_RBUTTONDOWN:
-		grid->ResetAllExceptObstacles();
+		//grid->ResetAllExceptObstacles();
 		g_currentState = eInitDepDest;
 		InvalidateRect(hWnd, NULL, TRUE);
 		break;

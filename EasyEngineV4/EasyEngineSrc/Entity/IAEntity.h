@@ -19,6 +19,13 @@ public:
 
 	void						Update();
 
+
+protected:
+
+	bool						IsArrivedAtDestination();
+	static void 				OnCollision(IAEntity* pEntity);
+	virtual void				UpdateGoto();
+
 private:
 	enum TFightState
 	{
@@ -51,7 +58,7 @@ private:
 	int							m_nCurrentPathPointNumber;
 	float						m_fDestinationDeltaRadius;
 
-	void						UpdateGoto();
+	
 	void						UpdateFaceTo();
 	void						UpdateFightState();
 	float						GetAngleBetween2Vectors(CVector& v1, CVector& v2);
@@ -74,8 +81,4 @@ private:
 	virtual IBox*				GetNextCollideBox() = 0;
 
 	static void					OnHitReceivedCallback( IAnimation::TEvent e, void* pData );
-
-protected:
-
-	static void 				OnCollision( IAEntity* pEntity );
 };

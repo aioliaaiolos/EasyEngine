@@ -23,6 +23,12 @@ public:
 	virtual void	SetVisibility(bool bVisible) = 0;
 };
 
+class ITopicWindow : public virtual IGUIWindow
+{
+public:
+	virtual void SetSpeakerId(string sId) = 0;
+};
+
 class IGUIManager : public CPlugin
 {
 protected:
@@ -98,7 +104,7 @@ public:
 	virtual void			DestroyStaticTest( int nID ) = 0;
 	virtual void			PrintStaticText( int nTextID ) = 0;
 	virtual void			EnableStaticText( int nTextID, bool bEnable ) = 0;
-	virtual IGUIWindow*		GetTopicsWindow() = 0;
+	virtual ITopicWindow*	GetTopicsWindow() = 0;
 	virtual IGUIWindow*		CreatePlayerWindow(int nWidth, int nHeight) = 0;
 	virtual void			SetGUIMode(bool bGUIMode) = 0;
 	virtual bool			GetGUIMode() = 0;

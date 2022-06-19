@@ -58,6 +58,7 @@ public:
 	void			DrawCollisionBoundingBoxes(bool bDraw) {}
 	void			PlayCurrentAnimation(bool loop) {}
 	void			PauseCurrentAnimation(bool loop) {}
+	void			CreateCollisionMaps(float fBias) {}
 };
 
 #endif // SHAPE_H

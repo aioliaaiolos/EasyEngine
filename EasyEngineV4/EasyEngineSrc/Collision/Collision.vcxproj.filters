@@ -21,12 +21,18 @@
     <ClInclude Include="HeightMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HeightMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

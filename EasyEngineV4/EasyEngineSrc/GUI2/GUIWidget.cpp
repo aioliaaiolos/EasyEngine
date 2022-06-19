@@ -1,11 +1,12 @@
 #define GUIWIDGET_CPP
 
-#include "GUIWidget.h"
-#include "listener.h"
 #include "IRessource.h"
-#include "Exception.h"
+#include "Interface.h"
 #include "IShader.h"
 #include "IGUIManager.h"
+#include "GUIWidget.h"
+#include "listener.h"
+#include "Exception.h"
 #include "Utils2/Rectangle.h"
 
 using namespace std;
@@ -33,24 +34,25 @@ m_pParent(NULL)
 		CWidgetNotInitialized e( "" );
 		throw e;
 	}
-	_Dimension.SetDimension( (float) nWidth, (float)nHeight);
+	m_oDimension.SetDimension( (float) nWidth, (float)nHeight);
 	m_pShader = s_pShader;
 }
 
-CGUIWidget::CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, CRectangle& oSkin):
+CGUIWidget::CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin):
 _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
 m_pParent(NULL)
 {
+	InitManagers(oInterface);
 	ILoader::CMeshInfos mi;
 	CRectangle oFinalSkin;
-	CreateQuadMeshInfosFromTexture(oRenderer, pTexture, oSkin, mi, oFinalSkin);
+	CreateQuadMeshInfosFromTexture(*m_pRenderer, pTexture, oSkin, mi, oFinalSkin);
 
 	ILoader::CAnimatableMeshData oData;
 	oData.m_vMeshes.push_back(mi);
-	IRessource* pMaterial = oRessourceManager.CreateMaterial(mi.m_oMaterialInfos, pTexture);
-	IAnimatableMesh* pARect = oRessourceManager.CreateMesh(oData, pMaterial);
+	IRessource* pMaterial = m_pRessourceManager->CreateMaterial(mi.m_oMaterialInfos, pTexture);
+	IAnimatableMesh* pARect = m_pRessourceManager->CreateMesh(oData, pMaterial);
 	IMesh* pRect = pARect->GetMesh(0);
 	
 	if (s_pShader == NULL)
@@ -58,15 +60,14 @@ m_pParent(NULL)
 		CWidgetNotInitialized e("");
 		throw e;
 	}
-	_Dimension.SetDimension((float)oFinalSkin.m_oDim.GetWidth(), (float)oFinalSkin.m_oDim.GetWidth());
+	m_oDimension.SetDimension((float)oFinalSkin.m_oDim.GetWidth(), (float)oFinalSkin.m_oDim.GetWidth());
 	m_pShader = s_pShader;
 	
 	SetQuad(pRect);
 }
 
 CGUIWidget::CGUIWidget(
-	IRenderer& oRenderer, 
-	IRessourceManager& oRessourceManager, 
+	EEInterface& oInterface,
 	ITexture* pTexture, 
 	CRectangle& oSkin, 
 	ILoader::CMeshInfos& outMeshInfos, 
@@ -76,13 +77,15 @@ _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
 m_pParent(NULL)
 {
+	InitManagers(oInterface);
+
 	CRectangle oFinalSkin;
-	CreateQuadMeshInfosFromTexture(oRenderer, pTexture, oSkin, outMeshInfos, oFinalSkin);
+	CreateQuadMeshInfosFromTexture(*m_pRenderer, pTexture, oSkin, outMeshInfos, oFinalSkin);
 
 	ILoader::CAnimatableMeshData oData;
 	oData.m_vMeshes.push_back(outMeshInfos);
-	pOutMaterial = oRessourceManager.CreateMaterial(outMeshInfos.m_oMaterialInfos, pTexture);
-	IAnimatableMesh* pARect = oRessourceManager.CreateMesh(oData, pOutMaterial);
+	pOutMaterial = m_pRessourceManager->CreateMaterial(outMeshInfos.m_oMaterialInfos, pTexture);
+	IAnimatableMesh* pARect = m_pRessourceManager->CreateMesh(oData, pOutMaterial);
 	IMesh* pRect = pARect->GetMesh(0);
 
 	if (s_pShader == NULL)
@@ -90,26 +93,34 @@ m_pParent(NULL)
 		CWidgetNotInitialized e("");
 		throw e;
 	}
-	_Dimension.SetDimension((float)oFinalSkin.m_oDim.GetWidth(), (float)oFinalSkin.m_oDim.GetHeight());
+	m_oDimension.SetDimension((float)oFinalSkin.m_oDim.GetWidth(), (float)oFinalSkin.m_oDim.GetHeight());
 	m_pShader = s_pShader;
 
 	SetQuad(pRect);
 }
 
-CGUIWidget::CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sFileName, int width, int height):
+CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height):
 CGUIWidget(width, height)
 {
+	InitManagers(oInterface);
 	CRectangle oSkin;
 	oSkin.SetDimension(width, height);
-	IMesh* pQuad = CreateQuadFromFile(oRenderer, oRessourceManager, sFileName, oSkin, oSkin.m_oDim);
+	IMesh* pQuad = CreateQuadFromFile(*m_pRenderer, *m_pRessourceManager, sFileName, oSkin, oSkin.m_oDim);
 	SetQuad(pQuad);
 }
 
-CGUIWidget::CGUIWidget(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& windowSize, const CRectangle& skin) :
+CGUIWidget::CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
 	CGUIWidget(windowSize.GetWidth(), windowSize.GetHeight())
 {
-	IMesh* pRect = CreateQuad(oRenderer, oRessourceManager, windowSize, skin);
+	InitManagers(oInterface);
+	IMesh* pRect = CreateQuad(*m_pRenderer, *m_pRessourceManager, windowSize, skin);
 	SetQuad(pRect);
+}
+
+void CGUIWidget::InitManagers(EEInterface& oInterface)
+{
+	m_pRenderer = static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"));
+	m_pRessourceManager = static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 }
 
 CGUIWidget::~CGUIWidget(void)
@@ -150,42 +161,42 @@ void CGUIWidget::Display()
 
 void CGUIWidget::SetPosition( float fPosX, float fPosY )
 {
-	_Position.SetX( fPosX );
-	_Position.SetY( fPosY );
+	m_oPosition.SetX( fPosX );
+	m_oPosition.SetY( fPosY );
 }
 
 void CGUIWidget::Translate(float dx, float dy)
 {
-	_Position.SetX(_Position.GetX() + dx);
-	_Position.SetY(_Position.GetY() + dy);
+	m_oPosition.SetX(m_oPosition.GetX() + dx);
+	m_oPosition.SetY(m_oPosition.GetY() + dy);
 }
 
 void CGUIWidget::SetY( float fY )
 {
-	_Position.SetY( fY );
+	m_oPosition.SetY( fY );
 }
 
 
 CPosition CGUIWidget::GetPosition() const
 {
-	return _Position;
+	return m_oPosition;
 }
 
 void CGUIWidget::GetLogicalPosition( float& x, float& y, int nResWidth, int nResHeight ) const
 {
-	x = 2.f*(float)_Position.GetX() / nResWidth;
-	y = - 2.f*(float)_Position.GetY() / nResHeight;
+	x = 2.f*(float)m_oPosition.GetX() / nResWidth;
+	y = - 2.f*(float)m_oPosition.GetY() / nResHeight;
 }
 
 void CGUIWidget::GetLogicalDimension( float& x, float& y, int nResWidth, int nResHeight ) const
 {
-	x = 2.f*(float)_Dimension.GetWidth() / nResWidth;
-	y = 2.f*(float)_Dimension.GetHeight() / nResHeight;
+	x = 2.f*(float)m_oDimension.GetWidth() / nResWidth;
+	y = 2.f*(float)m_oDimension.GetHeight() / nResHeight;
 }
 
 CDimension CGUIWidget::GetDimension() const
 {
-	return _Dimension;
+	return m_oDimension;
 }
 
 void CGUIWidget::SetListener(CListener* pListener)
@@ -199,9 +210,9 @@ void CGUIWidget::UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager:
 	if (_pListener)
 	{
 		_pListener->ExecuteCallBack(IGUIManager::EVENT_OUTSIDE, this, nCursorXPos, nCursorYPos);
-		if (nCursorXPos > _Position.GetX() && nCursorXPos < _Position.GetX() + _Dimension.GetWidth())
+		if (nCursorXPos > m_oPosition.GetX() && nCursorXPos < m_oPosition.GetX() + m_oDimension.GetWidth())
 		{
-			if (nCursorYPos > _Position.GetY() && nCursorYPos < _Position.GetY() + _Dimension.GetHeight())
+			if (nCursorYPos > m_oPosition.GetY() && nCursorYPos < m_oPosition.GetY() + m_oDimension.GetHeight())
 			{
 				bIsCursorInWidget = true;
 				if (!_bIsCursorInWidget)
@@ -220,10 +231,10 @@ void CGUIWidget::UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager:
 					_pListener->ExecuteCallBack( IGUIManager::EVENT_LMOUSERELEASED, this, nCursorXPos, nCursorYPos);
 					return;
 				}
-				if ( _NextCursorPos.GetX() != nCursorXPos || _NextCursorPos.GetY() != nCursorYPos )
+				if ( m_oNextCursorPos.GetX() != nCursorXPos || m_oNextCursorPos.GetY() != nCursorYPos )
 				{
 					_pListener->ExecuteCallBack( IGUIManager::EVENT_MOUSEMOVE, this, nCursorXPos, nCursorYPos);
-					_NextCursorPos.SetPosition(static_cast<float> (nCursorXPos), static_cast<float> (nCursorYPos) );
+					m_oNextCursorPos.SetPosition(static_cast<float> (nCursorXPos), static_cast<float> (nCursorYPos) );
 					return;
 				}
 				_pListener->ExecuteCallBack(IGUIManager::EVENT_NONE, this, nCursorXPos, nCursorYPos);
@@ -253,7 +264,7 @@ string CGUIWidget::GetSkinName()
 
 void CGUIWidget::SetPosition(CPosition p)
 {
-	_Position = p;
+	m_oPosition = p;
 }
 
 void CGUIWidget::CreateQuadMeshInfosFromTexture(IRenderer& oRenderer, ITexture* pTexture, const CRectangle& oSkin, ILoader::CMeshInfos& mi, CRectangle& oFinalSkin) const

@@ -13,7 +13,7 @@ class CDimension;
 class CPlayerWindow : public CGUIWindow
 {
 public:
-	CPlayerWindow(IGUIManager* pGUIManager, IRessourceManager& oRessourceManager, IRenderer& oRenderer, const CDimension& windowSize);
+	CPlayerWindow(EEInterface& oInterface, const CDimension& windowSize);
 	~CPlayerWindow();
 
 	void	SetVisibility(bool bVisible);

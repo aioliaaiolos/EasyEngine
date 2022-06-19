@@ -42,7 +42,9 @@ public:
 	IAnimation*					GetCurrentAnimation();
 	void						WearSkinnedClothFull(string sClothName);
 	void						WearCloth(string sClothName, string sDummyName);
-	static void					InitStatics();	
+	void						Link(INode* pParent) override;
+	IBox*						GetBoundingBox();
+	static void					InitStatics();
 
 	static map<string, IEntity::TAnimation>	s_mStringToAnimation;
 
@@ -68,9 +70,11 @@ protected:
 	map< IEntity::TAnimation, IAnimation* >		m_mAnimations;
 	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sAttackBoneName;
+	string										m_sSecondaryAttackBoneName;
 	CVector										m_vNextLocalTranslate;
 	bool										m_bFirstUpdate;
 	string										m_sStandAnimation;
+	IBox*										m_pBBox;	
 	
 
 	static map< string, TAction >				s_mActions;
@@ -88,6 +92,7 @@ protected:
 	void					Stand();
 	void					PlayReceiveHit();
 	void					PlayHitAnimation();
+	void					PlaySecondaryHitAnimation();
 	void					Guard();
 	void					TurnEyesH( float fValue );
 	void					TurnNeckH( float f );
@@ -97,12 +102,12 @@ protected:
 	IFighterEntity*			GetFirstEnemy();
 	IFighterEntity*			GetNextEnemy();
 	CMatrix&				GetWorldTM();
-	float					GetBoundingSphereRadius(){ return m_fBoundingSphereRadius; }
-	IBox*					GetBoundingBox();
+	float					GetBoundingSphereRadius();	
 	ICollisionManager&		GetCollisionManager(){ return m_oCollisionManager; }
 	ISphere*				GetBoneSphere( string sBoneName );
 	void					AddSpeed(float x, float y, float z);
 	const string&			GetAttackBoneName();
+	const string&			GetSecondaryAttackBoneName();
 	IGeometry*				GetBoundingGeometry() override;
 
 	static void				OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );

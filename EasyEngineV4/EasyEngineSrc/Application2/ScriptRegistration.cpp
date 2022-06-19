@@ -264,6 +264,27 @@ void SaveCloth(IScriptState* pState)
 	m_pCharacterEditor->SaveCurrentEditableCloth();
 }
 
+void OffsetEyes(IScriptState* pState)
+{
+	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	m_pCharacterEditor->OffsetEyes(px->m_fValue, py->m_fValue, pz->m_fValue);
+}
+
+void TurnEyes(IScriptState* pState)
+{
+	CScriptFuncArgFloat* pYaw	= static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CScriptFuncArgFloat* pPitch = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CScriptFuncArgFloat* pRoll	= static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	m_pCharacterEditor->TurnEyes(pYaw->m_fValue, pPitch->m_fValue, pRoll->m_fValue);
+}
+
+void SaveCurrentEditableBody(IScriptState* pState)
+{
+	m_pCharacterEditor->SaveCurrentEditableBody();
+}
+
 void EditWorld(IScriptState* pState)
 {
 	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
@@ -1807,17 +1828,6 @@ void DisplayHM( IScriptState* pState )
 		m_pConsole->Println("Erreur : ressource non valide");
 }
 
-void DisplayCollisionMap(IScriptState* pState)
-{
-	m_pCollisionManager->DisplayCollisionMap();
-}
-
-void StopDisplayCollisionMap(IScriptState* pState)
-{
-	m_pCollisionManager->StopDisplayCollisionMap();
-}
-
-
 void DisplaySceneChilds( IScriptState* pState )
 {
 	string sName;
@@ -1827,9 +1837,6 @@ void DisplaySceneChilds( IScriptState* pState )
 		m_pConsole->Println( sName );
 	}
 }
-
-
-
 
 string g_sBegin;
 void DisplayFonctionList(void* params)
@@ -2307,21 +2314,6 @@ void CreateHMFromFile(IScriptState* pState)
 	}
 }
 
-void CreateCollisionMapByRendering(IScriptState* pState)
-{
-	try
-	{
-		m_pScene->CreateCollisionMapByRendering();
-	}
-	catch (CEException& e)
-	{
-		string sError;
-		e.GetErrorMessage(sError);
-		string s = string("Erreur : ") + sError;
-		m_pConsole->Println(s);
-	}
-}
-
 void ScreenCapture( IScriptState* pState )
 {
 	ostringstream ossFile;
@@ -2417,22 +2409,25 @@ void CreateLightw( IScriptState* pState )
 void CreateCollisionMap(IScriptState* pState)
 {
 	IEntity* pNode = nullptr;
-	CScriptFuncArgInt* pId = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	CScriptFuncArgString* pFileName = static_cast<CScriptFuncArgString*>(pState->GetArg(1));
-	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
-	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(3));
+	CScriptFuncArgInt* pId = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));	
+	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
+	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(2));
 	if (pId->m_nValue == 0)
 		pNode = m_pScene;
 	else
 		pNode = dynamic_cast<IEntity*>(m_pEntityManager->GetEntity(pId->m_nValue));
 	vector<vector<bool>> vGrid;
-	m_pCollisionManager->CreateCollisionMap(pFileName->m_sValue, pNode, pCellSize->m_nValue, pBias->m_fValue);
+	m_pCollisionManager->CreateCollisionMap(pNode, pCellSize->m_nValue, pBias->m_fValue);
 }
 
 void EnablePathFindSaving(IScriptState* pState)
 {
 	CScriptFuncArgInt* pEnable = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	m_pPathFinder->EnableSaveGrid(pEnable->m_nValue != 0);
+	CScriptFuncArgInt* pXmin = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
+	CScriptFuncArgInt* pYmin = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
+	CScriptFuncArgInt* pXmax = static_cast<CScriptFuncArgInt*>(pState->GetArg(3));
+	CScriptFuncArgInt* pYMax = static_cast<CScriptFuncArgInt*>(pState->GetArg(4));
+	m_pPathFinder->EnableSaveGrid(pEnable->m_nValue != 0, pXmin->m_nValue, pYmin->m_nValue, pXmax->m_nValue, pYMax->m_nValue);
 }
 
 void IsAbsolutePath(IScriptState* pState)
@@ -2568,6 +2563,27 @@ void GetNodeInfos( INode* pNode, int nLevel = 0 )
 		GetNodeInfos( pNode->GetChild( i ), nLevel + 1 );
 }
 
+void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
+{
+	IEntity* pEntity = dynamic_cast< IEntity* >(pNode);
+	if (pEntity) {
+
+		ostringstream sLine;
+		for (int j = 0; j < nLevel; j++)
+			sLine << "\t";
+		string sEntityName;
+		pEntity->GetEntityName(sEntityName);
+		if (sEntityName.empty())
+			pEntity->GetName(sEntityName);
+		if (sEntityName.find("CollisionPrimitive") != -1) {
+			sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
+			g_vStringsResumeMode.push_back(sLine.str());
+		}
+	}
+	for (unsigned int i = 0; i < pNode->GetChildCount(); i++)
+		GetCollisionNodeInfos(pNode->GetChild(i), nLevel + 1);
+}
+
 void Kill(IScriptState* pState)
 {
 	CScriptFuncArgInt* pId = (CScriptFuncArgInt*)(pState->GetArg(0));
@@ -2660,6 +2676,15 @@ void DisplayEntities( IScriptState* pState )
 {
 	g_vStringsResumeMode.clear();
 	GetNodeInfos( m_pScene );
+	DisplayEntitiesResume(nullptr);
+}
+
+void DisplayCollisionEntities(IScriptState* pState)
+{
+	CScriptFuncArgInt* pParentID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	IEntity* pParent = m_pEntityManager->GetEntity(pParentID->m_nValue);
+	g_vStringsResumeMode.clear();
+	GetCollisionNodeInfos(pParent);
 	DisplayEntitiesResume(nullptr);
 }
 
@@ -3249,23 +3274,10 @@ void EnableRenderCallback(IScriptState* pState)
 		m_pConsole->Println("Plugin \"" + pName->m_sValue + "\" not found");
 }
 
-void SendCustomUniformValue(IScriptState* pState)
-{
-	CScriptFuncArgString* pName = (CScriptFuncArgString*)pState->GetArg(0);
-	CScriptFuncArgFloat* pValue = (CScriptFuncArgFloat*)pState->GetArg(1);
-	m_pCollisionManager->SendCustomUniformValue(pName->m_sValue, pValue->m_fValue);
-}
-
 void SetLineWidth(IScriptState* pState)
 {
 	CScriptFuncArgInt* pWidth = (CScriptFuncArgInt*)pState->GetArg(0);
 	m_pRenderer->SetLineWidth(pWidth->m_nValue);
-}
-
-void DisplayGrid(IScriptState* pState)
-{
-	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	m_pCollisionManager->DisplayGrid(pCellSize->m_nValue);
 }
 
 void PatchBMEMeshTextureName(IScriptState* pState)
@@ -3368,6 +3380,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eInt);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("EnablePathFindSaving", EnablePathFindSaving, vType);
 
 	vType.clear();
@@ -3388,7 +3404,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eInt);
-	vType.push_back(eString);
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
 	m_pScriptManager->RegisterFunction("CreateCollisionMap", CreateCollisionMap, vType);
@@ -3405,6 +3420,21 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("EditCloth", EditCloth, vType);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("OffsetEyes", OffsetEyes, vType);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("TurnEyes", TurnEyes, vType);	
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("SaveCurrentEditableBody", SaveCurrentEditableBody, vType);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -3548,15 +3578,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("ResetFreeCamera", ResetFreeCamera, vType);	
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayGrid", DisplayGrid, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayCollisionMap", DisplayCollisionMap, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("StopDisplayCollisionMap", StopDisplayCollisionMap, vType);
-
-	vType.clear();
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("SetLineWidth", SetLineWidth, vType);	
 
@@ -3655,6 +3676,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction( "DisplayEntities", DisplayEntities, vType );
 
 	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("DisplayCollisionEntities", DisplayCollisionEntities, vType);
+	
+
+	vType.clear();
 	m_pScriptManager->RegisterFunction("DisplayMobileEntities", DisplayMobileEntities, vType);
 	
 	vType.clear();
@@ -3712,9 +3738,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("CreateHMFromFile", CreateHMFromFile, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("CreateCollisionMapByRendering", CreateCollisionMapByRendering, vType);
 
 	vType.clear();
 	vType.push_back( eString );
@@ -4187,11 +4210,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eString);
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("EnableRenderCallback", EnableRenderCallback, vType);
-
-	vType.clear();
-	vType.push_back(eString);
-	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SendCustomUniformValue", SendCustomUniformValue, vType);
 
 	vType.clear();
 	vType.push_back(eFloat);
