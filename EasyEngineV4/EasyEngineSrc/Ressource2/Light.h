@@ -15,7 +15,7 @@
 #include <gl/GLU.h>
 
 
-class CLight : public IRessource
+class CLight : public ILight
 {	
 public:
 	struct Desc : public IRessource::Desc
@@ -38,7 +38,8 @@ public:
 	void						Disable();
 	void						Enable();
 	void						SetShader( IShader* pShader );
-	void						SetIntensity( float fIntensity );
+	void						SetIntensity( float fIntensity ) override;
+	void						SetAmbient(float fAmbient) override;
 	float						GetIntensity();
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }

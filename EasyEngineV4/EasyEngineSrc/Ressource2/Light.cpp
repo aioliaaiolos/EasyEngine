@@ -19,7 +19,7 @@ Color( 1,1,1,1 )
 }
 
 CLight::CLight( const Desc& oDesc ):
-IRessource( oDesc ),
+ILight( oDesc ),
 m_bIsEnabled( true ),
 m_Specular( oDesc.Color ),
 m_Diffuse( oDesc.Color ),
@@ -107,6 +107,12 @@ void CLight::SetIntensity(float fIntensity)
 	GetRenderer().SetLightAmbient( m_ID, ambient[0], ambient[1], ambient[2], ambient[3] );
 	GetRenderer().SetLightDiffuse(m_ID, diffuse[0], diffuse[1], diffuse[2], diffuse[3] );
 	GetRenderer().SetLightSpecular( m_ID, specular[0], specular[1], specular[2], specular[3] );
+}
+
+void CLight::SetAmbient(float fAmbient)
+{
+	GLfloat ambient[] = { m_fIntensity * fAmbient, m_fIntensity * fAmbient, m_fIntensity * fAmbient, 1.f };
+	GetRenderer().SetLightAmbient(m_ID, ambient[0], ambient[1], ambient[2], ambient[3]);
 }
 
 float CLight::GetIntensity()

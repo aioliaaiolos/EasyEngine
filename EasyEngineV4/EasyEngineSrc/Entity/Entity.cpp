@@ -266,25 +266,41 @@ void CEntity::CreateAndLinkCollisionChildren(string sFileName)
 	string sPrefix = sFileName.substr(0, dotPos);
 	string sCollisionFileName = sPrefix + ".col";
 	try {
-		m_pCollisionMesh = dynamic_cast<ICollisionMesh*>(m_oRessourceManager.GetRessource(sCollisionFileName, false));
+		m_pCollisionMesh = dynamic_cast<ICollisionMesh*>(m_oRessourceManager.GetRessource(sCollisionFileName, false));		
+		vector<CCollisionEntity*> doors, walls;
 		for (int i = 0; i < m_pCollisionMesh->GetGeometryCount(); i++) {
 			IGeometry* pGeometry = m_pCollisionMesh->GetGeometry(i);
-			ostringstream oss;
-			oss << sPrefix << "_CollisionPrimitive" << i;
-			CCollisionEntity* pChild = m_pEntityManager->CreateCollisionEntity(oss.str());
+			string sName;
+			pGeometry->GetName(sName);
+			CCollisionEntity* pChild = m_pEntityManager->CreateCollisionEntity(sName);
 			pChild->SetLocalMatrix(pGeometry->GetTM());
+			pChild->SetWorldMatrix(pGeometry->GetTM());
 			pChild->ForceAssignBoundingGeometry(pGeometry);
 			pChild->m_fBoundingSphereRadius = pGeometry->ComputeBoundingSphereRadius();
 			pChild->Link(this);
-			string sCollisionEntityName;
-			CStringUtils::GetShortFileName(oss.str(), sCollisionEntityName);
-			pChild->SetEntityName(sCollisionEntityName);
+			pChild->SetEntityName(sName);
+			if (sName.find("Door") != -1)
+				doors.push_back(pChild);
+			else if (sName.find("Wall") != -1)
+				walls.push_back(pChild);
 		}
 		m_sTypeName = "building";
+		LinkDoorsToWalls(walls, doors);
 		LoadCollisionMaps();
 	}
 	catch (CFileNotFoundException& e) {
 		e = e;
+	}
+}
+
+void CEntity::LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors)
+{
+	for (CCollisionEntity* pWall : walls) {
+		for (CCollisionEntity* pDoor : doors) {
+			if (pWall->TestLocalCollision(pDoor)) {
+				pDoor->Link(pWall);
+			}
+		}
 	}
 }
 
@@ -340,7 +356,7 @@ void CEntity::UpdateCollision()
 	}
 }
 
-bool CEntity::TestCollision(INode* pEntity)
+bool CEntity::TestWorldCollision(INode* pEntity)
 {
 	bool ret = false;
 	if (GetBoundingSphereDistance(pEntity) < 0)
@@ -365,6 +381,77 @@ bool CEntity::TestCollision(INode* pEntity)
 		}
 	}
 	return ret;
+}
+
+bool CEntity::TestLocalCollision(INode* pEntity)
+{
+	bool ret = false;
+	if (GetBoundingSphereDistance(pEntity) < 0)
+	{
+		IGeometry* pGeometry = GetBoundingGeometry();
+		if (!pGeometry) {
+			ostringstream oss;
+			oss << "Error : entity '" << m_sEntityName << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			throw CEException(oss.str());
+		}
+		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
+		IGeometry* pOtherGeometry = pEntity->GetBoundingGeometry() ? pEntity->GetBoundingGeometry()->Duplicate() : NULL;
+
+		if (pOtherGeometry) {
+			pCurrentGeometry->SetTM(m_oLocalMatrix);
+			CMatrix oOtherLocalMatrix;
+			pEntity->GetLocalMatrix(oOtherLocalMatrix);
+			pOtherGeometry->SetTM(oOtherLocalMatrix);
+
+			string sEntityName;
+			pEntity->GetName(sEntityName);
+
+			if (sEntityName.find("Wall") != -1) {
+				if (!IsPassingDoor(pEntity, pCurrentGeometry, pOtherGeometry))
+					ret = pCurrentGeometry->IsIntersect(*pOtherGeometry);
+			}
+			else
+				ret = pCurrentGeometry->IsIntersect(*pOtherGeometry);
+				
+			delete pCurrentGeometry;
+			delete pOtherGeometry;
+		}
+	}
+	return ret;
+}
+
+bool CEntity::IsPassingDoor(INode* pWall, IGeometry* pThisBBox, IGeometry* pWallBBox)
+{
+	if (pThisBBox->IsIntersect(*pWallBBox)) {
+		bool ret = false;
+		for (int i = 0; i < pWall->GetChildCount(); i++) {
+			INode* pDoor = pWall->GetChild(i);
+			string sName;
+			pDoor->GetName(sName);
+			if (sName.find("Door") == -1)
+				continue;
+			CMatrix oDoorLocalTM, oDoorLocalTMInv; // , oEntityInvTM; // , oWallLocalTM;
+			pDoor->GetLocalMatrix(oDoorLocalTM);
+			oDoorLocalTM.GetInverse(oDoorLocalTMInv);
+			CMatrix oEntityTMInBoxBase = oDoorLocalTMInv * m_oLocalMatrix;
+
+			pThisBBox->SetTM(oEntityTMInBoxBase);
+			IGeometry* pDoorGeometry = pDoor->GetBoundingGeometry();
+
+			CVector oDoorDimension; // , oThisDimension;
+			pDoorGeometry->GetBBoxDimension(oDoorDimension);			
+			
+			vector<CVector> vThisPoints;			
+			pThisBBox->GetBBoxPoints(vThisPoints);
+
+			if ( (-oDoorDimension.m_x / 2.f < CVector::GetMinx(vThisPoints)) && (oDoorDimension.m_x / 2.f > CVector::GetMaxx(vThisPoints)) ||
+				 (-oDoorDimension.m_z / 2.f < CVector::GetMinz(vThisPoints)) && (oDoorDimension.m_z / 2.f > CVector::GetMaxz(vThisPoints)) ) {
+				return true;
+			}
+			pThisBBox->SetTM(m_oLocalMatrix);
+		}
+	}
+	return false;
 }
 
 void CEntity::LinkAndUpdateMatrices(CEntity* pEntity)
@@ -400,7 +487,7 @@ void CEntity::GetEntitiesCollision(vector<INode*>& entities)
 		if (!pEntity || pEntity == this)
 			continue;
 
-		if (TestCollision(pEntity))
+		if (TestLocalCollision(pEntity))
 			entities.push_back(pEntity);
 	}
 }
@@ -1098,6 +1185,11 @@ IGeometry* CEntity::GetBoundingGeometry()
 		pGeometry = m_pBoundingGeometry;
 
 	return pGeometry;
+}
+
+IBox* CEntity::GetBoundingBox()
+{
+	return nullptr;
 }
 
 void CEntity::AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback)

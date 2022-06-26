@@ -68,6 +68,15 @@ public:
 	virtual void		SetName( string sName ){ m_sName = sName; }
 };
 
+class ILight : public IRessource
+{
+public:
+
+	ILight(const IRessource::Desc& oDesc) : IRessource(oDesc) {}
+	virtual void SetIntensity(float fIntensity) = 0;
+	virtual void SetAmbient(float fAmbient) = 0;
+};
+
 class ITexture : public IRessource
 {
 public:

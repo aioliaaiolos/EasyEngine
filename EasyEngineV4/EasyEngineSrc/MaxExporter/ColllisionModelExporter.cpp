@@ -98,10 +98,16 @@ void CollisionModelExporter::GetPrimitives(Interface* pInterface, vector<IGeomet
 			if (g_bInterruptExport)
 				break;
 		}
-		if (pObject->CanConvertToType(Class_ID(BOXOBJ_CLASS_ID, 0)) == TRUE)
+		else if (pObject->CanConvertToType(Class_ID(BOXOBJ_CLASS_ID, 0)) == TRUE)
 		{
 			pGeometry = m_pGeometryManager->CreateBox();
 			StoreBoxInfos(pNode, *(IBox*)pGeometry);			
+			if (g_bInterruptExport)
+				break;
+		}
+		else {
+			pGeometry = m_pGeometryManager->CreateBox();
+			StoreMeshInfos(pNode, *(IBox*)pGeometry);
 			if (g_bInterruptExport)
 				break;
 		}
@@ -140,6 +146,11 @@ void CollisionModelExporter::StoreCylinderInfos(INode* pMesh, ICylinder& cylinde
 
 void CollisionModelExporter::StoreBoxInfos(INode* pMesh, IBox& box)
 {
+	const wchar_t* wName = pMesh->GetName();
+	string sName;
+	CStringUtils::ConvertWStringToString(wName, sName);
+	box.SetName(sName);
+
 	Mesh& mesh = GetMeshFromNode(pMesh);
 	Box3 bbox = mesh.getBoundingBox();
 	CMatrix tm;
@@ -159,6 +170,39 @@ void CollisionModelExporter::StoreBoxInfos(INode* pMesh, IBox& box)
 	box.Set(vMin, dim);
 	float temp = tm.m_13;
 	tm.m_13 = tm.m_23 + dim.m_y / 2.f;
+	tm.m_23 = temp;
+	box.SetTM(tm);
+}
+
+
+void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
+{
+	const wchar_t* wName = pMesh->GetName();
+	string sName;
+	CStringUtils::ConvertWStringToString(wName, sName);
+	if (sName.find("Wall") == -1 && sName.find("Door") == -1 && sName.find("Roof") == -1 && sName.find("Floor") == -1)
+		return;
+	box.SetName(sName);
+
+	Mesh& mesh = GetMeshFromNode(pMesh);
+	Box3 bbox = mesh.getBoundingBox();
+	CMatrix tm;
+	MaxMatrixToEngineMatrix(pMesh->GetObjectTM(0), tm);
+	CMatrix m = m_oMaxToOpenglMatrix * tm, mInv;
+	CVector boxMin(bbox.Min().x, bbox.Min().y, bbox.Min().z);
+	CVector boxDim;
+	ConvertPoint3ToCVector(bbox.Max() - bbox.Min(), boxDim);
+
+	CVector dim;
+	dim.m_x = boxDim.m_x;
+	float h = boxDim.m_y;
+	dim.m_y = boxDim.m_z;
+	dim.m_z = h;
+
+	CVector vMin(boxMin.m_x, boxMin.m_z, boxMin.m_y);
+	box.Set(vMin, dim);
+	float temp = tm.m_13;
+	tm.m_13 = tm.m_23;
 	tm.m_23 = temp;
 	box.SetTM(tm);
 }

@@ -9,17 +9,11 @@ class IRenderer;
 
 class CBox : public IBox
 {
-	bool				m_bInitialized;
-	float				m_fBoundingSphereRadius;
-	CVector				m_oMinPoint;
-	CMatrix				m_oTM;
-	CMatrix				m_oBackupInvTM;
-	CVector				m_oDimension;
-
-	bool				TestBoxesCollisionIntoFirstBoxBase(const IBox& b1, const IBox& b2) const;
-	float				GetDistanceInBase(const IBox& oBox) const;	
-
 public:
+
+	CBox();
+	CBox(CVector& oMinPoint, CVector& oDimension);
+	CBox(const CBox& oBox);
 
 	void				SetTM(const CMatrix& m);
 	const CVector&		GetMinPoint() const;
@@ -28,10 +22,7 @@ public:
 	const CMatrix&		GetTM() const;
 	const CVector&		GetDimension() const;
 	void				GetDimension(CVector& dim) const;
-
-						CBox();
-						CBox( CVector& oMinPoint, CVector& oDimension );
-						CBox( const CBox& oBox );
+						
 	void				Set( const CVector& oMinPoint, const CVector& oDimension );
 	void				GetCenter( CVector& oCenter ) const;
 	void				SetX(float x);
@@ -49,8 +40,8 @@ public:
 	float				GetDistance(const CBox& oBox) const;
 	float				GetDistance(const ICylinder& oBox) const;
 	IBox&				operator=(const IBox& oBox);
-	void				SetWorldMatrix(const CMatrix& oMatrix);
 	void				GetPoints(vector< CVector >& vPoints);
+	void				GetBBoxPoints(vector< CVector >& vPoints);
 	void				GetCenterPoints(vector< CVector >& vPoints) const;
 	bool				IsIntersect(const IGeometry& box) const;
 	bool				IsIntersect(const CBox& box) const;
@@ -66,6 +57,17 @@ public:
 	IPersistantObject& operator << (CAsciiFileStorage& store);
 	const IPersistantObject& operator >> (CStringStorage& store) const;
 	IPersistantObject& operator << (CStringStorage& store);
+
+private:
+	bool				m_bInitialized;
+	float				m_fBoundingSphereRadius;
+	CVector				m_oMinPoint;
+	CMatrix				m_oTM;
+	CMatrix				m_oBackupInvTM;
+	CVector				m_oDimension;
+
+	bool				TestBoxesCollisionIntoFirstBoxBase(const IBox& b1, const IBox& b2) const;
+	float				GetDistanceInBase(const IBox& oBox) const;
 };
 
 #endif // BOX_H

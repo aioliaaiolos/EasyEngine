@@ -15,6 +15,7 @@ class IGUIManager;
 class CNode;
 class CBone;
 class ICollisionMap;
+class CCollisionEntity;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 
@@ -73,6 +74,7 @@ public:
 	ICollisionMesh*					GetCollisionMesh();
 	void							ForceAssignBoundingGeometry(IGeometry* pBoundingGeometry);
 	IGeometry*						GetBoundingGeometry();
+	IBox*							GetBoundingBox();
 	float							GetHeight();
 	void							LinkAndUpdateMatrices(CEntity* pEntity);
 	bool							IsOnTheGround();
@@ -147,10 +149,13 @@ protected:
 	float				GetBoundingSphereDistance(INode* pEntity);
 	void				UpdateBoundingBox();
 	bool				ManageGroundCollision(const CMatrix& olastLocalTM);
-	bool				TestCollision(INode* pEntity);
+	bool				TestLocalCollision(INode* pEntity);
+	bool				TestWorldCollision(INode* pEntity);
+	bool				IsPassingDoor(INode* pWall, IGeometry* pBBox, IGeometry* pWallBBox);
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
 	void				SendBonesToShader();
 	void				DispatchEntityEvent();
+	void				LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors);
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
 };
 

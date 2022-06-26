@@ -2338,19 +2338,39 @@ void SetLightIntensity( IScriptState* pState )
 {
 	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	CScriptFuncArgFloat* pIntensity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	try
-	{
-		m_pEntityManager->SetLightIntensity( pID->m_nValue, pIntensity->m_fValue );
+
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = dynamic_cast<ILight*>(pLightEntity->GetRessource());
+		if(pLight)
+			pLight->SetIntensity(pIntensity->m_fValue);
 	}
-	catch( CBadTypeException& )
-	{
+	else {
 		ostringstream oss;
 		oss << "Erreur : " << pID->m_nValue << " n'est pas un identifiant de lumière";
-		m_pConsole->Println("Erreur : ");
+		m_pConsole->Println(oss.str());
 	}
 }
 
-void CreateLight( IScriptState* pState )
+void SetLightAmbient(IScriptState* pState)
+{
+	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CScriptFuncArgFloat* pAmbient = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));	
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = dynamic_cast<ILight*>(pLightEntity->GetRessource());
+		if(pLight)
+			pLight->SetAmbient(pAmbient->m_fValue);
+	}
+	else {
+		ostringstream oss;
+		oss << "Erreur : " << pID->m_nValue << " n'est pas un identifiant de lumière";
+		m_pConsole->Println(oss.str());
+	}
+
+}
+
+void CreateLight(IScriptState* pState)
 {
 	CScriptFuncArgInt* pr = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	CScriptFuncArgInt* pg = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
@@ -2792,10 +2812,12 @@ void DisplayCamPos( IScriptState* pState )
 void EntityCallback(CPlugin*, IEventDispatcher::TEntityEvent e, IEntity* pEntity)
 {
 	if (e == IEventDispatcher::TEntityEvent::T_UPDATE) {
-		CVector pos;
+		CVector pos, localPos;
 		pEntity->GetWorldPosition(pos);
+		pEntity->GetLocalPosition(localPos);
 		ostringstream oss;
-		oss << "Entity " << pEntity->GetID() << ", Position = (" << pos.m_x << ", " << pos.m_y << ", " << pos.m_z << ")";
+		oss << "Entity " << pEntity->GetID() << ", world position = (" << pos.m_x << ", " << pos.m_y << ", " << pos.m_z 
+											<< "), local position = (" << localPos.m_x << ", " << localPos.m_y << ", " << localPos.m_z << ")";
 		int slot = 0;
 		if (g_mSlots.empty())
 			g_mSlots[pEntity] = m_pHud->CreateNewSlot(800, 100);
@@ -3719,6 +3741,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
 	m_pScriptManager->RegisterFunction( "SetLightIntensity", SetLightIntensity, vType );
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetLightAmbient", SetLightAmbient, vType);	
 
 	vType.clear();
 	vType.push_back(eInt);

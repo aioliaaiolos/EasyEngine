@@ -21,6 +21,7 @@ public:
 	int					DoExport(const TCHAR *name, ExpInterface *ei, Interface *pInterface, BOOL suppressPrompts, DWORD options);
 	void				StoreCylinderInfos(INode* pMesh, ICylinder& cylinder);
 	void				StoreBoxInfos(INode* pMesh, IBox& box);
+	void				StoreMeshInfos(INode* pMesh, IBox& box);
 
 private:
 	vector<wstring>		m_vExtension;

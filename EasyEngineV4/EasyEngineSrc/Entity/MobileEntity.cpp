@@ -146,7 +146,7 @@ void CObject::UpdateCollision()
 		SetLocalPosition(last);
 
 		// Still into parent ?	
-		if (!TestCollision(m_pParent)) {
+		if (!TestWorldCollision(m_pParent)) {
 			CEntity* pEntity = dynamic_cast<CEntity*>(m_pParent->GetParent());
 			if (pEntity)
 				LinkAndUpdateMatrices(pEntity);

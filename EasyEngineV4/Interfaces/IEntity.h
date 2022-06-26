@@ -129,6 +129,12 @@ public:
 	virtual void				CreateCollisionMaps(float fBias) = 0;
 };
 
+class ILightEntity : public virtual IEntity
+{
+public:
+
+};
+
 class ICharacter : public virtual IEntity
 {
 public:

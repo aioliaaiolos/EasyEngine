@@ -21,6 +21,7 @@ CBox::CBox( const CBox& oBox )
 	m_oMinPoint = oBox.m_oMinPoint;
 	m_oDimension = oBox.m_oDimension;
 	m_oTM = oBox.m_oTM;
+	m_sName = oBox.m_sName;
 }
 
 void CBox::Set( const CVector& oMinPoint, const CVector& oDimension )
@@ -142,9 +143,9 @@ bool CBox::TestBoxesCollisionIntoFirstBoxBase(const IBox& b1, const IBox& b2) co
 
 	CBox b2Temp;
 	b2Temp.Set(b2.GetMinPoint(), b2.GetDimension());
-	b2Temp.SetWorldMatrix(b2.GetTM());
+	b2Temp.SetTM(b2.GetTM());
 
-	b2Temp.SetWorldMatrix(b2MatBaseB1);
+	b2Temp.SetTM(b2MatBaseB1);
 	vector< CVector > vPoints2;
 	b2Temp.GetPoints(vPoints2);
 	float fMinx = CVector::GetMinx(vPoints2);
@@ -200,9 +201,9 @@ float CBox::GetDistanceInBase(const IBox& oBox) const
 
 	CBox b2Temp;
 	b2Temp.Set(oBox.GetMinPoint(), oBox.GetDimension());
-	b2Temp.SetWorldMatrix(oBox.GetTM());
+	b2Temp.SetTM(oBox.GetTM());
 
-	b2Temp.SetWorldMatrix(b2MatBaseB1);
+	b2Temp.SetTM(b2MatBaseB1);
 	vector< CVector > vPoints2;
 	b2Temp.GetPoints(vPoints2);
 	float fMinx = CVector::GetMinx(vPoints2);
@@ -256,13 +257,13 @@ float CBox::GetBoundingSphereRadius() const
 
 const IPersistantObject& CBox::operator >> (CBinaryFileStorage& store) const
 {
-	store << (int)eBox << m_oTM << m_oMinPoint << m_oDimension << m_fBoundingSphereRadius;
+	store << (int)eBox << m_oTM << m_oMinPoint << m_oDimension << m_fBoundingSphereRadius << m_sName;
 	return *this;
 }
 
 IPersistantObject& CBox::operator << (CBinaryFileStorage& store)
 {
-	store >> m_oTM >> m_oMinPoint >> m_oDimension >> m_fBoundingSphereRadius;
+	store >> m_oTM >> m_oMinPoint >> m_oDimension >> m_fBoundingSphereRadius >> m_sName;
 	return *this;
 }
 
@@ -333,11 +334,6 @@ IBox& CBox::operator=( const IBox& oBox )
 	return *this;
 }
 
-void CBox::SetWorldMatrix( const CMatrix& oMatrix )
-{
-	m_oTM = oMatrix;
-}
-
 void CBox::GetPoints( vector< CVector >& vPoints )
 {
 	vector< CVector > vTemp;
@@ -354,6 +350,11 @@ void CBox::GetPoints( vector< CVector >& vPoints )
 		CVector v = m_oTM * vTemp[ i ];
 		vPoints.push_back( v );
 	}
+}
+
+void CBox::GetBBoxPoints(vector< CVector >& vPoints)
+{
+	GetPoints(vPoints);
 }
 
 void CBox::GetCenterPoints(vector< CVector >& vPoints) const
@@ -544,7 +545,7 @@ IGeometry::TFace CBox::GetReactionYAlignedPlane(const CVector& firstPoint, const
 {
 	CBox temp(*this);
 	CMatrix m;
-	temp.SetWorldMatrix(m);
+	temp.SetTM(m);
 	CMatrix oTMInv;
 	m_oTM.GetInverse(oTMInv);
 	//oTMInv = m_oBackupInvTM;

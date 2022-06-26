@@ -7,7 +7,7 @@ class IRessource;
 class IRessourceManager;
 class IRenderer;
 
-class CLightEntity : public CEntity
+class CLightEntity : public CEntity, public ILightEntity
 {
 public:
 	CLightEntity(EEInterface& oInterface, IRessource* pLight);

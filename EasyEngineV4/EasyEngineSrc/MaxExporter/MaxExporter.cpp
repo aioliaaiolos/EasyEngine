@@ -730,7 +730,8 @@ INT_PTR CALLBACK CMaxExporter::OnExportAnim(HWND hWnd, UINT msg, WPARAM wParam, 
 			s_pExporter->m_hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""), CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
 				20, 121, 150, 200, hWnd, NULL, (HINSTANCE)GetWindowLongW(hWnd, 0), NULL);
 			//path = BrowseFolder("C:/Users/wladi/Documents/Developpement/EasyEngine2/trunk/EasyEngineV4/EasyEngine/Data/Animations");
-			path = "C:/Users/wladi/Documents/Developpement/EasyEngine2/trunk/EasyEngineV4/EasyEngine/Data/Animations";
+			//path = "C:/Users/wladi/Documents/Developpement/EasyEngine2/trunk/EasyEngineV4/EasyEngine/Data/Animations";
+			path = "D:/Developpement/EasyEngine-git/trunk/EasyEngineV4/EasyEngine/Data/Animations";
 			if (path != "") {
 				path = path + "/*.bke";
 				HANDLE hFile = FindFirstFileA(path.c_str(), &findFileData);
