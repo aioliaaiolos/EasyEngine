@@ -64,7 +64,8 @@ public:
 #endif // DISPLAYCURSOR
 	int				CreateListener( IGUIManager::EVENT_CALLBACK pfnCallBack );
 	void			AddEventListener( int hWidget, int hListener);
-	void			Print( std::string sText, int x, int y, TFontColor color = eWhite);
+	void			CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets);
+	void			Print( string sText, int x, int y, TFontColor color = eWhite);
 	void			Print( char c, int x, int y );
 	void			SetActive( bool bActivate );
 	bool			GetActive();

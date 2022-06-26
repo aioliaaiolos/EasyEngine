@@ -38,7 +38,7 @@ public:
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, vector<CCondition>& conditions);
 	void									Display();
-	void									DisplayTopicInfos(string sTopic);
+	void									DisplayTopicInfos(string sTopic, string sSpeakerId);
 	void									SetSpeakerId(string sId) override;
 
 private:
@@ -47,7 +47,10 @@ private:
 	void									DecodeString(string& sIn, string& sOut);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, void* pData);
 	void									OnShow(bool bShow) override;
+	void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
+	void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
 
+	EEInterface&							m_oInterface;
 	IRenderer&								m_oRenderer;
 	IRessourceManager&						m_oRessourceManager;
 	IFileSystem&							m_oFileSystem;
@@ -55,6 +58,15 @@ private:
 	CGUIManager*							m_pGUIManager;
 	string									m_sText;
 	const int								m_nMaxCharPerLine;
+};
+
+class CLink : public CGUIWidget
+{
+public:
+	CLink(EEInterface& oInterface, string sText);
+
+private:
+	vector<CGUIWidget> m_vText;
 };
 
 class CTopicFrame : public CGUIWidget

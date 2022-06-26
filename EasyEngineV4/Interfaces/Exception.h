@@ -19,6 +19,11 @@ public:
 	virtual void SetErrorMessage( string sMessage ){ m_sMessage = sMessage; }
 };
 
+class CTopicException : public CEException
+{
+	CTopicException(string sMessage) : CEException(sMessage) {}
+};
+
 class CBadFileFormat : public CEException
 {
 public:

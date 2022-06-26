@@ -109,6 +109,7 @@ public:
 	virtual void			SetGUIMode(bool bGUIMode) = 0;
 	virtual bool			GetGUIMode() = 0;
 	virtual void			ToggleDisplayMap() = 0;
+	virtual void			CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets) = 0;
 };
 
 #endif // IGUIManager_H

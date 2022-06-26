@@ -17,6 +17,7 @@ using namespace rapidjson;
 
 CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	CGUIWindow("Gui/TopicsWindow.bmp", oInterface, CDimension(width, height)),
+	m_oInterface(oInterface),
 	m_nMaxCharPerLine(96),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
@@ -58,15 +59,51 @@ void CTopicsWindow::Display()
 	m_pGUIManager->Print(m_sText, GetPosition().GetX(), GetPosition().GetY());
 }
 
-void CTopicsWindow::DisplayTopicInfos(string sTopicInfo)
+void CTopicsWindow::Format(string sTopicText, string sSpeakerId, string& sFormatedText)
 {
+	int nIndex = 0;
+	int nLastIndex = 0;
+	while (nIndex < sTopicText.size()) {
+		string varTag = "<var>";
+		nIndex = sTopicText.find(varTag, nIndex);
+		sFormatedText += sTopicText.substr(nLastIndex, nIndex);
+		if (nIndex == -1)
+			break;
+		int nEndVarIndex = sTopicText.find("</var>");
+		if (nEndVarIndex == -1) {
+			ostringstream oss;
+			oss << "'var' tag not closed";
+			throw CEException(oss.str());
+		}
+		int nVarNameSize = nEndVarIndex - nIndex - varTag.size();
+		string sVarName = sTopicText.substr(nIndex + varTag.size(), nVarNameSize);
+		string sVarValue;
+		GetVarValue(sVarName, sSpeakerId, sVarValue);		
+		sFormatedText += sVarValue;
+
+		nIndex += varTag.size() + sVarName.size() + varTag.size() + 1;
+		nLastIndex = nIndex;
+	}
+}
+
+void CTopicsWindow::GetVarValue(string sVarName, string sCharacterId, string& sValue)
+{
+	if (sVarName == "CharacterName") {
+		sValue = sCharacterId;
+	}
+}
+
+void CTopicsWindow::DisplayTopicInfos(string sTopicInfo, string sSpeakerId)
+{
+	string sFormatedText;
+	Format(sTopicInfo, sSpeakerId, sFormatedText);
 	vector<int> returnIndices;
 	int textIndex = 0;
-	while (textIndex < sTopicInfo.size()) {
+	while (textIndex < sFormatedText.size()) {
 		int lineIndex = 0;
 		int lastWordIndex = 0;
-		while ( (textIndex < sTopicInfo.size()) && (lineIndex < m_nMaxCharPerLine) ) {
-			if (sTopicInfo[textIndex] == ' ') {
+		while ( (textIndex < sFormatedText.size()) && (lineIndex < m_nMaxCharPerLine) ) {
+			if (sFormatedText[textIndex] == ' ') {
 				lastWordIndex = textIndex;
 			}
 			lineIndex++;
@@ -76,7 +113,7 @@ void CTopicsWindow::DisplayTopicInfos(string sTopicInfo)
 			returnIndices.push_back(lastWordIndex);
 	}
 
-	string sTruncatedString = sTopicInfo;
+	string sTruncatedString = sFormatedText;
 	for (int i = 0; i < returnIndices.size(); i++) {
 		string::iterator itIndex = sTruncatedString.begin() + returnIndices[i];
 		itIndex = sTruncatedString.erase(itIndex);
@@ -219,6 +256,15 @@ void CTopicsWindow::LoadTopics(string sFileName)
 	ifs.close();
 }
 
+
+CLink::CLink(EEInterface& oInterface, string sText) :
+	CGUIWidget(100, 20)
+{	
+	IGUIManager& oGUIManager = static_cast<IGUIManager&>(*oInterface.GetPlugin("GUIManager"));
+	oGUIManager.CreateWidgetArrayFromString(sText, IGUIManager::TFontColor::eBlue, m_vText);
+
+}
+
 CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height) :
 	CGUIWidget(oInterface, "Gui/topic-frame.bmp", width, height),
 	m_oInterface(oInterface),
@@ -317,7 +363,14 @@ void CTopicFrame::OnItemRelease(int itemIndex)
 	int idx = SelectTopic(itTopic->second, m_sSpeakerId);
 	if (idx < 0) 
 		idx = 0;
-	GetParent()->DisplayTopicInfos(itTopic->second[idx].m_sText);
+	try {
+		GetParent()->DisplayTopicInfos(itTopic->second[idx].m_sText, m_sSpeakerId);
+	}
+	catch (CTopicException& e) {
+		string sMessage = string("Erreur in 'topic.json' : ") + e.what();
+		CEException ex(sMessage);
+		throw ex;
+	}
 }
 
 void CTopicFrame::OnItemHover(int itemIndex)

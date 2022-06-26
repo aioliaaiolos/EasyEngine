@@ -94,7 +94,7 @@ bool CCylinder::IsIntersect(const CBox& box) const
 
 	CBox boxTemp;
 	boxTemp.Set(box.GetMinPoint(), box.GetDimension());
-	boxTemp.SetWorldMatrix(boxMatInCylBase);
+	boxTemp.SetTM(boxMatInCylBase);
 
 	vector<CVector> points;
 	boxTemp.GetPoints(points);

@@ -440,23 +440,14 @@ void CGUIManager::RemoveWindow(IGUIWindow* pWindow)
 		SetGUIMode(bGUIMode);
 }
 
-//-----------------------------------------------------------------------------------------------------
-//										IsVisible
-//-----------------------------------------------------------------------------------------------------
 bool CGUIManager::IsVisible(CGUIWindow* pWindow)
 {
 	return pWindow->IsVisible(); 
 }
 
-//-----------------------------------------------------------------------------------------------------
-//										Print
-//-----------------------------------------------------------------------------------------------------
-
-void CGUIManager::Print( string sText, int x, int y, TFontColor color )
-{ 
-	int nNewSize = m_vText.size() + 1 ;
-	m_vText.resize( nNewSize );
-	for( unsigned int i = 0; i < sText.size(); i++ )
+void CGUIManager::CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets)
+{
+	for (unsigned int i = 0; i < sText.size(); i++)
 	{
 		CGUIWidget* pWidget = NULL;
 		switch (color)
@@ -473,8 +464,16 @@ void CGUIManager::Print( string sText, int x, int y, TFontColor color )
 		default:
 			break;
 		}
-		m_vText[ nNewSize - 1 ].m_vWidget.push_back( *pWidget );
+		widgets.push_back(*pWidget);
 	}
+}
+
+void CGUIManager::Print( string sText, int x, int y, TFontColor color )
+{ 
+	int nNewSize = m_vText.size() + 1 ;
+	m_vText.resize( nNewSize );
+	CreateWidgetArrayFromString(sText, color, m_vText[nNewSize - 1].m_vWidget);
+
 	m_vText[ nNewSize - 1 ].m_nPosX = x;
 	m_vText[ nNewSize - 1 ].m_nPosY = y;
 }
@@ -611,7 +610,6 @@ bool CGUIManager::GetGUIMode()
 //-----------------------------------------------------------------------------------------------------
 void CGUIManager::RenderText()
 {
-	
 	for( unsigned int i = 0; i < m_vText.size(); i++ )
 	{
 		CLine& oLine = m_vText[ i ];
