@@ -11,6 +11,14 @@ CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimensio
 {
 }
 
+CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight) :
+	CGUIWidget(oInterface, fileName, nWidth, nHeight),
+	m_bVisible(false),
+	m_bGUIMode(false)
+{
+
+}
+
 CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
 	CGUIWidget(oInterface, windowSize, skin),
 	m_bVisible(false),
@@ -29,9 +37,18 @@ void CGUIWindow::SetGUIMode(bool bGUIMode)
 
 void CGUIWindow::AddWidget(CGUIWidget* pWidget)
 {
-	m_vWidget.push_back(pWidget);
-	pWidget->SetPosition(pWidget->GetPosition().GetX() + m_oPosition.GetX(), pWidget->GetPosition().GetY() + m_oPosition.GetY());
 	pWidget->SetParent(this);
+	m_vWidget.push_back(pWidget);
+	pWidget->SetRelativePosition(pWidget->GetRelativePosition().GetX(), pWidget->GetRelativePosition().GetY());
+}
+
+deque<CGUIWidget*>::iterator CGUIWindow::RemoveWidget(CGUIWidget* pWidget)
+{
+	deque<CGUIWidget*>::iterator itWidget = std::find(m_vWidget.begin(), m_vWidget.end(), pWidget);
+	m_vWidget.erase(itWidget);
+	pWidget->SetParent(nullptr);
+	delete pWidget;
+	return itWidget;
 }
 
 void CGUIWindow::SetPosition(float fPosX, float fPosY)
@@ -73,12 +90,6 @@ bool CGUIWindow::IsVisible()
 
 void CGUIWindow::Clear()
 {
-	/*for (int i=0 ; i<_vWidget.size() ; i++)
-	{		
-		CGUIWidget* pWidget = _vWidget[i];
-		delete(_vWidget[i]);
-		_vWidget[i] = NULL;
-	}*/
 	m_vWidget.clear();
 }
 
@@ -99,6 +110,11 @@ void CGUIWindow::UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager:
 		CGUIWidget* pWidget = GetWidget((unsigned int)i);
 		pWidget->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);
 	}
+}
+
+deque<CGUIWidget*>& CGUIWindow::GetChildren()
+{
+	return m_vWidget;
 }
 
 void CGUIWindow::OnShow(bool bShow)

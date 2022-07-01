@@ -45,7 +45,8 @@ m_bActive( true ),
 m_nCharspace( 1 ),
 m_bGUIMode(false),
 m_bDisplayMap(false),
-m_pScene(nullptr)
+m_pScene(nullptr),
+m_pCurrentFont(nullptr)
 {
 	ISceneManager* pSceneManager = static_cast<ISceneManager*>(oInterface.GetPlugin("SceneManager"));
 	m_pScene = dynamic_cast<IScene*>(pSceneManager->GetScene("Game"));
@@ -59,7 +60,7 @@ m_pScene(nullptr)
 #endif // DISPLAYCURSOR
 	InitFontMap();
 	m_pTopicsWindow = new CTopicsWindow(oInterface, 900, 800);
-	m_pMapWindow = new CMinimapWindow(oInterface, *m_pScene, 512, 512);
+	m_pMapWindow = new CMinimapWindow(oInterface, *m_pScene, 512, 512);	
 }
 
 
@@ -103,12 +104,21 @@ void CGUIManager::InitFontMap()
 		for( int j = 0; j < 16; j++ )
 		{
 			char c = (char) ( i * 16 + j );
-			CRectangle charRect( j * 16, 16 * i, vCharSize[ i * 16 + j ].m_x, vCharSize[ i * 16 + j ].m_y );			
-			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, pFontTextureBlue, charRect);
-			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, pFontTextureTurquoise, charRect);
-			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, pFontTextureWhite, charRect, m_mWidgetFontInfos[c], m_pFontMaterial);
+			CRectangle charRect( j * 16, 16 * i, vCharSize[ i * 16 + j ].m_x, vCharSize[ i * 16 + j ].m_y );
+			ILoader::CMeshInfos mi;
+			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, pFontTextureBlue, charRect, mi, m_pBlueFontMaterial);
+			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, pFontTextureTurquoise, charRect, mi, m_pTurquoiseFontMaterial);
+			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, pFontTextureWhite, charRect, m_mWidgetFontInfos[c], m_pWhiteFontMaterial);
 		}
 	}
+	
+	m_mFontMaterialByColor[IGUIManager::TFontColor::eBlue] = m_pBlueFontMaterial;
+	m_mFontMaterialByColor[IGUIManager::TFontColor::eTurquoise] = m_pTurquoiseFontMaterial;
+	m_mFontMaterialByColor[IGUIManager::TFontColor::eWhite] = m_pWhiteFontMaterial;
+	
+	m_mFontWidgetByColor[IGUIManager::TFontColor::eBlue] = m_mWidgetFontBlue;
+	m_mFontWidgetByColor[IGUIManager::TFontColor::eTurquoise] = m_mWidgetFontTurquoise;
+	m_mFontWidgetByColor[IGUIManager::TFontColor::eWhite] = m_mWidgetFontWhite;
 }
 
 void CGUIManager::GetScreenCoordFromTexCoord( const CRectangle& oTexture, const CDimension& oScreenDim, CRectangle& oScreen ) const
@@ -468,8 +478,29 @@ void CGUIManager::CreateWidgetArrayFromString(string sText, TFontColor color, ve
 	}
 }
 
+void CGUIManager::CreateWidgetFromChar(char c, TFontColor color, CGUIWidget& widget)
+{
+	CGUIWidget* pWidget = NULL;
+	switch (color)
+	{
+	case eWhite:
+		pWidget = m_mWidgetFontWhite[c];
+		break;
+	case eBlue:
+		pWidget = m_mWidgetFontBlue[c];
+		break;
+	case eTurquoise:
+		pWidget = m_mWidgetFontTurquoise[c];
+		break;
+	default:
+		break;
+	}
+	widget = *pWidget;
+}
+
 void CGUIManager::Print( string sText, int x, int y, TFontColor color )
 { 
+	m_pCurrentFont = &GetFontWidget(color);
 	int nNewSize = m_vText.size() + 1 ;
 	m_vText.resize( nNewSize );
 	CreateWidgetArrayFromString(sText, color, m_vText[nNewSize - 1].m_vWidget);
@@ -478,83 +509,167 @@ void CGUIManager::Print( string sText, int x, int y, TFontColor color )
 	m_vText[ nNewSize - 1 ].m_nPosY = y;
 }
 
-void CGUIManager::Print( char c, int x, int y )
+void CGUIManager::Print( char c, int x, int y, IGUIManager::TFontColor color)
 {
 	string s;
 	s.push_back( c );
-	Print( s, x, y, eWhite );
+	Print( s, x, y, color);
 }
 
-int CGUIManager::CreateStaticText( vector< string >& vText, int nPosX, int nPosY )
+void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffsetX, IGUIManager::TFontColor color)
+{
+	fOffsetX = 0;
+	unsigned int nScreenWidth, nScreenHeight;
+	m_oRenderer.GetResolution(nScreenWidth, nScreenHeight);
+	float fPosX, fPosY;
+	CGUIWidget oTestWidget = *(GetFontWidget(color)).at('a');
+	oTestWidget.SetPosition(nPosX, nPosY);
+	oTestWidget.GetLogicalPosition(fPosX, fPosY, nScreenWidth, nScreenHeight);	
+
+	for (int iChar = 0; iChar < sText.size(); iChar++, nNumChar++)
+	{
+		char c = sText[iChar];
+		ILoader::CMeshInfos& miTemp = m_mWidgetFontInfos[c];
+
+		if (iChar > 0)
+		{
+			CGUIWidget oTempWidget(0, 0); // = *m_mWidgetFontWhite[sText[iChar - 1]];
+			CreateWidgetFromChar(sText[iChar - 1], color, oTempWidget);
+			oTempWidget.SetPosition(oTempWidget.GetDimension().GetWidth() + m_nCharspace, 0);
+			float x, y;
+			oTempWidget.GetLogicalPosition(x, y, nScreenWidth, nScreenHeight);
+			fOffsetX += x;
+		}
+		for (int iVertex = 0; iVertex < miTemp.m_vVertex.size(); iVertex++)
+		{
+			float ox = 0.f, oy = 0.f;
+			if ((iVertex % 3) == 0)
+				ox = fOffsetX + fPosX;
+			if (((iVertex - 1) % 3) == 0)
+				oy = fOffsetY + fPosY;
+			mi.m_vVertex.push_back(miTemp.m_vVertex[iVertex] + ox + oy);
+		}
+
+		for (int iIndex = 0; iIndex < miTemp.m_vIndex.size(); iIndex++)
+			mi.m_vIndex.push_back(miTemp.m_vIndex[iIndex] + nNumChar * 4);
+		for (int iUVIndex = 0; iUVIndex < miTemp.m_vUVIndex.size(); iUVIndex++)
+			mi.m_vUVIndex.push_back(miTemp.m_vUVIndex[iUVIndex] + nNumChar * 4);
+		mi.m_vUVVertex.insert(mi.m_vUVVertex.begin() + mi.m_vUVVertex.size(), miTemp.m_vUVVertex.begin(), miTemp.m_vUVVertex.end());
+		mi.m_vNormalFace.insert(mi.m_vNormalFace.begin() + mi.m_vNormalFace.size(), miTemp.m_vNormalFace.begin(), miTemp.m_vNormalFace.end());
+		mi.m_vNormalVertex.insert(mi.m_vNormalVertex.begin() + mi.m_vNormalVertex.size(), miTemp.m_vNormalVertex.begin(), miTemp.m_vNormalVertex.end());
+	}
+}
+
+IRessource* CGUIManager::GetFontMaterial(IGUIManager::TFontColor color)
+{
+	return m_mFontMaterialByColor[color];
+}
+
+const map<unsigned char, CGUIWidget*>& CGUIManager::GetFontWidget(IGUIManager::TFontColor color) const
+{
+	return m_mFontWidgetByColor.at(color);
+}
+
+int CGUIManager::CreateStaticText(vector< string >& vText, int nPosX, int nPosY, IGUIManager::TFontColor color)
 {
 	ILoader::CAnimatableMeshData ami;
 	ILoader::CMeshInfos mi;
 	mi.m_bCanBeIndexed = false;
 	mi.m_bMultiMaterial = false;
-	ILoader::CMeshInfos& miA = m_mWidgetFontInfos[ 'a' ];
+	ILoader::CMeshInfos& miA = m_mWidgetFontInfos['a'];
 	mi.m_oMaterialInfos = miA.m_oMaterialInfos;
 	mi.m_sShaderName = "gui";
 	int nNumChar = 0;
 	float fOffsetY = 0.f;
-	float fLogicalFontHeight;
-	CGUIWidget oTestWidget = *m_mWidgetFontWhite[ 'a' ];
+	CGUIWidget oTestWidget = *(GetFontWidget(color)).at('a');
 	unsigned int nScreenWidth, nScreenHeight;
-	m_oRenderer.GetResolution( nScreenWidth, nScreenHeight );
+	m_oRenderer.GetResolution(nScreenWidth, nScreenHeight);
 	float fFontDimX, fFontDimY;
-	oTestWidget.GetLogicalDimension( fFontDimX, fFontDimY, nScreenWidth, nScreenHeight );
-	oTestWidget.SetPosition( nPosX, nPosY );
+	oTestWidget.GetLogicalDimension(fFontDimX, fFontDimY, nScreenWidth, nScreenHeight);
+	oTestWidget.SetPosition(nPosX, nPosY);
 	float fPosX, fPosY;
-	oTestWidget.GetLogicalPosition( fPosX, fPosY, nScreenWidth, nScreenHeight );
-	CGUIWidget oSpaceWidget = *m_mWidgetFontWhite[ ' ' ];
-	float fSpaceWidgetWidth, fSpaceWidgetHeight;
-	oSpaceWidget.GetLogicalDimension( fSpaceWidgetWidth, fSpaceWidgetHeight, nScreenWidth, nScreenHeight );
-	float fTabWidth = fSpaceWidgetWidth * 4;
+	oTestWidget.GetLogicalPosition(fPosX, fPosY, nScreenWidth, nScreenHeight);
 
 	for( int iLine = 0; iLine < vText.size(); iLine++ )
 	{
-		float fOffsetX = 0;
-		for( int iChar = 0; iChar < vText[ iLine ].size(); iChar++, nNumChar++ )
-		{
-			char c = vText[ iLine ][ iChar ];
-			ILoader::CMeshInfos& miTemp = m_mWidgetFontInfos[ c ];
-
-			if( iChar > 0 )
-			{
-				CGUIWidget oTempWidget = *m_mWidgetFontWhite[ vText[ iLine ][ iChar - 1 ] ];
-				oTempWidget.SetPosition( oTempWidget.GetDimension().GetWidth() + m_nCharspace, 0 );
-				float x, y;
-				oTempWidget.GetLogicalPosition( x, y, nScreenWidth, nScreenHeight );
-				fOffsetX += x;
-			}
-			for( int iVertex = 0; iVertex < miTemp.m_vVertex.size(); iVertex++ )
-			{
-				float ox = 0.f, oy = 0.f;
-				if( ( iVertex % 3 ) == 0 )
-					ox = fOffsetX + fPosX;
-				if( ( ( iVertex - 1 ) % 3  ) == 0 )
-					oy = fOffsetY + fPosY;
-				mi.m_vVertex.push_back( miTemp.m_vVertex[ iVertex ] + ox + oy );
-			}
-
-			for( int iIndex = 0; iIndex < miTemp.m_vIndex.size(); iIndex++ )
-				mi.m_vIndex.push_back( miTemp.m_vIndex[ iIndex ] + nNumChar * 4 );
-			for( int iUVIndex = 0; iUVIndex < miTemp.m_vUVIndex.size(); iUVIndex++ )
-				mi.m_vUVIndex.push_back( miTemp.m_vUVIndex[ iUVIndex ] + nNumChar * 4 );
-			mi.m_vUVVertex.insert( mi.m_vUVVertex.begin() + mi.m_vUVVertex.size(), miTemp.m_vUVVertex.begin(), miTemp.m_vUVVertex.end() );
-			mi.m_vNormalFace.insert( mi.m_vNormalFace.begin() + mi.m_vNormalFace.size(), miTemp.m_vNormalFace.begin(), miTemp.m_vNormalFace.end() );
-			mi.m_vNormalVertex.insert( mi.m_vNormalVertex.begin() + mi.m_vNormalVertex.size(), miTemp.m_vNormalVertex.begin(), miTemp.m_vNormalVertex.end() );			
-		}
+		float fOffsetX;
+		AddTextToMeshInfos(vText[iLine], nPosX, nPosY, fOffsetY, nNumChar, mi, fOffsetX, color);
 		fOffsetY -= fFontDimY;
 	}
 	if( mi.m_vVertex.size() > 0 )
 	{
 		ami.m_vMeshes.push_back( mi );
-		IAnimatableMesh* pARect = m_oRessourceManager.CreateMesh( ami, m_pFontMaterial );
+		IAnimatableMesh* pARect = m_oRessourceManager.CreateMesh( ami, GetFontMaterial(color));
 		int nID = m_mStaticText.size();
 		m_mStaticText[ nID ] = pARect;
 		return nID;
 	}
 	return -1;
+}
+
+IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, IGUIManager::TFontColor color)
+{
+	float fOffsetY = 0.f;
+	int nNumChar = 0;
+	ILoader::CAnimatableMeshData ami;
+	ILoader::CMeshInfos mi;
+	mi.m_bCanBeIndexed = false;
+	mi.m_bMultiMaterial = false;
+	ILoader::CMeshInfos& miA = m_mWidgetFontInfos['a'];
+	mi.m_oMaterialInfos = miA.m_oMaterialInfos;
+	mi.m_sShaderName = "gui";
+
+	IAnimatableMesh* pARect = nullptr;
+	float fOffsetX;
+	AddTextToMeshInfos(sText, 0, 0, fOffsetY, nNumChar, mi, fOffsetX, color);
+	if (mi.m_vVertex.size() > 0)
+	{
+		ami.m_vMeshes.push_back(mi);
+		pARect = m_oRessourceManager.CreateMesh(ami, GetFontMaterial(color));
+	}
+	return pARect;
+}
+
+CGUIWidget* CGUIManager::CreateStaticText(string sText, IGUIManager::TFontColor color)
+{
+	IAnimatableMesh* pARect = CreateTextMeshes(sText, color);
+	int nWidth = 0;
+	for (char& c : sText) {
+		nWidth += GetLetterEspacementX(c) + 1;
+	}
+	CGUIWidget* pWidget = new CGUIWidget(nWidth, GetCurrentFontEspacementY());
+	pWidget->SetQuad(pARect->GetMesh(0));
+	return pWidget;
+}
+
+void CGUIManager::CreateStaticText(string sText, int nMaxWidth, vector<CGUIWidget*>& vLineWidgets)
+{
+	int nMaxCharacterPerLine = nMaxWidth / (GetCurrentFontEspacementX() - 2);
+	CreateStaticText_(sText, nMaxCharacterPerLine, vLineWidgets);
+}
+
+void CGUIManager::CreateStaticText_(string sText, int nMaxCharacterPerLine, vector<CGUIWidget*>& vLineWidgets)
+{
+	string subText = sText.substr(0, nMaxCharacterPerLine);
+	int nTextIndex = 0;
+	int nLastSpaceIndex = 0;
+	while (nTextIndex < subText.size()) {
+		if (subText[nTextIndex] == ' ')
+			nLastSpaceIndex = nTextIndex;
+		nTextIndex++;
+	}
+	if (sText[nTextIndex] == ' ' || sText[nTextIndex] == '\0')
+		nLastSpaceIndex = nTextIndex;
+	subText = sText.substr(0, nLastSpaceIndex);
+
+	CGUIWidget* pWidget = CreateStaticText(subText);
+	vLineWidgets.push_back(pWidget);
+	if (sText.size() > subText.size() + 1)
+		sText = sText.substr(subText.size() + 1);
+	else
+		sText = "";
+	if (!sText.empty())
+		CreateStaticText_(sText, nMaxCharacterPerLine, vLineWidgets);
 }
 
 void CGUIManager::DestroyStaticTest( int nID )
@@ -617,7 +732,7 @@ void CGUIManager::RenderText()
 		for( unsigned int j = 0; j < oLine.m_vWidget.size(); j++ )
 		{
 			CGUIWidget& oWidget = oLine.m_vWidget[ j ];
-			if(  oWidget == *m_mWidgetFontWhite[ '\n' ] )
+			if(  oWidget == *(*m_pCurrentFont).at('\n'))
 			{
 				nCursorPosX = oLine.m_nPosX;
 				nCursorPosY += GetCurrentFontEspacementY();
@@ -645,9 +760,19 @@ void CGUIManager::RenderText()
 	m_vText.clear();
 }
 
+int CGUIManager::GetCurrentFontEspacementX()
+{
+	return (int)GetFontWidget(IGUIManager::TFontColor::eWhite).at('A')->GetDimension().GetWidth() + 2;
+}
+
+int CGUIManager::GetLetterEspacementX(char c)
+{
+	return (int)GetFontWidget(IGUIManager::TFontColor::eWhite).at(c)->GetDimension().GetWidth();
+}
+
 int CGUIManager::GetCurrentFontEspacementY()
 {
-	return (int)m_mWidgetFontWhite['A']->GetDimension().GetHeight() + 2;
+	return (int)GetFontWidget(IGUIManager::TFontColor::eWhite).at('A')->GetDimension().GetHeight() + 2;
 }
 
 string CGUIManager::GetName()
@@ -667,13 +792,16 @@ void CGUIManager::ToggleDisplayMap()
 
 unsigned int CGUIManager::GetCurrentFontHeight() const
 {
-	map< unsigned char, CGUIWidget* >::const_iterator it =  m_mWidgetFontWhite.find( 'A' );
+	const map<unsigned char, CGUIWidget*>* pCurrent = m_pCurrentFont;
+	if (!m_pCurrentFont)
+		pCurrent = &GetFontWidget(IGUIManager::TFontColor::eWhite);
+	map< unsigned char, CGUIWidget* >::const_iterator it = pCurrent->find( 'A' );
 	return ( unsigned int )it->second->GetDimension().GetHeight();
 }
 
 unsigned int CGUIManager::GetCurrentFontWidth( char c ) const
 {
-	map< unsigned char, CGUIWidget* >::const_iterator it = m_mWidgetFontWhite.find( c );
+	map< unsigned char, CGUIWidget* >::const_iterator it = m_pCurrentFont->find( c );
 	return ( unsigned int )it->second->GetDimension().GetWidth();
 }
 

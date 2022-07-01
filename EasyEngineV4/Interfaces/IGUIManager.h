@@ -94,13 +94,13 @@ public:
 	virtual void			SetVisibility( int hWindow, bool bVisible ) = 0;
 	virtual void			OnRender() = 0;
 	virtual void			Print( std::string sText, int x, int y, TFontColor color = eWhite) = 0;
-	virtual void			Print( char c, int x, int y ) = 0;
+	virtual void			Print( char c, int x, int y, IGUIManager::TFontColor color = eWhite) = 0;
 	virtual void			SetActive( bool bActivate ) = 0;
 	virtual bool			GetActive() = 0;
 	virtual unsigned int	GetCurrentFontHeight() const = 0;
 	virtual unsigned int	GetCurrentFontWidth( char c ) const = 0;
 	virtual unsigned int	GetCharSpace() = 0;
-	virtual int				CreateStaticText( vector< string >& vText, int nPosX = 0, int nPosY = 0 ) = 0;
+	virtual int				CreateStaticText( vector< string >& vText, int nPosX = 0, int nPosY = 0, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite) = 0;
 	virtual void			DestroyStaticTest( int nID ) = 0;
 	virtual void			PrintStaticText( int nTextID ) = 0;
 	virtual void			EnableStaticText( int nTextID, bool bEnable ) = 0;

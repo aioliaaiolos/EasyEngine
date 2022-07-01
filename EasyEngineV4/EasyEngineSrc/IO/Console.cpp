@@ -112,7 +112,7 @@ void CConsole::UpdateBlink( int nFontHeight )
 	if( m_bCursorBlinkState && !m_bPauseMode ) {
 		int nLastIndice = m_vLines.size() - 1;
 		unsigned int PixelCursorPos = ComputePixelCursorPos() - 1;
-		m_oGUIManager.Print( '|', m_xPos + PixelCursorPos, m_yPos + nLastIndice * nFontHeight );
+		m_oGUIManager.Print( '|', m_xPos + PixelCursorPos, m_yPos + nLastIndice * nFontHeight);
 	}
 }
 

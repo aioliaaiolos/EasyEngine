@@ -141,3 +141,25 @@ void CStringUtils::GetShortFileName(string sPathFile, string& sFileName)
 	if(idx >= 0)
 		sFileName = sPathFile.substr(idx + 1);
 }
+
+void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines)
+{
+	string subText = sText;
+
+	while (!subText.empty()) {
+		int nTextIndex = 0;
+		int nLastSpaceIndex = 0;
+		while (nTextIndex < nMaxCharacterPerLine && nTextIndex < subText.size()) {
+			if (subText[nTextIndex] == ' ')
+				nLastSpaceIndex = nTextIndex;
+			nTextIndex++;
+		}
+		if (subText[nTextIndex] == ' ' || subText[nTextIndex] == '\0')
+			nLastSpaceIndex = nTextIndex;
+		string s = subText.substr(0, nLastSpaceIndex);
+		if (s[0] == ' ')
+			s = s.substr(1);
+		vLines.push_back(s);
+		subText = subText.substr(nLastSpaceIndex);
+	} 
+}

@@ -7,7 +7,7 @@
 		{
 			"Title": "Que fais-je ici ?",
 			"Text": [
-				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient,",
+				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient, ",
 				"adressez-vous a l'<link>administration</link> quand vous vous sentirez pret à sortir"
 			],
 			"Conditions": [

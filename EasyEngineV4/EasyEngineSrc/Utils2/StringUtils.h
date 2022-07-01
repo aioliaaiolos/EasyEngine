@@ -20,6 +20,7 @@ public:
 	static void		GetShortFileName(string sPathFile, string& sFileName);
 	static void		ConvertStringToWString(const std::string& s, std::wstring& w);
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
+	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines);
 };
 
 

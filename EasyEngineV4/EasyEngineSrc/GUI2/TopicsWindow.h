@@ -31,6 +31,15 @@ struct CTopicInfo
 	CTopicInfo() {}
 };
 
+
+struct CTopicInfoWidgets : public CGUIWidget
+{
+	CTopicInfoWidgets(int nWidth, int nHeight);
+
+	CGUIWidget* m_pTitle;
+	CGUIWidget*	m_pText;
+};
+
 class CTopicsWindow : public CGUIWindow, public ITopicWindow
 {
 public:
@@ -38,8 +47,9 @@ public:
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, vector<CCondition>& conditions);
 	void									Display();
-	void									DisplayTopicInfos(string sTopic, string sSpeakerId);
 	void									SetSpeakerId(string sId) override;
+	void									AddTopicText(const string& sTopicText);
+	void									RemoveTopicTexts();
 
 private:
 
@@ -47,29 +57,21 @@ private:
 	void									DecodeString(string& sIn, string& sOut);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, void* pData);
 	void									OnShow(bool bShow) override;
-	void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
-	void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
+	void									DestroyTopicsWidgets();
 
 	EEInterface&							m_oInterface;
 	IRenderer&								m_oRenderer;
 	IRessourceManager&						m_oRessourceManager;
 	IFileSystem&							m_oFileSystem;
 	CTopicFrame*							m_pTopicFrame;
+	CGUIWindow*								m_pTopicTextFrame;
 	CGUIManager*							m_pGUIManager;
 	string									m_sText;
 	const int								m_nMaxCharPerLine;
+	int										m_nTopicTextPointer;
 };
 
-class CLink : public CGUIWidget
-{
-public:
-	CLink(EEInterface& oInterface, string sText);
-
-private:
-	vector<CGUIWidget> m_vText;
-};
-
-class CTopicFrame : public CGUIWidget
+class CTopicFrame : public CGUIWindow
 {
 public:
 	enum TTopicState {
@@ -85,34 +87,38 @@ public:
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
 	void										SetSpeakerId(string sId);
+	void										CreateTopicsWidgets();
+	void										DestroyTopicsWidgets();
 
 private:
 
 	CTopicsWindow*								GetParent();
 	int											GetTopicIndexFromY(int y);
-	void										OnItemSelected(int itemIndex);
-	void										OnItemRelease(int itemIndex);
-	void										OnItemHover(int itemIndex);
+	void										OnItemSelected(CGUIWidget* pTitle);
+	void										OnItemHover(CGUIWidget* pTitle);
 	int											SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId);
 	int											IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
-	static void									OnEventCallback(IGUIManager::ENUM_EVENT nEvent, CGUIWidget* pWidget, int x, int y);
 	static void									OnGUIManagerCreated(CPlugin* plugin, void* pData);
 	static void									OnScriptManagerCreated(CPlugin* plugin, void* pData);
+	static void									OnTopicEvent(IGUIManager::ENUM_EVENT nEvent, CGUIWidget* pWidget, int x, int y);
+	static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
+	static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
 
-	EEInterface&								m_oInterface;
-	IGUIManager*								m_pGUIManager;
-	IScriptManager*								m_pScriptManager;
-	const int									m_nXTextMargin;
-	const int									m_nYTextmargin;
-	const int									m_nYmargin;
-	const int									m_nTextHeight;
-	map<string, vector<CTopicInfo>>				m_mTopics;
-	map<string, vector<CTopicInfo>>				m_mDisplayedTopics;
-	map<string, TTopicState>					m_mTopicsState;
-	const int									m_nTopicBorderWidth;
-	map<TTopicState, IGUIManager::TFontColor>	m_mFontColorFromTopicState;
-	string										m_sSpeakerId;
+	EEInterface&											m_oInterface;
+	CGUIManager*											m_pGUIManager;
+	IScriptManager*											m_pScriptManager;
+	const int												m_nXTextMargin;
+	const int												m_nYTextmargin;
+	const int												m_nYmargin;
+	const int												m_nTextHeight;
+	map<string, vector<CTopicInfo>>							m_mTopics;
+	map<string, vector<CTopicInfo>>							m_mDisplayedTopics;
+	map<CGUIWidget*, string>								m_mDisplayedTopicWidgets;
+	map<string, TTopicState>								m_mTopicsState;
+	const int												m_nTopicBorderWidth;
+	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
+	string													m_sSpeakerId;
 };
 
 

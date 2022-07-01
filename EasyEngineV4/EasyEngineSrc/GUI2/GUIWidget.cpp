@@ -3,11 +3,12 @@
 #include "IRessource.h"
 #include "Interface.h"
 #include "IShader.h"
-#include "IGUIManager.h"
+#include "GUIManager.h"
 #include "GUIWidget.h"
 #include "listener.h"
 #include "Exception.h"
 #include "Utils2/Rectangle.h"
+#include "GUIWindow.h"
 
 using namespace std;
 
@@ -125,11 +126,23 @@ void CGUIWidget::InitManagers(EEInterface& oInterface)
 
 CGUIWidget::~CGUIWidget(void)
 {
+	delete _pListener;
+}
+
+CGUIWidget* CGUIWidget::GetParent()
+{
+	return m_pParent;
 }
 
 void CGUIWidget::SetParent(CGUIWidget* parent)
 {
 	m_pParent = parent;
+}
+
+deque<CGUIWidget*>::iterator CGUIWidget::Unlink()
+{
+	CGUIWindow* pParent = static_cast<CGUIWindow*>(m_pParent);
+	return pParent->RemoveWidget(this);
 }
 
 bool CGUIWidget::operator==( const CGUIWidget& w )
@@ -159,10 +172,24 @@ void CGUIWidget::Display()
 }
 
 
-void CGUIWidget::SetPosition( float fPosX, float fPosY )
+void CGUIWidget::SetPosition(float fPosX, float fPosY)
 {
-	m_oPosition.SetX( fPosX );
-	m_oPosition.SetY( fPosY );
+	m_oPosition.SetX(fPosX);
+	m_oPosition.SetY(fPosY);
+}
+
+void CGUIWidget::SetRelativePosition( float fPosX, float fPosY )
+{
+	m_oRelativePosition.SetX(fPosX);
+	m_oRelativePosition.SetY(fPosY);
+	float parentPosX = 0.f;
+	float parentPosY = 0.f;
+	if (m_pParent) {
+		parentPosX = m_pParent->GetPosition().GetX();
+		parentPosY = m_pParent->GetPosition().GetY();
+	}
+	m_oPosition.SetX(parentPosX + m_oRelativePosition.GetX());
+	m_oPosition.SetY(parentPosY + m_oRelativePosition.GetY());
 }
 
 void CGUIWidget::Translate(float dx, float dy)
@@ -180,6 +207,11 @@ void CGUIWidget::SetY( float fY )
 CPosition CGUIWidget::GetPosition() const
 {
 	return m_oPosition;
+}
+
+CPosition CGUIWidget::GetRelativePosition() const
+{
+	return m_oRelativePosition;
 }
 
 void CGUIWidget::GetLogicalPosition( float& x, float& y, int nResWidth, int nResHeight ) const
@@ -414,4 +446,26 @@ IMesh* CGUIWidget::CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& o
 {
 	ITexture* pTexture = static_cast< ITexture* > (oRessourceManager.GetRessource(sTextureName));
 	return CreateQuadFromTexture(oRenderer, oRessourceManager, pTexture, skin, oImageSize);
+}
+
+CLink::CLink(EEInterface& oInterface, string sText) :
+	CGUIWidget(0, 0)
+{
+	CGUIManager* pGUIManager = static_cast<CGUIManager*>(oInterface.GetPlugin("GUIManager"));
+
+	m_sText = sText;
+	int nWidth = 0;
+	for (char& c : m_sText) {
+		nWidth += pGUIManager->GetLetterEspacementX(c) + 1;
+	}
+	
+	m_oDimension.SetWidth(nWidth);
+	m_oDimension.SetHeight(pGUIManager->GetCurrentFontEspacementY());
+	IAnimatableMesh* pARect = pGUIManager->CreateTextMeshes(m_sText, IGUIManager::TFontColor::eBlue);
+	SetQuad(pARect->GetMesh(0));
+}
+
+void CLink::SetText(string sText)
+{
+
 }

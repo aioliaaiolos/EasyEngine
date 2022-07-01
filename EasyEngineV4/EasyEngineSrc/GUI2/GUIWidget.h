@@ -1,6 +1,8 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
+#include <deque>
+
 #include "Container.h"
 #include "IInputManager.h"
 #include "ILoader.h"
@@ -37,19 +39,23 @@ public:
 	virtual void			Display();
 	
 	CPosition				GetPosition()const;
+	CPosition				GetRelativePosition() const;
 	void					GetLogicalPosition( float& x, float& y, int nResWidth, int nResHeight ) const;
 	void					GetLogicalDimension( float& x, float& y, int nResWidth, int nResHeight ) const;
 	CDimension				GetDimension() const;
 
 	virtual void			SetPosition(float fPosX, float fPosY);
+	void					SetRelativePosition(float fPosX, float fPosY);
 	void					SetPosition(CPosition p);
 	void					SetY(float fY);
 	void					Translate(float fPosX, float fPosY);
 	void					SetListener(CListener* pListener);
-	void					UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager::TMouseButtonState eButtonState);
+	virtual void			UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager::TMouseButtonState eButtonState);
 	void					SetSkinName( const std::string& szSkinName );
 	std::string				GetSkinName();
+	CGUIWidget*				GetParent();
 	virtual void			SetParent(CGUIWidget* parent);
+	deque<CGUIWidget*>::iterator	Unlink();
 
 	static void				Init( int nResX, int nResY, IShader* pShader );
 
@@ -68,6 +74,7 @@ protected:
 	IMesh*					m_pMesh;
 	CDimension				m_oDimension;
 	CPosition				m_oPosition;
+	CPosition				m_oRelativePosition;
 	CListener*				_pListener;
 	bool					_bIsCursorInWidget;
 	std::string				_strSkinName;
@@ -79,7 +86,16 @@ protected:
 
 };
 
+class CLink : public CGUIWidget
+{
+public:
+	CLink(EEInterface& oInterface, string sText);
+	void SetText(string sText);
 
+
+private:
+	string	m_sText;
+};
 
 
 #endif
