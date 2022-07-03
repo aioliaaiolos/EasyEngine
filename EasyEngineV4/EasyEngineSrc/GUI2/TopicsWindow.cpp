@@ -103,35 +103,59 @@ void ExtractLink(string sText, vector<pair<bool, string>>& vText)
 	}
 }
 
+int CTopicsWindow::GetTopicTextLineCount()
+{
+	int count = 0;
+	for (CGUIWidget* pTopic : m_pTopicTextFrame->GetChildren()) {
+		CGUIWindow* pTopicWindow = dynamic_cast<CGUIWindow*>(pTopic);
+		if (pTopicWindow) {
+			count += pTopicWindow->GetWidgetCount();
+		}
+		else {
+			count++;
+		}
+	}
+	return count;
+}
+
 void CTopicsWindow::AddTopicText(const string& sTopicText)
 {
 	vector<string> vLines;
 	CStringUtils::Truncate(sTopicText, m_nMaxCharPerLine, vLines);
 
-	vector<vector<pair<bool, CGUIWidget*>>> vText;
+	vector<vector<pair<bool, CGUIWidget*>>> vTopicWidgets;
 	int nIndex = 0;
-	for (string& line : vLines) {
-		vText.push_back(vector<pair<bool, CGUIWidget*>>());
+	for (string& sTopicText : vLines) {
+		vTopicWidgets.push_back(vector<pair<bool, CGUIWidget*>>());
 		vector<pair<bool, string>> vSubString;
-		ExtractLink(line, vSubString);
-		for (pair<bool, string>& p : vSubString) {
+		ExtractLink(sTopicText, vSubString);
+		for (pair<bool, string>& topicLine : vSubString) {
 			CGUIWidget* pTextWidget = nullptr;
-			if (p.first)
-				pTextWidget = new CLink(m_oInterface, p.second);
+			if (topicLine.first) {
+				pTextWidget = new CLink(m_oInterface, topicLine.second);
+				CLink* pLink = static_cast<CLink*>(pTextWidget);
+				pLink->SetClickedCallback(OnLinkClicked);
+			}
 			else
-				pTextWidget = m_pGUIManager->CreateStaticText(p.second);
-			vText.back().push_back(pair<bool, CGUIWidget*>(p.first, pTextWidget));
+				pTextWidget = m_pGUIManager->CreateStaticText(topicLine.second);
+			pTextWidget->m_sUserData = topicLine.second;
+			vTopicWidgets.back().push_back(pair<bool, CGUIWidget*>(topicLine.first, pTextWidget));
 		}
 	}
 
-	int y = m_nTopicTextPointer * m_pGUIManager->GetCurrentFontEspacementY();
-	for (vector<pair<bool, CGUIWidget*>> text : vText) {
+	CGUIWindow* pTopicWidget = new CGUIWindow;
+	m_pTopicTextFrame->AddWidget(pTopicWidget);
+	int y = 0;
+	pTopicWidget->SetRelativePosition(0, m_nTopicTextPointer * m_pGUIManager->GetCurrentFontEspacementY());
+	for (vector<pair<bool, CGUIWidget*>> lineWidgets : vTopicWidgets) {
 		int x = 0;
-		for (pair<bool, CGUIWidget*>& p : text) {
-			m_pTopicTextFrame->AddWidget(p.second);
+		CGUIWindow* pLineWidget = new CGUIWindow;
+		for (pair<bool, CGUIWidget*>& p : lineWidgets) {
+			pLineWidget->AddWidget(p.second);
 			p.second->SetRelativePosition(x, y);
 			x += p.second->GetDimension().GetWidth();
 		}
+		pTopicWidget->AddWidget(pLineWidget);
 		m_nTopicTextPointer++;
 		y += m_pGUIManager->GetCurrentFontEspacementY();
 	}
@@ -141,16 +165,82 @@ void CTopicsWindow::AddTopicText(const string& sTopicText)
 	pBlank->SetRelativePosition(0, y);
 	m_nTopicTextPointer++;
 
+	y = 0;
 	int maxLineCount = (GetDimension().GetHeight() / m_pGUIManager->GetCurrentFontEspacementY()) - 1;
-	int numberOflineToRemove = m_nTopicTextPointer - maxLineCount;
+	int numberOflineToRemove = GetTopicTextLineCount() - maxLineCount;
 	if (numberOflineToRemove > 0) {
 		m_nTopicTextPointer -= numberOflineToRemove;
-		for (int i = 0; i < numberOflineToRemove; i++) {
+		bool bContinue = true;
+		for (int k = 0; k < m_pTopicTextFrame->GetChildren().size();) {
+			CGUIWidget* pTopicText = m_pTopicTextFrame->GetWidget(k);
+			CGUIWindow* topicTextWindow = dynamic_cast<CGUIWindow*>(pTopicText);
+			if (topicTextWindow) {
+				numberOflineToRemove -= topicTextWindow->GetChildren().size();
+				topicTextWindow->Clear();
+			}
+			else {
+				numberOflineToRemove--;
+			}
 			m_pTopicTextFrame->GetChildren().pop_front();
+			if (numberOflineToRemove <= 0)
+				break;
 		}
-		int offsetY = numberOflineToRemove * m_pGUIManager->GetCurrentFontEspacementY();
-		for (CGUIWidget* pText : m_pTopicTextFrame->GetChildren())
-			pText->SetPosition(pText->GetPosition().GetX(), pText->GetPosition().GetY() - offsetY);
+
+		int y = 0;
+		for (CGUIWidget* pTopic : m_pTopicTextFrame->GetChildren()) {
+			CGUIWindow* pTopicWindow = dynamic_cast<CGUIWindow*>(pTopic);
+			if (pTopicWindow) {
+				pTopicWindow->SetRelativePosition(0, y);
+				y += pTopicWindow->GetChildren().size() * m_pGUIManager->GetCurrentFontEspacementY();
+			}
+			else {
+				pTopic->SetRelativePosition(0, y);
+				y += m_pGUIManager->GetCurrentFontEspacementY();
+			}
+		}
+	}
+}
+
+void CTopicsWindow::OnLinkClicked(CLink* pLink)
+{
+	string sLinkText;
+	pLink->GetText(sLinkText);
+	CGUIWindow* pLine = dynamic_cast<CGUIWindow*>(pLink->GetParent());
+	if (pLine) {
+		CGUIWindow* pTopicText = dynamic_cast<CGUIWindow*>(pLine->GetParent());
+		if (pTopicText) {
+			CGUIWindow* pTopicTextFrame = dynamic_cast<CGUIWindow*>(pTopicText->GetParent());
+			if (pTopicTextFrame) {
+				CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pTopicTextFrame->GetParent());
+				if (pTopicWindow) {
+					CTopicFrame* pTopicFrame = nullptr;
+					for (CGUIWidget* pWidget : pTopicWindow->GetChildren()) {
+						pTopicFrame = dynamic_cast<CTopicFrame*>(pWidget);
+						if (pTopicFrame)
+							break;
+					}
+					string sTopicText;
+					if (sLinkText[0] >= 'a' && sLinkText[0] <= 'z') {
+						sLinkText[0] += 'A' - 'a';
+					}
+					pTopicFrame->GetTopicText(sLinkText, sTopicText);
+					pTopicWindow->m_sNextTopicTextToAdd = sTopicText;
+					IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(pTopicWindow->m_oInterface.GetPlugin("EventDispatcher"));
+					pEventDispatcher->AbonneToWindowEvent(pTopicWindow->m_pGUIManager, CTopicsWindow::OnAddTopic);
+				}
+			}
+		}
+	}
+}
+
+void CTopicsWindow::OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int)
+{
+	if (e == IEventDispatcher::TWindowEvent::T_WINDOWUPDATE) {
+		CGUIManager* pGUIManager = static_cast<CGUIManager*>(pPlugin);
+		CTopicsWindow* pTopicWindow = static_cast<CTopicsWindow*>(pGUIManager->GetTopicsWindow());
+		pTopicWindow->AddTopicText(pTopicWindow->m_sNextTopicTextToAdd);
+		IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(pTopicWindow->m_oInterface.GetPlugin("EventDispatcher"));
+		pEventDispatcher->DesabonneToWindowEvent(CTopicsWindow::OnAddTopic);
 	}
 }
 
@@ -285,6 +375,11 @@ CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height) :
 	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
 }
 
+CTopicFrame::~CTopicFrame()
+{
+
+}
+
 CTopicsWindow* CTopicFrame::GetParent()
 {
 	return (CTopicsWindow*)m_pParent;
@@ -318,6 +413,13 @@ void CTopicFrame::AddTopic(string sTopicName, string sText, vector<CCondition>& 
 	topic.m_sText = sText;
 	topic.m_vConditions = conditions;
 	m_mTopics[sTopicName].push_back(topic);
+}
+
+void CTopicFrame::GetTopicText(string sTopicTitle, string& sTopicText)
+{
+	map<CGUIWidget*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
+		[sTopicTitle](pair<CGUIWidget*, string> const& p) {return p.first->m_sUserData == sTopicTitle; });
+	sTopicText = itTopic->second;
 }
 
 void CTopicFrame::GetVarValue(string sVarName, string sCharacterId, string& sValue)
@@ -357,13 +459,13 @@ void CTopicFrame::Format(string sTopicText, string sSpeakerId, string& sFormated
 void CTopicFrame::CreateTopicsWidgets()
 {
 	int iLine = 0;
-	m_mDisplayedTopics.clear();
 	Clear();
 	for (map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.begin(); itTopic != m_mTopics.end(); itTopic++) {
 		if (IsConditionChecked(itTopic->second, m_sSpeakerId)) {
 			int y = iLine * m_nTextHeight + m_nYTextmargin;
 			string sTopic = itTopic->first;
 			CGUIWidget* pTitle = m_pGUIManager->CreateStaticText(sTopic);
+			pTitle->m_sUserData = sTopic;
 			
 			int nIdx = SelectTopic(itTopic->second, m_sSpeakerId);
 			if (nIdx < 0)
@@ -387,8 +489,6 @@ void CTopicFrame::DestroyTopicsWidgets()
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
 	pTopicWindow->RemoveTopicTexts();
-	for (map<CGUIWidget*, string>::iterator itTopic = m_mDisplayedTopicWidgets.begin(); itTopic != m_mDisplayedTopicWidgets.end(); itTopic++)
-		delete itTopic->first;	
 	m_mDisplayedTopicWidgets.clear();
 }
 

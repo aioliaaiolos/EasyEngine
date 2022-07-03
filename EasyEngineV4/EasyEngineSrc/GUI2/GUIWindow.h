@@ -15,10 +15,11 @@ class CDimension;
 class CGUIWindow  : public CGUIWidget, public virtual IGUIWindow
 {
 public:
+									CGUIWindow();
 									CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize);
 									CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight);
 									CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
-	virtual							~CGUIWindow(void);
+	virtual							~CGUIWindow();
 	void							AddWidget(CGUIWidget* pWidget);
 	deque<CGUIWidget*>::iterator	RemoveWidget(CGUIWidget* pWidget);
 	size_t							GetWidgetCount()const;
@@ -28,6 +29,7 @@ public:
 	void							Clear();
 	void							Display();
 	void							SetPosition(float fPosX, float fPosY);
+	void							SetRelativePosition(float fPosX, float fPosY) override;
 	bool							IsGUIMode();
 	void							SetGUIMode(bool bGUIMode);	
 	void							UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager::TMouseButtonState eButtonState);

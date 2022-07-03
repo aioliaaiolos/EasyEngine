@@ -24,6 +24,12 @@ void CGUIWidget::Init( int nResX, int nResY, IShader* pShader )
 	s_pShader = pShader;
 }
 
+CGUIWidget::CGUIWidget() :
+	CGUIWidget(0, 0)
+{
+
+}
+
 CGUIWidget::CGUIWidget( int nWidth, int nHeight ):
 _pListener(NULL),
 _bIsCursorInWidget( NULL ),
@@ -118,15 +124,16 @@ CGUIWidget::CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, co
 	SetQuad(pRect);
 }
 
+CGUIWidget::~CGUIWidget(void)
+{
+	delete _pListener;
+	_pListener = nullptr;
+}
+
 void CGUIWidget::InitManagers(EEInterface& oInterface)
 {
 	m_pRenderer = static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"));
 	m_pRessourceManager = static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
-}
-
-CGUIWidget::~CGUIWidget(void)
-{
-	delete _pListener;
 }
 
 CGUIWidget* CGUIWidget::GetParent()
@@ -162,13 +169,15 @@ IMesh* CGUIWidget::GetQuad()
 
 void CGUIWidget::Display()
 {
-	float fWidgetLogicalPosx, fWidgetLogicalPosy;
-	GetLogicalPosition( fWidgetLogicalPosx, fWidgetLogicalPosy, s_nScreenResWidth, s_nScreenResHeight );
-	vector< float > vPos;
-	vPos.push_back( fWidgetLogicalPosx );
-	vPos.push_back( fWidgetLogicalPosy );
-	m_pShader->SendUniformVec2Array( "vImagePosition", vPos );
-	m_pMesh->Update();
+	if (m_pMesh) {
+		float fWidgetLogicalPosx, fWidgetLogicalPosy;
+		GetLogicalPosition(fWidgetLogicalPosx, fWidgetLogicalPosy, s_nScreenResWidth, s_nScreenResHeight);
+		vector< float > vPos;
+		vPos.push_back(fWidgetLogicalPosx);
+		vPos.push_back(fWidgetLogicalPosy);
+		m_pShader->SendUniformVec2Array("vImagePosition", vPos);
+		m_pMesh->Update();
+	}
 }
 
 
@@ -192,6 +201,11 @@ void CGUIWidget::SetRelativePosition( float fPosX, float fPosY )
 	m_oPosition.SetY(parentPosY + m_oRelativePosition.GetY());
 }
 
+void CGUIWidget::UpdatePosition()
+{
+	SetRelativePosition(m_oRelativePosition.GetX(), m_oRelativePosition.GetY());
+}
+
 void CGUIWidget::Translate(float dx, float dy)
 {
 	m_oPosition.SetX(m_oPosition.GetX() + dx);
@@ -202,7 +216,6 @@ void CGUIWidget::SetY( float fY )
 {
 	m_oPosition.SetY( fY );
 }
-
 
 CPosition CGUIWidget::GetPosition() const
 {
@@ -449,23 +462,79 @@ IMesh* CGUIWidget::CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& o
 }
 
 CLink::CLink(EEInterface& oInterface, string sText) :
-	CGUIWidget(0, 0)
+	CGUIWidget(0, 0),
+	m_oGUIManager(static_cast<CGUIManager&>(*oInterface.GetPlugin("GUIManager")))
 {
-	CGUIManager* pGUIManager = static_cast<CGUIManager*>(oInterface.GetPlugin("GUIManager"));
-
 	m_sText = sText;
 	int nWidth = 0;
 	for (char& c : m_sText) {
-		nWidth += pGUIManager->GetLetterEspacementX(c) + 1;
+		nWidth += m_oGUIManager.GetLetterEspacementX(c) + 1;
 	}
 	
 	m_oDimension.SetWidth(nWidth);
-	m_oDimension.SetHeight(pGUIManager->GetCurrentFontEspacementY());
-	IAnimatableMesh* pARect = pGUIManager->CreateTextMeshes(m_sText, IGUIManager::TFontColor::eBlue);
+	m_oDimension.SetHeight(m_oGUIManager.GetCurrentFontEspacementY());
+	IAnimatableMesh* pARect = m_oGUIManager.CreateTextMeshes(m_sText, IGUIManager::TFontColor::eBlue);
 	SetQuad(pARect->GetMesh(0));
+
+	m_pListener = new CListener;
+	this->SetListener(m_pListener);
+	m_pListener->SetEventCallBack(OnLinkEvent);
+	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eBlue;
+	m_mColorByState[TState::eClick] = IGUIManager::TFontColor::eWhite;
+	m_mColorByState[TState::eHover] = IGUIManager::TFontColor::eTurquoise;
+}
+
+CLink::~CLink()
+{
+}
+
+void CLink::Display()
+{
+	CGUIWidget::Display();
+}
+
+void CLink::ChangeColor(IGUIManager::TFontColor color)
+{
+	ITexture* pTexture = m_oGUIManager.GetColorTexture(color);
+	this->m_pMesh->SetTexture(pTexture);
+}
+
+void CLink::OnLinkEvent(IGUIManager::ENUM_EVENT eEvent, CGUIWidget* pWidget, int x, int y)
+{
+	CLink* pThisLink = static_cast<CLink*>(pWidget);
+	switch (eEvent) {
+	case IGUIManager::ENUM_EVENT::EVENT_LMOUSECLICK:
+		pThisLink->ChangeColor(pThisLink->m_mColorByState[TState::eClick]);
+		break;
+	case IGUIManager::ENUM_EVENT::EVENT_LMOUSERELEASED:
+		pThisLink->ChangeColor(pThisLink->m_mColorByState[TState::eHover]);
+		pThisLink->m_pClickCallback(pThisLink);
+		break;
+	case IGUIManager::ENUM_EVENT::EVENT_MOUSEENTERED:
+		pThisLink->ChangeColor(pThisLink->m_mColorByState[TState::eHover]);
+		break;
+	case IGUIManager::ENUM_EVENT::EVENT_MOUSEEXITED:
+		pThisLink->ChangeColor(pThisLink->m_mColorByState[TState::eNormal]);
+		break;
+	}
 }
 
 void CLink::SetText(string sText)
 {
+	m_sText = sText;
+}
 
+void CLink::SetColorByState(CLink::TState s, IGUIManager::TFontColor color)
+{
+	m_mColorByState[s] = color;
+}
+
+void CLink::SetClickedCallback(TItemSelectedCallback callback)
+{
+	m_pClickCallback = callback;
+}
+
+void CLink::GetText(string& sText) const
+{
+	sText = m_sText;
 }

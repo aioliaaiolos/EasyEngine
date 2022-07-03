@@ -3,14 +3,12 @@
 
 #include <deque>
 
-#include "Container.h"
+#include "IGUIManager.h"
 #include "IInputManager.h"
 #include "ILoader.h"
 #include "../Utils2/Dimension.h"
 #include "../Utils2/Position.h"
 
-class CMesh;
-class CListener;
 class IShaderManager;
 class IRessourceManager;
 class IRessource;
@@ -20,11 +18,15 @@ class CRectangle;
 class ITexture;
 class IRenderer;
 
+class CMesh;
+class CListener;
+class CGUIManager;
+
 class CGUIWidget
 {
 
 public:
-
+							CGUIWidget();
 							CGUIWidget( int nWidth, int nHeight );
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin);
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial);
@@ -45,7 +47,7 @@ public:
 	CDimension				GetDimension() const;
 
 	virtual void			SetPosition(float fPosX, float fPosY);
-	void					SetRelativePosition(float fPosX, float fPosY);
+	virtual void			SetRelativePosition(float fPosX, float fPosY);
 	void					SetPosition(CPosition p);
 	void					SetY(float fY);
 	void					Translate(float fPosX, float fPosY);
@@ -56,6 +58,9 @@ public:
 	CGUIWidget*				GetParent();
 	virtual void			SetParent(CGUIWidget* parent);
 	deque<CGUIWidget*>::iterator	Unlink();
+	void					UpdatePosition();
+
+	string					m_sUserData;
 
 	static void				Init( int nResX, int nResY, IShader* pShader );
 
@@ -66,7 +71,7 @@ protected:
 	void					CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& dimQuad, const CRectangle& oSkin, ILoader::CMeshInfos& mi) const;
 	IMesh*					CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin, const CDimension& oImageSize) const;
 	IMesh*					CreateQuad(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& quadSize, const CRectangle& skin) const;
-	void					InitManagers(EEInterface& oInterface);
+	void					InitManagers(EEInterface& oInterface);	
 
 	CPosition				m_oNextCursorPos;
 	CGUIWidget*				m_pParent;
@@ -89,12 +94,34 @@ protected:
 class CLink : public CGUIWidget
 {
 public:
-	CLink(EEInterface& oInterface, string sText);
-	void SetText(string sText);
+	enum TState
+	{
+		eNormal = 0,
+		eClick,
+		eHover
+	};
 
+	typedef void(*TItemSelectedCallback)(CLink*);
+
+	CLink(EEInterface& oInterface, string sText);
+	virtual ~CLink();
+	void SetText(string sText);
+	void Display();
+	void SetColorByState(TState s, IGUIManager::TFontColor color);
+	void SetClickedCallback(TItemSelectedCallback callback);
+	void GetText(string& sText) const;
 
 private:
-	string	m_sText;
+
+	void	ChangeColor(IGUIManager::TFontColor color);
+	static void OnLinkEvent(IGUIManager::ENUM_EVENT nEvent, CGUIWidget*, int, int);
+
+	string									m_sText;
+	CGUIManager&							m_oGUIManager;
+	map<TState, IGUIManager::TFontColor>	m_mColorByState;
+	TState									m_eCurrentState = eNormal;
+	TItemSelectedCallback					m_pClickCallback = nullptr;
+	CListener*								m_pListener = nullptr;
 };
 
 

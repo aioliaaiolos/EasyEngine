@@ -46,18 +46,21 @@ public:
 	CTopicsWindow(EEInterface& oInterface, int width, int height);
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, vector<CCondition>& conditions);
+	void									AddTopicText(const string& sTopicText);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
-	void									AddTopicText(const string& sTopicText);
 	void									RemoveTopicTexts();
 
 private:
 
 	void									LoadTopics(string sFileName);
 	void									DecodeString(string& sIn, string& sOut);
-	static									void OnGUIManagerCreated(CPlugin* pGUIManager, void* pData);
 	void									OnShow(bool bShow) override;
 	void									DestroyTopicsWidgets();
+	int										GetTopicTextLineCount();
+	static void								OnLinkClicked(CLink* pLink);
+	static									void OnGUIManagerCreated(CPlugin* pGUIManager, void* pData);
+	static void								OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int);
 
 	EEInterface&							m_oInterface;
 	IRenderer&								m_oRenderer;
@@ -69,6 +72,8 @@ private:
 	string									m_sText;
 	const int								m_nMaxCharPerLine;
 	int										m_nTopicTextPointer;
+	string									m_sNextTopicTextToAdd;
+	
 };
 
 class CTopicFrame : public CGUIWindow
@@ -82,8 +87,10 @@ public:
 	};
 
 	CTopicFrame(EEInterface& oInterface, int width, int height);
+	virtual ~CTopicFrame();
 	void										Display();
 	void										AddTopic(string sTopicName, string sText, vector<CCondition>& conditions);
+	void										GetTopicText(string sTopicTitle, string& sTopicText);
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
 	void										SetSpeakerId(string sId);
@@ -113,7 +120,6 @@ private:
 	const int												m_nYmargin;
 	const int												m_nTextHeight;
 	map<string, vector<CTopicInfo>>							m_mTopics;
-	map<string, vector<CTopicInfo>>							m_mDisplayedTopics;
 	map<CGUIWidget*, string>								m_mDisplayedTopicWidgets;
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;

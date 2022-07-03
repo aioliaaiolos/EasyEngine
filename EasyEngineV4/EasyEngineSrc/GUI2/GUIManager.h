@@ -15,7 +15,6 @@
 class CGUIWindow;
 class CGUIWidget;
 class CLink;
-class CContainer;
 class CRectangle;
 class CDimension;
 class CPosition;
@@ -90,6 +89,7 @@ public:
 	int					GetCurrentFontEspacementY();
 	int					GetLetterEspacementX(char c);
 	string				GetName() override;
+	ITexture*			GetColorTexture(TFontColor color) const override;
 
 private:
 	ILoaderManager*								m_pLoaderManager;
@@ -126,6 +126,7 @@ private:
 	bool										m_bDisplayMap;
 	map<IGUIManager::TFontColor, IRessource*>	m_mFontMaterialByColor;
 	map<IGUIManager::TFontColor, map<unsigned char, CGUIWidget*>>	m_mFontWidgetByColor;
+	map<TFontColor, ITexture*>					m_mFontColor;
 
 	void									GetScreenCoordFromTexCoord(const CRectangle& oTexture, const CDimension& oScreenDim, CRectangle& oScreen) const;
 	void									InitFontMap();

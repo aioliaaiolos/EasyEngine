@@ -4,6 +4,11 @@
 #include "Utils2/Rectangle.h"
 #include "IRessource.h"
 
+CGUIWindow::CGUIWindow()
+{
+
+}
+
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize) :
 	CGUIWidget(oInterface, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bVisible(false),
@@ -26,8 +31,11 @@ CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, co
 {
 }
 
-CGUIWindow::~CGUIWindow(void)
+CGUIWindow::~CGUIWindow()
 {
+	for (CGUIWidget* pWidget : m_vWidget) {
+		delete pWidget;
+	}
 }
 
 void CGUIWindow::SetGUIMode(bool bGUIMode)
@@ -57,6 +65,14 @@ void CGUIWindow::SetPosition(float fPosX, float fPosY)
 	for (int i = 0; i < m_vWidget.size(); i++) {
 		CGUIWidget* pWidget = m_vWidget[i];
 		pWidget->SetPosition(pWidget->GetPosition().GetX() + fPosX, pWidget->GetPosition().GetY() + fPosY);
+	}
+}
+
+void CGUIWindow::SetRelativePosition(float fPosX, float fPosY)
+{
+	CGUIWidget::SetRelativePosition(fPosX, fPosY);
+	for (CGUIWidget* pWidget : m_vWidget) {
+		pWidget->UpdatePosition();
 	}
 }
 
@@ -90,6 +106,9 @@ bool CGUIWindow::IsVisible()
 
 void CGUIWindow::Clear()
 {
+	for (CGUIWidget* pWidget : m_vWidget) {
+		delete pWidget;
+	}
 	m_vWidget.clear();
 }
 

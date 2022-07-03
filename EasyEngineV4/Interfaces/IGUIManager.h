@@ -13,6 +13,7 @@ class CGUIWidget;
 class ICameraManager;
 class IEntityManager;
 class IScene;
+class ITexture;
 
 using namespace std;
 
@@ -110,6 +111,7 @@ public:
 	virtual bool			GetGUIMode() = 0;
 	virtual void			ToggleDisplayMap() = 0;
 	virtual void			CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets) = 0;
+	virtual ITexture*		GetColorTexture(TFontColor color) const = 0;
 };
 
 #endif // IGUIManager_H

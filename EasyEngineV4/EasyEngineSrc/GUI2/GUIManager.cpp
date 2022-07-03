@@ -93,9 +93,9 @@ void CGUIManager::InitFontMap()
 	CreateFontBitmap("Arial", dim.GetWidth(), vDataBlue, vCharSize, 255, 0, 0);
 	CreateFontBitmap("Arial", dim.GetWidth(), vDataTurquoise, vCharSize, 255, 255, 0);
 	IShader* pShader = m_oRenderer.GetShader( "gui");
-	ITexture* pFontTextureWhite = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataWhite, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
-	ITexture* pFontTextureBlue  = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataBlue,  dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
-	ITexture* pFontTextureTurquoise = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataTurquoise, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
+	m_mFontColor[TFontColor::eWhite] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataWhite, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
+	m_mFontColor[TFontColor::eBlue]	= m_oRessourceManager.CreateTexture2D(pShader, 3, vDataBlue,  dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
+	m_mFontColor[TFontColor::eTurquoise] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataTurquoise, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
 	
 	CRectangle char0( 0, 12 * (float)rect.m_oDim.GetHeight() / 16.f, vCharSize[ 48 ].m_x, vCharSize[  48 ].m_y );
 
@@ -106,9 +106,9 @@ void CGUIManager::InitFontMap()
 			char c = (char) ( i * 16 + j );
 			CRectangle charRect( j * 16, 16 * i, vCharSize[ i * 16 + j ].m_x, vCharSize[ i * 16 + j ].m_y );
 			ILoader::CMeshInfos mi;
-			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, pFontTextureBlue, charRect, mi, m_pBlueFontMaterial);
-			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, pFontTextureTurquoise, charRect, mi, m_pTurquoiseFontMaterial);
-			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, pFontTextureWhite, charRect, m_mWidgetFontInfos[c], m_pWhiteFontMaterial);
+			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eBlue], charRect, mi, m_pBlueFontMaterial);
+			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eTurquoise], charRect, mi, m_pTurquoiseFontMaterial);
+			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eWhite], charRect, m_mWidgetFontInfos[c], m_pWhiteFontMaterial);
 		}
 	}
 	
@@ -119,6 +119,11 @@ void CGUIManager::InitFontMap()
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eBlue] = m_mWidgetFontBlue;
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eTurquoise] = m_mWidgetFontTurquoise;
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eWhite] = m_mWidgetFontWhite;
+}
+
+ITexture* CGUIManager::GetColorTexture(TFontColor color) const
+{
+	return m_mFontColor.at(color);
 }
 
 void CGUIManager::GetScreenCoordFromTexCoord( const CRectangle& oTexture, const CDimension& oScreenDim, CRectangle& oScreen ) const
@@ -526,6 +531,7 @@ void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float f
 	oTestWidget.SetPosition(nPosX, nPosY);
 	oTestWidget.GetLogicalPosition(fPosX, fPosY, nScreenWidth, nScreenHeight);	
 
+	CGUIWidget oTempWidget(0, 0);
 	for (int iChar = 0; iChar < sText.size(); iChar++, nNumChar++)
 	{
 		char c = sText[iChar];
@@ -533,7 +539,6 @@ void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float f
 
 		if (iChar > 0)
 		{
-			CGUIWidget oTempWidget(0, 0); // = *m_mWidgetFontWhite[sText[iChar - 1]];
 			CreateWidgetFromChar(sText[iChar - 1], color, oTempWidget);
 			oTempWidget.SetPosition(oTempWidget.GetDimension().GetWidth() + m_nCharspace, 0);
 			float x, y;
