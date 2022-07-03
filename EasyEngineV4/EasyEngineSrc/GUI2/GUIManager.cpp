@@ -86,16 +86,20 @@ void CGUIManager::InitFontMap()
 	rect.SetPosition( CPosition( 0, 0 ) );
 	rect.SetDimension( CDimension( 256, 256 ) );
 	
-	vector< unsigned char > vDataWhite, vDataBlue, vDataTurquoise;
+	vector< unsigned char > vDataWhite, vDataBlue, vDataTurquoise, vDataYellow, vDataRed;
 	vector< CPoint > vCharSize;
 	CDimension dim = rect.m_oDim;
 	CreateFontBitmap("Arial", dim.GetWidth(), vDataWhite, vCharSize, 255, 255, 255 );
 	CreateFontBitmap("Arial", dim.GetWidth(), vDataBlue, vCharSize, 255, 0, 0);
 	CreateFontBitmap("Arial", dim.GetWidth(), vDataTurquoise, vCharSize, 255, 255, 0);
+	CreateFontBitmap("Arial", dim.GetWidth(), vDataRed, vCharSize, 0, 0, 255);
+	CreateFontBitmap("Arial", dim.GetWidth(), vDataYellow, vCharSize, 0, 255, 255);
 	IShader* pShader = m_oRenderer.GetShader( "gui");
 	m_mFontColor[TFontColor::eWhite] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataWhite, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
 	m_mFontColor[TFontColor::eBlue]	= m_oRessourceManager.CreateTexture2D(pShader, 3, vDataBlue,  dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
+	m_mFontColor[TFontColor::eYellow] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataYellow, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
 	m_mFontColor[TFontColor::eTurquoise] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataTurquoise, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
+	m_mFontColor[TFontColor::eRed] = m_oRessourceManager.CreateTexture2D(pShader, 3, vDataRed, dim.GetWidth(), dim.GetHeight(), IRenderer::T_RGBA);
 	
 	CRectangle char0( 0, 12 * (float)rect.m_oDim.GetHeight() / 16.f, vCharSize[ 48 ].m_x, vCharSize[  48 ].m_y );
 
@@ -108,6 +112,8 @@ void CGUIManager::InitFontMap()
 			ILoader::CMeshInfos mi;
 			m_mWidgetFontBlue[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eBlue], charRect, mi, m_pBlueFontMaterial);
 			m_mWidgetFontTurquoise[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eTurquoise], charRect, mi, m_pTurquoiseFontMaterial);
+			m_mWidgetFontYellow[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eYellow], charRect, mi, m_pYellowFontMaterial);
+			m_mWidgetFontRed[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eRed], charRect, mi, m_pRedFontMaterial);
 			m_mWidgetFontWhite[c] = new CGUIWidget(m_oInterface, m_mFontColor[TFontColor::eWhite], charRect, m_mWidgetFontInfos[c], m_pWhiteFontMaterial);
 		}
 	}
@@ -115,10 +121,14 @@ void CGUIManager::InitFontMap()
 	m_mFontMaterialByColor[IGUIManager::TFontColor::eBlue] = m_pBlueFontMaterial;
 	m_mFontMaterialByColor[IGUIManager::TFontColor::eTurquoise] = m_pTurquoiseFontMaterial;
 	m_mFontMaterialByColor[IGUIManager::TFontColor::eWhite] = m_pWhiteFontMaterial;
+	m_mFontMaterialByColor[IGUIManager::TFontColor::eYellow] = m_pYellowFontMaterial;
+	m_mFontMaterialByColor[IGUIManager::TFontColor::eRed] = m_pRedFontMaterial;
 	
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eBlue] = m_mWidgetFontBlue;
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eTurquoise] = m_mWidgetFontTurquoise;
 	m_mFontWidgetByColor[IGUIManager::TFontColor::eWhite] = m_mWidgetFontWhite;
+	m_mFontWidgetByColor[IGUIManager::TFontColor::eYellow] = m_mWidgetFontYellow;
+	m_mFontWidgetByColor[IGUIManager::TFontColor::eRed] = m_mWidgetFontRed;
 }
 
 ITexture* CGUIManager::GetColorTexture(TFontColor color) const
@@ -496,6 +506,12 @@ void CGUIManager::CreateWidgetFromChar(char c, TFontColor color, CGUIWidget& wid
 		break;
 	case eTurquoise:
 		pWidget = m_mWidgetFontTurquoise[c];
+		break;
+	case eYellow:
+		pWidget = m_mWidgetFontYellow[c];
+		break;
+	case eRed:
+		pWidget = m_mWidgetFontRed[c];
 		break;
 	default:
 		break;

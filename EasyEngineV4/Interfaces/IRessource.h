@@ -152,7 +152,8 @@ public:
 	virtual CVector&		GetOrgMaxPosition() = 0;
 	virtual void			Colorize(float r, float g, float b, float a) = 0;
 	virtual ITexture*		GetTexture(int nMaterialIndex) = 0;
-	virtual void			SetTexture(ITexture* pTexture) = 0;	
+	virtual void			SetTexture(ITexture* pTexture) = 0;
+	virtual void			SetMaterial(IRessource* pMaterial) = 0;
 	virtual int				GetMaterialCount() = 0;
 	virtual IMaterial*		GetMaterial(int index) = 0;
 	virtual void			SetDrawStyle(IRenderer::TDrawStyle style) = 0;

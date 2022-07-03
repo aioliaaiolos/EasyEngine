@@ -473,15 +473,15 @@ CLink::CLink(EEInterface& oInterface, string sText) :
 	
 	m_oDimension.SetWidth(nWidth);
 	m_oDimension.SetHeight(m_oGUIManager.GetCurrentFontEspacementY());
-	IAnimatableMesh* pARect = m_oGUIManager.CreateTextMeshes(m_sText, IGUIManager::TFontColor::eBlue);
+	IAnimatableMesh* pARect = m_oGUIManager.CreateTextMeshes(m_sText, IGUIManager::TFontColor::eRed);
 	SetQuad(pARect->GetMesh(0));
 
 	m_pListener = new CListener;
 	this->SetListener(m_pListener);
 	m_pListener->SetEventCallBack(OnLinkEvent);
-	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eBlue;
-	m_mColorByState[TState::eClick] = IGUIManager::TFontColor::eWhite;
+	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eRed;	
 	m_mColorByState[TState::eHover] = IGUIManager::TFontColor::eTurquoise;
+	m_mColorByState[TState::eClick] = IGUIManager::TFontColor::eYellow;
 }
 
 CLink::~CLink()
@@ -495,8 +495,8 @@ void CLink::Display()
 
 void CLink::ChangeColor(IGUIManager::TFontColor color)
 {
-	ITexture* pTexture = m_oGUIManager.GetColorTexture(color);
-	this->m_pMesh->SetTexture(pTexture);
+	IRessource* pMaterial = m_oGUIManager.GetFontMaterial(color);
+	m_pMesh->SetMaterial(pMaterial);
 }
 
 void CLink::OnLinkEvent(IGUIManager::ENUM_EVENT eEvent, CGUIWidget* pWidget, int x, int y)
@@ -527,6 +527,8 @@ void CLink::SetText(string sText)
 void CLink::SetColorByState(CLink::TState s, IGUIManager::TFontColor color)
 {
 	m_mColorByState[s] = color;
+	if (s == CLink::TState::eNormal)
+		ChangeColor(color);
 }
 
 void CLink::SetClickedCallback(TItemSelectedCallback callback)

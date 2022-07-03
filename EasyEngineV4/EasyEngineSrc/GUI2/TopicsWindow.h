@@ -101,14 +101,14 @@ private:
 
 	CTopicsWindow*								GetParent();
 	int											GetTopicIndexFromY(int y);
-	void										OnItemSelected(CGUIWidget* pTitle);
+	void										OnItemSelected(CLink* pTitle);
 	void										OnItemHover(CGUIWidget* pTitle);
 	int											SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId);
 	int											IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
 	static void									OnGUIManagerCreated(CPlugin* plugin, void* pData);
 	static void									OnScriptManagerCreated(CPlugin* plugin, void* pData);
-	static void									OnTopicEvent(IGUIManager::ENUM_EVENT nEvent, CGUIWidget* pWidget, int x, int y);
+	static void									OnClickTopic(CLink* pLink);
 	static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
 
@@ -120,7 +120,7 @@ private:
 	const int												m_nYmargin;
 	const int												m_nTextHeight;
 	map<string, vector<CTopicInfo>>							m_mTopics;
-	map<CGUIWidget*, string>								m_mDisplayedTopicWidgets;
+	map<CLink*, string>										m_mDisplayedTopicWidgets;
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;

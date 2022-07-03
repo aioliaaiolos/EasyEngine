@@ -52,7 +52,9 @@ public:
 	{
 		eWhite = 0,
 		eBlue,
-		eTurquoise
+		eTurquoise,
+		eYellow,
+		eRed
 	};
 
 	typedef void (*EVENT_CALLBACK)( ENUM_EVENT nEvent, CGUIWidget*, int, int) ;

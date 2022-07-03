@@ -417,7 +417,7 @@ void CTopicFrame::AddTopic(string sTopicName, string sText, vector<CCondition>& 
 
 void CTopicFrame::GetTopicText(string sTopicTitle, string& sTopicText)
 {
-	map<CGUIWidget*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
+	map<CLink*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
 		[sTopicTitle](pair<CGUIWidget*, string> const& p) {return p.first->m_sUserData == sTopicTitle; });
 	sTopicText = itTopic->second;
 }
@@ -464,24 +464,31 @@ void CTopicFrame::CreateTopicsWidgets()
 		if (IsConditionChecked(itTopic->second, m_sSpeakerId)) {
 			int y = iLine * m_nTextHeight + m_nYTextmargin;
 			string sTopic = itTopic->first;
-			CGUIWidget* pTitle = m_pGUIManager->CreateStaticText(sTopic);
+			CLink* pTitle = new CLink(m_oInterface, sTopic);
 			pTitle->m_sUserData = sTopic;
-			
 			int nIdx = SelectTopic(itTopic->second, m_sSpeakerId);
 			if (nIdx < 0)
 				nIdx = 0;
 			
 			string sFormatedText;
 			Format(itTopic->second[nIdx].m_sText, m_sSpeakerId, sFormatedText);
-
 			m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
-			CListener* pListener = new CListener;
-			pListener->SetEventCallBack(OnTopicEvent);
-			pTitle->SetListener(pListener);
+			pTitle->SetClickedCallback(OnClickTopic);
 			AddWidget(pTitle);
 			pTitle->SetRelativePosition(m_nXTextMargin, iLine * m_nTextHeight + m_nYTextmargin);
+			pTitle->SetColorByState(CLink::TState::eNormal, IGUIManager::TFontColor::eWhite);
+			pTitle->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eYellow);
+			pTitle->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eTurquoise);
 			iLine++;
 		}
+	}
+}
+
+void CTopicFrame::OnClickTopic(CLink* pLink)
+{
+	CTopicFrame* pTopicFrame = dynamic_cast<CTopicFrame*>(pLink->GetParent());
+	if (pTopicFrame) {
+		pTopicFrame->OnItemSelected(pLink);
 	}
 }
 
@@ -490,32 +497,6 @@ void CTopicFrame::DestroyTopicsWidgets()
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
 	pTopicWindow->RemoveTopicTexts();
 	m_mDisplayedTopicWidgets.clear();
-}
-
-void CTopicFrame::OnTopicEvent(IGUIManager::ENUM_EVENT nEvent, CGUIWidget* pWidget, int x, int y)
-{
-	int i = 0;
-	CTopicFrame* pTopicFrame = nullptr;
-	switch (nEvent) {
-	case IGUIManager::EVENT_LMOUSECLICK:
-		i = i;
-		break;
-	case IGUIManager::EVENT_LMOUSERELEASED:
-		pTopicFrame = dynamic_cast<CTopicFrame*>(pWidget->GetParent());
-		if (pTopicFrame) {
-			pTopicFrame->OnItemSelected(pWidget);
-		}
-	case IGUIManager::EVENT_MOUSEENTERED:
-		pTopicFrame = dynamic_cast<CTopicFrame*>(pWidget->GetParent());
-		if (pTopicFrame) {
-			pTopicFrame->OnItemHover(pWidget);
-		}
-		break;
-		
-	default:
-		break;
-
-	}
 }
 
 void CTopicFrame::Display()
@@ -535,10 +516,10 @@ void CTopicFrame::SetParent(CGUIWidget* parent)
 	SetRelativePosition(m_pParent->GetDimension().GetWidth() - m_nTopicBorderWidth, m_nYmargin);
 }
 
-void CTopicFrame::OnItemSelected(CGUIWidget* pTitle)
+void CTopicFrame::OnItemSelected(CLink* pTitle)
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
-	map<CGUIWidget*, string>::iterator itTopic = m_mDisplayedTopicWidgets.find(pTitle);
+	map<CLink*, string>::iterator itTopic = m_mDisplayedTopicWidgets.find(pTitle);
 	if (itTopic != m_mDisplayedTopicWidgets.end())
 		pTopicWindow->AddTopicText(itTopic->second);
 }

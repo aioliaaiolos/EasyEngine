@@ -90,6 +90,7 @@ public:
 	int					GetLetterEspacementX(char c);
 	string				GetName() override;
 	ITexture*			GetColorTexture(TFontColor color) const override;
+	IRessource*			GetFontMaterial(IGUIManager::TFontColor color);
 
 private:
 	ILoaderManager*								m_pLoaderManager;
@@ -104,6 +105,8 @@ private:
 	map<unsigned char, CGUIWidget*>				m_mWidgetFontWhite;
 	map<unsigned char, CGUIWidget*>				m_mWidgetFontBlue;
 	map<unsigned char, CGUIWidget*>				m_mWidgetFontTurquoise;
+	map<unsigned char, CGUIWidget*>				m_mWidgetFontYellow;
+	map<unsigned char, CGUIWidget*>				m_mWidgetFontRed;
 	const map<unsigned char, CGUIWidget*>* 		m_pCurrentFont;
 	map<unsigned char, ILoader::CMeshInfos>		m_mWidgetFontInfos;
 	ILoader::CMeshInfos							m_oLastWidgetInfosCreated;
@@ -115,9 +118,11 @@ private:
 	IXMLParser&									m_oXMLParser;
 	IInputManager&								m_oInputManager;
 	IScene*										m_pScene;
-	IRessource*									m_pWhiteFontMaterial;
-	IRessource*									m_pBlueFontMaterial;
-	IRessource*									m_pTurquoiseFontMaterial;
+	IRessource*									m_pWhiteFontMaterial = nullptr;
+	IRessource*									m_pBlueFontMaterial = nullptr;
+	IRessource*									m_pTurquoiseFontMaterial = nullptr;
+	IRessource*									m_pYellowFontMaterial = nullptr;
+	IRessource*									m_pRedFontMaterial = nullptr;
 	map< int, IAnimatableMesh* >				m_mStaticText;
 	std::map< int, CGUIWidget* >				m_mWidget;
 	std::map< int, CListener* >					m_mListener;
@@ -140,7 +145,6 @@ private:
 	IGUIWindow*								CreatePlayerWindow(int nWidth, int nHeight);
 	void									RenderText();
 	void									AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffset, IGUIManager::TFontColor color = IGUIManager::eWhite);
-	IRessource*								GetFontMaterial(IGUIManager::TFontColor color);
 	const map<unsigned char, CGUIWidget*>&	GetFontWidget(IGUIManager::TFontColor color) const;
 
 	IShader*								m_pShader;

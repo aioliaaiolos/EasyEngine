@@ -73,6 +73,7 @@ public:
 	void								Colorize(float r, float g, float b, float a);
 	ITexture*							GetTexture(int nMaterialIndex);
 	void								SetTexture(ITexture* pTexture);
+	void								SetMaterial(IRessource* pMaterial) override;
 	int									GetMaterialCount() override;
 	IMaterial*							GetMaterial(int index) override;
 	void								SetDrawStyle(IRenderer::TDrawStyle style) override;

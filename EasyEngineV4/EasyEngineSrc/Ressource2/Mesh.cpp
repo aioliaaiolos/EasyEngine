@@ -434,6 +434,11 @@ void CMesh::SetTexture(ITexture* pTexture)
 	m_mMaterials[0]->SetTexture(pTexture);
 }
 
+void CMesh::SetMaterial(IRessource* pMaterial)
+{
+	m_mMaterials[0] = static_cast<CMaterial*>(pMaterial);
+}
+
 int CMesh::GetMaterialCount()
 {
 	return m_mMaterials.size();
