@@ -139,8 +139,11 @@ class ICharacter : public virtual IEntity
 {
 public:
 	virtual void				WearShoes(string shoesName)  = 0;
+	virtual void				UnWearShoes(string shoesPath) = 0;
+	virtual void				UnWearAllShoes() = 0;
 	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
 	virtual void				AddHairs(string sHairsPath) = 0;
+	virtual void				WearSkinnedCloth(string sClothName) = 0;
 	virtual void				WearSkinnedClothFull(string sClothName) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
 };

@@ -24,6 +24,10 @@ LoadWorld("");
 //LoadWorld("test03");
 //LoadWorld("empty");
 //LoadGame("save");
+//EditWorld("Empty");
+//SpawnCharacter("test");
+//id = GetEntityID("test");
+//WearSkinnedClothFull(id, "clothes/brassiere");
 
 //EditMap("hopital02");
 //CreateCollisionMap(0, "cm-100.bmp", 100, 0);
@@ -59,116 +63,3 @@ WearCloth("slip", "BodyDummyJupe");
 */
 return;
 
-/*
-SetSceneMap("HM_terrain02.bmp", "terrain02.bmp", 1000000, 40000);
-light1=CreateLightw("omni", 1500000);
-SetEntityPos(light1, 1000000, 500000, 0);
-return;
-*/
-
-light2=CreateLightw("omni", 1500000);
-SetEntityPos(light2, -1000000, 500000, 0);
-
-perso=CreatePlayer("testExport15");
-SetEntityName(perso, "perso");
-SetCurrentPlayer(perso);
-Stand(perso);
-SetAnimationSpeed(perso, "run", 2);
-SetAnimationSpeed(perso, "walk", 1.5);
-//WearArmor(perso, "2");
-SetEntityPos(perso, -10000, 1150, 4500);
-
-
-npc1=CreateNPC("body01", "Geraldine");
-Stand(npc1);
-h=CreateEntity("hairs/hairs02");
-LinkDummyParentToDummyEntity(h, npc1, "BodyDummyHairs");
-//SetEntityTexture(npc1, "texture3-noire.bmp");
-WearArmorToDummy(npc1, "2");
-YawEntity(npc1, 90);
-//WearShoes(npc1, "Sandal");
-SetEntityPos(npc1, -161000, -7400, -151000);
-
-
-npc2=CreateNPC("body03", "Christina");
-YawEntity(npc2, 90);
-Stand(npc2);
-h2=CreateEntity("hairs/hairs01");
-LinkDummyParentToDummyEntity(h2, npc2, "BodyDummyHairs");
-//SetEntityTexture(npc2, "texture3-blanche.bmp");
-//WearShoes(npc2, "Sandal");
-SetEntityPos(npc2, -161000, -7400, -151080);
-
-
-npc3=CreateNPC("body03", "Venus");
-YawEntity(npc3, 90);
-Stand(npc3);
-h3=CreateEntity("hairs/hairs01");
-LinkDummyParentToDummyEntity(h3, npc3, "BodyDummyHairs");
-//SetEntityTexture(npc3, "texture3-ebene.bmp");
-SetEntityPos(npc3, -161000, -7400, -151160);
-//WearShoes(npc3, "Sandal-body03");
-
-
-//SetCamPos(160000, -12000, -326000);
-
-//l=CreateLightw("omni", 100);)
-//SetEntityPos(l, 160000, -13400, -327200);
-return;
-
-//CullFace(0);
-//GenerateRandomNPC("testExport15", "2", 100, 20);
-r=CreateRepere();
-//SetEntityPos(r, 0, -3000, 0);
-
-
-
-
-SetSceneMap("HM_terrain02.bmp", "terrain02.bmp", 100000, 4000);
-light1=CreateLightw("omni", 1500000);
-SetEntityPos(light1, 1000000, 500000, 0);
-
-//SetCameraType("free");
-//return;
-
-/*
-light1=CreateLightw("omni", 240000);
-SetEntityPos(light1, 0, 400000, 0);
-
-light2=CreateLightw("omni", 150000);
-SetEntityPos(light2, 0, 0, 400000);
-
-light3=CreateLightw("omni", 150000);
-SetEntityPos(light3, 0, 0, -400000);
-*/
-
-perso=CreatePlayer("testExport15");
-SetEntityName(perso, "perso");
-SetCurrentPlayer(perso);
-Stand(perso);
-SetAnimationSpeed(perso, "run", 2);
-SetAnimationSpeed(perso, "walk", 1.5);
-WearArmorToDummy(perso, "2");
-SetEntityPos(perso, 0, 3000, 0);
-
-npc1 = CreateNPC("femme2", "femme2");
-SetEntityName(npc1, "npc1");
-Stand(npc1);
-WearArmorToDummy(npc1, "2");
-SetEntityPos(npc1, 150, 3000, 0);
-
-npc2 = CreateNPC("femme3", "Femme3");
-SetEntityName(npc2, "npc2");
-Stand(npc2);
-WearArmorToDummy(npc2, "2");
-SetEntityPos(npc2, 300, 3000, 0);
-
-npc3 = CreateNPC("femme4", "femme4");
-SetEntityName(npc3, "npc3");
-Stand(npc3);
-WearArmorToDummy(npc3, "2");
-SetEntityPos(npc3, 400, 3000, 0);
-
-
-SetCameraType("link");
-//SetEditionMode(1);

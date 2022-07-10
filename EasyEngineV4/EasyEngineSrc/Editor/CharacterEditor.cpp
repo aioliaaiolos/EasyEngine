@@ -224,6 +224,28 @@ void CCharacterEditor::WearShoes(string sShoesName)
 	}
 }
 
+void CCharacterEditor::UnWearShoes(string sShoesName)
+{
+	try
+	{
+		m_pCurrentCharacter->UnWearShoes(sShoesName);
+	}
+	catch (CEException& e) {
+		m_oConsole.Println(e.what());
+	}
+}
+
+void CCharacterEditor::UnWearAllShoes()
+{
+	try
+	{
+		m_pCurrentCharacter->UnWearAllShoes();
+	}
+	catch (CEException& e) {
+		m_oConsole.Println(e.what());
+	}
+}
+
 void CCharacterEditor::WearCloth(string sClothName, string sDummyName)
 {
 	try

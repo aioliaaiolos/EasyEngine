@@ -20,6 +20,7 @@ public:
 	virtual void						Unlink() = 0;
   	virtual void                		AddChild( INode* pNode ) = 0;
 	virtual void						RemoveChild(int index) = 0;
+	virtual void						ClearChildren() = 0;
   	virtual void                		Yaw(float fAngle) = 0;
   	virtual void                		Pitch(float fAngle) = 0;
   	virtual void                		Roll(float fAngle) = 0;

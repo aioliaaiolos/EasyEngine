@@ -47,6 +47,7 @@ public:
 	virtual void				Unlink();
   	void                		AddChild(INode* pNode);
 	void						RemoveChild(int index);
+	void						ClearChildren() override;
   	void                		SetParent( INode* pNode );
   	virtual void                Yaw(float fAngle);
   	virtual void                Pitch(float fAngle);

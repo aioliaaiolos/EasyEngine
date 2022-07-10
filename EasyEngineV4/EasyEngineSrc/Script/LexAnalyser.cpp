@@ -198,6 +198,11 @@ int CLexAnalyser::GenStringFromRegExpr(string sExpr, string& sOut)
 						sOut.push_back( '\\' );
 						i += 2;
 					}
+					else if (sExpr[i + 2] == 'r')
+					{
+						sOut.push_back('\r');
+						i += 3;
+					}
 					else
 					{
 						CLineCompilationErrorException e(i);

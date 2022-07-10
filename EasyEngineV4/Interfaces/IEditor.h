@@ -56,6 +56,8 @@ public:
 	virtual void	AddHairs(string sHairsName) = 0;
 	virtual void	WearShoes(string sShoesName) = 0;
 	virtual void	WearCloth(string sClothPath, string sDummyName) = 0;
+	virtual void	UnWearShoes(string sShoesName) = 0;
+	virtual void	UnWearAllShoes() = 0;
 	virtual void	SetTexture(string sTexture) = 0;
 	virtual void	SetBody(string sBodyName) = 0;
 	virtual void	Save() = 0;

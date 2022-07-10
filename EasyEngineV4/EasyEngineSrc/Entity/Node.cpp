@@ -113,6 +113,11 @@ void CNode::RemoveChild(int index)
 	m_vChild.resize(m_vChild.size() - 1);
 }
 
+void CNode::ClearChildren()
+{
+	m_vChild.clear();
+}
+
 void CNode::SetParent( INode* pNode )
 {
 	if( m_pParent )

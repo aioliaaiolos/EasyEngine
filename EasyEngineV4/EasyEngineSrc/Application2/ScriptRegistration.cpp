@@ -2142,7 +2142,8 @@ void WearSkinnedClothFull(IScriptState* pState)
 	CScriptFuncArgString* pClothName = (CScriptFuncArgString*)pState->GetArg(1);
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityID->m_nValue));
 	if (pCharacter)
-		pCharacter->WearSkinnedClothFull(pClothName->m_sValue);
+		//pCharacter->WearSkinnedClothFull(pClothName->m_sValue);
+		pCharacter->WearSkinnedCloth(pClothName->m_sValue);
 	else {
 		ostringstream oss;
 		oss << "Erreur : l'entite " << pEntityID->m_nValue << " n'est pas un character";
@@ -2622,6 +2623,17 @@ void WearShoes(IScriptState* pState)
 {
 	CScriptFuncArgString* pShoes = (CScriptFuncArgString*)(pState->GetArg(0));
 	m_pCharacterEditor->WearShoes(pShoes->m_sValue);
+}
+
+void UnWearShoes(IScriptState* pState)
+{
+	CScriptFuncArgString* pShoes = (CScriptFuncArgString*)(pState->GetArg(0));
+	m_pCharacterEditor->UnWearShoes(pShoes->m_sValue);
+}
+
+void UnWearAllShoes(IScriptState* pState)
+{
+	m_pCharacterEditor->UnWearAllShoes();
 }
 
 void WearCloth(IScriptState* pState)
@@ -4270,6 +4282,13 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("WearShoes", WearShoes, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("UnWearShoes", UnWearShoes, vType);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("UnWearAllShoes", UnWearAllShoes, vType);
 
 	vType.clear();
 	vType.push_back(eString);

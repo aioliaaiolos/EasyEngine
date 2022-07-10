@@ -339,6 +339,28 @@ void CMobileEntity::WearArmorToDummy(string armorName)
 	}
 }
 
+void CMobileEntity::UnWearShoes(string shoesPath)
+{
+	IBone* pDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyLFoot");
+	IBone* pDummyRShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyRFoot");
+	if (pDummyLShoes) {
+		INode* pShoeNode = pDummyLShoes->GetChild(0);
+		pShoeNode->Unlink();
+	}
+	if (pDummyRShoes) {
+		INode* pShoeNode = pDummyRShoes->GetChild(0);
+		pShoeNode->Unlink();
+	}
+}
+
+void CMobileEntity::UnWearAllShoes()
+{
+	IBone* pBodyDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyLFoot");
+	pBodyDummyLShoes->ClearChildren();
+	IBone* pBodyDummyRShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyRFoot");
+	pBodyDummyRShoes->ClearChildren();
+}
+
 void CMobileEntity::WearShoes(string shoesPath)
 {
 	string shoesPathLower = shoesPath;
@@ -354,12 +376,12 @@ void CMobileEntity::WearShoes(string shoesPath)
 	Stand();
 
 	// unlink old shoes if exists
-	IBone* pDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("DummyLFoot");
-	IBone* pDummyRShoes = m_pSkeletonRoot->GetChildBoneByName("DummyRFoot");
+	IBone* pDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyLFoot");
+	IBone* pDummyRShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyRFoot");
 	if (pDummyLShoes)
-		pDummyLShoes->Unlink();
+		pDummyLShoes->ClearChildren();
 	if (pDummyRShoes)
-		pDummyRShoes->Unlink();
+		pDummyRShoes->ClearChildren();
 
 	// link new shoes
 	string shoesName = shoesPath.substr(shoesPath.find_last_of("/") + 1);
@@ -719,6 +741,7 @@ IAnimation*	CMobileEntity::GetCurrentAnimation()
 { 
 	return m_pCurrentAnimation; 
 }
+
 void CMobileEntity::WearSkinnedClothFull(string sClothName)
 {
 	IEntity* pCloth = m_pEntityManager->CreateEntity(sClothName);
@@ -733,6 +756,23 @@ void CMobileEntity::WearSkinnedClothFull(string sClothName)
 			m_pCloth->AddAnimation("test3.bke");
 			m_pCloth->LocalTranslate(0, 24, -1);
 
+			m_pCloth->Link(this);
+		}
+	}
+}
+
+void CMobileEntity::WearSkinnedCloth(string sClothName)
+{
+	ILoader::CAnimatableMeshData mi;
+	m_pLoaderManager->Load(string("Meshes/") + sClothName + ".bme", mi);
+	set<float> ids;
+	for (float& id : mi.m_vMeshes[0].m_vWeigtedVertexID) {
+		ids.insert(id);
+	}
+	IEntity* pCloth = m_pEntityManager->CreateEntity(sClothName);
+	if (pCloth) {
+		m_pCloth = dynamic_cast<CEntity*>(pCloth);
+		if (m_pCloth) {
 			m_pCloth->Link(this);
 		}
 	}

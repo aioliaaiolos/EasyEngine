@@ -30,6 +30,8 @@ public:
 	void					SetCurrentEditableNPC(ICharacter* pNPCEntity) override;
 	void					AddHairs(string sHairsName) override;
 	void					WearShoes(string sShoesName) override;
+	void					UnWearShoes(string sShoesName) override;
+	void					UnWearAllShoes() override;
 	void					WearCloth(string sClothName, string sDummyName) override;
 	void					SetTexture(string sTexture) override;
 	void					SetBody(string sBodyName) override;

@@ -50,7 +50,6 @@ void IAEntity::UpdateFightState()
 	case eArrivedToEnemy:
 		m_eFightState = ePreparingForNextAttack;
 		TurnFaceToDestination();
-		Stand();
 		break;
 	case eBeginLaunchAttack:
 		MainHit();
