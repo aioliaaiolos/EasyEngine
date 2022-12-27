@@ -24,6 +24,7 @@ class CMobileEntity : public CObject, public virtual IFighterEntity, public virt
 
 public:
 	CMobileEntity(EEInterface& oInterface, string sFileName, string sID);
+	virtual ~CMobileEntity();
 
 	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
@@ -36,15 +37,15 @@ public:
 	void						WearShoes(string shoesName) override;
 	void						UnWearShoes(string shoesPath) override;
 	void						UnWearAllShoes() override;
+	void						UnwearAllClothes() override;
 	void						AddHairs(string sHairsPath) override;
 	void						SetBody(string sBodyName) override;
 	void						Yaw(float fAngle);
 	void						Pitch(float fAngle);
 	void						Roll(float fAngle);
 	IAnimation*					GetCurrentAnimation();
-	void						WearSkinnedCloth(string sClothName);
 	void						WearSkinnedClothFull(string sClothName);
-	void						WearCloth(string sClothName, string sDummyName);
+	void						WearCloth(string sClothPath, string sDummyName);
 	void						Link(INode* pParent) override;
 	IBox*						GetBoundingBox();
 	static void					InitStatics();
@@ -77,8 +78,8 @@ protected:
 	CVector										m_vNextLocalTranslate;
 	bool										m_bFirstUpdate;
 	string										m_sStandAnimation;
-	IBox*										m_pBBox;	
-	
+	IBox*										m_pBBox;
+	vector<IEntity*>							m_vClothes;
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;
@@ -96,6 +97,7 @@ protected:
 	void					PlayReceiveHit();
 	void					PlayHitAnimation();
 	void					PlaySecondaryHitAnimation();
+	void					MoveToGuard();
 	void					Guard();
 	void					TurnEyesH( float fValue );
 	void					TurnNeckH( float f );
@@ -119,7 +121,7 @@ protected:
 	static void 			Run( CMobileEntity*, bool bLoop );
 	static void				Jump(CMobileEntity* pHuman, bool bLoop);
 	static void				Dying(CMobileEntity* pHuman, bool bLoop);
-	static void				Guard(CMobileEntity* pHuman, bool bLoop);
+	static void				MoveToGuard(CMobileEntity* pHuman, bool bLoop);
 	static void 			PlayReceiveHit( CMobileEntity* pHuman, bool bLoop );
 	static void 			OnCollision(CEntity* pThis, vector<INode*> entities);
 	static void				OnDyingCallback(IAnimation::TEvent e, void* data);

@@ -321,6 +321,7 @@ public:
 		bool								m_bUseCustomSpecular;
 		CVector								m_vSpecular;
 		map< string, float>					m_mAnimationSpeed;
+		map<string, string>					m_mClothesToNode;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{
@@ -328,6 +329,7 @@ public:
 			ILoader::CEntityInfos::operator >> (store);
 			store << m_sAnimationFileName << m_sTextureName << m_bUseCustomSpecular << m_vSpecular;
 			store << m_mAnimationSpeed;
+			store << m_mClothesToNode;
 			return *this;
 		}
 
@@ -350,6 +352,7 @@ public:
 			ILoader::CEntityInfos::operator << (store);
 			store >> m_sAnimationFileName >> m_sTextureName >> m_bUseCustomSpecular >> m_vSpecular;
 			store >> m_mAnimationSpeed;
+			store >> m_mClothesToNode;
 			return *this;
 		}
 	};

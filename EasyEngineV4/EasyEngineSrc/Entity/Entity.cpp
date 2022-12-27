@@ -63,43 +63,12 @@ m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
 }
 
 CEntity::CEntity(EEInterface& oInterface, const string& sFileName, bool bDuplicate ):
-m_oInterface(oInterface),
-m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"))),
-m_oRenderer(*static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"))),
-m_oGeometryManager(*static_cast<IGeometryManager*>(oInterface.GetPlugin("GeometryManager"))),
-m_oCollisionManager(*static_cast<ICollisionManager*>(oInterface.GetPlugin("CollisionManager"))),
-m_pEntityManager(static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"))),
-m_pCurrentAnimation( NULL ),
-m_pOrgSkeletonRoot( NULL ),
-m_pSkeletonRoot( NULL ),
-m_bHidden( false ),
-m_pEntityRoot( NULL ),
-m_bUsePositionKeys( false ),
-m_eRenderType( IRenderer::eFill ),
-m_pBoundingSphere( NULL ),
-m_fBoundingSphereRadius( -1 ),
-m_bDrawAnimationBoundingBox( false ),
-m_pfnCollisionCallback( NULL ),
-m_pCollisionMesh(NULL),
-m_pRessource(NULL),
-m_pBoundingGeometry(NULL),
-m_fMaxStepHeight(g_fMaxHeight),
-m_bDrawBoundingBox(false),
-m_pScene(NULL),
-m_pMesh(nullptr),
-m_bEmptyEntity(false),
-m_pBaseTexture(nullptr),
-m_pCustomTexture(nullptr),
-m_bIsOnTheGround(true),
-m_bUseCustomSpecular(false),
-m_pCloth(nullptr),
-m_pCollisionGrid(nullptr),
-m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
+CEntity(oInterface)
 {
-	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
 	if( sFileName.size() > 0 )
 	{
-		SetRessource( sFileName);
+		SetRessource(sFileName);
+		m_pEntityManager->AddEntity(this, m_sName);
 		if (m_pBoundingGeometry)
 			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
 		if (m_sEntityName.empty())
@@ -175,6 +144,16 @@ ICollisionMap* CEntity::GetCollisionMap()
 	return m_pCollisionMap;
 }
 
+void CEntity::SetSkinOffset(CVector& oSkinOffset)
+{
+	m_oSkinOffset = oSkinOffset;
+}
+
+void CEntity::SetSkinOffset(float x, float y, float z)
+{
+	m_oSkinOffset = CVector(x, y, z);
+}
+
 void CEntity::SetRenderingType( IRenderer::TRenderType t )
 {
 	m_eRenderType = t;
@@ -195,6 +174,8 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 		{
 			m_pRessource = pAMesh->GetMesh( 0 );
 			m_pMesh = dynamic_cast< IMesh* >(m_pRessource);
+			if (m_pMesh->IsSkinned())
+				m_oSkinOffset = m_pMesh->GetOrgMaxPosition();
 			m_pBaseTexture = m_pMesh->GetTexture(0);
 			m_pRessource->GetName( m_sName );
 			m_pOrgSkeletonRoot = dynamic_cast<CBone*>(pAMesh->GetSkeleton());
@@ -215,7 +196,7 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 					IBone* pParentBone = static_cast< IBone* >( m_pSkeletonRoot->GetChildBoneByID( pMesh->GetParentBoneID() ) );
 					string sName;
 					pMesh->GetName( sName );
-					CEntity* pEntity = dynamic_cast< CEntity* >( m_pEntityManager->CreateEmptyEntity( sName ) );
+					CEntity* pEntity = CreateEmptyEntity(sName); //dynamic_cast< CEntity* >( m_pEntityManager->CreateEmptyEntity( sName ) );
 					pEntity->SetMesh( pMesh );
 					if (pMesh == m_pRessource)
 						m_bEmptyEntity = true;
@@ -302,6 +283,11 @@ void CEntity::LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vec
 			}
 		}
 	}
+}
+
+CEntity* CEntity::CreateEmptyEntity(string sName)
+{
+	return dynamic_cast< CEntity* >(m_pEntityManager->CreateEmptyEntity(sName));
 }
 
 void CEntity::UpdateCollision()
@@ -505,10 +491,10 @@ void CEntity::SendBonesToShader()
 {
 	if (m_pOrgSkeletonRoot)
 	{
-		vector< CMatrix > vBoneMatrix;
-		GetBonesMatrix(m_pOrgSkeletonRoot, m_pSkeletonRoot, vBoneMatrix);
+		m_vBoneMatrix.clear();
+		GetBonesMatrix(m_pOrgSkeletonRoot, m_pSkeletonRoot, m_vBoneMatrix);
 		if (!m_pEntityManager->IsUsingInstancing())
-			SetNewBonesMatrixArray(vBoneMatrix);
+			SetNewBonesMatrixArray(m_vBoneMatrix);
 	}
 }
 
@@ -551,9 +537,16 @@ void CEntity::Update()
 	CNode::Update();
 	SendBonesToShader();
 
+	if (m_oSkinOffset != CVector(0, 0, 0)) {
+		CMatrix offsetLocalMatrix = m_oLocalMatrix * CMatrix::GetTranslation(m_oSkinOffset.m_x, m_oSkinOffset.m_y, m_oSkinOffset.m_z);
+		m_oWorldMatrix = m_oWorldMatrix * offsetLocalMatrix;
+	}
+
 	m_oWorldMatrix *= m_oScaleMatrix;
-	if(!m_pEntityManager->IsUsingInstancing())
-		m_oRenderer.SetModelMatrix( m_oWorldMatrix );	
+	if (!m_pEntityManager->IsUsingInstancing())
+	{
+		m_oRenderer.SetModelMatrix(m_oWorldMatrix);
+	}
 	UpdateRessource();
 
 	if (m_bDrawBoundingBox && m_pBoundingGeometry)
@@ -801,24 +794,34 @@ int CEntity::GetCellSize()
 
 void CEntity::GetBonesMatrix( INode* pInitRoot, INode* pCurrentRoot, vector< CMatrix >& vMatrix )
 {
-	// m0 = base du node dans sa position initiale, m0i = inverse de m0
-	// m1 = base du node dans sa position actuelle
-	// m2 = matrice de passage de m0 à m1 (m2 = inv(m0)*m1)
-	CMatrix m0, m1, mPassage, m0i;
-	pInitRoot->GetWorldMatrix(m0);
-	pCurrentRoot->GetWorldMatrix(m1);
-	CMatrix::GetPassage( m0, m1, mPassage );
-	
-	CMatrix oWorldInverse;
-	m_oWorldMatrix.GetInverse(oWorldInverse);
-	mPassage = oWorldInverse * mPassage;	
+	//if (pInitRoot->GetID() != -1) 
+	{
+		CMatrix mPassage;
+		GetPassageMatrix(pInitRoot, pCurrentRoot, mPassage);
 
-	vMatrix.push_back( mPassage );
+		vMatrix.push_back(mPassage);
+	}
 	for ( unsigned int i = 0; i < pInitRoot->GetChildCount(); i++ )
 	{
 		if ( pInitRoot->GetChild( i ) )
 			GetBonesMatrix( pInitRoot->GetChild( i ), pCurrentRoot->GetChild( i ), vMatrix );
 	}
+}
+
+void CEntity::GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage)
+{
+	// m0 = base du node dans sa position initiale, m0i = inverse de m0
+	// m1 = base du node dans sa position actuelle
+	// m2 = matrice de passage de m0 à m1 (m2 = inv(m0)*m1)
+
+	CMatrix m0, m1, m0i;
+	pOrgNode->GetWorldMatrix(m0);
+	pCurrentNode->GetWorldMatrix(m1);
+	CMatrix::GetPassage(m0, m1, passage);
+
+	CMatrix oWorldInverse;
+	m_oWorldMatrix.GetInverse(oWorldInverse);
+	passage = oWorldInverse * passage;
 }
 
 void CEntity::SetNewBonesMatrixArray( std::vector< CMatrix >& vMatBones )
@@ -948,18 +951,16 @@ IBone* CEntity::GetSkeletonRoot()
 	return m_pSkeletonRoot;
 }
 
+IBone* CEntity::GetOrgSkeletonRoot()
+{
+	return m_pOrgSkeletonRoot;
+}
+
 void CEntity::SetSkeletonRoot(CBone* pBone, CBone* pOrgBone)
 {
-#if 1
-	m_pSkeletonRoot = (CBone*)pBone->DuplicateHierarchy();
-	m_pOrgSkeletonRoot = (CBone*)pOrgBone->DuplicateHierarchy();
-	m_pSkeletonRoot->Link(this);
-
-#else
 	m_pSkeletonRoot = pBone;
 	m_pOrgSkeletonRoot = pOrgBone;
 //	m_pSkeletonRoot->Link(this);
-#endif // 0
 }
 
 void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)

@@ -9,6 +9,7 @@
 #include "EntityManager.h"
 #include "IGUIManager.h"
 #include "Bone.h"
+#include "../Utils2/StringUtils.h"
 
 map< string, IEntity::TAnimation >			CMobileEntity::s_mAnimationStringToType;
 map< IEntity::TAnimation, float > 			CMobileEntity::s_mOrgAnimationSpeedByType;
@@ -202,6 +203,11 @@ m_sStandAnimation("stand-normal")
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 }
 
+CMobileEntity::~CMobileEntity()
+{
+
+}
+
 void CMobileEntity::InitAnimations()
 {
 	string sMask = "Animations/*.bke";
@@ -231,14 +237,14 @@ void CMobileEntity::InitStatics()
 	s_mAnimationStringToType["HitRightArm"] = eHitRightArm;
 	s_mAnimationStringToType["jump"] = eJump;
 	s_mAnimationStringToType["dying"] = eDying;
-	s_mAnimationStringToType["guard"] = eGuard;
+	s_mAnimationStringToType["MoveToGuard"] = eMoveToGuard;
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
 	s_mOrgAnimationSpeedByType[eRun] = -7.f;
 	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
 	s_mOrgAnimationSpeedByType[eHitReceived] = 0.f;
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
-	s_mOrgAnimationSpeedByType[eGuard] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
 
 	s_mActions["walk"] = Walk;
 	s_mActions["run"] = Run;
@@ -246,7 +252,7 @@ void CMobileEntity::InitStatics()
 	s_mActions["PlayReceiveHit"] = PlayReceiveHit;
 	s_mActions["jump"] = Jump;
 	s_mActions["dying"] = Dying;
-	s_mActions["guard"] = Guard;
+	s_mActions["MoveToGuard"] = MoveToGuard;
 
 	s_mStringToAnimation["run"] = IEntity::eRun;
 }
@@ -333,7 +339,7 @@ void CMobileEntity::WearArmorToDummy(string armorName)
 	for (int i = 0; i < count; i++) {
 		IBone* pBodyDummy = dynamic_cast<IBone*>(m_pSkeletonRoot->GetChildBoneByName(bodyDummies[i]));
 		if (pBodyDummy) {
-			IEntity* piece = m_pEntityManager->CreateEntity(string("meshes/armors/") + armorName + "/" + arrayPiece[i] + ".bme", "");
+			CEntity* piece = new CEntity(m_oInterface, string("meshes/armors/") + armorName + "/" + arrayPiece[i] + ".bme");
 			piece->LinkDummyParentToDummyEntity(this, bodyDummies[i]);
 		}
 	}
@@ -361,6 +367,13 @@ void CMobileEntity::UnWearAllShoes()
 	pBodyDummyRShoes->ClearChildren();
 }
 
+void CMobileEntity::UnwearAllClothes()
+{
+	for (IEntity*& pEntity : m_vClothes) {
+		pEntity->Unlink();
+	}
+}
+
 void CMobileEntity::WearShoes(string shoesPath)
 {
 	string shoesPathLower = shoesPath;
@@ -385,9 +398,9 @@ void CMobileEntity::WearShoes(string shoesPath)
 
 	// link new shoes
 	string shoesName = shoesPath.substr(shoesPath.find_last_of("/") + 1);
-	IEntity* Lshoes = m_pEntityManager->CreateEntity(string("clothes/shoes/") + sPrefix + "L" + shoesName + ".bme", "");
+	CEntity* Lshoes = new CEntity(m_oInterface, string("clothes/shoes/") + sPrefix + "L" + shoesName + ".bme");
 	Lshoes->LinkDummyParentToDummyEntity(this, "BodyDummyLFoot");
-	IEntity* Rshoes = m_pEntityManager->CreateEntity(string("clothes/shoes/") + sPrefix + "R" + shoesName + ".bme", "");
+	CEntity* Rshoes = new CEntity(m_oInterface, string("clothes/shoes/") + sPrefix + "R" + shoesName + ".bme");
 	Rshoes->LinkDummyParentToDummyEntity(this, "BodyDummyRFoot");
 }
 
@@ -396,10 +409,19 @@ void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
 	string clothPathLower = sClothPath;
 	std::transform(sClothPath.begin(), sClothPath.end(), clothPathLower.begin(), tolower);
 
-	// link new cloth
 	string sClothName = sClothPath.substr(sClothPath.find_last_of("/") + 1);
-	IEntity* pCloth = m_pEntityManager->CreateEntity(string("Clothes/") + sClothName + ".bme", "");
-	pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
+	CEntity* pCloth = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity(string("Clothes/") + sClothName + ".bme", ""));
+	if (pCloth) {
+		IMesh* pMesh = pCloth->GetMesh();
+		if (pMesh && pMesh->IsSkinned()) {
+			pCloth->SetSkeletonRoot(m_pSkeletonRoot, m_pOrgSkeletonRoot);
+			pCloth->Link(this);
+			pCloth->SetSkinOffset(pCloth->GetMesh()->GetOrgMaxPosition());
+		}
+		else
+			pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
+		m_vClothes.push_back(pCloth);
+	}
 }
 
 void CMobileEntity::Link(INode* pParent)
@@ -426,7 +448,7 @@ void CMobileEntity::AddHairs(string hairsName)
 		pDummyHairs->Unlink();
 
 	// link new hairs
-	IEntity* hairs = m_pEntityManager->CreateEntity(string("hairs/") + hairsName + ".bme", "");
+	CEntity* hairs = new CEntity(m_oInterface, string("Meshes/hairs/") + hairsName + ".bme");
 	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");	
 }
 
@@ -562,11 +584,19 @@ void CMobileEntity::PlayReceiveHit()
 	RunAction("PlayReceiveHit", false);
 }
 
+void CMobileEntity::MoveToGuard()
+{
+	//RunAction("guard", false);
+	if (m_eCurrentAnimationType != eMoveToGuard) {
+		SetPredefinedAnimation("MoveToGuard", false);
+	}
+}
+
 void CMobileEntity::Guard()
 {
 	//RunAction("guard", false);
-	if (m_eCurrentAnimationType != eGuard) {
-		SetPredefinedAnimation("guard", false);
+	if (m_eCurrentAnimationType != eMoveToGuard) {
+		SetPredefinedAnimation("Guard", false);
 	}
 }
 
@@ -604,9 +634,9 @@ void CMobileEntity::Dying(CMobileEntity* pHuman, bool bLoop)
 	pHuman->Die();
 }
 
-void CMobileEntity::Guard(CMobileEntity* pHuman, bool bLoop)
+void CMobileEntity::MoveToGuard(CMobileEntity* pHuman, bool bLoop)
 {
-	pHuman->Guard();
+	pHuman->MoveToGuard();
 }
 
 void CMobileEntity::SetAnimationSpeed( IEntity::TAnimation eAnimationType, float fSpeed )
@@ -665,6 +695,22 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		animatedEntityInfos.m_vSpecular = m_vCustomSpecular;
 		animatedEntityInfos.m_bUseCustomSpecular = m_bUseCustomSpecular;
 	}
+	for (IEntity*& pEntity : m_vClothes) {
+		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
+		string sClothName, sNodeName;
+		pMesh->GetFileName(sClothName);
+		for (int i = 0; i < animatedEntityInfos.m_vSubEntityInfos.size(); i++) {
+			ILoader::CObjectInfos* pSubEntity = animatedEntityInfos.m_vSubEntityInfos[i];
+			if (pSubEntity->m_sRessourceFileName == sClothName)
+				animatedEntityInfos.m_vSubEntityInfos.erase(animatedEntityInfos.m_vSubEntityInfos.begin() + i);
+		}
+		CStringUtils::GetShortFileName(sClothName, sClothName);
+		CStringUtils::GetFileNameWithoutExtension(sClothName, sClothName);
+		if (pEntity->GetParent() != this) {
+			sNodeName = pEntity->GetParent()->GetName();
+		}
+		animatedEntityInfos.m_mClothesToNode[sClothName] = sNodeName;
+	}
 }
 
 void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent)
@@ -682,6 +728,10 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* 
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
 			SetAnimationSpeed(CMobileEntity::s_mStringToAnimation[it->first], it->second);
 		GetCurrentAnimation()->Play(true);
+
+		for (const pair<string, string>& clothesInfos : pAnimatedEntityInfos->m_mClothesToNode) {
+			WearCloth(clothesInfos.first, clothesInfos.second);
+		}
 	}
 }
 
@@ -755,24 +805,6 @@ void CMobileEntity::WearSkinnedClothFull(string sClothName)
 			m_pCloth->AddAnimation("stand-normal.bke");
 			m_pCloth->AddAnimation("test3.bke");
 			m_pCloth->LocalTranslate(0, 24, -1);
-
-			m_pCloth->Link(this);
-		}
-	}
-}
-
-void CMobileEntity::WearSkinnedCloth(string sClothName)
-{
-	ILoader::CAnimatableMeshData mi;
-	m_pLoaderManager->Load(string("Meshes/") + sClothName + ".bme", mi);
-	set<float> ids;
-	for (float& id : mi.m_vMeshes[0].m_vWeigtedVertexID) {
-		ids.insert(id);
-	}
-	IEntity* pCloth = m_pEntityManager->CreateEntity(sClothName);
-	if (pCloth) {
-		m_pCloth = dynamic_cast<CEntity*>(pCloth);
-		if (m_pCloth) {
 			m_pCloth->Link(this);
 		}
 	}

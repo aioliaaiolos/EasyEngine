@@ -18,7 +18,7 @@ Walk(npc1);
 
 //ExportBMEToAscii("meshes/hairs/hairs04", "test.txt");
 //LoadWorld("TestCollisions");
-LoadWorld("");
+//LoadWorld("");
 //EditWorld("");
 //LoadWorld("TestHopital");
 //LoadWorld("test03");
@@ -31,7 +31,8 @@ LoadWorld("");
 
 //EditMap("hopital02");
 //CreateCollisionMap(0, "cm-100.bmp", 100, 0);
-
+//EditCharacter("Geraldine");
+// WearCloth("clothes/testCloth03", "BodyDummyRoot");
 
 //ger=GetEntityID("Geraldine");
 //Goto(ger, 3110, 0, -893);

@@ -67,7 +67,6 @@ void StopAnimation( IScriptState* pState );
 void Sleep( IScriptState* pState );
 void HideEntity( IScriptState* pState );
 void LinkToId( IScriptState* pState );
-void LinkToName(IScriptState* pState);
 void SetZCollisionError( IScriptState* pState );
 void SetConstantLocalTranslate( IScriptState* pState );
 void NextAnimationFrame( IScriptState* pState );

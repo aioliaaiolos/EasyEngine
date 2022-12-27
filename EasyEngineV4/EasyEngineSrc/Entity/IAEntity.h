@@ -76,6 +76,7 @@ private:
 	virtual IAnimation*			GetCurrentAnimation() = 0;
 	virtual float				GetDistanceTo2dPoint( const CVector& oPosition ) = 0;
 	virtual void				Run() = 0;
+	virtual void				MoveToGuard() = 0;
 	virtual void				Guard() = 0;
 	virtual IBox*				GetFirstCollideBox() = 0;
 	virtual IBox*				GetNextCollideBox() = 0;

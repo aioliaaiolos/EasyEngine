@@ -104,9 +104,6 @@ IEntity* CEntityManager::CreateEntity(std::string sFileName, bool bDuplicate)
 	sFileName = string("Meshes/") + sFileName;
 	CEntity* pEntity = NULL;
 	pEntity = new CEntity(m_oInterface, sFileName, bDuplicate);
-	string sName;
-	pEntity->GetName(sName);
-	AddEntity(pEntity, sName);
 	return pEntity;
 }
 
@@ -326,11 +323,14 @@ void CEntityManager::GetCharactersName(vector<string>& vCharactersName)
 
 int	CEntityManager::GetEntityID( IEntity* pEntity )
 {
-	map< IEntity*, int >::iterator itEntity = m_mEntitiesID.find( pEntity );
-	if( itEntity != m_mEntitiesID.end() )
-		return itEntity->second;
-	AddEntity(pEntity);
-	return pEntity->GetID();
+	if (pEntity) {
+		map< IEntity*, int >::iterator itEntity = m_mEntitiesID.find(pEntity);
+		if (itEntity != m_mEntitiesID.end())
+			return itEntity->second;
+		AddEntity(pEntity);
+		return pEntity->GetID();
+	}
+	return -1;
 }
 
 int CEntityManager::GetEntityCount()

@@ -71,6 +71,7 @@ public:
 	ITexture*			CreateRenderTexture(int width, int height, string sShaderName);
 	string				GetName() override;
 	void				RemoveAllLights() override;
+	void				Reset() override;
 
 private:
 	typedef IRessource*(*TRessourceCreation)(string sFileName, CRessourceManager*, IRenderer&);

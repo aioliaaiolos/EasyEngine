@@ -6,6 +6,7 @@
 #include "IGeometry.h"
 #include "IConsole.h"
 #include "EditorManager.h"
+#include "CharacterEditor.h"
 #include "../Utils2/StringUtils.h"
 
 #include <algorithm>
@@ -28,6 +29,11 @@ void CWorldEditor::HandleMapLoaded(string sMapName)
 
 void CWorldEditor::ClearWorld()
 {
+	CCharacterEditor* pCharacterEditor = dynamic_cast<CCharacterEditor*>(m_pEditorManager->GetEditor(IEditor::Type::eCharacter));
+	if (pCharacterEditor)
+	{
+		pCharacterEditor->OnEditorExit();
+	}
 	m_pScene->Clear();
 	m_vEntities.clear();
 	m_mCharacterMatrices.clear();

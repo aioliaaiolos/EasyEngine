@@ -153,6 +153,11 @@ void CMesh::SetDrawStyle(IRenderer::TDrawStyle style)
 	m_eDrawStyle = style;
 }
 
+bool CMesh::IsSkinned()
+{
+	return m_nVertexWeightBufferID != -1;
+}
+
 void CMesh::Update()
 {
 	m_pShader->Enable( true );

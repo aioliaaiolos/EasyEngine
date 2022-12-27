@@ -83,7 +83,7 @@ private:
 
 	void											OnKeyPress(unsigned char key);
 	void											OnKeyRelease(unsigned char key);
-	void											AddString(string s);
+	void											AddString(string s, int nPos = -1);
 	void											NewLine();
 	void											ReplaceString(string s, int nLine = -1);
 	unsigned int									ComputePixelCursorPos();

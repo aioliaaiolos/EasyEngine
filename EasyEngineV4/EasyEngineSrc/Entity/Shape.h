@@ -49,7 +49,6 @@ public:
 	void			Goto( const CVector& oPosition, float fSpeed ){ throw 1; }
 	void			SetEntityName( string sName ){ throw 1; }
 	void			ReloadShader();
-	void			LinkDummyParentToDummyEntity(IEntity* pEntity, string sEntityName) override {}
 	void			AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			SetDiffuseTexture(string sFileName) override {}
@@ -58,7 +57,8 @@ public:
 	void			DrawCollisionBoundingBoxes(bool bDraw) {}
 	void			PlayCurrentAnimation(bool loop) {}
 	void			PauseCurrentAnimation(bool loop) {}
-	void			CreateCollisionMaps(float fBias) {}
+	void			CreateCollisionMaps(float fBias) override{}
+	void			SetSkinOffset(float x, float y, float z) override {}
 };
 
 #endif // SHAPE_H

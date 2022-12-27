@@ -481,6 +481,11 @@ void CRessourceManager::RemoveAllLights()
 	CLight::RemoveAllLights();
 }
 
+void CRessourceManager::Reset()
+{
+	m_mRessource.clear();
+}
+
 void CRessourceManager::CollectMaterials( const ILoader::CMaterialInfos& oMaterialInfos, IRenderer& oRenderer, IShader* pShader, IRessourceManager* pRessourceManager, std::map< int, CMaterial* >& mMaterials )
 {
 	mMaterials[ oMaterialInfos.m_nID ] = CreateMaterial( &oMaterialInfos, oRenderer, pShader, pRessourceManager );

@@ -158,6 +158,7 @@ public:
 	virtual IMaterial*		GetMaterial(int index) = 0;
 	virtual void			SetDrawStyle(IRenderer::TDrawStyle style) = 0;
 	virtual void			UpdateInstances(int instanceCount) = 0;
+	virtual bool			IsSkinned() = 0;
 };
 
 class IAnimatableMesh : public IRessource
@@ -222,6 +223,7 @@ public:
 	virtual ITexture*			CreateTexture2D(IShader* pShader, int nUnitTexture, vector< unsigned char >& vData, int nWidth, int nHeight, IRenderer::TPixelFormat eFormat) = 0;
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
 	virtual void				RemoveAllLights() = 0;
+	virtual void				Reset() = 0;
 };
 
 #endif // IRESSOURCE_H

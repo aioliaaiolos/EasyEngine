@@ -52,6 +52,11 @@ void CNPCEntity::Run()
 	CMobileEntity::Run( true ); 
 }
 
+void CNPCEntity::MoveToGuard()
+{
+	CMobileEntity::MoveToGuard();
+}
+
 void CNPCEntity::Guard()
 {
 	CMobileEntity::Guard();

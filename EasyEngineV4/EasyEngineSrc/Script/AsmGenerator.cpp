@@ -2,6 +2,7 @@
 #include "LexAnalyser.h"
 #include "SyntaxAnalyser.h"
 #include "ScriptException.h"
+#include "Exception.h"
 
 #include <sstream>
 #include <algorithm>
@@ -231,6 +232,10 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 	}
 	else if( oTree.m_Lexem.m_eType == CLexAnalyser::CLexem::eAffect )
 	{
+		if (oTree.m_vChild.empty()) {
+			CCompilationErrorException e(-1, -1);
+			throw e;
+		}
 		CVar& v1 = mVar[ m_nCurrentScopeNumber ][ oTree.m_vChild[ 0 ].m_Lexem.m_sValue ];
 		if( !v1.m_bIsDeclared )
 			v1.m_bIsDeclared = true;

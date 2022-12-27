@@ -46,6 +46,7 @@ public:
 	void							PlayCurrentAnimation(bool loop);
 	void							PauseCurrentAnimation(bool loop);
 	IBone*							GetSkeletonRoot();
+	IBone*							GetOrgSkeletonRoot();
 	void							SetSkeletonRoot(CBone* pBone, CBone* pOrgBone);
 	void							GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 	virtual void					BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent);
@@ -56,7 +57,7 @@ public:
 	void							LocalTranslate(float dx , float dy , float dz);
 	void							LocalTranslate( const CVector& vTranslate );
 	void							LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM );
-	void							LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName) override;
+	virtual void					LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName);
 	void							SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
 	TAnimation						GetCurrentAnimationType() const{return eNone;}
 	void							GetTypeName( string& sName );
@@ -91,6 +92,9 @@ public:
 	void							CreateCollisionMaps(float fBias) override;
 	void							LoadCollisionMaps();
 	ICollisionMap*					GetCollisionMap();
+	void							SetSkinOffset(float x, float y, float z) override;
+	void							SetSkinOffset(CVector& oSkinOffset);
+	
 
 protected:
 	IRessource*										m_pRessource;
@@ -138,7 +142,9 @@ protected:
 	IGrid*											m_pCollisionGrid;
 	const int										m_nCollisionGridCellSize = 200;
 	IPathFinder&									m_oPathFinder;
-	ICollisionMap*									m_pCollisionMap;	
+	ICollisionMap*									m_pCollisionMap;
+	vector< CMatrix >								m_vBoneMatrix;
+	CVector											m_oSkinOffset;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -153,9 +159,11 @@ protected:
 	bool				TestWorldCollision(INode* pEntity);
 	bool				IsPassingDoor(INode* pWall, IGeometry* pBBox, IGeometry* pWallBBox);
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
-	void				SendBonesToShader();
+	virtual void		SendBonesToShader();
 	void				DispatchEntityEvent();
 	void				LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors);
+	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
+	virtual CEntity*	CreateEmptyEntity(string sName);
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
 };
 

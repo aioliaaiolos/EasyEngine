@@ -350,8 +350,8 @@ void CConsole::OnKeyPress( unsigned char key )
 			else if (key == 'V') {
 				string text;
 				GetClipboardContent(text);
-				Print(text);
-				m_nCursorPos = sLine.size();
+				AddString(text, m_nCursorPos);
+				m_nCursorPos += text.size();
 			}
 		}
 		else
@@ -424,7 +424,7 @@ void CConsole::Close()
 	m_oGUIManager.EnableStaticText( m_nStaticTextID, false );
 }
 
-void CConsole::AddString( string s )
+void CConsole::AddString( string s, int nPos )
 {
 	if( s.size() == 0 )
 		return;
@@ -441,8 +441,14 @@ void CConsole::AddString( string s )
 			AddString( sQueue );
 		}
 	}
-	else
-		m_vLines.back().insert( m_vLines.back().end(), s.begin(), s.end() );
+	else {
+		if(nPos == -1)
+			m_vLines.back().insert(m_vLines.back().end(), s.begin(), s.end());
+		else {
+			string& lastLine = m_vLines.back();
+			lastLine.insert(lastLine.begin() + nPos, s.begin(), s.end());
+		}
+	}
 }
 
 bool CConsole::UpdateConsoleHeight()

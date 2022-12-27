@@ -8,14 +8,14 @@
 #include "EditorManager.h"
 
 CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCameraType type) :
-CEditor(oInterface, type),
-CPlugin(nullptr, ""),
-ICharacterEditor(oInterface),
-m_bIsLeftMousePressed(false),
-m_pWorldEditor(nullptr),
-m_pCurrentCharacter(nullptr),
-m_pCurrentEditableCloth(nullptr),
-m_oLoaderManager(static_cast<ILoaderManager&>(*oInterface.GetPlugin("LoaderManager")))
+	CEditor(oInterface, type),
+	CPlugin(nullptr, ""),
+	ICharacterEditor(oInterface),
+	m_bIsLeftMousePressed(false),
+	m_pWorldEditor(nullptr),
+	m_pCurrentCharacter(nullptr),
+	m_pCurrentEditableCloth(nullptr),
+	m_oLoaderManager(static_cast<ILoaderManager&>(*oInterface.GetPlugin("LoaderManager")))
 {
 	m_pScene = m_oSceneManager.GetScene("Game");
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(oInterface.GetPlugin("EventDispatcher"));
@@ -68,6 +68,14 @@ void CCharacterEditor::ZoomCameraBody()
 	Zoom(pos, 106, -14, -1);
 }
 
+void CCharacterEditor::ZoomCameraLarge()
+{
+	m_eZoomType = eLarge;
+	static int x = 230, y = 150, z = -35;
+	CVector pos(500, 200, -35);
+	Zoom(pos, 106, -14, -1);
+}
+
 void CCharacterEditor::ZoomCameraHead()
 {
 	m_eZoomType = eHead;
@@ -84,7 +92,7 @@ void CCharacterEditor::ZoomCameraEye()
 	static float yaw = 106;
 	static float pitch = -14;
 	static float roll = -1;
-	CVector pos(x, y, z);
+	CVector pos(17, 158, -5);
 	Zoom(pos, yaw, pitch, roll);
 }
 
@@ -159,6 +167,8 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 {
 	if(!m_bEditionMode)
 		SetEditionMode(true);
+	if (m_pCurrentCharacter)
+		m_pCurrentCharacter->Unlink();
 	m_pCurrentCharacter = dynamic_cast<ICharacter*>(m_oEntityManager.GetEntity(sCharacterId));
 	if (!m_pCurrentCharacter) {
 		m_pCurrentCharacter = m_oEntityManager.BuildCharacterFromDatabase(sCharacterId, m_pScene);
@@ -167,13 +177,15 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 				if (sCharacterId == "Player")				
 					m_pCurrentCharacter = m_oEntityManager.CreatePlayer("body03");
 				else
-					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body01", sCharacterId);
+					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03", sCharacterId);
 				m_pCurrentCharacter->Link(m_pScene);
 			}
 			else
 				throw CEException("Erreur : CCharacterEditor::SpawnEntity() -> Vous devez indiquer un ID pour votre personnage");
 		}
 	}
+	else
+		m_pCurrentCharacter->Link(m_pScene);
 	InitSpawnedCharacter();
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 
@@ -252,6 +264,9 @@ void CCharacterEditor::WearCloth(string sClothName, string sDummyName)
 	{
 		m_pCurrentCharacter->WearCloth(sClothName, sDummyName);
 	}
+	catch (CNodeNotFoundException & e) {
+		m_oConsole.Println(string("Error : Node '") + e.what() + "' not found");
+	}
 	catch (CEException& e) {
 		m_oConsole.Println(e.what());
 	}
@@ -290,14 +305,23 @@ void CCharacterEditor::EditCloth(string sClothName)
 	IBone* pCurrentEditableDummyCloth = m_pCurrentCharacter->GetSkeletonRoot()->GetChildBoneByName(sDummyName);
 	if (pCurrentEditableDummyCloth)
 		m_pCurrentEditableCloth = dynamic_cast<IEntity*>(pCurrentEditableDummyCloth->GetChild(0));
-	else
-		throw CEException(sDummyName + " not found");
+	else {
+		IEntity* pCloth = m_oEntityManager.GetEntity(sClothName);
+		if (pCloth)
+			m_pCurrentEditableCloth = pCloth;
+		else
+			throw CEException(sDummyName + " not found. If your cloth is skinned, check the name you entered corresponds to the object name into Max scene");
+	}
 }
 
 void CCharacterEditor::OffsetCloth(float x, float y, float z)
 {
 	if (m_pCurrentEditableCloth) {
-		m_pCurrentEditableCloth->WorldTranslate(x, y, z);
+		IMesh* pMesh = dynamic_cast<IMesh*>(m_pCurrentEditableCloth->GetRessource());
+		if (pMesh && pMesh->IsSkinned())
+			m_pCurrentEditableCloth->SetSkinOffset(x, y, z);
+		else
+			m_pCurrentEditableCloth->WorldTranslate(x, y, z);
 		m_offsetCloth += CVector(x, y, z);
 	}
 	else
@@ -324,14 +348,24 @@ void CCharacterEditor::TurnEyes(float fYaw, float fPitch, float fRoll)
 
 void CCharacterEditor::SaveCurrentEditableCloth()
 {
-	string sFileName = string("Meshes/Clothes/") + m_sCurrentEditableCloth + ".bme";
+	string sFileName;
+	IMesh* pMesh = dynamic_cast<IMesh*>(m_pCurrentEditableCloth->GetRessource());
+	if (pMesh->IsSkinned())
+		pMesh->GetFileName(sFileName);
+	else
+		sFileName = string("Meshes/Clothes/") + m_sCurrentEditableCloth + ".bme";
 	ILoader::CAnimatableMeshData ami;
 	m_oLoaderManager.Load(sFileName, ami);
-	map<int, pair<string, CMatrix>>::iterator it = ami.m_mBones.begin();
-	CMatrix& tm = it->second.second;
-	tm.m_03 -= m_offsetCloth.m_x;
-	tm.m_13 -= m_offsetCloth.m_y;
-	tm.m_23 -= m_offsetCloth.m_z;
+
+	if (pMesh->IsSkinned())	
+		ami.m_vMeshes[0].m_oOrgMaxPosition = m_offsetCloth;
+	else {
+		map<int, pair<string, CMatrix>>::iterator it = ami.m_mBones.begin();
+		CMatrix& tm = it->second.second;
+		tm.m_03 -= m_offsetCloth.m_x;
+		tm.m_13 -= m_offsetCloth.m_y;
+		tm.m_23 -= m_offsetCloth.m_z;
+	}
 	m_oLoaderManager.Export(sFileName, ami);
 }
 
@@ -347,6 +381,10 @@ void CCharacterEditor::SaveCurrentEditableBody()
 	m_oLoaderManager.Export(sFileName, ami);
 }
 
+void CCharacterEditor::OnEditorExit()
+{
+	m_pCurrentCharacter = nullptr;
+}
 
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)
 {
@@ -370,6 +408,9 @@ void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 			if (x > 0) {
 				switch (pEditor->m_eZoomType)
 				{
+				case eLarge:
+					pEditor->ZoomCameraBody();
+					break;
 				case eBody:
 					pEditor->ZoomCameraHead();
 					break;
@@ -388,6 +429,9 @@ void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 					break;
 				case eHead:
 					pEditor->ZoomCameraBody();
+					break;
+				case eBody:
+					pEditor->ZoomCameraLarge();
 					break;
 				default:
 					break;

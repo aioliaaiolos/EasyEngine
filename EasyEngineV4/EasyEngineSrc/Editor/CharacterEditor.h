@@ -41,22 +41,25 @@ public:
 	void					OffsetCloth(float x, float y, float z);
 	void					OffsetEyes(float x, float y, float z);
 	void					TurnEyes(float fYaw, float fPitch, float fRoll);
-	void					SaveCurrentEditableCloth();
+	void					SaveCurrentEditableCloth() override;
 	void					SaveCurrentEditableBody();
+	void					OnEditorExit();
 
 private:
 
 	enum TZoomType
 	{
-		eBody = 0,
+		eLarge = 0,
+		eBody,
 		eHead,
-		eEye
+		eEye		
 	};
 
 	void					InitEyeNodes(INode* pParent);
 	void					InitHeadNode(INode* pParent);
 	void					InitSpawnedCharacter();
 	void					InitCamera(const CVector& pos);
+	void					ZoomCameraLarge();
 	void					ZoomCameraBody();
 	void					ZoomCameraHead();
 	void					ZoomCameraEye();

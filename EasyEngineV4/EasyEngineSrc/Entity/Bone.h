@@ -31,6 +31,7 @@ public:
 	void					AddKey(  string sAnimation, CKey& oKey );
 	void					NextKey();
 	void					Rewind();
+	void					SetBoundKeys(int nFirstKey, int nLastKey);
 	void					UpdateTime( float fTime );
 	IBone*					DuplicateHierarchy();
 	void					Yaw(float fAngle);

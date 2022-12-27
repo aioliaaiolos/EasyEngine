@@ -70,12 +70,12 @@ void IAEntity::UpdateFightState()
 		break;
 	case ePreparingForNextAttack:
 		m_pCurrentEnemy->GetPosition( oEnemyPos );
-		if( GetDistanceTo2dPoint( oEnemyPos ) > 100.f )
+		if( GetDistanceTo2dPoint( oEnemyPos ) > 75.f )
 			m_eFightState = eBeginGoToEnemy;
 		else
 		{
 			FaceTo(oEnemyPos);
-			//Guard();
+			//MoveToGuard();
 			m_nCurrentWaitTimeBeforeNextAttack = CTimeManager::Instance()->GetCurrentTimeInMillisecond() - m_nBeginWaitTimeBeforeNextAttack;
 			if( m_nCurrentWaitTimeBeforeNextAttack > m_nRecoveryTime )
 				m_eFightState = eBeginLaunchAttack;
@@ -117,7 +117,7 @@ void IAEntity::OnEndHitAnimation()
 {
 	if( m_eFightState == IAEntity::eLaunchingAttack )
 		m_eFightState = IAEntity::eEndLaunchAttack;
-	Stand();
+	//Stand();
 }
 
 void IAEntity::FaceTo(const CVector& target)

@@ -43,6 +43,12 @@ void CBone::Rewind()
 	m_nNextKeyValue = 1;
 }
 
+void CBone::SetBoundKeys(int nFirstKey, int nLastKey)
+{
+	m_nLastKeyValue = nFirstKey;
+	m_nNextKeyValue = nLastKey;
+}
+
 void CBone::AddKey( string sAnimation, int nTimeValue, const CMatrix& m, const CQuaternion& q )
 {
 	CKey oKey;

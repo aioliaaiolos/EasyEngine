@@ -77,7 +77,7 @@ public:
 		eHitReceived,
 		eJump,
 		eDying,
-		eGuard,
+		eMoveToGuard,
 		eAnimationCount
 	};
 
@@ -120,13 +120,13 @@ public:
 	virtual void				GetEntityName(string& sName) = 0;
 	virtual void				SetEntityName( string sName ) = 0;
 	virtual void				Colorize(float r, float g, float b, float a) = 0;
-	virtual void				LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName) = 0;
 	virtual void				AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void				DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void				SetCustomSpecular(const CVector& customSpecular) = 0;
 	virtual void				DrawCollisionBoundingBoxes(bool bDraw) = 0;
 	virtual int					GetCellSize() = 0;
 	virtual void				CreateCollisionMaps(float fBias) = 0;
+	virtual void				SetSkinOffset(float x, float y, float z) = 0;
 };
 
 class ILightEntity : public virtual IEntity
@@ -141,10 +141,9 @@ public:
 	virtual void				WearShoes(string shoesName)  = 0;
 	virtual void				UnWearShoes(string shoesPath) = 0;
 	virtual void				UnWearAllShoes() = 0;
+	virtual void				UnwearAllClothes() = 0;
 	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
 	virtual void				AddHairs(string sHairsPath) = 0;
-	virtual void				WearSkinnedCloth(string sClothName) = 0;
-	virtual void				WearSkinnedClothFull(string sClothName) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
 };
 

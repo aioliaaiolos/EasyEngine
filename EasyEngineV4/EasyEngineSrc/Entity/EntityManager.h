@@ -88,6 +88,7 @@ public:
 	bool													IsUsingInstancing();
 	void													GetInstancesTM(map<IMesh*, vector<CEntity*>>& instances);
 	map<IMesh*, vector<vector<CMatrix>>>&					GetInstancesBonesTM();
+	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
 
 private:
 	EEInterface&											m_oInterface;
@@ -105,7 +106,6 @@ private:
 	map< string, IEntity* >									m_mNameEntities;
 	map< IEntity*, string >									m_mEntitiesName;
 	int														m_nLastEntityID;
-	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
 	map< CEntity*, int >									m_mCollideEntities;
 	map< IAEntity*, int >									m_mIAEntities;
 	map< IAEntity*, int >::iterator							m_itCurrentIAEntity;

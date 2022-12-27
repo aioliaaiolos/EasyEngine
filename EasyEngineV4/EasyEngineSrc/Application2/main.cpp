@@ -34,7 +34,7 @@
 #include "IEditor.h"
 #include "Interface.h"
 
-#define CATCH_EXCEPTION
+//#define CATCH_EXCEPTION
 
 using namespace std;
 

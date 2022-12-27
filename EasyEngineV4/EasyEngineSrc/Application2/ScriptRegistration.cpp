@@ -811,7 +811,8 @@ void SetCurrentPlayer( IScriptState* pState )
 
 void GetPlayerId(IScriptState* pState)
 {
-	pState->SetReturnValue(m_pEntityManager->GetEntityID(dynamic_cast<IEntity*>(m_pEntityManager->GetPlayer())));
+	IPlayer* pPlayer = m_pEntityManager->GetPlayer();
+	pState->SetReturnValue(m_pEntityManager->GetEntityID(pPlayer));
 }
 
 void SetGravity( IScriptState* pState )
@@ -916,14 +917,27 @@ void Walk( IScriptState* pState )
 	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	//pEntity->Walk();
-	pEntity->RunAction( "walk", true );
+	if(pEntity)
+		pEntity->RunAction( "walk", true );
+	else {
+		ostringstream oss;
+		oss << "Error : entity " << pEntityID->m_nValue << " not found";
+		m_pConsole->Println(oss.str());
+	}
 }
 
 void Run( IScriptState* pState )
 {
 	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
-	pEntity->RunAction( "run", true );
+	if (pEntity)
+		pEntity->RunAction("run", true);
+	else
+	{
+		ostringstream oss;
+		oss << "Error : Entity " << pEntityID->m_nValue << " not found";
+		m_pConsole->Println(oss.str());;
+	}
 }
 
 void Stand( IScriptState* pState )
@@ -1368,141 +1382,6 @@ void GetNodeId(IScriptState* pState)
 		m_pConsole->Println("Node introuvable");
 	}
 	pState->SetReturnValue(-1);
-}
-
-void LinkToName(IScriptState* pState)
-{
-	CScriptFuncArgInt* pIDEntity1 = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgString* pIDNode1 = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
-	CScriptFuncArgInt* pIDEntity2 = static_cast< CScriptFuncArgInt* >(pState->GetArg(2));
-	CScriptFuncArgString* pIDNode2 = static_cast< CScriptFuncArgString* >(pState->GetArg(3));
-	CScriptFuncArgString* pLinkType = static_cast< CScriptFuncArgString* >(pState->GetArg(4));
-
-	IEntity::TLinkType t;
-	if (pLinkType->m_sValue == "preserve")
-		t = IEntity::ePreserveChildRelativeTM;
-	else if (pLinkType->m_sValue == "settoparent")
-		t = IEntity::eSetChildToParentTM;
-	else {	
-		ostringstream oss;
-		oss << "Error : argument 5 \"" << pLinkType->m_sValue << "\" unexpected, you must choose \"preserve\" or \"settoparent\"";
-		m_pConsole->Println(oss.str());
-		return;		
-	}
-
-	IEntity* pEntity1 = m_pEntityManager->GetEntity(pIDEntity1->m_nValue);
-	if (pEntity1)
-	{
-		INode* pNode1 = NULL;
-		bool bEntity1 = false;
-		bool bBone2 = false;
-		IBone* pBone2 = NULL;
-		if (!pIDNode1->m_sValue.empty())
-			pNode1 = pEntity1->GetSkeletonRoot()->GetChildBoneByName(pIDNode1->m_sValue);
-		else
-		{
-			pNode1 = pEntity1;
-			bEntity1 = true;
-		}
-
-		if (pIDEntity2->m_nValue == -1)
-			pNode1->Unlink();
-		else
-		{
-			IEntity* pEntity2 = m_pEntityManager->GetEntity(pIDEntity2->m_nValue);
-			INode* pNode2 = NULL;
-			if (!pIDNode2->m_sValue.empty())
-			{
-				if (!pEntity2) {
-					ostringstream oss;
-					oss << "Erreur : Entité " << pIDEntity2->m_nValue << " introuvable pour la deuxieme entité";
-					m_pConsole->Println(oss.str());
-					return;
-				}
-				IBone* pSkeletonRoot = pEntity2->GetSkeletonRoot();
-				if (pSkeletonRoot)
-				{
-					pNode2 = pSkeletonRoot->GetChildBoneByName(pIDNode2->m_sValue);
-					pBone2 = dynamic_cast< IBone* >(pNode2);
-					if (pBone2)
-						bBone2 = true;
-				}
-				else
-				{
-					ostringstream oss;
-					oss << "Erreur : l'entité " << pIDEntity2->m_nValue << " ne possède pas de squelette";
-					m_pConsole->Println(oss.str());
-					return;
-				}
-			}
-			else
-				pNode2 = pEntity2;
-
-			if (bEntity1 && bBone2)
-				pEntity2->LinkEntityToBone(pEntity1, pBone2, t);
-			else {
-				if (pNode1) {
-					if (pNode2) {
-						static bool test = false;
-						if(!test)
-							pEntity1->LinkDummyParentToDummyEntity(pEntity2, pIDNode2->m_sValue);
-						else {
-							CMatrix id;
-							pNode1->SetLocalMatrix(id);
-							pNode1->Link(pNode2);
-						}
-					}
-					else {
-						ostringstream oss;
-						oss << "Error : node \"" << pIDNode2->m_sValue << "\" not found for the second entity, please check the case (bone names are case sensitive)";
-						m_pConsole->Println(oss.str());
-						return;
-					}
-				}
-				else {
-					ostringstream oss;
-					oss << "Error : node \"" << pIDNode1->m_sValue << "\" not found for the first entity";
-					m_pConsole->Println(oss.str());
-					return;
-				}
-			}
-		}
-	}
-}
-
-void LinkDummyParentToDummyEntity(IScriptState* pState)
-{
-	CScriptFuncArgInt* pIDEntity1 = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgInt* pIDEntity2 = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
-	CScriptFuncArgString* pIDNode2 = static_cast< CScriptFuncArgString* >(pState->GetArg(2));
-	IEntity* pEntity1 = m_pEntityManager->GetEntity(pIDEntity1->m_nValue);
-	if (!pEntity1) {
-		ostringstream oss;
-		oss << "Erreur : Identifiant " << pIDEntity1->m_nValue << " invalide";
-		m_pConsole->Println(oss.str());
-		return;
-	}
-	IEntity* pEntity2 = m_pEntityManager->GetEntity(pIDEntity2->m_nValue);
-	if (!pEntity2) {
-		ostringstream oss;
-		oss << "Erreur : Identifiant " << pIDEntity2->m_nValue << " invalide";
-		m_pConsole->Println(oss.str());
-		return;
-	}
-	try {
-		pEntity1->LinkDummyParentToDummyEntity(pEntity2, pIDNode2->m_sValue);
-	}
-	catch (CNodeNotFoundException& e)
-	{
-		ostringstream oss;
-		oss << "Erreur : Dummy " << e.what() << " introuvable";
-		m_pConsole->Println(oss.str());
-	}
-	catch (CNoDummyRootException& e) {
-		ostringstream oss;
-		oss << "Erreur : Pas de dummy root trouve pour l'entite " << pIDEntity1->m_nValue;
-		m_pConsole->Println(oss.str());
-	}
 }
 
 void LinkToId( IScriptState* pState )
@@ -1950,21 +1829,32 @@ DWORD WINAPI ExportBMEToAsciiCallback(void* lpThreadParameter)
 	delete callbackArg;
 	ILoader::CAnimatableMeshData oData;
 	ILoader* pLoader = m_pLoaderManager->GetLoader("bme");
-	pLoader->Load(sBMEName, oData, *m_pFileSystem);
-	string rootDirectory;
-	m_pFileSystem->GetLastDirectory(rootDirectory);
-	for (int i = 0; i < oData.m_vMessages.size(); i++) {
-		m_pConsole->Println(oData.m_vMessages[i]);
-	}
-
-	m_pConsole->Println("Export en cours...");
-	
-	oData.m_vMessages.clear();
-	pLoader->SetAsciiExportPrecision(7);
 	try {
+		pLoader->Load(sBMEName, oData, *m_pFileSystem);	
+		string rootDirectory;
+		m_pFileSystem->GetLastDirectory(rootDirectory);
+		for (int i = 0; i < oData.m_vMessages.size(); i++) {
+			m_pConsole->Println(oData.m_vMessages[i]);
+		}
+
+		m_pConsole->Println("Export en cours...");
+	
+		oData.m_vMessages.clear();
+		pLoader->SetAsciiExportPrecision(7);
+
 		string outputPath = rootDirectory + "\\" + sOutputName;
 		pLoader->Export(outputPath, oData);
 		m_pConsole->Println("Export terminé");
+	}
+	catch (CFileNotFoundException& e)
+	{
+		ostringstream log;
+		log << "Erreur : Fichier \"" << e.m_sFileName << "\" manquant";
+		m_pConsole->Println(log.str());
+	}
+	catch (CEException& e)
+	{
+		m_pConsole->Println(e.what());
 	}
 	catch (exception& e) {
 		char msg[256];
@@ -1973,6 +1863,12 @@ DWORD WINAPI ExportBMEToAsciiCallback(void* lpThreadParameter)
 	}
 	m_pConsole->EnableInput(true);
 	return 0;
+}
+
+void Reset(IScriptState* pState)
+{
+	m_pRessourceManager->Reset();
+	m_pEntityManager->Clear();
 }
 
 void ExportBMEToAscii( IScriptState* pState )
@@ -2133,21 +2029,6 @@ void DrawCollisionModels(IScriptState* pState)
 	
 	if (pEntity) {
 		pEntity->DrawCollisionBoundingBoxes(pDisplay->m_nValue == 0 ? false : true);
-	}
-}
-
-void WearSkinnedClothFull(IScriptState* pState)
-{
-	CScriptFuncArgInt* pEntityID = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgString* pClothName = (CScriptFuncArgString*)pState->GetArg(1);
-	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityID->m_nValue));
-	if (pCharacter)
-		//pCharacter->WearSkinnedClothFull(pClothName->m_sValue);
-		pCharacter->WearSkinnedCloth(pClothName->m_sValue);
-	else {
-		ostringstream oss;
-		oss << "Erreur : l'entite " << pEntityID->m_nValue << " n'est pas un character";
-		m_pConsole->Println(oss.str());
 	}
 }
 
@@ -2643,7 +2524,14 @@ void WearCloth(IScriptState* pState)
 	m_pCharacterEditor->WearCloth(pClothPath->m_sValue, pDummyName->m_sValue);
 }
 
-void SetCharacterBody(IScriptState* pState)
+void UnwearAllClothes(IScriptState* pState)
+{
+	CScriptFuncArgInt* pEntityId = (CScriptFuncArgInt*)(pState->GetArg(0));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityId->m_nValue));
+	pCharacter->UnwearAllClothes();
+}
+
+void SetBody(IScriptState* pState)
 {
 	CScriptFuncArgString* pBody = (CScriptFuncArgString*)(pState->GetArg(0));
 	m_pCharacterEditor->SetBody(pBody->m_sValue);
@@ -3398,6 +3286,8 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
 
+	vType.clear();
+	m_pScriptManager->RegisterFunction("Reset", Reset, vType);
 
 	vType.clear();
 	vType.push_back(eFloat);
@@ -3472,13 +3362,8 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetCharacterBody", SetCharacterBody, vType);
-
-	vType.clear();
-	vType.push_back(eInt);
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("WearSkinnedClothFull", WearSkinnedClothFull, vType);
-
+	m_pScriptManager->RegisterFunction("SetBody", SetBody, vType);
+	
 	vType.clear();
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("EnableInstancingMode", EnableInstancingMode, vType);
@@ -3961,21 +3846,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back( eInt );
 	vType.push_back( eString );
 	m_pScriptManager->RegisterFunction( "LinkToId", LinkToId, vType );
-
-	vType.clear();
-	vType.push_back(eInt);
-	vType.push_back(eString);
-	vType.push_back(eInt);
-	vType.push_back(eString);
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("LinkToName", LinkToName, vType);
-
-	vType.clear();
-	vType.push_back(eInt);
-	vType.push_back(eInt);
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("LinkDummyParentToDummyEntity", LinkDummyParentToDummyEntity, vType);	
-
+	
 	vType.clear();
 	vType.push_back( eFloat );
 	m_pScriptManager->RegisterFunction( "SetZCollisionError", SetZCollisionError, vType );
@@ -4294,6 +4165,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eString);
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("WearCloth", WearCloth, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("UnwearAllClothes", UnwearAllClothes, vType);
 
 	vType.clear();
 	vType.push_back(eString);

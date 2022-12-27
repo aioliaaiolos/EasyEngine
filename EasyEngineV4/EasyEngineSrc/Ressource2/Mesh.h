@@ -77,6 +77,7 @@ public:
 	int									GetMaterialCount() override;
 	IMaterial*							GetMaterial(int index) override;
 	void								SetDrawStyle(IRenderer::TDrawStyle style) override;
+	bool								IsSkinned();
 
 
 private:

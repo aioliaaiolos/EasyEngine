@@ -13,6 +13,7 @@ public:
 	void					IncreaseLife( int nLife );
 	float					GetDistanceTo2dPoint( const CVector& oPosition );
 	void					Run();
+	void					MoveToGuard();
 	void					Guard();
 	void					ReceiveHit( IAEntity* pEnemy );
 	ICollisionManager&		GetCollisionManager(){ return m_oCollisionManager; }
