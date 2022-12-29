@@ -20,10 +20,10 @@ m_bDisplayPickingIntersectPlane(false),
 m_pQuadEntity(nullptr),
 m_pDebugSphere(nullptr),
 m_eLastKeyEvent(IEventDispatcher::TKeyEvent::T_KEYUP),
-m_eEditorMode(Type::eNone)
+m_eEditorMode(TEditorMode::eNone),
+m_eEditingMode(eXForm)
 {	
 	m_oEventDispatcher.AbonneToMouseEvent(this, OnMouseEventCallback);
-	m_oEventDispatcher.AbonneToKeyEvent(this, OnKeyEventCallback);
 }
 
 void CSpawnableEditor::HandleEditorManagerCreation(IEditorManager* pEditorManager)
@@ -41,40 +41,80 @@ void CSpawnableEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 			pEditor->m_oInputManager.SetEditionMode(false);
 		else if (e == IEventDispatcher::TMouseEvent::T_RBUTTONUP)
 			pEditor->m_oInputManager.SetEditionMode(true);
-		else if ( (e == IEventDispatcher::TMouseEvent::T_MOVE) && (pEditor->m_eEditorMode == Type::eAdding) )
+		else if ( (e == IEventDispatcher::TMouseEvent::T_MOVE) && (pEditor->m_eEditorMode == TEditorMode::eAdding) )
 			pEditor->OnMouseMove(x, y);
 	}
 }
 
 void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
 {
+	CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
+	if (e == IEventDispatcher::T_KEYUP) {
+		if (key == VK_SPACE) {
+			pEditor->m_eEditingMode = (pEditor->m_eEditingMode == TEditingType::eScale) ? TEditingType::eXForm : TEditingType::eScale;
+			return;
+		}
+	}
 	if (e == IEventDispatcher::T_KEYDOWN) {
-		CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
 		if (!pEditor->m_oConsole.IsOpen()) {
 			if (pEditor->m_pEditingEntity) {
-				float yawStep = (pEditor->m_oInputManager.GetKeyState(VK_CONTROL) == IInputManager::KEY_STATE::PRESSED) ? 1.f : 10.f;
-				float translateValue = 10.f;
 				if (key == VK_DELETE) {
 					pEditor->OnEntityRemoved(pEditor->m_pEditingEntity);
 					pEditor->m_pEditingEntity->Unlink();
 					pEditor->m_pEditingEntity = nullptr;
 				}
-				else if (key == VK_LEFT) {
-					if(pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
-						pEditor->m_pEditingEntity->LocalTranslate(translateValue, 0, 0);
-					else
-						pEditor->m_pEditingEntity->Yaw(-yawStep);
+				if (pEditor->m_eEditingMode == TEditingType::eXForm) {
+					float yawStep = (pEditor->m_oInputManager.GetKeyState(VK_CONTROL) == IInputManager::KEY_STATE::PRESSED) ? 1.f : 10.f;
+					float translateValue = 10.f;
+					
+					if (key == VK_LEFT) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->LocalTranslate(translateValue, 0, 0);
+						else
+							pEditor->m_pEditingEntity->Yaw(-yawStep);
+					}
+					else if (key == VK_RIGHT) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->LocalTranslate(-translateValue, 0, 0);
+						else
+							pEditor->m_pEditingEntity->Yaw(yawStep);
+					}
+					else if (key == VK_UP) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->LocalTranslate(0, 0, translateValue);
+						else
+							pEditor->m_pEditingEntity->LocalTranslate(0, translateValue, 0);
+					}
+					else if (key == VK_DOWN) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->LocalTranslate(0, 0, -translateValue);
+						else
+							pEditor->m_pEditingEntity->LocalTranslate(0, -translateValue, 0);
+					}
 				}
-				else if (key == VK_RIGHT) {
-					if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
-						pEditor->m_pEditingEntity->LocalTranslate(-translateValue, 0, 0);
-					else
-						pEditor->m_pEditingEntity->Yaw(yawStep);
+				else if (pEditor->m_eEditingMode == TEditingType::eScale) {
+					CVector scaleFactor;
+					pEditor->m_pEditingEntity->GetScaleFactor(scaleFactor);
+					float s = 1.01f;
+					if (key == VK_LEFT) {
+						pEditor->m_pEditingEntity->SetScaleFactor(s, 1, 1);
+					}
+					else if (key == VK_RIGHT) {
+						pEditor->m_pEditingEntity->SetScaleFactor(1.f / s, 1.f, 1.f);
+					}
+					else if (key == VK_UP) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->SetScaleFactor(1.f, 1.f, s);
+						else
+							pEditor->m_pEditingEntity->SetScaleFactor(1.f, s, 1.f);
+					}
+					else if (key == VK_DOWN) {
+						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
+							pEditor->m_pEditingEntity->SetScaleFactor(1.f, 1.f, 1.f / s);
+						else
+							pEditor->m_pEditingEntity->SetScaleFactor(1.f, 1.f / s, 1.f);
+					}
 				}
-				else if (key == VK_UP)
-					pEditor->m_pEditingEntity->LocalTranslate(0, 0, translateValue);
-				else if (key == VK_DOWN)
-					pEditor->m_pEditingEntity->LocalTranslate(0, 0, -translateValue);
 			}
 		}
 	}
@@ -110,8 +150,8 @@ void CSpawnableEditor::OnLeftMouseDown(int x, int y)
 		SelectEntity(x, y);
 		if (m_pEditingEntity) {
 			m_pEditingEntity->DrawBoundingBox(true);
-			m_eEditorMode = m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED ? Type::eEditing : Type::eAdding;
-			if (m_eEditorMode == Type::eAdding) {
+			m_eEditorMode = m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED ? TEditorMode::eEditing : TEditorMode::eAdding;
+			if (m_eEditorMode == TEditorMode::eAdding) {
 				CVector pos;
 				m_pEditingEntity->GetWorldPosition(pos);
 				m_pEditingEntity->Link(m_pScene);

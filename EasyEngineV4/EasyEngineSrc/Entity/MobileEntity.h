@@ -28,7 +28,7 @@ public:
 
 	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	void						BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent) override;
+	void						BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) override;
 	void						SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
 	TAnimation					GetCurrentAnimationType() const;
 	void						RunAction(string sAction, bool bLoop);
@@ -79,7 +79,7 @@ protected:
 	bool										m_bFirstUpdate;
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
-	vector<IEntity*>							m_vClothes;
+	vector<INode*>								m_vClothes;
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;

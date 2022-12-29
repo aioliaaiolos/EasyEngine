@@ -201,8 +201,11 @@ void SpawnCharacter(IScriptState* pState)
 	m_pRessourceManager->EnableCatchingException(false);
 	try
 	{
-		if (m_pWorldEditor->IsEnabled())
-			m_pWorldEditor->SpawnCharacter(id);
+		if (m_pWorldEditor->IsEnabled()) {
+			IEntity* pCharacter = m_pWorldEditor->SpawnCharacter(id);
+			int nCharacterId = m_pEntityManager->GetEntityID(pCharacter);
+			pState->SetReturnValue((float)nCharacterId);
+		}
 		else
 			m_pConsole->Println("Erreur : impossible de spawner un personnage en dehors du world editor");
 	}
@@ -216,6 +219,12 @@ void SpawnCharacter(IScriptState* pState)
 		m_pConsole->Println(e.what());
 	}
 	m_pRessourceManager->EnableCatchingException(bak);
+}
+
+void SpawnArea(IScriptState* pState)
+{
+	CScriptFuncArgString* pAreaName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->SpawnArea(pAreaName->m_sValue);
 }
 
 void EditCharacter(IScriptState* pState)
@@ -233,6 +242,13 @@ void EditCharacter(IScriptState* pState)
 	{
 		m_pConsole->Println(e.what());
 	}
+}
+
+void ChangeCharacterName(IScriptState* pState)
+{
+	CScriptFuncArgString* pOld = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CScriptFuncArgString* pNew = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	m_pEntityManager->ChangeCharacterName(pOld->m_sValue, pNew->m_sValue);
 }
 
 void EditCloth(IScriptState* pState)
@@ -910,6 +926,12 @@ void StopRender( IScriptState* pState )
 {
 	CScriptFuncArgInt* pRender = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	m_bRenderScene = pRender->m_nValue == 1 ? false : true;
+}
+
+void StopUpdateEntity(IScriptState* pState)
+{
+	CScriptFuncArgInt* pEntityId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	//m_pEntityManager-
 }
 
 void Walk( IScriptState* pState )
@@ -3452,8 +3474,16 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("SpawnCharacter", SpawnCharacter, vType);
 
 	vType.clear();
+	m_pScriptManager->RegisterFunction("SpawnArea", SpawnArea, vType);
+
+	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("EditCharacter", EditCharacter, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("ChangeCharacterName", ChangeCharacterName, vType);
 
 	vType.clear();
 	vType.push_back(eString);

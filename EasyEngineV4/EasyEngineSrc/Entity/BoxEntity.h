@@ -1,12 +1,11 @@
+#pragma once
+
 #include "Shape.h"
 
 class IBox;
 
 class CBoxEntity : public CShape
 {
-	IBox&	m_oBox;
-	string	m_sEntityName;
-
 public:
 	CBoxEntity( IRenderer& oRenderer, IBox& oBox );
 	void				Update();
@@ -15,4 +14,9 @@ public:
 	void				GetEntityName(string& sName);
 	IGeometry*			GetBoundingGeometry();
 	int					GetCellSize() { throw 1; return -1.f; };
+
+protected:
+	IBox&				m_oBox;
+	string				m_sEntityName;
+	CVector				m_oColor;
 };

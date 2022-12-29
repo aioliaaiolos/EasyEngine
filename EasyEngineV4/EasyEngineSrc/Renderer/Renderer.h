@@ -126,7 +126,7 @@ public:
 	void						DrawBase( const CMatrix& mBase, float fSize );
 	void						DrawLine(const CVector& p1, const CVector& p2, const CVector& color);
 	void						DrawLineInternal( const CVector& p1, const CVector& p2, const CVector& color  );
-	void						DrawBox( const CVector& oMinPoint, const CVector& oDimension );
+	void						DrawBox( const CVector& oMinPoint, const CVector& oDimension, const CVector& oColor = CVector(1, 1, 1)) override;
 	int							CreateTexture1D( float* pTexelsArray, int nSize, TPixelFormat format );
 	int							CreateTexture2D( vector< unsigned char >& pTexelsArray, int nWidth, int nWeight, TPixelFormat format );
 	int							CreateMipmaps2D(vector< unsigned char>& vTexel, int nWidth, int nHeight, IRenderer::TPixelFormat format);

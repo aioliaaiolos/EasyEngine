@@ -36,6 +36,7 @@ public:
 	IEntity*												CreatePlaneEntity(int slices, int size, string heightTexture, string diffuseTexture) override;
 	void													AddNewCharacter(IEntity* pEntity) override;
 	ICharacter*												BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) override;
+	void													GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos);
 	void													SetPlayer(IPlayer* player);
 	IPlayer*												GetPlayer();
 	IEntity*												GetEntity( int nEntityID );
@@ -53,8 +54,7 @@ public:
 	IEntity*												CreateSphere( float fSize );
 	IEntity*												CreateQuad(float lenght, float width);
 	IEntity*												CreateBox(const CVector& oDimension ) override;
-	ISphere&												GetSphere( IEntity* pSphereEntity );
-	IBox&													GetBox( IEntity* pBoxEntity );
+	IEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;
 	void													AddCollideEntity( CEntity* pEntity );
 	void													RemoveCollideEntity( CEntity* pEntity );
 	CEntity*												GetFirstCollideEntity();
@@ -89,6 +89,7 @@ public:
 	void													GetInstancesTM(map<IMesh*, vector<CEntity*>>& instances);
 	map<IMesh*, vector<vector<CMatrix>>>&					GetInstancesBonesTM();
 	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
+	void													ChangeCharacterName(string sOldName, string sNewName);
 
 private:
 	EEInterface&											m_oInterface;

@@ -6,6 +6,7 @@
 #include "IConsole.h"
 #include "WorldEditor.h"
 #include "EditorManager.h"
+#include "../Utils2/StringUtils.h"
 
 CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCameraType type) :
 	CEditor(oInterface, type),
@@ -15,6 +16,7 @@ CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCam
 	m_pWorldEditor(nullptr),
 	m_pCurrentCharacter(nullptr),
 	m_pCurrentEditableCloth(nullptr),
+	m_pRightEye(nullptr),
 	m_oLoaderManager(static_cast<ILoaderManager&>(*oInterface.GetPlugin("LoaderManager")))
 {
 	m_pScene = m_oSceneManager.GetScene("Game");
@@ -136,18 +138,17 @@ bool CCharacterEditor::IsEnabled()
 	return m_bEditionMode;
 }
 
-void CCharacterEditor::InitEyeNodes(INode* pParent)
+void CCharacterEditor::InitEyeNodes()
 {
-	for (int i = 0; i < pParent->GetChildCount(); i++) {
-		INode* pNode = pParent->GetChild(i);
+	INode* pHead = m_pLeftEye = m_pCurrentCharacter->GetSkeletonRoot()->GetChildBoneByName("Tete");
+	for (int i = 0; i < pHead->GetChildCount(); i++) {
+		INode* pNode = pHead->GetChild(i);
 		if (pNode->GetName() == "OeilD") {
 			m_pRightEye = pNode;
 		}
 		if (pNode->GetName() == "OeilG") {
 			m_pLeftEye = pNode;
 		}
-		if (!m_pLeftEye || !m_pRightEye)
-			InitEyeNodes(pNode);
 	}
 }
 
@@ -189,7 +190,7 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 	InitSpawnedCharacter();
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 
-	InitEyeNodes(m_pCurrentCharacter);
+	InitEyeNodes();
 	InitHeadNode(m_pCurrentCharacter);
 }
 
@@ -274,6 +275,7 @@ void CCharacterEditor::WearCloth(string sClothName, string sDummyName)
 
 void CCharacterEditor::SetTexture(string sTexture)
 {
+	CStringUtils::GetFileNameWithExtension(sTexture, "bmp", sTexture);
 	m_pCurrentCharacter->SetDiffuseTexture(sTexture);
 }
 
@@ -282,8 +284,14 @@ void CCharacterEditor::SetBody(string sBodyName)
 	if (sBodyName.find(".bme") == -1)
 		sBodyName += ".bme";
 	m_pCurrentCharacter->SetBody(sBodyName);
+	string sCharacterName;
+	ILoader::CAnimatedEntityInfos characterInfos;
+	m_pCurrentCharacter->GetEntityName(sCharacterName);
+	m_oEntityManager.GetCharacterInfosFromDatabase(sCharacterName, characterInfos);
+	characterInfos.m_sRessourceFileName = string("Meshes/Bodies/") + sBodyName;
+	m_pCurrentCharacter->BuildFromInfos(characterInfos, m_pScene);
 	InitSpawnedCharacter();
-	InitEyeNodes(m_pCurrentCharacter);
+	InitEyeNodes();
 	InitHeadNode(m_pCurrentCharacter);
 }
 
@@ -330,20 +338,30 @@ void CCharacterEditor::OffsetCloth(float x, float y, float z)
 
 void CCharacterEditor::OffsetEyes(float x, float y, float z)
 {
-	m_pRightEye->LocalTranslate(x, y, z);
-	m_pLeftEye->LocalTranslate(x, y, z);
-	m_vOffsetEyes += CVector(x, y, z);
+	if (m_pRightEye && m_pLeftEye) {
+		m_pRightEye->LocalTranslate(x, y, z);
+		m_pLeftEye->LocalTranslate(x, y, z);
+		m_vOffsetEyes += CVector(x, y, z);
+	}
+	else {
+		throw CEException("Error : Eye nodes not initialized");
+	}
 }
 
 void CCharacterEditor::TurnEyes(float fYaw, float fPitch, float fRoll)
 {
-	m_pRightEye->Yaw(fYaw);
-	m_pRightEye->Pitch(fPitch);
-	m_pRightEye->Roll(fRoll);
+	if (m_pRightEye && m_pLeftEye) {
+		m_pRightEye->Yaw(fYaw);
+		m_pRightEye->Pitch(fPitch);
+		m_pRightEye->Roll(fRoll);
 
-	m_pLeftEye->Yaw(fYaw);
-	m_pLeftEye->Pitch(fPitch);
-	m_pLeftEye->Roll(fRoll);
+		m_pLeftEye->Yaw(fYaw);
+		m_pLeftEye->Pitch(fPitch);
+		m_pLeftEye->Roll(fRoll);
+	}
+	else {
+		throw CEException("Error : Eye nodes not initialized");
+	}
 }
 
 void CCharacterEditor::SaveCurrentEditableCloth()

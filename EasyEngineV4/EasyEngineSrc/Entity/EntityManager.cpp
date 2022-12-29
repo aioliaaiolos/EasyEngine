@@ -20,6 +20,9 @@
 #include "ICollisionManager.h"
 #include "Bone.h"
 #include "IEditor.h"
+#include "AreaEntity.h"
+
+#include <algorithm>
 
 CEntityManager::CEntityManager(EEInterface& oInterface):
 IEntityManager(oInterface),
@@ -72,6 +75,33 @@ void CEntityManager::AddEntity( IEntity* pEntity, string sName, int id )
 	IFighterEntity* pFighterEntity = dynamic_cast< IFighterEntity* >( pEntity );
 	if( pFighterEntity )
 		m_mFighterEntities[ pFighterEntity ] = 1;
+}
+
+void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
+{
+	std::transform(sOldName.begin(), sOldName.end(), sOldName.begin(), tolower);
+	map<string, ILoader::CAnimatedEntityInfos>::iterator itCharacterInfos = m_mCharacterInfos.find(sOldName);
+	if (itCharacterInfos != m_mCharacterInfos.end()) {
+		ILoader::CAnimatedEntityInfos oCharacterInfos = itCharacterInfos->second;
+		RemoveCharacterFromDB(sOldName);
+		//m_mCharacterInfos.erase(itCharacterInfos);
+		oCharacterInfos.m_sObjectName = sNewName;
+		m_mCharacterInfos[sNewName] = oCharacterInfos;
+
+		map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sOldName);
+		if (itCharacter != m_mCharacters.end()) {
+			CMobileEntity* pCharacter = itCharacter->second;
+			m_mCharacters.erase(itCharacter);
+			m_mCharacters[sNewName] = pCharacter;
+		}
+
+		SaveCharacterInfos(m_mCharacterInfos);
+	}
+	else {
+		throw CEException(string("Error : character '") + sOldName + "' not found");
+	}
+	
+	
 }
 
 CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTypeName, string sID, bool bDuplicate )
@@ -198,16 +228,13 @@ IEntity* CEntityManager::CreateBox(const CVector& oDimension )
 	return pBoxEntity;
 }
 
-ISphere& CEntityManager::GetSphere( IEntity* pEntity )
+IEntity* CEntityManager::CreateAreaEntity(string sAreaName, const CVector& oDimension)
 {
-	CSphereEntity* pSphereEntity = static_cast< CSphereEntity* >( pEntity );
-	return pSphereEntity->GetSphere();
-}
-
-IBox& CEntityManager::GetBox( IEntity* pEntity )
-{
-	CBoxEntity* pBoxEntity = static_cast< CBoxEntity* >( pEntity );
-	return pBoxEntity->GetBox();
+	IBox* pBox = m_oGeometryManager.CreateBox();
+	pBox->Set(-oDimension / 2.f, oDimension);
+	CAreaEntity* pAreaEntity = new CAreaEntity(sAreaName, m_oInterface, m_oRenderer, *pBox);
+	AddEntity(pAreaEntity);
+	return pAreaEntity;
 }
 
 IEntity* CEntityManager::CreateMobileEntity( string sFileName, IFileSystem* pFileSystem, string sID )
@@ -228,11 +255,12 @@ void CEntityManager::AddNewCharacter(IEntity* pEntity)
 {
 	string sCharacterName;
 	pEntity->GetEntityName(sCharacterName);
+	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterName.begin(), tolower);
+
 	map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sCharacterName);
 	if (itCharacter != m_mCharacters.end())
 		throw CCharacterAlreadyExistsException(sCharacterName);
 	CMobileEntity* pCharacter = dynamic_cast<CMobileEntity*>(pEntity);
-	AddEntity(pCharacter, "Player");
 	m_mCharacters[sCharacterName] = pCharacter;
 }
 
@@ -250,6 +278,22 @@ ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEnt
 		pEntity->BuildFromInfos(itCharacter->second, dynamic_cast<CEntity*>(pParent));
 	}
 	return dynamic_cast<ICharacter*>(pEntity);
+}
+
+void CEntityManager::GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos)
+{
+	CEntity* pEntity = nullptr;
+	map<string, ILoader::CAnimatedEntityInfos>::iterator itCharacter = m_mCharacterInfos.find(sCharacterId);
+	if (itCharacter == m_mCharacterInfos.end()) {
+		ostringstream oss;
+		oss << "CEntityManager::GetCharacterInfosFromDatabase() : Erreur : CEntityManager::BuildCharacterFromDatabase() -> id " 
+			<< sCharacterId << " inexistant dans la base de donneees des personnages.";
+		CEException e(oss.str());
+	}
+	else {
+		infos = itCharacter->second;
+	}
+	
 }
 
 void CEntityManager::SetPlayer(IPlayer* player)
@@ -287,7 +331,7 @@ IPlayer* CEntityManager::CreatePlayer(string sFileName)
 		sName += ".bme";
 	sName = string("Meshes/Bodies/") + sName;
 	IPlayer* pEntity = new CPlayer(m_oInterface, sName);
-	AddEntity(pEntity);
+	AddEntity(pEntity, "Player");
 	ICharacterEditor* pCharacterEditor = dynamic_cast<ICharacterEditor*>(m_pEditorManager->GetEditor(IEditor::Type::eCharacter));
 	if (pCharacterEditor->IsEnabled()) {
 		pCharacterEditor->SetCurrentEditablePlayer(pEntity);
@@ -539,6 +583,7 @@ void CEntityManager::WearArmorToDummy(int entityId, string sArmorName)
 
 void CEntityManager::SaveCharacter(string sNPCID)
 {
+	std::transform(sNPCID.begin(), sNPCID.end(), sNPCID.begin(), tolower);
 	map<string, CMobileEntity*>::iterator itNPC = m_mCharacters.find(sNPCID);
 	if (itNPC != m_mCharacters.end()) {
 		ILoader::CObjectInfos* pInfos = nullptr;
@@ -548,6 +593,9 @@ void CEntityManager::SaveCharacter(string sNPCID)
 		m_mCharacterInfos[sNPCID] = *pAnimatedEntity;
 		SaveCharacterInfos(m_mCharacterInfos);
 		delete pAnimatedEntity;
+	}
+	else {
+		throw CEException("CEntityManager::SaveCharacter : Unable to save character because it's not loaded");
 	}
 }
 

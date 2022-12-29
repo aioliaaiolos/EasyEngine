@@ -20,11 +20,17 @@ public:
 	bool							IsEnabled() override;
 
 protected:
-	enum Type
+	enum TEditorMode
 	{
 		eNone = 0,
 		eAdding,
 		eEditing
+	};
+
+	enum TEditingType
+	{
+		eXForm = 0,
+		eScale
 	};
 
 	void							OnLeftMouseDown(int x, int y);
@@ -59,5 +65,6 @@ protected:
 	IEntity*						m_pQuadEntity;
 	IEntity*						m_pDebugSphere;
 	IEventDispatcher::TKeyEvent		m_eLastKeyEvent;
-	Type							m_eEditorMode;
+	TEditorMode						m_eEditorMode;
+	TEditingType					m_eEditingMode;
 };

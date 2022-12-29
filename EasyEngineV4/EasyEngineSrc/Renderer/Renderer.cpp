@@ -931,7 +931,7 @@ void CRenderer::DrawLineInternal( const CVector& p1, const CVector& p2, const CV
 	glEnd();
 }
 
-void CRenderer::DrawBox( const CVector& oMinPoint, const CVector& oDimension )
+void CRenderer::DrawBox( const CVector& oMinPoint, const CVector& oDimension, const CVector& Color)
 {
 	CMatrix oModelView = m_oCameraMatrixInv * m_oCurrentModelMatrix;
 	LoadMatrix(oModelView);
@@ -946,7 +946,7 @@ void CRenderer::DrawBox( const CVector& oMinPoint, const CVector& oDimension )
 	CVector p6 = oMinPoint + CVector( oDimension.m_x , oDimension.m_y, oDimension.m_z );
 	CVector p7 = oMinPoint + CVector( 0, oDimension.m_y, oDimension.m_z );
 	
-	CVector color( 1, 1, 1, 1 );
+	CVector color(Color.m_x, Color.m_y, Color.m_z, 1 );
 	DrawLineInternal( p0, p1, color );
 	DrawLineInternal( p1, p2, color  );
 	DrawLineInternal( p2, p3, color  );

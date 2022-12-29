@@ -77,7 +77,7 @@ void CLightEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	lightInfos.m_eType = type;
 }
 
-void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent)
+void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
 {
 	CEntity::BuildFromInfos(infos, pParent);
 	const ILoader::CLightEntityInfos* pLightEntityInfos = static_cast< const ILoader::CLightEntityInfos* >(&infos);

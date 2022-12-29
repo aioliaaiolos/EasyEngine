@@ -142,6 +142,12 @@ void CStringUtils::GetShortFileName(string sPathFile, string& sFileName)
 		sFileName = sPathFile.substr(idx + 1);
 }
 
+void CStringUtils::GetFileNameWithExtension(string sTexture, string sExtension, string& output)
+{
+	if (sTexture.find(sExtension) == -1)
+		output = sTexture + "." + sExtension;
+}
+
 void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines)
 {
 	string subText = sText;

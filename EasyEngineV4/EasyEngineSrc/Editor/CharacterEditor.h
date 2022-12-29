@@ -55,7 +55,7 @@ private:
 		eEye		
 	};
 
-	void					InitEyeNodes(INode* pParent);
+	void					InitEyeNodes();
 	void					InitHeadNode(INode* pParent);
 	void					InitSpawnedCharacter();
 	void					InitCamera(const CVector& pos);

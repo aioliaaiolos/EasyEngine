@@ -8,7 +8,7 @@
 class IRenderer;
 class IShader;
 
-class CShape : public IEntity, public CNode
+class CShape : virtual public IEntity, public CNode
 {
 protected:
 	IRenderer&	m_oRenderer;
@@ -59,6 +59,7 @@ public:
 	void			PauseCurrentAnimation(bool loop) {}
 	void			CreateCollisionMaps(float fBias) override{}
 	void			SetSkinOffset(float x, float y, float z) override {}
+	void			GetScaleFactor(CVector& factor) {}
 };
 
 #endif // SHAPE_H

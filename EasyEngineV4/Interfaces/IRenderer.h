@@ -105,7 +105,7 @@ public:
 	virtual void			DrawIndexedGeometryInstanced(const IBuffer* pBuffer, TDrawStyle style = T_TRIANGLES, int instanceCount = 1) = 0;
 	virtual void			DrawLine( const CVector& p1, const CVector& p2, const CVector& color ) = 0;
 	virtual void			DrawBase( const CMatrix& mBase, float fSize ) = 0;
-	virtual void			DrawBox( const CVector& oMinPoint, const CVector& oDimension ) = 0;
+	virtual void			DrawBox( const CVector& oMinPoint, const CVector& oDimension, const CVector& oColor = CVector(1, 1, 1)) = 0;
 	virtual void			DrawSphere(double dRadius, unsigned int nSliceCount, unsigned int nStackCount) = 0;
 	virtual void			DrawCylinder(double dBaseRadius, double dTopRadius, double dHeight,	unsigned int nSlicesCount, unsigned int nStacksCount) = 0;
 	virtual void			DrawQuad(float fLenght, float fWidth) = 0;

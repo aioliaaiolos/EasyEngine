@@ -15,6 +15,8 @@ public:
 	void											Load(string fileName) override;
 	void											Edit(string worldName) override;
 	void											HandleMapLoaded(string sMapName);
+	IEntity*										SpawnCharacter(string sID) override;
+	int												SpawnArea(string areaName) override;
 
 private:
 	void											ClearWorld();
@@ -28,7 +30,6 @@ private:
 	void											SaveGame(string fileName) override;
 	void											SpawnEntity(string sFileName) override;
 	void											RemoveCharacter(string sID) override;
-	void											SpawnCharacter(string sID) override;
 	void											SetEditionMode(bool bEditionMode) override;
 	void											CollectSelectableEntity(vector<IEntity*>& entities) override;
 	void											GetRelativeDatabasePath(string worldName, string& path);

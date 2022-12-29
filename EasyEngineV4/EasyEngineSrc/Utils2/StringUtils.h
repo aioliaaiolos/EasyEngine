@@ -18,6 +18,7 @@ public:
 	static void		GetFileNameWithoutExtension( string sFileName, string& sOut );
 	static void		GetFolderPathFromCompleteFileName(string sFileName, string& sPath);
 	static void		GetShortFileName(string sPathFile, string& sFileName);
+	static void		GetFileNameWithExtension(string sTexture, string sExtension, string& output);
 	static void		ConvertStringToWString(const std::string& s, std::wstring& w);
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
 	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines);

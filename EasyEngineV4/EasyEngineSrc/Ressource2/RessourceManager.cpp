@@ -568,7 +568,13 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 		if (sFileName.empty() || (sFileName[0] != '/' && sFileName[0] != '\\') )
 			sPrefix += "/";
 		sFileName = sPrefix + sFileName;
-		m_oLoaderManager.LoadTexture(sFileName, ti);
+		try {
+			m_oLoaderManager.LoadTexture(sFileName, ti);
+		}
+		catch (CFileNotFoundException& e)
+		{
+			m_oLoaderManager.LoadTexture("Textures/Default.bmp", ti);
+		}
 	}
 	ti.m_sFileName = sFileName;
 	IRenderer::TPixelFormat format = IRenderer::T_FormatNone;

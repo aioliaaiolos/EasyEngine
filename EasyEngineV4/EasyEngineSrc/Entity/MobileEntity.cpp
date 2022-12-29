@@ -369,8 +369,8 @@ void CMobileEntity::UnWearAllShoes()
 
 void CMobileEntity::UnwearAllClothes()
 {
-	for (IEntity*& pEntity : m_vClothes) {
-		pEntity->Unlink();
+	for (INode*& pNode : m_vClothes) {
+		pNode->Unlink();
 	}
 }
 
@@ -416,11 +416,14 @@ void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
 		if (pMesh && pMesh->IsSkinned()) {
 			pCloth->SetSkeletonRoot(m_pSkeletonRoot, m_pOrgSkeletonRoot);
 			pCloth->Link(this);
-			pCloth->SetSkinOffset(pCloth->GetMesh()->GetOrgMaxPosition());
+			pCloth->SetSkinOffset(pCloth->GetMesh()->GetOrgMaxPosition()); 
+			m_vClothes.push_back(pCloth);
 		}
-		else
+		else {
 			pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
-		m_vClothes.push_back(pCloth);
+			m_vClothes.push_back(pCloth->GetSkeletonRoot());
+		}
+		
 	}
 }
 
@@ -695,26 +698,39 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		animatedEntityInfos.m_vSpecular = m_vCustomSpecular;
 		animatedEntityInfos.m_bUseCustomSpecular = m_bUseCustomSpecular;
 	}
-	for (IEntity*& pEntity : m_vClothes) {
-		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
+	for (INode*& pNode : m_vClothes) {
 		string sClothName, sNodeName;
+
+		IEntity* pEntity = dynamic_cast<IEntity*>(pNode);
+		if (!pEntity) {
+			IBone* pBone = dynamic_cast<IBone*>(pNode);
+			if (pBone && pBone->GetChildCount() == 1) {
+				pEntity = dynamic_cast<IEntity*>(pBone->GetChild(0));
+			}
+		}
+
+		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
 		pMesh->GetFileName(sClothName);
-		for (int i = 0; i < animatedEntityInfos.m_vSubEntityInfos.size(); i++) {
-			ILoader::CObjectInfos* pSubEntity = animatedEntityInfos.m_vSubEntityInfos[i];
-			if (pSubEntity->m_sRessourceFileName == sClothName)
-				animatedEntityInfos.m_vSubEntityInfos.erase(animatedEntityInfos.m_vSubEntityInfos.begin() + i);
+
+		if (pEntity) {
+			for (int i = 0; i < animatedEntityInfos.m_vSubEntityInfos.size(); i++) {
+				ILoader::CObjectInfos* pSubEntity = animatedEntityInfos.m_vSubEntityInfos[i];
+				if (pSubEntity->m_sRessourceFileName == sClothName)
+					animatedEntityInfos.m_vSubEntityInfos.erase(animatedEntityInfos.m_vSubEntityInfos.begin() + i);
+			}
+			CStringUtils::GetShortFileName(sClothName, sClothName);
+			CStringUtils::GetFileNameWithoutExtension(sClothName, sClothName);
+			if ((pEntity->GetParent() != this) && pEntity->GetParent()->GetParent()) {
+				sNodeName = pEntity->GetParent()->GetParent()->GetName();
+			}
+			animatedEntityInfos.m_mClothesToNode[sClothName] = sNodeName;
 		}
-		CStringUtils::GetShortFileName(sClothName, sClothName);
-		CStringUtils::GetFileNameWithoutExtension(sClothName, sClothName);
-		if (pEntity->GetParent() != this) {
-			sNodeName = pEntity->GetParent()->GetName();
-		}
-		animatedEntityInfos.m_mClothesToNode[sClothName] = sNodeName;
 	}
 }
 
-void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent)
+void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
 {
+	m_vClothes.clear();
 	CEntity::BuildFromInfos(infos, pParent);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 	if (GetSkeletonRoot()) {

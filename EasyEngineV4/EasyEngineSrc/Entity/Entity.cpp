@@ -1014,7 +1014,7 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	}
 }
 
-void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent)
+void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
 {	
 	SetLocalMatrix(infos.m_oXForm);
 	const ILoader::CEntityInfos* pEntityInfos = dynamic_cast<const ILoader::CEntityInfos*>(&infos);
@@ -1073,6 +1073,11 @@ void CEntity::SetScaleFactor( float x, float y, float z )
 	m_oScaleMatrix.m_00 = x;
 	m_oScaleMatrix.m_11 = y;
 	m_oScaleMatrix.m_22 = z;
+}
+
+void CEntity::GetScaleFactor(CVector& factor)
+{
+	factor = CVector(m_oScaleMatrix.m_00, m_oScaleMatrix.m_11, m_oScaleMatrix.m_22, 1.f);
 }
 
 void CEntity::DrawBoundingSphere( bool bDraw )

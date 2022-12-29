@@ -233,7 +233,7 @@ void CWorldEditor::SpawnEntity(string sFileName)
 	CMatrix m;
 	m_mEntityMatrices[sFileName].push_back(pair<IEntity*, CMatrix>(nullptr, m));
 	m_vEntities.push_back(m_pEditingEntity);
-	m_eEditorMode = Type::eAdding;
+	m_eEditorMode = TEditorMode::eAdding;
 }
 
 void CWorldEditor::RemoveCharacter(string sID)
@@ -244,7 +244,7 @@ void CWorldEditor::RemoveCharacter(string sID)
 	m_vEntities.erase(itCharacter);
 }
 
-void CWorldEditor::SpawnCharacter(string sID)
+IEntity* CWorldEditor::SpawnCharacter(string sID)
 {
 	if (!m_bEditionMode)
 		SetEditionMode(true);
@@ -261,7 +261,20 @@ void CWorldEditor::SpawnCharacter(string sID)
 	m_mCharacterMatrices[sID] = m;
 	m_vEntities.push_back(m_pEditingEntity);
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
-	m_eEditorMode = Type::eAdding;
+	m_eEditorMode = TEditorMode::eAdding;
+	return m_pEditingEntity;
+}
+
+int CWorldEditor::SpawnArea(string areaName)
+{
+	if (!m_bEditionMode)
+		SetEditionMode(true);
+	m_pEditingEntity = m_oEntityManager.CreateAreaEntity(areaName, CVector(1000, 1000, 1000));
+	InitSpawnedEntity();
+	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
+	m_eEditorMode = TEditorMode::eAdding;
+	m_vEntities.push_back(m_pEditingEntity);
+	return -1;
 }
 
 void CWorldEditor::SetEditionMode(bool bEditionMode)
@@ -312,6 +325,10 @@ void CWorldEditor::OnSceneLoaded()
 			pEntity->SetLocalMatrix(itCharacter->second);
 			pEntity->SetWeight(1);
 			m_vEntities.push_back(pEntity);
+		}
+		else {
+			string log = string("Error : character '") + itCharacter->first + "' not found in characters database";
+			throw CEException(log);
 		}
 	}
 	for (map<string, vector<pair<IEntity*, CMatrix>>>::iterator itEntity = m_mEntityMatrices.begin(); itEntity != m_mEntityMatrices.end(); itEntity++) {

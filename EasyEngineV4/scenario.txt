@@ -38,13 +38,18 @@ Ordre du royaume d'Eran
 
 Noms : 
 
-Khemat :
+Adnakat :
 . Mirabelle
 . Balam Akab
 . Akhenao
 . Ramsab Edao
 . Ulam Edao
-. 
+. Ranja
+. Hasna
+. Inaya
+. Malia
+. Namia
+. Jahia
 
 
 Eran : 
@@ -69,11 +74,11 @@ Guerriers Eran :
 . Blatoa Maruos
 
 Chefs Eran
-. Amunraya
-. Bamunraya
-. Chahmunraya
+. Amunarya
+. Bamunarya
+. Chahmunarya
 . Deovemar
-. Eodumraya
+. Eodumarya
 . Ilemnuij
 . Akhlepion
 . Maenarit
@@ -85,3 +90,10 @@ Autres :
 Idées :
 
 . Mettre une jauge de température
+
+Missions :
+
+1. Sortir de l'hopital
+
+Un garde nous empeche de sortir de l'hopital, il reclame l'autorisation de la responsable, Ranja. En allant la voir elle nous dit qu'elle est occupée, elle a perdu un de ses flacons et n'est pas disponible tant qu'elle ne l'a pas retrouvé. En discutant avec les autres patientes on découvre que l'une d'entre elles, Mirabelle, a volé un flacon d'opium, utilisé par les médecins pour soulager les patients. Elle nous propose de l'échanger contre un bracelet qu'elle trouve tres joli détenu par une autre patiente, Namia. En allant discuter avec elle, Namia nous explique qu'il est probablement maudit car lorsqu'elle le porte elle a des visions maléfique et fait des caumemars la nuit. On lui propose de nous le donner et elle accepte.
+

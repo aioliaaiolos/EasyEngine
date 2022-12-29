@@ -111,6 +111,7 @@ public:
 	virtual TAnimation			GetCurrentAnimationType() const = 0;
 	virtual void				GetTypeName( string& sName ) = 0;
 	virtual void				SetScaleFactor( float x, float y, float z ) = 0;
+	virtual void				GetScaleFactor(CVector& scale) = 0;
 	virtual void				SetRenderingType( IRenderer::TRenderType t ) = 0;
 	virtual void				DrawBoundingSphere( bool bDraw ) = 0;
 	virtual void				DrawBoneBoundingSphere( int nID, bool bDraw ) = 0;
@@ -129,6 +130,12 @@ public:
 	virtual void				SetSkinOffset(float x, float y, float z) = 0;
 };
 
+class IAreaEntity : public virtual IEntity
+{
+public:
+	virtual ~IAreaEntity() {};
+};
+
 class ILightEntity : public virtual IEntity
 {
 public:
@@ -145,6 +152,7 @@ public:
 	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
 	virtual void				AddHairs(string sHairsPath) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
+	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) = 0;
 };
 
 class IPlayer : public virtual ICharacter
@@ -228,9 +236,8 @@ public:
 	virtual void				Clear() = 0;
 	virtual IEntity*			CreateSphere( float fSize ) = 0;
 	virtual IEntity*			CreateBox(const CVector& oDimension ) = 0;
+	virtual IEntity*			CreateAreaEntity(string sAreaName, const CVector& oDimension) = 0;
 	virtual IEntity*			CreateQuad(float lenght, float width) = 0;
-	virtual ISphere&			GetSphere( IEntity* pSphereEntity ) = 0;
-	virtual IBox&				GetBox( IEntity* pBoxEntity ) = 0;
 	virtual void				SetZCollisionError( float e ) = 0;
 	virtual IAEntity*			GetFirstIAEntity() = 0;
 	virtual IAEntity*			GetNextIAEntity() = 0;
@@ -251,9 +258,11 @@ public:
 	virtual IBone*				CreateBone() const = 0;
 	virtual void				AddNewCharacter(IEntity* pEntity) = 0;
 	virtual ICharacter*			BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) = 0;
+	virtual void				GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos) = 0;
 	virtual void				SaveCharacter(string sNPCID) = 0;
 	virtual void				RemoveCharacterFromDB(string sID) = 0;
 	virtual void				EnableInstancing(bool enable) = 0;
+	virtual void				ChangeCharacterName(string sOldName, string sNewName) = 0;
 };
 
 class ISceneManager : public CPlugin
@@ -267,9 +276,6 @@ public:
 	virtual IScene*		CreateScene(string sSceneName, string sRessourceFileName, string diffuseFileName) = 0;
 	virtual IScene*		GetScene( std::string sSceneName ) = 0;
 };
-
-
-
 
 class IBone : virtual public INode
 {

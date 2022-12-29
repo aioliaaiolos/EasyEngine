@@ -390,7 +390,7 @@ void CMapEditor::SpawnEntity(string sEntityFileName)
 {
 	if(!m_bEditionMode)
 		SetEditionMode(true);
-	m_eEditorMode = Type::eAdding;
+	m_eEditorMode = TEditorMode::eAdding;
 	m_pEditingEntity = m_oEntityManager.CreateEntity(sEntityFileName, "");
 	InitSpawnedEntity();
 }

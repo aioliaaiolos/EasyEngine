@@ -178,7 +178,8 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 			GenOperation( oTree.m_Lexem.m_eType, oTree.m_vChild[ 0 ], oTree.m_vChild[ 1 ], vAssembler );
 		else 
 		{
-			
+			if (oTree.m_vChild.size() < 2)
+				throw CCompilationErrorException(-1, -1);
 			if( oTree.m_vChild[ 0 ].m_vChild.size() > 0 )
 			{
 				GenAssemblerFirstPass(oTree.m_vChild[ 0 ], vAssembler, mFuncAddr, mVar );

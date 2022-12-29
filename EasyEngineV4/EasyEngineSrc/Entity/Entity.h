@@ -49,7 +49,7 @@ public:
 	IBone*							GetOrgSkeletonRoot();
 	void							SetSkeletonRoot(CBone* pBone, CBone* pOrgBone);
 	void							GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	virtual void					BuildFromInfos(const ILoader::CObjectInfos& infos, CEntity* pParent);
+	virtual void					BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent);
 	bool							HasAnimation( string sAnimationName );
 	void							DetachCurrentAnimation();
 	void							Hide( bool bHide );
@@ -62,6 +62,7 @@ public:
 	TAnimation						GetCurrentAnimationType() const{return eNone;}
 	void							GetTypeName( string& sName );
 	void							SetScaleFactor( float x, float y, float z );
+	void							GetScaleFactor(CVector& factor);
 	void							SetRenderingType( IRenderer::TRenderType t );
 	void							DrawBoundingSphere( bool bDraw );
 	void							DrawBoneBoundingSphere( int nID, bool bDraw );
