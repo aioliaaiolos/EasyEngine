@@ -21,7 +21,7 @@ public:
 		{
 			eNone = -1,
 			eVar = 0,
-			eFunction,
+			eCall,
 			eInt,
 			eFloat,
 			eLPar,
@@ -36,7 +36,10 @@ public:
 			eMult,
 			ePtVirg,
 			eString,
-			eIdentifier
+			eIdentifier,
+			eFunctionDef,
+			eLBraket,
+			eRBraket
 		};
 		string			m_sValue;
 		int				m_nValue;
@@ -54,10 +57,12 @@ private:
 	vector< vector< int > >				m_vAutomate;
 	map< int, CLexem::TLexem >		m_mFinalStates;
 	map< string, CLexem::TLexem >	m_mStringToLexemType;
+	map<string, pair<int, int>>		m_mKeyWord;
 
 	void					CalculStateCount( CCSVReader& r );
 	void					CalculLexicalArrayFromCSV( string sCSVName, IFileSystem* pFS );
 	void					CalculFinalStates( CCSVReader& r );
+	void					CalculKeywords(CCSVReader& r);
 	int						GenStringFromRegExpr(std::string sExpr, std::string& sOut);
 	int						GenHookRegExpr(string sExpr, string& sOut);
 	void					InitStringToLexemTypeArray();

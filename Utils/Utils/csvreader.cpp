@@ -43,10 +43,7 @@ bool CCSVReader::ReadCell( string& sCellValue )
 		return false;
 	}
 
-	if ( sCellValue[ 0 ] == '"' )
-		sCellValue = sCellValue.substr( 1, sCellValue.size() - 3 );
-	else
-		sCellValue = sCellValue.substr( 0, sCellValue.size() - 1 );
+	sCellValue = sCellValue.substr( 0, sCellValue.size() - 1 );
 	if ( c == '\n' )
 	{
 		if ( sCellValue.size() > 0 )

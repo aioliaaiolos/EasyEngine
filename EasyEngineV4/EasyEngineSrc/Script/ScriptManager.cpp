@@ -16,10 +16,10 @@ m_bGeneratedAssemblerListing(false)
 	IFileSystem* pFileSystem = static_cast<IFileSystem*>(oInterface.GetPlugin("FileSystem"));
 	m_pLexAnalyser = new CLexAnalyser( "lexanalyser.csv", pFileSystem);
 	m_pSyntaxAnalyser = new CSyntaxAnalyser;
-	m_pSemanticAnalyser = new CSemanticAnalyser;
+	m_pSemanticAnalyser = new CSemanticAnalyser();
 	m_pCodeGenerator = new CAsmGenerator;
-	m_pBinGenerator = new CBinGenerator;
-	m_pProc = new CVirtualProcessor( m_pSemanticAnalyser );
+	m_pBinGenerator = new CBinGenerator(*m_pSyntaxAnalyser);
+	m_pProc = new CVirtualProcessor( m_pSemanticAnalyser, m_pBinGenerator );
 
 	m_mRegisterFromName["eax"] = CRegister::eax;
 	m_mRegisterFromName["ebx"] = CRegister::ebx;
@@ -56,7 +56,7 @@ void CScriptManager::ExecuteCommand( std::string sCommand )
 		return;
 	CSyntaxNode oTree;
 	m_pSyntaxAnalyser->GetSyntaxicTree( vLexem, oTree );
-	m_pSemanticAnalyser->CompleteSyntaxicTree( oTree );
+	m_pSemanticAnalyser->CompleteSyntaxicTree( oTree, m_pSyntaxAnalyser->m_mFunctions);
 	vector< CAsmGenerator::CInstr > vAssembler;
 	map< string, int > mFuncAddr;
 	m_pSemanticAnalyser->GetFunctionAddress( mFuncAddr );
@@ -64,7 +64,7 @@ void CScriptManager::ExecuteCommand( std::string sCommand )
 	if(m_bGeneratedAssemblerListing)
 		m_pCodeGenerator->CreateAssemblerListing( vAssembler, "test.asm" );
 	vector< unsigned char > vBin;
-	m_pBinGenerator->GenBinary( vAssembler, vBin );
+	m_pBinGenerator->GenBinary(vAssembler, m_pCodeGenerator->m_vAssemblerFunctions, vBin);
 	m_pProc->Execute( vBin, CBinGenerator::s_vInstrSize );
 }
 

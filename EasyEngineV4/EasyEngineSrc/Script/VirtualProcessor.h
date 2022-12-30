@@ -9,6 +9,14 @@ using namespace std;
 
 class CVirtualProcessor
 {
+
+public:
+	CVirtualProcessor(CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator);
+	void	Execute(const vector< unsigned char >& vBinary, const vector< int >& vInstrSize);
+	float	GetVariableValue(string varName);
+	float	GetRegisterValue(CRegister::TType reg);
+
+private:
 	typedef void (*TInstrFunc)( unsigned char* );
 	float	m_nEip;
 	float	m_nEax;
@@ -29,9 +37,6 @@ class CVirtualProcessor
 	vector< float* >	m_vRegAddr;
 	bool				m_bEnd;
 
-
-	void DecodeInstruction( unsigned char* pInstr, int nSize );
-	void ExecuteInstruction( unsigned char* pOperand, int nSize );
 
 	static void MovRegReg( unsigned char* pOperand );
 	static void MovRegImm( unsigned char* pOperand );
@@ -56,6 +61,7 @@ class CVirtualProcessor
 
 	static void PopReg( unsigned char* pOperand );
 
+	static void CallImm(unsigned char* pOperand);
 	static void IntImm( unsigned char* pOperand );
 
 	static void Ret( unsigned char* pOperand );
@@ -63,13 +69,8 @@ class CVirtualProcessor
 
 	static CVirtualProcessor* s_pCurrentInstance;
 	static CSemanticAnalyser* s_pSemanticAnalyser;
+	static CBinGenerator* s_pBinGenerator;
 
 	static int GetMemRegisterAddress(unsigned char* pOperand);
 
-
-public:
-	CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser );
-	void	Execute( const vector< unsigned char >& vBinary, const vector< int >& vInstrSize );
-	float	GetVariableValue(string varName);
-	float	GetRegisterValue(CRegister::TType reg);
 };

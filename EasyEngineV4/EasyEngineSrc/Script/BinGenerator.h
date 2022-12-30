@@ -79,17 +79,19 @@ private:
 
 	map< CAsmGenerator::TMnemonic, int > MnemToInstrNum;
 
-	void			GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin  );
-	void			GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
+	void				GenInstructionBinary(const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin);
+	void				GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
+	CSyntaxAnalyser&	m_oSyntaxAnalyser;
 	
 	static void AddImmToByteArray( float nImm, vector< unsigned char >& vBin );
 
 	static int				s_tabInstr[ CAsmGenerator::eMnemonicCount ][ eTypeInstrCount ][ eTypeInstrCount ];	
 
 public:
-	CBinGenerator();
-	void	GenBinary( const vector< CAsmGenerator::CInstr >& vAsmCode, vector< unsigned char >& vBin  );
+	CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser);
+	void	GenBinary(const vector< CAsmGenerator::CInstr >& vAsmCode, const vector<vector<CAsmGenerator::CInstr>>& vAsmFunctionsCode, vector< unsigned char >& vBin);
 	static vector< int >	s_vInstrSize;
+	vector<vector<unsigned char>> m_vFunctionsBin;
 	//int		GetInstrSize( int nInstrNum );
 };
 

@@ -211,7 +211,7 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 			}
 		}
 	}
-	else if( oTree.m_Lexem.m_eType == CLexAnalyser::CLexem::eFunction )
+	else if( oTree.m_Lexem.m_eType == CLexAnalyser::CLexem::eCall )
 	{
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 		{
@@ -250,13 +250,19 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 		}
 		else if (oTree.m_vChild[1].m_Type == CSyntaxNode::eInt || oTree.m_vChild[1].m_Type == CSyntaxNode::eFloat || oTree.m_vChild[1].m_Type == CSyntaxNode::eString)
 			GenMovAddrImm(pDestMemory, mVar, destNode, vAssembler);
-		else if (oTree.m_vChild[1].m_Lexem.m_eType == CLexAnalyser::CLexem::eFunction) {
+		else if (oTree.m_vChild[1].m_Lexem.m_eType == CLexAnalyser::CLexem::eCall) {
 			GenAssemblerFirstPass(oTree.m_vChild[1], vAssembler, mFuncAddr, mVar);
 			GenMovAddrReg(CRegister::eax, pDestMemory, vAssembler);
 		}
 	}
 	else if (oTree.m_Type == CSyntaxNode::eCommand) {
 		GenReturn(vAssembler);
+	}
+	else if (oTree.m_Type == CSyntaxNode::eFunctionDef) {
+		for (unsigned int i = 0; i < oTree.m_vChild.size(); i++) {
+			m_vAssemblerFunctions.resize(m_vAssemblerFunctions.size() + 1);
+			GenAssemblerFirstPass(oTree.m_vChild[i], m_vAssemblerFunctions.back(), mFuncAddr, mVar);
+		}
 	}
 	else
 	{
@@ -289,7 +295,7 @@ void CAsmGenerator::ResolveAddresses( vector< CInstr >& vCodeOut )
 void CAsmGenerator::GenCall( const CSyntaxNode& oNode, vector< CInstr >& vAssembler )
 {
 	CInstr oInstr;
-	if( oNode.m_Type == CSyntaxNode::eAPIFunction )
+	if( oNode.m_Type == CSyntaxNode::eAPICall )
 		oInstr.m_eMnem = CAsmGenerator::eInt;
 	else
 		oInstr.m_eMnem = CAsmGenerator::eCall;

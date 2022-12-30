@@ -11,7 +11,8 @@ void CBinGenerator::AddImmToByteArray( float nImm, vector< unsigned char >& vBin
 	memcpy( &vBin[ 0 ] + vBin.size() - 4, &nImm, 4 );
 }
 
-CBinGenerator::CBinGenerator()
+CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
+	m_oSyntaxAnalyser(oSyntaxAnalyser)
 {
 	int iInstrNum = 1;
 
@@ -93,10 +94,18 @@ CBinGenerator::CBinGenerator()
 //	return s_vInstrSize[ nInstrNum ];
 //}
 
-void CBinGenerator::GenBinary( const vector< CAsmGenerator::CInstr >& vAsmCode, vector< unsigned char >& vBin )
+void CBinGenerator::GenBinary(const vector<CAsmGenerator::CInstr>& vAsmCode, const vector<vector<CAsmGenerator::CInstr>>& vAsmFunctionsCode, vector< unsigned char >& vBin)
 {
 	for( unsigned int i = 0; i < vAsmCode.size(); i++ )
-		GenInstructionBinary( vAsmCode[ i ], vBin );
+		GenInstructionBinary( vAsmCode[ i ], vBin );	
+	
+	if (m_oSyntaxAnalyser.m_vFunctions.size() > m_vFunctionsBin.size()) {
+		int oldSize = m_vFunctionsBin.size();
+		m_vFunctionsBin.resize(vAsmFunctionsCode.size());
+		for (unsigned int i = oldSize; i < vAsmFunctionsCode.size(); i++)
+			for (unsigned int j = 0; j < vAsmFunctionsCode[i].size(); j++)
+				GenInstructionBinary(vAsmFunctionsCode[i][j], m_vFunctionsBin[i]);
+	}
 }
 
 

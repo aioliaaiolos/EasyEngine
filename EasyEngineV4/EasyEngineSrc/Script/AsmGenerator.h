@@ -113,6 +113,8 @@ public:
 	void CreateAssemblerListing( vector< CInstr >& vCodeOut, string sFileName );
 	void GenAssembler( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr, VarMap& mVar );
 
+	vector<vector<CInstr>>	m_vAssemblerFunctions;
+
 private:
 	map< CLexAnalyser::CLexem::TLexem, TMnemonic >	m_mTypeToMnemonic;
 	map< TMnemonic, string >						m_mMnemonicToString;

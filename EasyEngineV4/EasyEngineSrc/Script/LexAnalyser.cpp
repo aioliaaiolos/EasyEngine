@@ -25,8 +25,8 @@ bool CLexAnalyser::CLexem::IsNumeric()const
 
 void CLexAnalyser::InitStringToLexemTypeArray()
 {
-	m_mStringToLexemType[ "Identifier" ] = CLexem::eFunction;
-	m_mStringToLexemType[ "Function" ] = CLexem::eFunction;
+	m_mStringToLexemType[ "Identifier" ] = CLexem::eCall;
+	m_mStringToLexemType[ "Function" ] = CLexem::eCall;
 	m_mStringToLexemType[ "Var" ] = CLexem::eVar;
 	m_mStringToLexemType[ "LPar" ] = CLexem::eLPar;
 	m_mStringToLexemType[ "RPar" ] = CLexem::eRPar;
@@ -40,6 +40,9 @@ void CLexAnalyser::InitStringToLexemTypeArray()
 	m_mStringToLexemType[ "Virg" ] = CLexem::eVirg;
 	m_mStringToLexemType[ "PTVirg" ] = CLexem::ePtVirg;
 	m_mStringToLexemType[ "Mult" ] = CLexem::eMult;
+	m_mStringToLexemType[ "FunctionDef" ] = CLexem::eFunctionDef;
+	m_mStringToLexemType[ "LBrace"] = CLexem::eLBraket;
+	m_mStringToLexemType[ "RBrace"] = CLexem::eRBraket;
 }
 
 void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vLexem )
@@ -53,6 +56,9 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 		bool bFinalState = false;
 		string sValue;
 		int nCurrentState = 0;
+		string sKeyword;
+		int keywordStateFrom = -1;
+		int keywordStateTo = -1;
 		while ( !bFinalState )
 		{
 			if (sScript[i] == '/' && sScript[i + 1] == '*')
@@ -74,6 +80,20 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 			if( c == 0 && nCurrentState == 0 )
 				return;
 			int nNextState = m_vAutomate[ nCurrentState ][ c ];
+			
+			if (nNextState != nCurrentState) {
+				map<string, pair<int, int>>::iterator itKeyword = m_mKeyWord.find(sValue);
+				if (itKeyword != m_mKeyWord.end()) {
+					sKeyword = sValue;
+					keywordStateFrom = itKeyword->second.first;
+					keywordStateTo = itKeyword->second.second;
+				}
+			}
+
+			if (!sKeyword.empty() && (nNextState == keywordStateFrom)) {
+				nNextState = keywordStateTo;
+			}
+
 			map< int, CLexem::TLexem >::iterator it = m_mFinalStates.find( nNextState );
 			if (  it != m_mFinalStates.end() )
 				bFinalState = true;
@@ -106,12 +126,19 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 			l.m_sValue = sValue;
 			break;
 		case CLexem::eVar:
-		case CLexem::eFunction:
+		case CLexem::eCall:
+		{
 			auto last = std::remove_if(sValue.begin(), sValue.end(), isspace);
 			sValue.erase(last, sValue.end());
 			l.m_sValue = sValue;
 			i--;
 			break;
+		}
+		case CLexem::eFunctionDef:
+			auto last = std::remove_if(sValue.begin(), sValue.end(), isspace);
+			sValue.erase(last, sValue.end());
+			l.m_sValue = sValue;
+			i--;
 		}
 		vLexem.push_back( l );
 		if( i < sScript.size() )
@@ -201,6 +228,11 @@ int CLexAnalyser::GenStringFromRegExpr(string sExpr, string& sOut)
 					else if (sExpr[i + 2] == 'r')
 					{
 						sOut.push_back('\r');
+						i += 3;
+					}
+					else if (sExpr[i + 2] == 't')
+					{
+						sOut.push_back('\t');
 						i += 3;
 					}
 					else
@@ -339,7 +371,7 @@ void CLexAnalyser::CalculFinalStates( CCSVReader& r )
 	}
 	while( sCell != "FinalStates" && !bEof);
 	sCell.clear();
-	while( r.ReadCell( sCell ) )
+	while( r.ReadCell( sCell ) && !sCell.empty())
 	{
 		int nState = atoi( sCell.c_str() );
 		sCell.clear();
@@ -352,6 +384,33 @@ void CLexAnalyser::CalculFinalStates( CCSVReader& r )
 			exception e( sCell.c_str() );
 			throw e;
 		}
+		sCell.clear();
+		r.NextLine();
+	}
+}
+
+void CLexAnalyser::CalculKeywords(CCSVReader& r)
+{
+	r.Rewind();
+	string sCell;
+	bool bEof = false;
+	do
+	{
+		sCell.clear();
+		bEof = !r.ReadCell(sCell);
+		r.NextLine();
+	} while (sCell != "Keywords" && !bEof);
+	sCell.clear();
+	while (r.ReadCell(sCell))
+	{
+		string sKeyWord = sCell;
+		sCell.clear();
+		r.ReadCell(sCell);
+		int nState1 = atoi(sCell.c_str());
+		sCell.clear();
+		r.ReadCell(sCell);
+		int nState2 = atoi(sCell.c_str());
+		m_mKeyWord[sKeyWord] = pair<int, int>(nState1, nState2);
 		sCell.clear();
 		r.NextLine();
 	}
@@ -379,6 +438,7 @@ void CLexAnalyser::CalculLexicalArrayFromCSV( string sCSVName, IFileSystem* pFS 
 	string sExpr, sOut;
 	CalculStateCount( r );
 	CalculFinalStates( r );
+	CalculKeywords(r);
 	r.Rewind();
 	m_vAutomate.resize( m_nStateCount + 1 );
 	for( unsigned int i = 0; i < m_vAutomate.size(); i++ )

@@ -101,8 +101,10 @@ void InitScene( ISceneManager* pSceneManager )
 			fseek( pFile, 0, SEEK_END );
 			long pos = ftell( pFile );
 			fclose( pFile );
-			if (pos > 0)
+			if (pos > 0) {
 				m_pScriptManager->ExecuteCommand("run(\"start\");");
+				m_pScriptManager->ExecuteCommand("onLoadingGame();");
+			}
 		}
 		else
 			m_pConsole->Println( "Fichier start introuvable." );

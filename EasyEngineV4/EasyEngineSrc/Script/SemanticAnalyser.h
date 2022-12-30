@@ -32,13 +32,12 @@ class CSemanticAnalyser
 {
 	typedef map< string, pair< ScriptFunction, vector< TFuncArgType > > > FuncMap;
 	
-	FuncMap					m_mInterruption;
-	set<string>				m_vCommand;
-	map< string, int >		m_mStringAddress;
-	map< int, string >		m_mAddressString;
-	VarMap					m_mVar;
-	int						m_nCurrentScopeNumber;
-
+	FuncMap						m_mInterruption;
+	set<string>					m_vCommand;
+	map< string, int >			m_mStringAddress;
+	map< int, string >			m_mAddressString;
+	VarMap						m_mVar;
+	int							m_nCurrentScopeNumber;
 
 protected:
 	void					AddNewVariable(CSyntaxNode& oTree);
@@ -46,7 +45,7 @@ protected:
 public:
 	CSemanticAnalyser();
 	void			RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType );
-	void			CompleteSyntaxicTree( CSyntaxNode& oTree );
+	void			CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mFunctions);
 	void			GetFunctionAddress( map< string, int >& mFuncAddr );
 	void			SetTypeFromChildType( CSyntaxNode& oTree );
 	unsigned int	GetFuncArgsCount( int nFuncIndex );

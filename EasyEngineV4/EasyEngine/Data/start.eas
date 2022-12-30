@@ -1,66 +1,17 @@
-OpenConsole(0);
-SetBkgColor(0, 100, 255);
-r=CreateRepere();
+function onExitHospitalArea()
+{
+	print("hopitalout");
+}
 
-l=CreateLightw("omni", 1)
-SetEntityPos(l, 0, 700, 0);
-SetCameraType("free");
+function onLoadingGame()
+{
+	OpenConsole(0);
+	SetBkgColor(0, 100, 255);
+	r=CreateRepere();
 
+	l=CreateLightw("omni", 1)
+	SetEntityPos(l, 0, 700, 0);
+	SetCameraType("free");
 
-EnableInstancingMode(0);
-/*
-npc1=CreateNPC("body03", "q");
-SetEntityWeight(npc1, 0);
-SetEntityPos(npc1, 0, 0, 0);
-WearSkinnedClothFull(npc1, "clothes/dresses/robe3");
-Walk(npc1);
-*/
-
-//ExportBMEToAscii("meshes/hairs/hairs04", "test.txt");
-//LoadWorld("TestCollisions");
-//LoadWorld("");
-//EditWorld("");
-//LoadWorld("TestHopital");
-//LoadWorld("test03");
-//LoadWorld("empty");
-//LoadGame("save");
-//EditWorld("Empty");
-//SpawnCharacter("test");
-//id = GetEntityID("test");
-//WearSkinnedClothFull(id, "clothes/brassiere");
-
-//EditMap("hopital02");
-//CreateCollisionMap(0, "cm-100.bmp", 100, 0);
-//EditCharacter("Geraldine");
-// WearCloth("clothes/testCloth03", "BodyDummyRoot");
-
-//ger=GetEntityID("Geraldine");
-//Goto(ger, 3110, 0, -893);
-
-
-/*
-p=GetEntityID("Player");
-g=GetEntityID("Geraldine");
-DisplayBBox(g, 1);
-WatchEntityPosition(p);
-EnablePathFindSaving(1, 15, 15, 15, 15);
-Goto(g, -131797, 0, -235912);
-Goto(g, -130414, 0, -235919);
-*/
-
-
-//EditCharacter("test");
-//EditCharacter("Geraldine");
-//OffsetEyes(0, 1.2, 0);
-//SetCharacterBody("body03");
-//WearCloth("slip", "BodyDummyJupe");
-
-//EditCloth("Slip");
-//OffsetCloth(0, 0, 1);
-/*
-
-SetCharacterBody("Body03");
-WearCloth("slip", "BodyDummyJupe");
-*/
-return;
-
+	EnableInstancingMode(0);
+}

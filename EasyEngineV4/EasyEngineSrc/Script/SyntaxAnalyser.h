@@ -6,6 +6,8 @@
 #include "LexAnalyser.h"
 
 #include <vector>
+#include <map>
+#include <set>
 
 using namespace std;
 
@@ -21,11 +23,14 @@ public:
 		eInt,
 		eFloat,
 		eString,
-		eAPIFunction,
+		eAPICall,
+		eFunctionCall,
 		eProg,
 		eVecArgs,
 		ePar,
-		eCommand
+		eScope,
+		eCommand,
+		eFunctionDef
 	};
 
 	CSyntaxNode();
@@ -42,11 +47,13 @@ public:
 enum TParenthesisReductionType
 {
 	eNormal = 0,
-	eFunc
+	eFunc,
+	eFuncDef
 };
 
 class CSyntaxAnalyser
 {
+	void ReduceScopes(CSyntaxNode& oTree);
 	void ReduceParenthesis( CSyntaxNode& oTree );
 	void ReduceInstruction( CSyntaxNode& oTree );
 	void ReduceAllOperations(  CSyntaxNode& oNode );
@@ -57,6 +64,10 @@ class CSyntaxAnalyser
 
 public:
 	void GetSyntaxicTree( const vector< CLexAnalyser::CLexem >& vLexem, CSyntaxNode& oTree );
+	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
+
+	set<string> m_mFunctions;
+	vector<string>	m_vFunctions;
 };
 
 #endif //SYNTAXANALYSER_H

@@ -4,10 +4,11 @@
 #include <sstream>
 
 
-CVirtualProcessor* CVirtualProcessor::s_pCurrentInstance = NULL;
-CSemanticAnalyser* CVirtualProcessor::s_pSemanticAnalyser = NULL;
+CVirtualProcessor* CVirtualProcessor::s_pCurrentInstance = nullptr;
+CSemanticAnalyser* CVirtualProcessor::s_pSemanticAnalyser = nullptr;
+CBinGenerator* CVirtualProcessor::s_pBinGenerator = nullptr;
 
-CVirtualProcessor::CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser ):
+CVirtualProcessor::CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator):
 m_nEip( 0 ),
 m_nEsp( MEM_SIZE - 1 ),
 m_bEnd( false ),
@@ -16,6 +17,7 @@ m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1
 	ZeroMemory( m_pMemory, MEM_SIZE * sizeof( float ) );
 	s_pSemanticAnalyser = pSemanticAnalyser;
 	s_pCurrentInstance = this;
+	s_pBinGenerator = pBinGenerator;
 
 	m_mInstrFunc[ CBinGenerator::eMovRegReg ] = MovRegReg;
 	m_mInstrFunc[ CBinGenerator::eMovRegImm ] = MovRegImm;
@@ -68,7 +70,9 @@ m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1
 	m_mInstrFunc[ CBinGenerator::ePopAddr ] = PopAddr;
 
 	m_mInstrFunc[ CBinGenerator::eCallReg ]	= CallReg;
+#endif // 0
 	m_mInstrFunc[ CBinGenerator::eCallImm ]	= CallImm;
+#if 0
 	m_mInstrFunc[ CBinGenerator::eCallAddr ] = 	CallAddr;
 
 	m_mInstrFunc[ CBinGenerator::eIntReg ] = IntReg;
@@ -96,7 +100,7 @@ m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1
 	m_mEbpValueByScope[0] = m_nEbp;
 }
 
-void CVirtualProcessor::Execute( const vector< unsigned char >& vBinary, const vector< int >& vInstrSize )
+void CVirtualProcessor::Execute( const vector<unsigned char>& vBinary, const vector< int >& vInstrSize )
 {
 	unsigned int iCurrInstr = 0;
 	unsigned char pInstr[ 12 ];
@@ -302,6 +306,19 @@ void CVirtualProcessor::PushAddr( unsigned char* pOperand )
 void CVirtualProcessor::PopReg( unsigned char* pOperand )
 {
 	*s_pCurrentInstance->m_vRegAddr[ (int)pOperand[ 0 ]  ] = s_pCurrentInstance->m_pMemory[ (int)++s_pCurrentInstance->m_nEsp ];
+}
+
+void CVirtualProcessor::CallImm(unsigned char* pOperand)
+{
+	float fIndex;
+	memcpy(&fIndex, pOperand, 4);
+	int backupIp = s_pCurrentInstance->m_nEip;
+	bool backupEnd = s_pCurrentInstance->m_bEnd;
+	s_pCurrentInstance->m_nEip = 0;	
+	s_pCurrentInstance->Execute(s_pBinGenerator->m_vFunctionsBin[(int)fIndex], CBinGenerator::s_vInstrSize);
+	s_pCurrentInstance->m_nEip = backupIp;
+	s_pCurrentInstance->m_bEnd = backupEnd;
+
 }
 
 void CVirtualProcessor::IntImm( unsigned char* pOperand )
