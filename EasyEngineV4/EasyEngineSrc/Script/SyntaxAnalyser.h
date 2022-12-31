@@ -64,7 +64,7 @@ class CSyntaxAnalyser
 
 public:
 	void GetSyntaxicTree( const vector< CLexAnalyser::CLexem >& vLexem, CSyntaxNode& oTree );
-	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
+	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CLexAnalyser::CLexem::TLexem leftLexem, CLexAnalyser::CLexem::TLexem rightLexem, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
 
 	set<string> m_mFunctions;
 	vector<string>	m_vFunctions;

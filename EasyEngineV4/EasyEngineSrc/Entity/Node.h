@@ -33,6 +33,7 @@ protected:
 	CVector						m_vConstantLocalTranslate;
 	bool						m_bUpdateConstantLocalTranslate;
 	bool						m_bUpdateConstantLocalRotate;
+	bool						m_bIsCollidable;
 
 	void						UpdateWorldMatrix();
 	void						UpdateChildren();
@@ -94,6 +95,7 @@ public:
 	float						GetHeight() override;
 	float						GetBoundingSphereRadius() const override;
 	void						UpdateTime(float fTime) override;
+	bool						IsCollidable() override;
 };
 
 #endif  //NODE_H

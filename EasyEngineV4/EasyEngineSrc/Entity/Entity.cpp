@@ -60,6 +60,7 @@ m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
 {
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
+	m_bIsCollidable = true;
 }
 
 CEntity::CEntity(EEInterface& oInterface, const string& sFileName, bool bDuplicate ):
@@ -473,7 +474,7 @@ void CEntity::GetEntitiesCollision(vector<INode*>& entities)
 		if (!pEntity || pEntity == this)
 			continue;
 
-		if (TestLocalCollision(pEntity))
+		if (pEntity->IsCollidable() && TestLocalCollision(pEntity))
 			entities.push_back(pEntity);
 	}
 }

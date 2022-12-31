@@ -269,7 +269,7 @@ void CScene::Update()
 		RenderMinimap();
 		m_oRenderer.SetCurrentFBO(0);
 	}
-	
+	DispatchEntityEvent();
 }
 
 void CScene::DisplayMinimap(bool display)

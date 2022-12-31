@@ -54,7 +54,7 @@ public:
 	IEntity*												CreateSphere( float fSize );
 	IEntity*												CreateQuad(float lenght, float width);
 	IEntity*												CreateBox(const CVector& oDimension ) override;
-	IEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;
+	IBoxEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;
 	void													AddCollideEntity( CEntity* pEntity );
 	void													RemoveCollideEntity( CEntity* pEntity );
 	CEntity*												GetFirstCollideEntity();

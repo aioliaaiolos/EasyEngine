@@ -119,10 +119,8 @@ void CSyntaxAnalyser::ReduceVecArgs( CSyntaxNode& oNode )
 
 void CSyntaxAnalyser::DeleteTempNodes( CSyntaxNode& oNode )
 {
-	for( unsigned int i = 0; i < oNode.m_vChild.size(); i++ )
-	{
-		if( oNode.m_vChild[ i ].m_Type == CSyntaxNode::ePar )
-		{
+	for( unsigned int i = 0; i < oNode.m_vChild.size(); i++ ) {
+		if( oNode.m_vChild[ i ].m_Type == CSyntaxNode::ePar ) {
 			if( oNode.m_vChild[ i ].m_vChild.size() == 1 && oNode.m_vChild[ i ].m_vChild[ 0 ].m_Lexem.IsOperation() )
 				oNode.m_vChild[ i ] = oNode.m_vChild[ i ].m_vChild[ 0 ];
 			else
@@ -150,26 +148,19 @@ void CSyntaxAnalyser::ReduceAllOperations(  CSyntaxNode& oNode )
 
 void CSyntaxAnalyser::ReduceOperations( CSyntaxNode& oNode, const vector< CLexAnalyser::CLexem::TLexem >& vType )
 {
-	for( unsigned int i = 0; i < oNode.m_vChild.size(); i ++ )
-	{
+	for( unsigned int i = 0; i < oNode.m_vChild.size(); i ++ ) {
 		bool bIsType = false;
-		for( unsigned int j = 0; j < vType.size(); j++ )
-		{
-			if( oNode.m_vChild[ i ].m_Lexem.m_eType == vType[ j ] )
-			{
+		for( unsigned int j = 0; j < vType.size(); j++ ) {
+			if( oNode.m_vChild[ i ].m_Lexem.m_eType == vType[ j ] ) {
 				bIsType = true;
 				break;
 			}
 		}
-		if( bIsType )
-		{
-			
-			if( ( i > 0 ) && ( i < oNode.m_vChild.size() - 1 ) )
-			{
+		if( bIsType ) {			
+			if( ( i > 0 ) && ( i < oNode.m_vChild.size() - 1 ) ) {
 				bool bLeftIsParOrVal = ( ( oNode.m_vChild[ i - 1 ].m_Type == CSyntaxNode::eVal ) || ( oNode.m_vChild[ i - 1 ].m_Type == CSyntaxNode::ePar ) );
 				bool bRightIsParOrVal = ( ( oNode.m_vChild[ i + 1 ].m_Type == CSyntaxNode::eVal ) || (oNode.m_vChild[ i + 1 ].m_Type == CSyntaxNode::ePar ) );
-				if( bLeftIsParOrVal && bRightIsParOrVal )
-				{
+				if( bLeftIsParOrVal && bRightIsParOrVal ) {
 					oNode.m_vChild[ i ].m_vChild.push_back( oNode.m_vChild[ i - 1 ] );
 					oNode.m_vChild[ i ].m_vChild.push_back( oNode.m_vChild[ i + 1 ] );
 					oNode.m_vChild[ i ].m_Type = CSyntaxNode::eVal;
@@ -203,8 +194,7 @@ void GetClosingLexemIndices(const vector< CSyntaxNode >& vNode, CLexAnalyser::CL
 		}
 	}
 	unsigned int i = iBegin + 1;
-	while (lPar > 0 && i < vNode.size())
-	{
+	while (lPar > 0 && i < vNode.size()) {
 		if (vNode[i].m_Lexem.m_eType == RClosing)
 			lPar--;
 		if (vNode[i].m_Lexem.m_eType == LClosing)
@@ -215,38 +205,12 @@ void GetClosingLexemIndices(const vector< CSyntaxNode >& vNode, CLexAnalyser::CL
 		iEnd = i - 1;
 }
 
-void GetParenthesisIndices( const vector< CSyntaxNode >& vNode, int& iBegin, int& iEnd, unsigned int iFirst = 0, unsigned int iLast = -1 )
-{
-	int lPar = 0;
-	iBegin = iEnd = -1;
-	for( unsigned int i = iFirst; i < min( iLast, (unsigned int)vNode.size() ); i++ )
-	{
-		if( vNode[ i ].m_Lexem.m_eType == CLexAnalyser::CLexem::eLPar )
-		{
-			lPar = 1;
-			iBegin = i;
-			break;
-		}
-	}
-	unsigned int i = iBegin + 1;
-	while ( lPar > 0 && i < vNode.size() )
-	{
-		if( vNode[ i ].m_Lexem.m_eType == CLexAnalyser::CLexem::eRPar )
-			lPar--;
-		if( vNode[ i ].m_Lexem.m_eType == CLexAnalyser::CLexem::eLPar )
-			lPar++;
-		i++;
-	}
-	if( lPar == 0 )
-		iEnd = i - 1;
-}
-
-void CSyntaxAnalyser::ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst)
+void CSyntaxAnalyser::ReduceLargestClosingLexem(vector<CSyntaxNode>& vNode, CLexAnalyser::CLexem::TLexem leftLexem, CLexAnalyser::CLexem::TLexem rightLexem, 
+	CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst)
 {
 	int iBegin, iEnd;
-	GetClosingLexemIndices(vNode, CLexAnalyser::CLexem::TLexem::eLBraket, CLexAnalyser::CLexem::TLexem::eRBraket, iBegin, iEnd, iFirst);
-	if (iBegin != -1 && iEnd != -1)
-	{
+	GetClosingLexemIndices(vNode, leftLexem, rightLexem, iBegin, iEnd, iFirst);
+	if (iBegin != -1 && iEnd != -1)	{
 		CSyntaxNode oNode;
 		oNode.m_Type = nt;
 		for (int j = iBegin + 1; j < iEnd; j++)
@@ -272,33 +236,13 @@ void CSyntaxAnalyser::ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CS
 	}
 }
 
-void ReduceLargestParenthesis( vector< CSyntaxNode >& vNode, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0)
-{
-	int iBegin, iEnd;
-	GetParenthesisIndices( vNode, iBegin, iEnd, iFirst );
-	if( iBegin != -1 && iEnd != -1 )
-	{
-		CSyntaxNode oNode;
-		oNode.m_Type = nt;
-		for( int j = iBegin + 1; j < iEnd; j++ )
-			oNode.m_vChild.push_back( vNode[ j ] );
-		vNode.erase( vNode.begin() + iBegin, vNode.begin() + iEnd + 1 );
-		if( rt == eNormal )
-			vNode.insert( vNode.begin() + iBegin, oNode );
-		else			
-			vNode[ iBegin - 1 ].m_vChild.push_back( oNode );
-	}
-}
-
 void CSyntaxAnalyser::ReduceScopes(CSyntaxNode& oTree)
 {
 	for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
 	{
 		int iPred = i > 0 ? i - 1 : 0;
 		if (oTree.m_vChild[i].m_Lexem.m_eType == CLexAnalyser::CLexem::eLBraket)
-		{
-			ReduceLargestClosingLexem(oTree.m_vChild, CSyntaxNode::eScope, eFuncDef, i);
-		}
+			ReduceLargestClosingLexem(oTree.m_vChild, CLexAnalyser::CLexem::TLexem::eLBraket, CLexAnalyser::CLexem::TLexem::eRBraket, CSyntaxNode::eScope, eFuncDef, i);
 	}
 	for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
 		ReduceScopes(oTree.m_vChild[i]);
@@ -309,13 +253,12 @@ void CSyntaxAnalyser::ReduceParenthesis( CSyntaxNode& oTree )
 	for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 	{
 		int iPred = i > 0 ? i - 1 : 0;
-		if( oTree.m_vChild[ i ].m_Lexem.m_eType == CLexAnalyser::CLexem::eLPar )
-		{
+		if( oTree.m_vChild[ i ].m_Lexem.m_eType == CLexAnalyser::CLexem::eLPar ) {
 			if( oTree.m_vChild[ iPred ].m_Lexem.m_eType == CLexAnalyser::CLexem::eCall ||
 				oTree.m_vChild[iPred].m_Lexem.m_eType == CLexAnalyser::CLexem::eFunctionDef)
-				ReduceLargestParenthesis( oTree.m_vChild, CSyntaxNode::eVecArgs, eFunc, i );
+				ReduceLargestClosingLexem(oTree.m_vChild, CLexAnalyser::CLexem::TLexem::eLPar, CLexAnalyser::CLexem::TLexem::eRPar, CSyntaxNode::eVecArgs, eFunc, i);
 			else
-				ReduceLargestParenthesis( oTree.m_vChild, CSyntaxNode::ePar, eNormal, i );
+				ReduceLargestClosingLexem(oTree.m_vChild, CLexAnalyser::CLexem::TLexem::eLPar, CLexAnalyser::CLexem::TLexem::eRPar, CSyntaxNode::ePar, eNormal, i);
 		}
 	}
 	for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )	

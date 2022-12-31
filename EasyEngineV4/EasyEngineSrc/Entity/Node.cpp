@@ -8,7 +8,8 @@ m_bQuaternionMode( false ),
 m_nID( -1 ),
 m_nParentID( -1 ),
 m_bUpdateConstantLocalTranslate( false ),
-m_bUpdateConstantLocalRotate( false )
+m_bUpdateConstantLocalRotate( false ),
+m_bIsCollidable(false)
 {
 }
 
@@ -17,6 +18,11 @@ CNode::~CNode()
 	for (unsigned int i = 0; i < m_vChild.size(); i++) {
 		delete m_vChild[i];
 	}
+}
+
+bool CNode::IsCollidable()
+{
+	return m_bIsCollidable;
 }
 
 INode* CNode::GetParent()

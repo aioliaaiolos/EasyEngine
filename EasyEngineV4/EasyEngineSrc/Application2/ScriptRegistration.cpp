@@ -23,6 +23,7 @@
 #include "../Utils2/DebugTool.h"
 #include "../Utils2/EasyFile.h"
 #include "../Utils2/StringUtils.h"
+#include "IEventDispatcher.h"
 
 // stl
 #include <sstream>
@@ -2731,6 +2732,21 @@ void DisplayCamPos( IScriptState* pState )
 	m_pConsole->Println( oss.str() );
 }
 
+void PrintHUD(IScriptState* pState)
+{
+	CScriptFuncArgString* pText = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CScriptFuncArgInt* px = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
+	CScriptFuncArgInt* py = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
+	int slot = m_pHud->CreateNewSlot(px->m_nValue, py->m_nValue);
+	m_pHud->PrintInSlot(slot, 0, pText->m_sValue);
+}
+
+void RemoveHudSlot(IScriptState* pState)
+{
+	CScriptFuncArgInt* pSlot = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	m_pHud->RemoveText(pSlot->m_nValue);
+}
+
 void EntityCallback(CPlugin*, IEventDispatcher::TEntityEvent e, IEntity* pEntity)
 {
 	if (e == IEventDispatcher::TEntityEvent::T_UPDATE) {
@@ -3309,6 +3325,16 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vector< TFuncArgType > vType;
 
 	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("PrintHUD", PrintHUD, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("RemoveHUDSlot", RemoveHudSlot, vType);
+
+	vType.clear();
 	m_pScriptManager->RegisterFunction("Reset", Reset, vType);
 
 	vType.clear();
@@ -3474,6 +3500,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("SpawnCharacter", SpawnCharacter, vType);
 
 	vType.clear();
+	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("SpawnArea", SpawnArea, vType);
 
 	vType.clear();

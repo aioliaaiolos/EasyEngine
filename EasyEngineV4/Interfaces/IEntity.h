@@ -130,10 +130,11 @@ public:
 	virtual void				SetSkinOffset(float x, float y, float z) = 0;
 };
 
-class IAreaEntity : public virtual IEntity
+class IBoxEntity : public virtual IEntity
 {
 public:
-	virtual ~IAreaEntity() {};
+	virtual ~IBoxEntity() {};
+	virtual IBox&	GetBox() = 0;
 };
 
 class ILightEntity : public virtual IEntity
@@ -236,7 +237,7 @@ public:
 	virtual void				Clear() = 0;
 	virtual IEntity*			CreateSphere( float fSize ) = 0;
 	virtual IEntity*			CreateBox(const CVector& oDimension ) = 0;
-	virtual IEntity*			CreateAreaEntity(string sAreaName, const CVector& oDimension) = 0;
+	virtual IBoxEntity*		CreateAreaEntity(string sAreaName, const CVector& oDimension) = 0;
 	virtual IEntity*			CreateQuad(float lenght, float width) = 0;
 	virtual void				SetZCollisionError( float e ) = 0;
 	virtual IAEntity*			GetFirstIAEntity() = 0;

@@ -4,7 +4,7 @@
 
 class IBox;
 
-class CBoxEntity : public CShape
+class CBoxEntity : public CShape, public IBoxEntity
 {
 public:
 	CBoxEntity( IRenderer& oRenderer, IBox& oBox );

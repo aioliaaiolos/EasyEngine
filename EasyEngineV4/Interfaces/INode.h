@@ -58,6 +58,7 @@ public:
 	virtual void						Update() = 0;
 	virtual void						GetHierarchyCount(int& nCount) = 0;
 	virtual INode*						DuplicateHierarchy() = 0;
+	virtual bool						IsCollidable() = 0;
 };
 
 #endif // INODE_H

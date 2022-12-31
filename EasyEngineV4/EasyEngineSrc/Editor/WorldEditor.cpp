@@ -153,6 +153,15 @@ void CWorldEditor::Load(string fileName)
 				m_mEntityMatrices[sFileName].push_back(pair<IEntity*, CMatrix>(nullptr, tm));
 			}
 		}
+		int areaCount = 0;
+		fs >> areaCount;
+		for (int i = 0; i < areaCount; i++) {
+			string sName;
+			CMatrix tm;
+			CVector dim;
+			fs >> sName >> tm >> dim;
+			m_mAreaMatrices[sName] = pair<IBoxEntity*, pair<CMatrix, CVector>>(nullptr, pair<CMatrix, CVector>(tm, dim));
+		}
 	}
 	m_pEditorCamera->Link(m_pScene);
 }
@@ -215,6 +224,16 @@ void CWorldEditor::Save(string fileName)
 					fs << it->second[iMatrix].first->GetWorldMatrix();
 			}
 		}
+		fs << (int)m_mAreaMatrices.size();
+		for (map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator it = m_mAreaMatrices.begin(); it != m_mAreaMatrices.end(); it++) {
+			const string& name = it->first;
+			fs << name;
+			IBoxEntity* pBoxEntity = it->second.first;
+			if (pBoxEntity) {
+				fs << pBoxEntity->GetWorldMatrix();
+				fs << pBoxEntity->GetBox().GetDimension();
+			}
+		}
 	}
 }
 
@@ -274,6 +293,10 @@ int CWorldEditor::SpawnArea(string areaName)
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 	m_eEditorMode = TEditorMode::eAdding;
 	m_vEntities.push_back(m_pEditingEntity);
+	CMatrix m;
+	CVector dim;
+	IBoxEntity* pAreaEntity = dynamic_cast<IBoxEntity*>(m_pEditingEntity);
+	m_mAreaMatrices[areaName] = pair<IBoxEntity*, pair<CMatrix, CVector>>(pAreaEntity, pair<CMatrix, CVector>(m, dim));
 	return -1;
 }
 
@@ -342,6 +365,21 @@ void CWorldEditor::OnSceneLoaded()
 				pEntity->SetWeight(1);
 				m_vEntities.push_back(pEntity);
 			}
+		}
+	}
+	for (map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.begin(); itArea != m_mAreaMatrices.end(); itArea++) {
+		pair<IBoxEntity*, pair<CMatrix, CVector>>& area = itArea->second;
+		IBoxEntity* pAreaEntity = m_oEntityManager.CreateAreaEntity(itArea->first, area.second.second);
+		if (pAreaEntity) {
+			pAreaEntity->Link(m_pScene);
+			area.first = pAreaEntity;
+			CMatrix& oTM = area.second.first;
+			CVector& dim = area.second.second;
+			CVector minPoint = - dim / 2.f;
+			pAreaEntity->SetLocalMatrix(oTM);
+			pAreaEntity->GetBox().Set(minPoint, dim);
+			pAreaEntity->SetWeight(1);
+			m_vEntities.push_back(pAreaEntity);
 		}
 	}
 	if (m_bEditionMode)

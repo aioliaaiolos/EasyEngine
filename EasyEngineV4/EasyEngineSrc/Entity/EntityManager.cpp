@@ -228,7 +228,7 @@ IEntity* CEntityManager::CreateBox(const CVector& oDimension )
 	return pBoxEntity;
 }
 
-IEntity* CEntityManager::CreateAreaEntity(string sAreaName, const CVector& oDimension)
+IBoxEntity* CEntityManager::CreateAreaEntity(string sAreaName, const CVector& oDimension)
 {
 	IBox* pBox = m_oGeometryManager.CreateBox();
 	pBox->Set(-oDimension / 2.f, oDimension);
