@@ -45,7 +45,7 @@ protected:
 public:
 	CSemanticAnalyser();
 	void			RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType );
-	void			CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mFunctions);
+	void			CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions);
 	void			GetFunctionAddress( map< string, int >& mFuncAddr );
 	void			SetTypeFromChildType( CSyntaxNode& oTree );
 	unsigned int	GetFuncArgsCount( int nFuncIndex );

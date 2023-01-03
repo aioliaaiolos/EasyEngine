@@ -18,15 +18,27 @@ public:
 
 private:
 	typedef void (*TInstrFunc)( unsigned char* );
-	float	m_nEip;
-	float	m_nEax;
-	float	m_nEbx;
-	float	m_nEcx;
-	float	m_nEdx;
-	float 	m_nEsi;
-	float 	m_nEdi;
-	float 	m_nEbp;
-	float 	m_nEsp;
+	float			m_nEip;
+	float			m_nEax;
+	float			m_nEbx;
+	float			m_nEcx;
+	float			m_nEdx;
+	float 			m_nEsi;
+	float 			m_nEdi;
+	float 			m_nEbp;
+	float 			m_nEsp;
+	unsigned int	m_nFlags;
+
+	enum TFlag
+	{
+		CF = 1,
+		Flag2 = 1 << 2,
+		PF = 1 << 3,
+		Flag3 = 1 << 4,
+		AF = 1 << 5,
+		Flag4 = 1 << 6,
+		ZF = 1 << 7
+	};
 
 	map<int, int> m_mEbpValueByScope;
 
@@ -66,6 +78,9 @@ private:
 
 	static void Ret( unsigned char* pOperand );
 	static void Return(unsigned char* pOperand);
+
+	static void CmpAddrImm(unsigned char* pOperand);
+	static void JneAddr(unsigned char* pOperand);
 
 	static CVirtualProcessor* s_pCurrentInstance;
 	static CSemanticAnalyser* s_pSemanticAnalyser;

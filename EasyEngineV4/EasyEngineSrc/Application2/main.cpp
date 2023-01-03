@@ -103,7 +103,6 @@ void InitScene( ISceneManager* pSceneManager )
 			fclose( pFile );
 			if (pos > 0) {
 				m_pScriptManager->ExecuteCommand("run(\"start\");");
-				m_pScriptManager->ExecuteCommand("onLoadingGame();");
 			}
 		}
 		else

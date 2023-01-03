@@ -50,13 +50,13 @@ void CScriptManager::GenerateAssemblerListing(bool generate)
 void CScriptManager::ExecuteCommand( std::string sCommand )
 {
 	string s;
-	vector< CLexAnalyser::CLexem > vLexem;
+	vector< CLexem > vLexem;
 	m_pLexAnalyser->GetLexemArrayFromScript( sCommand, vLexem );
 	if (vLexem.size() == 0)
 		return;
 	CSyntaxNode oTree;
 	m_pSyntaxAnalyser->GetSyntaxicTree( vLexem, oTree );
-	m_pSemanticAnalyser->CompleteSyntaxicTree( oTree, m_pSyntaxAnalyser->m_mFunctions);
+	m_pSemanticAnalyser->CompleteSyntaxicTree( oTree, m_pSyntaxAnalyser->m_vFunctions);
 	vector< CAsmGenerator::CInstr > vAssembler;
 	map< string, int > mFuncAddr;
 	m_pSemanticAnalyser->GetFunctionAddress( mFuncAddr );
@@ -71,6 +71,8 @@ void CScriptManager::ExecuteCommand( std::string sCommand )
 void CScriptManager::GetRegisteredFunctions( vector< string >& vFuncNames )
 {
 	m_pSemanticAnalyser->GetRegisteredFunctions( vFuncNames );
+	for (const string& s : m_pSyntaxAnalyser->m_vFunctions)
+		vFuncNames.push_back(s);
 }
 
 float CScriptManager::GetVariableValue(string variableName)

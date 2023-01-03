@@ -10,48 +10,52 @@ using namespace std;
 class IFileSystem;
 class CCSVReader;
 
+struct CLexem
+{
+	enum TLexem
+	{
+		eNone = -1,
+		eVar = 0,
+		eCall,
+		eInt,
+		eFloat,
+		eLPar,
+		eRPar,
+		eAffect,
+		eVirg,
+		eDot,
+		eGuill,
+		eSub,
+		eAdd,
+		eDiv,
+		eMult,
+		ePtVirg,
+		eString,
+		eIdentifier,
+		eFunctionDef,
+		eLBraket,
+		eRBraket,
+		eIf,
+		eComp
+	};
+	string			m_sValue;
+	int				m_nValue;
+	float			m_fValue;
+	TLexem			m_eType;
+
+	CLexem() : m_eType(eNone), m_nValue(0), m_fValue(0.f) {}
+	CLexem(TLexem t) : m_eType(t), m_nValue(0), m_fValue(0.f) {}
+	bool	IsOperation()const;
+	bool	IsNumeric()const;
+};
 
 
 class CLexAnalyser
 {
 public:
-	struct CLexem
-	{
-		enum TLexem
-		{
-			eNone = -1,
-			eVar = 0,
-			eCall,
-			eInt,
-			eFloat,
-			eLPar,
-			eRPar,
-			eAffect,
-			eVirg,
-			eDot,
-			eGuill,
-			eSub,
-			eAdd,
-			eDiv,
-			eMult,
-			ePtVirg,
-			eString,
-			eIdentifier,
-			eFunctionDef,
-			eLBraket,
-			eRBraket
-		};
-		string			m_sValue;
-		int				m_nValue;
-		float			m_fValue;
-		TLexem			m_eType;
-
-		CLexem() : m_eType( eNone ), m_nValue(0), m_fValue(0.f){}
-		CLexem( TLexem t ) : m_eType( t ), m_nValue(0), m_fValue(0.f){}
-		bool	IsOperation()const;
-		bool	IsNumeric()const;
-	};
-
+	CLexAnalyser(string sCVSConfigName, IFileSystem*);
+	void	GetLexemArrayFromScript(string sScript, vector< CLexem >& vLexem);
+	
 private:
 	int									m_nStateCount;
 	vector< vector< int > >				m_vAutomate;
@@ -67,13 +71,7 @@ private:
 	int						GenHookRegExpr(string sExpr, string& sOut);
 	void					InitStringToLexemTypeArray();
 	static void				ReadUntilEndComment(string sScript, unsigned int& startIndex, int& line);
-	static void				ReadUntilEndLine(string sScript, unsigned int& startIndex);
-
-
-public:
-	CLexAnalyser( string sCVSConfigName, IFileSystem* );
-	void	GetLexemArrayFromScript( string sScript, vector< CLexem >& vLexem );
-	
+	static void				ReadUntilEndLine(string sScript, unsigned int& startIndex);	
 };
 
 #endif // LEXANALYSER_H

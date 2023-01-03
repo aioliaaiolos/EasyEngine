@@ -1,3 +1,19 @@
+a=3;
+
+if(a==3)
+{
+	PrintHUD("Bonjour", 300, 300);
+}
+
+
+function testIf()
+{
+	if(GetEntityID() == 3)
+	{
+		PrintHUD("Bonjour", 300, 300);
+	}
+}
+
 function onExitHospitalArea()
 {
 	print("hopitalout");
@@ -15,3 +31,4 @@ function onLoadingGame()
 
 	EnableInstancingMode(0);
 }
+

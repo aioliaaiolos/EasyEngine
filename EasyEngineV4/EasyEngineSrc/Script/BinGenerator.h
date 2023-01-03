@@ -70,7 +70,11 @@ public:
 		eIntAddr,
 
 		eRet,
-		eReturn
+		eReturn,
+
+		eCmpAddrImm,
+
+		eJneAddr
 	};
 
 private:
@@ -82,6 +86,7 @@ private:
 	void				GenInstructionBinary(const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin);
 	void				GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
 	CSyntaxAnalyser&	m_oSyntaxAnalyser;
+	map<string, pair<int, vector<int>>>	m_mLabelAddr; // (label, pair(adresse correspondante, vector(adresses ou le label est référencé)))
 	
 	static void AddImmToByteArray( float nImm, vector< unsigned char >& vBin );
 

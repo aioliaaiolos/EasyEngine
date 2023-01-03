@@ -17,11 +17,11 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
 	int iInstrNum = 1;
 
 	// Mov
-	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eReg ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eImm ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eAddr ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eMov ][ eAddr ][ eReg ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eMov ][ eAddr ][ eImm ] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eReg ] = iInstrNum++; // 1
+	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eImm ] = iInstrNum++; // 2
+	s_tabInstr[ CAsmGenerator::eMov ][ eReg ][ eAddr ] = iInstrNum++; // 3
+	s_tabInstr[ CAsmGenerator::eMov ][ eAddr ][ eReg ] = iInstrNum++; // 4
+	s_tabInstr[ CAsmGenerator::eMov ][ eAddr ][ eImm ] = iInstrNum++; // 5
 
 	// Operations
 	for( int i = CAsmGenerator::eAdd; i <= CAsmGenerator::eDiv; i++ )
@@ -34,23 +34,27 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
 		s_tabInstr[ i ][ eAddr ][ eImm ] = iInstrNum++;
 	}
 
-	s_tabInstr[ CAsmGenerator::ePush ][ eReg ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::ePush ][ eImm ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::ePush ][ eAddr ][ 0 ] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::ePush ][ eReg ][ 0 ] = iInstrNum++; // 30
+	s_tabInstr[ CAsmGenerator::ePush ][ eImm ][ 0 ] = iInstrNum++; // 31
+	s_tabInstr[ CAsmGenerator::ePush ][ eAddr ][ 0 ] = iInstrNum++; // 32
 
-	s_tabInstr[ CAsmGenerator::ePop ][ eReg ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::ePop ][ eAddr ][ 0 ] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::ePop ][ eReg ][ 0 ] = iInstrNum++; // 33
+	s_tabInstr[ CAsmGenerator::ePop ][ eAddr ][ 0 ] = iInstrNum++; // 34
 
-	s_tabInstr[ CAsmGenerator::eCall ][ eReg ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eCall ][ eImm ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eCall ][ eAddr ][ 0 ] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::eCall ][ eReg ][ 0 ] = iInstrNum++; // 35
+	s_tabInstr[ CAsmGenerator::eCall ][ eImm ][ 0 ] = iInstrNum++; // 36
+	s_tabInstr[ CAsmGenerator::eCall ][ eAddr ][ 0 ] = iInstrNum++; // 37
 
-	s_tabInstr[ CAsmGenerator::eInt ][ eReg ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eInt ][ eImm ][ 0 ] = iInstrNum++;
-	s_tabInstr[ CAsmGenerator::eInt ][ eAddr ][ 0 ] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::eInt ][ eReg ][ 0 ] = iInstrNum++; // 38
+	s_tabInstr[ CAsmGenerator::eInt ][ eImm ][ 0 ] = iInstrNum++; // 39
+	s_tabInstr[ CAsmGenerator::eInt ][ eAddr ][ 0 ] = iInstrNum++; // 40
 
-	s_tabInstr[ CAsmGenerator::eRet ][ 0 ][ 0 ] = iInstrNum++;
-	s_tabInstr[CAsmGenerator::eReturn][0][0] = iInstrNum++;
+	s_tabInstr[ CAsmGenerator::eRet ][ 0 ][ 0 ] = iInstrNum++; // 41
+	s_tabInstr[CAsmGenerator::eReturn][0][0] = iInstrNum++; // 42
+
+	s_tabInstr[CAsmGenerator::eCmp][eAddr][eImm] = iInstrNum++; // 43
+	
+	s_tabInstr[CAsmGenerator::eJne][eAddr][0] = iInstrNum++; // 44
 
 	s_vInstrSize.push_back( -1 ); // pour démarrer à 1
 
@@ -87,6 +91,9 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
 
 	s_vInstrSize.push_back( 1 ); // eRet
 	s_vInstrSize.push_back( 1 ); // eReturn
+
+	s_vInstrSize.push_back(7); // cmp
+	s_vInstrSize.push_back(3); // jne
 }
 
 //int	CBinGenerator::GetInstrSize( int nInstrNum )
@@ -202,6 +209,25 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 								GenMemoryBinary(pMem, vBin);
 								vBin.push_back(pReg2->m_eValue);
 							}
+						}
+					}
+				}
+				else {
+					const CPreprocessorString* pString = dynamic_cast<const CPreprocessorString* >(oInstr.m_vOperand[0]);
+					if (pString) {
+						if (oInstr.m_eMnem == CAsmGenerator::eNone) {
+							short address = vBin.size();
+							string label = pString->m_sValue.substr(0, pString->m_sValue.size() - 1);
+							m_mLabelAddr[label].first = address;
+							for (unsigned int i : m_mLabelAddr[label].second) {
+								memcpy(&vBin[0] + i, &address, 2);
+							}
+						}
+						else {
+							vBin.push_back(s_tabInstr[oInstr.m_eMnem][eAddr][0]);
+							m_mLabelAddr[pString->m_sValue].second.push_back(vBin.size());
+							for (int i = 0; i < 2; i++)
+								vBin.push_back(0);
 						}
 					}
 				}

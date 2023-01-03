@@ -34,13 +34,12 @@ public:
 	};
 
 	CSyntaxNode();
-	CSyntaxNode( CLexAnalyser::CLexem );
+	CSyntaxNode( CLexem );
 	static bool				IsValue(NODE_TYPE node);
-	CLexAnalyser::CLexem	m_Lexem;
+	CLexem	m_Lexem;
 	vector< CSyntaxNode >	m_vChild;
-	NODE_TYPE				m_Type;
+	NODE_TYPE				m_eType;
 	unsigned int			m_nAddress;
-	void*					m_pUserData;
 	int						m_nScope;
 };
 
@@ -57,16 +56,14 @@ class CSyntaxAnalyser
 	void ReduceParenthesis( CSyntaxNode& oTree );
 	void ReduceInstruction( CSyntaxNode& oTree );
 	void ReduceAllOperations(  CSyntaxNode& oNode );
-	void ReduceOperations( CSyntaxNode& oNode, const vector< CLexAnalyser::CLexem::TLexem >& vType );
+	void ReduceOperations( CSyntaxNode& oNode, const vector< CLexem::TLexem >& vType );
 	void DeleteTempNodes( CSyntaxNode& oNode );
 	void ReduceVecArgs( CSyntaxNode& oNode );
 	void DeleteParNodes( CSyntaxNode& oNode );
 
 public:
-	void GetSyntaxicTree( const vector< CLexAnalyser::CLexem >& vLexem, CSyntaxNode& oTree );
-	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CLexAnalyser::CLexem::TLexem leftLexem, CLexAnalyser::CLexem::TLexem rightLexem, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
-
-	set<string> m_mFunctions;
+	void GetSyntaxicTree( const vector< CLexem >& vLexem, CSyntaxNode& oTree );
+	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CLexem::TLexem leftLexem, CLexem::TLexem rightLexem, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
 	vector<string>	m_vFunctions;
 };
 

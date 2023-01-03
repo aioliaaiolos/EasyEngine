@@ -12,7 +12,8 @@ CVirtualProcessor::CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser, CBin
 m_nEip( 0 ),
 m_nEsp( MEM_SIZE - 1 ),
 m_bEnd( false ),
-m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1 ), m_nEbp( -1 )
+m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1 ), m_nEbp( -1 ),
+m_nFlags(0)
 {
 	ZeroMemory( m_pMemory, MEM_SIZE * sizeof( float ) );
 	s_pSemanticAnalyser = pSemanticAnalyser;
@@ -84,6 +85,9 @@ m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1
 
 	m_mInstrFunc[ CBinGenerator::eRet ] = Ret;
 	m_mInstrFunc[ CBinGenerator::eReturn] = Return;
+
+	m_mInstrFunc[CBinGenerator::eCmpAddrImm] = CmpAddrImm;
+	m_mInstrFunc[CBinGenerator::eJneAddr] = JneAddr;
 
 	m_vRegAddr.resize( 8 );
 	m_vRegAddr[CRegister::eax] = &m_nEax;
@@ -194,6 +198,36 @@ void CVirtualProcessor::MovAddrReg( unsigned char* pOperand )
 	char regId = pOperand[2];
 	int regValue = *s_pCurrentInstance->m_vRegAddr[regId];
 	s_pCurrentInstance->m_pMemory[address] = regValue;
+}
+
+void CVirtualProcessor::CmpAddrImm(unsigned char* pOperand)
+{
+	int address = GetMemRegisterAddress(pOperand);
+	float fimm;
+	int imm;
+	memcpy(&fimm, &pOperand[2], 4);
+	imm = fimm;
+	float memValue = s_pCurrentInstance->m_pMemory[address];
+	if (memValue < imm ) {
+		s_pCurrentInstance->m_nFlags &= (unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
+	}
+	else if (memValue > imm) {
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
+	}
+	else {
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::ZF;
+	}
+}
+
+void CVirtualProcessor::JneAddr(unsigned char* pOperand)
+{
+	unsigned char jmpAddr = pOperand[0];
+	if (!((s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF) == 0 && (s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF) != 0)) {
+		s_pCurrentInstance->m_nEip = jmpAddr;
+	}	
 }
 
 void CVirtualProcessor::MovAddrImm( unsigned char* pOperand )

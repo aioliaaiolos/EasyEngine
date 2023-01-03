@@ -75,27 +75,27 @@ const CVar* CSemanticAnalyser::GetVariable(string varName)
 	return ret;
 }
 
-void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mFunctions )
+void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions )
 {
-	if( oTree.m_Lexem.m_eType == CLexAnalyser::CLexem::eCall )
+	if( oTree.m_Lexem.m_eType == CLexem::eCall )
 	{
 		FuncMap::iterator it = m_mInterruption.find( oTree.m_Lexem.m_sValue );
 		if( it == m_mInterruption.end() )
 		{
-			set<string>::iterator itFunc = mFunctions.find(oTree.m_Lexem.m_sValue);
-			if (itFunc == mFunctions.end()) {
+			vector<string>::iterator itFunc = std::find(vFunctions.begin(), vFunctions.end(), oTree.m_Lexem.m_sValue);
+			if (itFunc == vFunctions.end()) {
 				string sMessage = string("Fonction \"") + oTree.m_Lexem.m_sValue + "\" non définie";
 				CCompilationErrorException e(-1, -1);
 				e.SetErrorMessage(sMessage);
 				throw e;
 			}
 			else {
-				oTree.m_Type = CSyntaxNode::eFunctionCall;
-				oTree.m_nAddress = (unsigned int)std::distance(mFunctions.begin(), itFunc);
+				oTree.m_eType = CSyntaxNode::eFunctionCall;
+				oTree.m_nAddress = (unsigned int)std::distance(vFunctions.begin(), itFunc);
 			}
 		}
 		else {
-			oTree.m_Type = CSyntaxNode::eAPICall;
+			oTree.m_eType = CSyntaxNode::eAPICall;
 			if (it->second.second.size() != oTree.m_vChild.size())
 			{
 				ostringstream oss;
@@ -108,26 +108,29 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mF
 		}
 		
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-			CompleteSyntaxicTree( oTree.m_vChild[ i ], mFunctions);
+			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
 	}
-	else if( oTree.m_Type == CSyntaxNode::eVal || 
-		oTree.m_Type == CSyntaxNode::eInt || 
-		oTree.m_Type == CSyntaxNode::eFloat || 
-		oTree.m_Type == CSyntaxNode::eString )
+	else if (oTree.m_Lexem.m_eType == CLexem::TLexem::eComp) {
+		oTree.m_eType = CSyntaxNode::eInt;
+	}
+	else if( oTree.m_eType == CSyntaxNode::eVal || 
+		oTree.m_eType == CSyntaxNode::eInt || 
+		oTree.m_eType == CSyntaxNode::eFloat || 
+		oTree.m_eType == CSyntaxNode::eString )
 	{
 		if( oTree.m_vChild.size() == 0 )
 		{
 			switch (oTree.m_Lexem.m_eType)
 			{
-			case CLexAnalyser::CLexem::eInt:
-				oTree.m_Type = CSyntaxNode::eInt;
+			case CLexem::eInt:
+				oTree.m_eType = CSyntaxNode::eInt;
 				break;
-			case CLexAnalyser::CLexem::eFloat:
-				oTree.m_Type = CSyntaxNode::eFloat;
+			case CLexem::eFloat:
+				oTree.m_eType = CSyntaxNode::eFloat;
 				break;
-			case CLexAnalyser::CLexem::eString:
+			case CLexem::eString:
 			{
-				oTree.m_Type = CSyntaxNode::eString;
+				oTree.m_eType = CSyntaxNode::eString;
 #ifndef STRING_IN_BIN
 				map< string, int >::iterator itString = m_mStringAddress.find(oTree.m_Lexem.m_sValue);
 				if (itString == m_mStringAddress.end())
@@ -141,7 +144,7 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mF
 #endif // 0
 				break;
 			}
-			case CLexAnalyser::CLexem::eVar:
+			case CLexem::eVar:
 				AddNewVariable(oTree);
 				break;
 			default:
@@ -153,10 +156,10 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mF
 		{
 			SetTypeFromChildType( oTree );
 			for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-				CompleteSyntaxicTree( oTree.m_vChild[ i ], mFunctions);
+				CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
 		}
 	}
-	else if (oTree.m_Type == CSyntaxNode::eCommand) {
+	else if (oTree.m_eType == CSyntaxNode::eCommand) {
 		set<string>::iterator itCommand = m_vCommand.find(oTree.m_Lexem.m_sValue);
 		if (itCommand == m_vCommand.end()) {
 			string sMessage = string("Commande \"") + oTree.m_Lexem.m_sValue + "\" non définie";
@@ -167,14 +170,14 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, set<string> mF
 	}
 	else
 	{
-		if (oTree.m_Type == CSyntaxNode::eInstr) {
-			if ((oTree.m_vChild.size() == 1) && (oTree.m_vChild[0].m_Lexem.m_eType == CLexAnalyser::CLexem::eVar)) {
-				oTree.m_vChild[0].m_Type = CSyntaxNode::eCommand;
-				oTree.m_vChild[0].m_Lexem.m_eType = CLexAnalyser::CLexem::eNone;
+		if (oTree.m_eType == CSyntaxNode::eInstr) {
+			if ((oTree.m_vChild.size() == 1) && (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eVar)) {
+				oTree.m_vChild[0].m_eType = CSyntaxNode::eCommand;
+				oTree.m_vChild[0].m_Lexem.m_eType = CLexem::eNone;
 			}
 		}
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-			CompleteSyntaxicTree( oTree.m_vChild[ i ], mFunctions);
+			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
 	}
 }
 
@@ -202,39 +205,39 @@ void CSemanticAnalyser::SetTypeFromChildType( CSyntaxNode& oTree )
 	{
 		switch( oTree.m_Lexem.m_eType )
 		{
-		case CLexAnalyser::CLexem::eInt:
-			oTree.m_Type = CSyntaxNode::eInt;
+		case CLexem::eInt:
+			oTree.m_eType = CSyntaxNode::eInt;
 			break;
-		case CLexAnalyser::CLexem::eFloat:
-			oTree.m_Type = CSyntaxNode::eFloat;
+		case CLexem::eFloat:
+			oTree.m_eType = CSyntaxNode::eFloat;
 			break;
 		}
 	}
 	else if( (oTree.m_vChild.size() > 1) && 
-			 (oTree.m_vChild[ 0 ].m_Type == CSyntaxNode::eInt || oTree.m_vChild[ 0 ].m_Type == CSyntaxNode::eFloat ) &&
-			 (oTree.m_vChild[ 1 ].m_Type == CSyntaxNode::eInt || oTree.m_vChild[ 1 ].m_Type == CSyntaxNode::eFloat )) 
+			 (oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eInt || oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eFloat ) &&
+			 (oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eInt || oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eFloat )) 
 	{
-		if( oTree.m_vChild[ 0 ].m_Type == CSyntaxNode::eInt &&
-			oTree.m_vChild[ 1 ].m_Type == CSyntaxNode::eInt )
-			oTree.m_Type = CSyntaxNode::eInt;
+		if( oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eInt &&
+			oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eInt )
+			oTree.m_eType = CSyntaxNode::eInt;
 		else
-			oTree.m_Type = CSyntaxNode::eFloat;
+			oTree.m_eType = CSyntaxNode::eFloat;
 	}
 	else
 	{
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 		{
-			if( oTree.m_vChild[ i ].m_Type != CSyntaxNode::eInt &&
-				oTree.m_vChild[ i ].m_Type != CSyntaxNode::eFloat )
+			if( oTree.m_vChild[ i ].m_eType != CSyntaxNode::eInt &&
+				oTree.m_vChild[ i ].m_eType != CSyntaxNode::eFloat )
 			{
 				SetTypeFromChildType( oTree.m_vChild[ i ] );
 			}
 		}
-		if( oTree.m_Lexem.m_eType != CLexAnalyser::CLexem::eCall )
-			if( oTree.m_Lexem.m_eType == CLexAnalyser::CLexem::eAffect )
+		if( oTree.m_Lexem.m_eType != CLexem::eCall )
+			if( oTree.m_Lexem.m_eType == CLexem::eAffect )
 			{
-				oTree.m_vChild[ 0 ].m_Type = oTree.m_vChild[ 1 ].m_Type;
-				oTree.m_Type = oTree.m_vChild[ 1 ].m_Type;
+				oTree.m_vChild[ 0 ].m_eType = oTree.m_vChild[ 1 ].m_eType;
+				oTree.m_eType = oTree.m_vChild[ 1 ].m_eType;
 			}
 			else
 				SetTypeFromChildType( oTree );

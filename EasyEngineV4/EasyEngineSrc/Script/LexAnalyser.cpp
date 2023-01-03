@@ -13,36 +13,38 @@ CLexAnalyser::CLexAnalyser( string sCSVConfigName, IFileSystem* pFS )
 	CalculLexicalArrayFromCSV( sCSVConfigName, pFS );
 }
 
-bool CLexAnalyser::CLexem::IsOperation()const
+bool CLexem::IsOperation()const
 {
 	return ( m_eType == eAdd || m_eType == eSub || m_eType == eDiv || m_eType == eMult );
 }
 
-bool CLexAnalyser::CLexem::IsNumeric()const
+bool CLexem::IsNumeric()const
 {
 	return m_eType == eInt || m_eType == eFloat || m_eType == eString;
 }
 
 void CLexAnalyser::InitStringToLexemTypeArray()
 {
-	m_mStringToLexemType[ "Identifier" ] = CLexem::eCall;
-	m_mStringToLexemType[ "Function" ] = CLexem::eCall;
-	m_mStringToLexemType[ "Var" ] = CLexem::eVar;
-	m_mStringToLexemType[ "LPar" ] = CLexem::eLPar;
-	m_mStringToLexemType[ "RPar" ] = CLexem::eRPar;
-	m_mStringToLexemType[ "Affectation" ] = CLexem::eAffect;
-	m_mStringToLexemType[ "String" ] = CLexem::eString;
-	m_mStringToLexemType[ "Sub" ] = CLexem::eSub;
-	m_mStringToLexemType[ "Add" ] = CLexem::eAdd;
-	m_mStringToLexemType[ "Div" ] = CLexem::eDiv;
-	m_mStringToLexemType[ "Int" ] = CLexem::eInt;
-	m_mStringToLexemType[ "Float" ] = CLexem::eFloat;
-	m_mStringToLexemType[ "Virg" ] = CLexem::eVirg;
-	m_mStringToLexemType[ "PTVirg" ] = CLexem::ePtVirg;
-	m_mStringToLexemType[ "Mult" ] = CLexem::eMult;
-	m_mStringToLexemType[ "FunctionDef" ] = CLexem::eFunctionDef;
-	m_mStringToLexemType[ "LBrace"] = CLexem::eLBraket;
-	m_mStringToLexemType[ "RBrace"] = CLexem::eRBraket;
+	m_mStringToLexemType["Identifier"] = CLexem::eCall;
+	m_mStringToLexemType["Function"] = CLexem::eCall;
+	m_mStringToLexemType["Var"] = CLexem::eVar;
+	m_mStringToLexemType["LPar"] = CLexem::eLPar;
+	m_mStringToLexemType["RPar"] = CLexem::eRPar;
+	m_mStringToLexemType["Affectation"] = CLexem::eAffect;
+	m_mStringToLexemType["String"] = CLexem::eString;
+	m_mStringToLexemType["Sub"] = CLexem::eSub;
+	m_mStringToLexemType["Add"] = CLexem::eAdd;
+	m_mStringToLexemType["Div"] = CLexem::eDiv;
+	m_mStringToLexemType["Int"] = CLexem::eInt;
+	m_mStringToLexemType["Float"] = CLexem::eFloat;
+	m_mStringToLexemType["Virg"] = CLexem::eVirg;
+	m_mStringToLexemType["PTVirg"] = CLexem::ePtVirg;
+	m_mStringToLexemType["Mult"] = CLexem::eMult;
+	m_mStringToLexemType["FunctionDef"] = CLexem::eFunctionDef;
+	m_mStringToLexemType["LBrace"] = CLexem::eLBraket;
+	m_mStringToLexemType["RBrace"] = CLexem::eRBraket;
+	m_mStringToLexemType["If"] = CLexem::eIf;
+	m_mStringToLexemType["Comp"] = CLexem::eComp;
 }
 
 void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vLexem )
@@ -135,10 +137,17 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 			break;
 		}
 		case CLexem::eFunctionDef:
+		{
 			auto last = std::remove_if(sValue.begin(), sValue.end(), isspace);
 			sValue.erase(last, sValue.end());
 			l.m_sValue = sValue;
 			i--;
+			break;
+		}
+		case CLexem::eIf:
+		case CLexem::eAffect:
+			i--;
+			break;
 		}
 		vLexem.push_back( l );
 		if( i < sScript.size() )
