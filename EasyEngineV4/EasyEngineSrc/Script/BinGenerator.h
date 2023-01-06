@@ -74,30 +74,26 @@ public:
 
 		eCmpAddrImm,
 
-		eJneAddr
+		eJneImm
 	};
-
-private:
-	typedef void (*TGen2RegsInstr)( CRegister::TType r1, CRegister::TType r2, vector< int >& vBin );
-	typedef void (*TGenRegImmInstr)( CRegister::TType r1, double fValue, vector< int >& vBin );
-
-	map< CAsmGenerator::TMnemonic, int > MnemToInstrNum;
-
-	void				GenInstructionBinary(const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin);
-	void				GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
-	CSyntaxAnalyser&	m_oSyntaxAnalyser;
-	map<string, pair<int, vector<int>>>	m_mLabelAddr; // (label, pair(adresse correspondante, vector(adresses ou le label est référencé)))
-	
-	static void AddImmToByteArray( float nImm, vector< unsigned char >& vBin );
-
-	static int				s_tabInstr[ CAsmGenerator::eMnemonicCount ][ eTypeInstrCount ][ eTypeInstrCount ];	
 
 public:
 	CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser);
-	void	GenBinary(const vector< CAsmGenerator::CInstr >& vAsmCode, const vector<vector<CAsmGenerator::CInstr>>& vAsmFunctionsCode, vector< unsigned char >& vBin);
-	static vector< int >	s_vInstrSize;
-	vector<vector<unsigned char>> m_vFunctionsBin;
-	//int		GetInstrSize( int nInstrNum );
+	void									GenBinary(const vector< CAsmGenerator::CInstr >& vAsmCode, vector< unsigned char >& vBin);
+	static vector< int >					s_vInstrSize;
+
+private:
+
+	void									GenInstructionBinary(const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin);
+	void									GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
+	CSyntaxAnalyser&						m_oSyntaxAnalyser;
+	map<string, pair<int, vector<int>>>		m_mLabelAddr; // (label, pair(adresse correspondante, vector(adresses ou le label est référencé)))
+	map< CAsmGenerator::TMnemonic, int >	MnemToInstrNum;
+	
+	static void								AddImmToByteArray( float nImm, vector< unsigned char >& vBin );
+	static int								s_tabInstr[ CAsmGenerator::eMnemonicCount ][ eTypeInstrCount ][ eTypeInstrCount ];	
+
+
 };
 
 #endif // BINGENERATOR_H

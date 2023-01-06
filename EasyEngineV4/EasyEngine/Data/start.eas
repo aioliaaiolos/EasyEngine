@@ -1,14 +1,8 @@
-a=3;
-
-if(a==3)
-{
-	PrintHUD("Bonjour", 300, 300);
-}
-
+onLoadingGame();
 
 function testIf()
 {
-	if(GetEntityID() == 3)
+	if(GetEntityID("geraldine") == 3)
 	{
 		PrintHUD("Bonjour", 300, 300);
 	}
@@ -31,4 +25,3 @@ function onLoadingGame()
 
 	EnableInstancingMode(0);
 }
-

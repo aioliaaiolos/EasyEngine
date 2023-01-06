@@ -91,7 +91,6 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 			}
 			else {
 				oTree.m_eType = CSyntaxNode::eFunctionCall;
-				oTree.m_nAddress = (unsigned int)std::distance(vFunctions.begin(), itFunc);
 			}
 		}
 		else {
@@ -112,6 +111,8 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 	}
 	else if (oTree.m_Lexem.m_eType == CLexem::TLexem::eComp) {
 		oTree.m_eType = CSyntaxNode::eInt;
+		for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
+			CompleteSyntaxicTree(oTree.m_vChild[i], vFunctions);
 	}
 	else if( oTree.m_eType == CSyntaxNode::eVal || 
 		oTree.m_eType == CSyntaxNode::eInt || 
@@ -176,8 +177,12 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 				oTree.m_vChild[0].m_Lexem.m_eType = CLexem::eNone;
 			}
 		}
+		if (oTree.m_eType == CSyntaxNode::eScope)
+			m_nCurrentScopeNumber++;
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
+		if (oTree.m_eType == CSyntaxNode::eScope)
+			m_nCurrentScopeNumber--;
 	}
 }
 

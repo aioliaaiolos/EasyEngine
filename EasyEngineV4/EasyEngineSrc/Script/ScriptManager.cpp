@@ -11,7 +11,7 @@
 //#define CREATE_ASSEMBLING_LISTING
 
 CScriptManager::CScriptManager(EEInterface& oInterface) :
-m_bGeneratedAssemblerListing(false)
+m_bGeneratedAssemblerListing(true)
 {
 	IFileSystem* pFileSystem = static_cast<IFileSystem*>(oInterface.GetPlugin("FileSystem"));
 	m_pLexAnalyser = new CLexAnalyser( "lexanalyser.csv", pFileSystem);
@@ -64,7 +64,7 @@ void CScriptManager::ExecuteCommand( std::string sCommand )
 	if(m_bGeneratedAssemblerListing)
 		m_pCodeGenerator->CreateAssemblerListing( vAssembler, "test.asm" );
 	vector< unsigned char > vBin;
-	m_pBinGenerator->GenBinary(vAssembler, m_pCodeGenerator->m_vAssemblerFunctions, vBin);
+	m_pBinGenerator->GenBinary(vAssembler, vBin);
 	m_pProc->Execute( vBin, CBinGenerator::s_vInstrSize );
 }
 

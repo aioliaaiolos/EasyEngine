@@ -23,6 +23,17 @@ bool CSyntaxNode::IsValue(NODE_TYPE node)
 	return (node == eVal) || (node == eInt) || (node == eFloat) || (node == eString);
 }
 
+bool CSyntaxNode::FindVar(string sVarName) const
+{
+	if (m_Lexem.m_sValue == sVarName)
+		return true;
+	for (const CSyntaxNode& child : m_vChild) {
+		if (child.FindVar(sVarName))
+			return true;
+	}
+	return false;
+}
+
 void CSyntaxAnalyser::ReduceInstruction( CSyntaxNode& oTree )
 {
 	unsigned int i = 0;

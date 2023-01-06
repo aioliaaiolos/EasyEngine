@@ -35,6 +35,7 @@ public:
 
 	CSyntaxNode();
 	CSyntaxNode( CLexem );
+	bool					FindVar(string varName) const;
 	static bool				IsValue(NODE_TYPE node);
 	CLexem	m_Lexem;
 	vector< CSyntaxNode >	m_vChild;

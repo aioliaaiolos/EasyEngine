@@ -80,7 +80,7 @@ private:
 	static void Return(unsigned char* pOperand);
 
 	static void CmpAddrImm(unsigned char* pOperand);
-	static void JneAddr(unsigned char* pOperand);
+	static void JneImm(unsigned char* pOperand);
 
 	static CVirtualProcessor* s_pCurrentInstance;
 	static CSemanticAnalyser* s_pSemanticAnalyser;
