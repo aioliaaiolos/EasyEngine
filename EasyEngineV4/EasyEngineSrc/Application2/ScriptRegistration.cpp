@@ -581,6 +581,19 @@ void Attack(IScriptState* pState)
 	}
 }
 
+void TalkTo(IScriptState* pState)
+{
+	CScriptFuncArgInt* pTalkerId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CScriptFuncArgInt* pInterlocutorId = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	IAEntityInterface* pTalker = dynamic_cast<IAEntityInterface*>(m_pEntityManager->GetEntity(pTalkerId->m_nValue));
+	if (pTalker) {
+		ICharacter* pInterlocutor = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pInterlocutorId->m_nValue));
+		if (pInterlocutor) {
+			pTalker->TalkTo(pInterlocutor);
+		}
+	}
+}
+
 void ComputeKeysBoundingBoxes( IScriptState* pState )
 {
 	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
@@ -2515,6 +2528,11 @@ void Kill(IScriptState* pState)
 	m_pEntityManager->Kill(pId->m_nValue);
 }
 
+void SetNPCState(IScriptState* pState)
+{
+	CScriptFuncArgInt* pNPCState = (CScriptFuncArgInt*)(pState->GetArg(0));
+	pState = pState;
+}
 
 void WearArmorToDummy(IScriptState* pState)
 {
@@ -2648,8 +2666,10 @@ void GetEntityID( IScriptState* pState )
 		int nID = m_pEntityManager->GetEntityID( pEntity );
 		pState->SetReturnValue(nID);
 	}
-	else
+	else {
 		pState->SetReturnValue(-1);
+		m_pConsole->Println("Error : Entity '" + pName->m_sValue + "' doesn't exists");
+	}
 }
 
 void GetCharacterID(IScriptState* pState)
@@ -2667,6 +2687,35 @@ void GetCharacterID(IScriptState* pState)
 		}
 	}
 	m_pConsole->Println(string("Error : character '" + pName->m_sValue + "' not found"));
+}
+
+void AttachScriptToEntity(IScriptState* pState)
+{
+	CScriptFuncArgString* pScriptName = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CScriptFuncArgString* pEntityName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	IEntity* pEntity = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityName->m_sValue));
+	if (pEntity) {
+		pEntity->AttachScript(pScriptName->m_sValue);
+	}
+}
+
+void IsIntersect(IScriptState* pState)
+{
+	CScriptFuncArgInt* pEntity1Id = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CScriptFuncArgInt* pEntity2Id = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	IEntity* pEntity1 = m_pEntityManager->GetEntity(pEntity1Id->m_nValue);
+	IEntity* pEntity2 = m_pEntityManager->GetEntity(pEntity2Id->m_nValue);
+	string sErrorMessage;
+	if (!pEntity1)
+		sErrorMessage = "Error : entity id '" + std::to_string(pEntity1Id->m_nValue) + "' doesn't exists";
+	else if (!pEntity2)
+		sErrorMessage = "Error : entity id '" + std::to_string(pEntity2Id->m_nValue) + "' doesn't exists";
+	else {
+		int ret = pEntity1->TestCollision(pEntity2) ? 1 : 0;
+		pState->SetReturnValue(ret);
+	}
+	if (!sErrorMessage.empty())
+		throw CEException(sErrorMessage);
 }
 
 void DisplayBBox( IScriptState* pState )
@@ -3323,6 +3372,20 @@ void SetCollisionMapBias(IScriptState* pState)
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("SetNPCState", SetNPCState, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("IsIntersect", IsIntersect, vType);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("AttachScriptToEntity", AttachScriptToEntity, vType);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4051,6 +4114,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("Attack", Attack, vType);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("TalkTo", TalkTo, vType);
 
 	vType.clear();
 	vType.push_back( eString );

@@ -26,7 +26,20 @@ struct CVar
 };
 
 
-typedef map< int, map< string, CVar > >	VarMap;
+class CVarMap
+{
+	typedef map< int, map< string, CVar > >	VarMap;
+public:
+	CVar* GetVariable(string sVarName);
+	void AddVariable(string sVarName, int nScope, int nIndex);
+	int GetVarCountInScope(const CSyntaxNode& node, int nScope);
+	CVar* GetVar(int nScope, string sVarName);
+
+	VarMap&		GetVarMap();
+private:
+	VarMap	m_mVars;
+
+};
 
 class CSemanticAnalyser
 {
@@ -36,11 +49,9 @@ class CSemanticAnalyser
 	set<string>					m_vCommand;
 	map< string, int >			m_mStringAddress;
 	map< int, string >			m_mAddressString;
-	VarMap						m_mVar;
+	CVarMap						m_oVars;
 	int							m_nCurrentScopeNumber;
-
-protected:
-	void					AddNewVariable(CSyntaxNode& oTree);
+	int							m_nVariableIndex;
 
 public:
 	CSemanticAnalyser();
@@ -51,8 +62,11 @@ public:
 	unsigned int	GetFuncArgsCount( int nFuncIndex );
 	float			CallInterruption( int nIndex, const vector< float >& vArgs );
 	void			GetRegisteredFunctions( vector< string >& vFuncNames );
-	VarMap&			GetVarMap();
+	CVarMap&		GetVarMap();
 	const CVar*		GetVariable(string varName);
+
+protected:
+	void			AddNewVariable(CSyntaxNode& oTree);
 };
 
 #endif // SEMANTICANALYSER_H

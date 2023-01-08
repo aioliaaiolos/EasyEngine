@@ -28,8 +28,62 @@ IScriptFuncArg* CScriptState::GetArg( int iIndex )
 	return m_vArg[ iIndex ];
 }
 
+CVar* CVarMap::GetVariable(string sVarName)
+{
+	int nScope = -1;
+	for (const pair<int, map<string, CVar>>& scopeVar : m_mVars) {
+		for (const pair<string, CVar>& var : scopeVar.second) {
+			if (var.first == sVarName) {
+				nScope = scopeVar.first;
+				return &m_mVars[nScope][sVarName];
+			}
+		}
+	}
+	return nullptr;
+}
+
+void CVarMap::AddVariable(string sVarName, int nScope, int nIndex)
+{
+	CVar v;
+	v.m_nScopePos = nScope;
+	v.m_nRelativeStackPosition = nIndex;
+	m_mVars[nScope][sVarName] = v;
+}
+
+int CVarMap::GetVarCountInScope(const CSyntaxNode& node, int nScope)
+{
+	int nVarCountInThisScope = 0;
+	VarMap::iterator itScope = m_mVars.find(nScope);
+	if (itScope != m_mVars.end()) {
+		for (const pair<string, CVar>& pairNameVar : itScope->second) {
+			if (node.FindVar(pairNameVar.first)) {
+				nVarCountInThisScope++;
+			}
+		}
+	}
+	return nVarCountInThisScope;
+}
+
+CVar* CVarMap::GetVar(int nScope, string sVarName)
+{
+	VarMap::iterator itScope = m_mVars.find(nScope);
+	if (itScope != m_mVars.end()) {
+		map<string, CVar>::iterator itVar = itScope->second.find(sVarName);
+		if (itVar != itScope->second.end()) {
+			return &itVar->second;
+		}
+	}
+	return nullptr;
+}
+
+CVarMap::VarMap& CVarMap::GetVarMap()
+{
+	return m_mVars;
+}
+
 CSemanticAnalyser::CSemanticAnalyser():
-	m_nCurrentScopeNumber( 0 )
+	m_nCurrentScopeNumber( 0 ),
+	m_nVariableIndex(0)
 {
 	m_vCommand.insert("return");
 }
@@ -52,27 +106,14 @@ void CSemanticAnalyser::GetRegisteredFunctions( vector< string >& vFuncNames )
 		vFuncNames.push_back( itFunc->first );
 }
 
-VarMap& CSemanticAnalyser::GetVarMap()
+CVarMap& CSemanticAnalyser::GetVarMap()
 {
-	return m_mVar;
+	return m_oVars;
 }
 
 const CVar* CSemanticAnalyser::GetVariable(string varName)
 {
-	CVar* ret = NULL;
-	int nScope = m_nCurrentScopeNumber;
-
-	while (!ret && nScope >= 0) {
-		VarMap::iterator itVarMap = m_mVar.find(nScope);
-		if (itVarMap != m_mVar.end()) {
-			map<string, CVar>::iterator itVar = itVarMap->second.find(varName);
-			if (itVar != itVarMap->second.end()) {
-				ret = &itVar->second;
-			}
-		}
-		nScope--;
-	}
-	return ret;
+	return m_oVars.GetVariable(varName);
 }
 
 void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions )
@@ -91,6 +132,7 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 			}
 			else {
 				oTree.m_eType = CSyntaxNode::eFunctionCall;
+				oTree.m_nAddress = (unsigned int)std::distance(vFunctions.begin(), itFunc);
 			}
 		}
 		else {
@@ -177,6 +219,8 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 				oTree.m_vChild[0].m_Lexem.m_eType = CLexem::eNone;
 			}
 		}
+		if (oTree.m_Lexem.m_eType == CLexem::eFunctionDef)
+			m_nVariableIndex = 0;
 		if (oTree.m_eType == CSyntaxNode::eScope)
 			m_nCurrentScopeNumber++;
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
@@ -189,18 +233,11 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 void CSemanticAnalyser::AddNewVariable(CSyntaxNode& oTree)
 {
 	string sVarName = oTree.m_Lexem.m_sValue;
-
-	map< string, CVar >& mVar = m_mVar[m_nCurrentScopeNumber];
-	map< string, CVar >::iterator itVar = mVar.find(sVarName);
-	if (itVar == mVar.end())
-	{
-		int nPosition = mVar.size();
-		CVar v;
-		v.m_nScopePos = m_nCurrentScopeNumber;
-		v.m_nRelativeStackPosition = nPosition;
-		mVar[sVarName] = v;
-	}
-	oTree.m_nScope = m_nCurrentScopeNumber;
+	if(!m_oVars.GetVariable(sVarName)) {
+		m_oVars.AddVariable(sVarName, m_nCurrentScopeNumber, m_nVariableIndex);
+		m_nVariableIndex++;
+		oTree.m_nScope = m_nCurrentScopeNumber;
+	}	
 }
 
 void CSemanticAnalyser::SetTypeFromChildType( CSyntaxNode& oTree )

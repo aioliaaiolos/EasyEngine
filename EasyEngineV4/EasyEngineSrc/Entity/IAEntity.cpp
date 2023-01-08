@@ -10,12 +10,14 @@ IAEntity::IAEntity():
 m_nRecoveryTime( 1000 ),
 m_bHitEnemy( false ),
 m_eFightState( eNoFight ),
+m_eTalkToState(eNoTalkTo),
 m_fAngleRemaining( 0.f ),
 m_bArriveAtDestination( true ),
 m_fDestinationDeltaRadius( 100.f ),
 m_nCurrentPathPointNumber( 0 ),
 m_pCurrentEnemy(NULL),
-m_bFaceToTarget(false)
+m_bFaceToTarget(false),
+m_pCurrentInterlocutor(nullptr)
 {
 }
 
@@ -85,6 +87,37 @@ void IAEntity::UpdateFightState()
 		if(m_pCurrentEnemy->GetLife() > 0)
 			Stand();
 		m_eFightState = eNoFight;
+		break;
+	default:
+		break;
+	}
+}
+
+void IAEntity::UpdateTalkToState()
+{
+	CVector oInterlocuteurPosition;
+	
+	switch (m_eTalkToState)
+	{
+	case eNoTalkTo:
+		break;
+	case eBeginGotoInterlocutor:
+		m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
+		Goto(oInterlocuteurPosition, -1.f);
+		m_eTalkToState = eGoingToInterlocutor;
+		break;
+	case eGoingToInterlocutor:
+		m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
+		if (GetDistanceTo2dPoint(oInterlocuteurPosition) > 100.f) {
+			SetDestination(oInterlocuteurPosition);
+			Run();
+		}
+		else {
+			m_eTalkToState = eNoTalkTo;
+			m_bArriveAtDestination = true;
+			Stand();
+			OpenTopicWindow();
+		}
 		break;
 	default:
 		break;
@@ -217,6 +250,10 @@ void IAEntity::Update()
 		UpdateGoto();
 		UpdateFightState();
 	}
+	else if (m_eTalkToState != eNoTalkTo) {
+		UpdateGoto();
+		UpdateTalkToState();
+	}
 	else {
 		UpdateGoto();
 	}
@@ -283,6 +320,12 @@ void IAEntity::Attack(IFighterEntityInterface* pEntity)
 	IFighterEntity* pEnemy = dynamic_cast<IFighterEntity*>(pEntity);
 	if (pEnemy)
 		Attack(pEnemy);
+}
+
+void IAEntity::TalkTo(ICharacter* pEntity)
+{
+	m_pCurrentInterlocutor = pEntity;
+	m_eTalkToState = eBeginGotoInterlocutor;
 }
 
 void IAEntity::Attack(IFighterEntity* pEntity)

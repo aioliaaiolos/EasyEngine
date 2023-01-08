@@ -39,7 +39,7 @@ private:
 	IFileSystem&														m_oFileSystem;
 	ISceneManager&														m_oSceneManager;
 	map<string, CVector>												m_mMaps;
-	map<string, CMatrix>												m_mCharacterMatrices;
+	map<string, pair<CMatrix, string>>									m_mCharacterMatrices; // (Nom, (TM, Script))
 	map<string, vector<pair<IEntity*, CMatrix>>>						m_mEntityMatrices;
 	map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>				m_mAreaMatrices;
 	vector<IEntity*>													m_vEntities;

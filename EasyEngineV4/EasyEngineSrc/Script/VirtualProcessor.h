@@ -11,7 +11,7 @@ class CVirtualProcessor
 {
 
 public:
-	CVirtualProcessor(CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator);
+	CVirtualProcessor(CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator, bool bPutAllCodeIntoSameMemory);
 	void	Execute(const vector< unsigned char >& vBinary, const vector< int >& vInstrSize);
 	float	GetVariableValue(string varName);
 	float	GetRegisterValue(CRegister::TType reg);
@@ -48,6 +48,7 @@ private:
 	map< CBinGenerator::TProcInstr, TInstrFunc > m_mInstrFunc;
 	vector< float* >	m_vRegAddr;
 	bool				m_bEnd;
+	bool				m_bPutAllCodeIntoSameMemory;
 
 
 	static void MovRegReg( unsigned char* pOperand );
@@ -80,6 +81,7 @@ private:
 	static void Return(unsigned char* pOperand);
 
 	static void CmpAddrImm(unsigned char* pOperand);
+	static void CmpRegImm(unsigned char* pOperand);
 	static void JneImm(unsigned char* pOperand);
 
 	static CVirtualProcessor* s_pCurrentInstance;

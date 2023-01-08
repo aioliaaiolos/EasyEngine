@@ -11,11 +11,12 @@ class IAnimation;
 class IGeometryManager;
 class CScene;
 class CEntityManager;
-class IGUIManager;
 class CNode;
 class CBone;
 class ICollisionMap;
 class CCollisionEntity;
+class IScriptManager;
+class IConsole;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 
@@ -95,6 +96,9 @@ public:
 	ICollisionMap*					GetCollisionMap();
 	void							SetSkinOffset(float x, float y, float z) override;
 	void							SetSkinOffset(CVector& oSkinOffset);
+	void							AttachScript(string sScript) override;
+	void							DetachScript(string sScript);
+	const string&					GetAttachedScript() const override;
 	
 
 protected:
@@ -105,6 +109,8 @@ protected:
 	IGeometryManager&								m_oGeometryManager;
 	ICollisionManager&								m_oCollisionManager;
 	ILoaderManager*									m_pLoaderManager;
+	IScriptManager&									m_oScriptManager;
+	IConsole&										m_oConsole;
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
@@ -146,6 +152,8 @@ protected:
 	ICollisionMap*									m_pCollisionMap;
 	vector< CMatrix >								m_vBoneMatrix;
 	CVector											m_oSkinOffset;
+	string											m_sAttachedScript;
+	vector<unsigned char>							m_vAttachedScriptByteCode;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -156,7 +164,7 @@ protected:
 	float				GetBoundingSphereDistance(INode* pEntity);
 	void				UpdateBoundingBox();
 	bool				ManageGroundCollision(const CMatrix& olastLocalTM);
-	bool				TestLocalCollision(INode* pEntity);
+	bool				TestCollision(INode* pEntity);
 	bool				TestWorldCollision(INode* pEntity);
 	bool				IsPassingDoor(INode* pWall, IGeometry* pBBox, IGeometry* pWallBBox);
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
@@ -165,6 +173,7 @@ protected:
 	void				LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors);
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
 	virtual CEntity*	CreateEmptyEntity(string sName);
+	void				ExecuteScripts();
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
 };
 

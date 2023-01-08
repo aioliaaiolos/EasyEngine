@@ -63,10 +63,12 @@ public:
 	
 	virtual void	RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType ) = 0;
 	virtual void	ExecuteCommand( std::string sCommand ) = 0;
+	virtual void	ExecuteByteCode(const vector<unsigned char>& vByteCode) = 0;
 	virtual void	GetRegisteredFunctions( vector< string >& vFuncNames ) = 0;
 	virtual float	GetVariableValue(string variableName) = 0;
 	virtual float	GetRegisterValue(string sRegisterName) = 0;
 	virtual void	GenerateAssemblerListing(bool generate) = 0;
+	virtual void	Compile(string script, vector<unsigned char>& vByteCode) = 0;
 };
 
 #endif // ISCRIPTMANAGER_H

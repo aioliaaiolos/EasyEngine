@@ -61,8 +61,7 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_sDiffuseFileName(diffuseFileName),
 	m_nMapLength(1000),
 	m_fMapHeight(10),
-	m_LoadingCompleteCallback(nullptr),
-	m_pLoadingCompleteData(nullptr)
+	m_oLoadingCompleteCallback(nullptr, nullptr)
 {
 	m_nID = 0;
 	SetName("Scene");
@@ -335,14 +334,14 @@ void CScene::DeleteTempDirectories()
 
 void CScene::HandleLoadingComplete(LevelCompleteProc callback, void* pData)
 {
-	m_LoadingCompleteCallback = callback;
-	m_pLoadingCompleteData = pData;
+	m_oLoadingCompleteCallback.first = callback;
+	m_oLoadingCompleteCallback.second = pData;
 }
 
 void CScene::UnhandleLoadingComplete()
 {
-	m_LoadingCompleteCallback = nullptr;
-	m_pLoadingCompleteData = nullptr;
+	m_oLoadingCompleteCallback.first = nullptr;
+	m_oLoadingCompleteCallback.second = nullptr;
 }
 
 
@@ -355,8 +354,8 @@ void  CScene::RenderScene()
 		m_oRenderer.SetCameraMatrix(oCamMatrix);
 	}
 	CNode::Update();
-	if (IsLoadingComplete() && m_LoadingCompleteCallback)
-		m_LoadingCompleteCallback(m_pLoadingCompleteData);
+	if (IsLoadingComplete() && m_oLoadingCompleteCallback.first)
+		m_oLoadingCompleteCallback.first(m_oLoadingCompleteCallback.second);
 
 	if (m_pEntityManager->IsUsingInstancing()) {
 		RenderInstances();

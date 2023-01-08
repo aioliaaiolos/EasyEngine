@@ -89,7 +89,6 @@ public:
 	float						GetX();
 	float						GetY();
 	float						GetZ();
-	bool						TestCollision(INode* pNode) override;
 	float						GetBoundingSphereDistance(INode* pEntity) override;
 	IGeometry*					GetBoundingGeometry() override;
 	float						GetHeight() override;

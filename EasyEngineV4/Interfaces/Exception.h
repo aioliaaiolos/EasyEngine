@@ -118,7 +118,7 @@ public:
 		ostringstream ossMessage;
 		string sErrorType;
 		if( m_sMessage == "" )
-			sErrorType = "Erreur de syntax";
+			sErrorType = "Erreur de syntaxe";
 		else
 			sErrorType = m_sMessage;
 		ostringstream ossPosition;

@@ -87,47 +87,50 @@ public:
 		eSetChildToParentTM
 	};
 
-	virtual void				Update() = 0;
-	virtual void				DrawBoundingBox( bool bDraw ) = 0;
-	virtual void				SetShader( IShader* pShader ) = 0;
-	virtual IGeometry*			GetBoundingGeometry() = 0;
-	virtual void				SetRessource(string sFileName, bool bDuplicate = false) = 0;
-	virtual IRessource*			GetRessource() = 0;
-	virtual void				SetDiffuseTexture(string sFileName) = 0;
-	virtual void				SetWeight( float fWeight ) = 0;
-	virtual float				GetWeight() = 0;
-	virtual void				AddAnimation( std::string sAnimationFile ) = 0;
-	virtual void				SetCurrentAnimation( std::string sAnimation ) = 0;
-	virtual IAnimation*			GetCurrentAnimation() = 0;
-	virtual void				PlayCurrentAnimation(bool loop) = 0;
-	virtual void				PauseCurrentAnimation(bool loop) = 0;
-	virtual bool				HasAnimation( string sAnimationName ) = 0;
-	virtual void				DetachCurrentAnimation() = 0;
-	virtual IBone*				GetSkeletonRoot() = 0;
-	virtual void				Hide( bool bHide ) = 0;
-	virtual void				RunAction( string sAction, bool bLoop ) = 0;
-	virtual void				LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM ) = 0;
-	virtual void				SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ) = 0;
-	virtual TAnimation			GetCurrentAnimationType() const = 0;
-	virtual void				GetTypeName( string& sName ) = 0;
-	virtual void				SetScaleFactor( float x, float y, float z ) = 0;
-	virtual void				GetScaleFactor(CVector& scale) = 0;
-	virtual void				SetRenderingType( IRenderer::TRenderType t ) = 0;
-	virtual void				DrawBoundingSphere( bool bDraw ) = 0;
-	virtual void				DrawBoneBoundingSphere( int nID, bool bDraw ) = 0;
-	virtual void				DrawAnimationBoundingBox( bool bDraw ) = 0;
-	virtual float				GetBoundingSphereRadius() const = 0;
-	virtual void				Goto( const CVector& oPosition, float fSpeed ) = 0;
-	virtual void				GetEntityName(string& sName) = 0;
-	virtual void				SetEntityName( string sName ) = 0;
-	virtual void				Colorize(float r, float g, float b, float a) = 0;
-	virtual void				AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
-	virtual void				DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
-	virtual void				SetCustomSpecular(const CVector& customSpecular) = 0;
-	virtual void				DrawCollisionBoundingBoxes(bool bDraw) = 0;
-	virtual int					GetCellSize() = 0;
-	virtual void				CreateCollisionMaps(float fBias) = 0;
-	virtual void				SetSkinOffset(float x, float y, float z) = 0;
+	virtual void						Update() = 0;
+	virtual void						DrawBoundingBox( bool bDraw ) = 0;
+	virtual void						SetShader( IShader* pShader ) = 0;
+	virtual IGeometry*					GetBoundingGeometry() = 0;
+	virtual void						SetRessource(string sFileName, bool bDuplicate = false) = 0;
+	virtual IRessource*					GetRessource() = 0;
+	virtual void						SetDiffuseTexture(string sFileName) = 0;
+	virtual void						SetWeight( float fWeight ) = 0;
+	virtual float						GetWeight() = 0;
+	virtual void						AddAnimation( std::string sAnimationFile ) = 0;
+	virtual void						SetCurrentAnimation( std::string sAnimation ) = 0;
+	virtual IAnimation*					GetCurrentAnimation() = 0;
+	virtual void						PlayCurrentAnimation(bool loop) = 0;
+	virtual void						PauseCurrentAnimation(bool loop) = 0;
+	virtual bool						HasAnimation( string sAnimationName ) = 0;
+	virtual void						DetachCurrentAnimation() = 0;
+	virtual IBone*						GetSkeletonRoot() = 0;
+	virtual void						Hide( bool bHide ) = 0;
+	virtual void						RunAction( string sAction, bool bLoop ) = 0;
+	virtual void						LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM ) = 0;
+	virtual void						SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ) = 0;
+	virtual TAnimation					GetCurrentAnimationType() const = 0;
+	virtual void						GetTypeName( string& sName ) = 0;
+	virtual void						SetScaleFactor( float x, float y, float z ) = 0;
+	virtual void						GetScaleFactor(CVector& scale) = 0;
+	virtual void						SetRenderingType( IRenderer::TRenderType t ) = 0;
+	virtual void						DrawBoundingSphere( bool bDraw ) = 0;
+	virtual void						DrawBoneBoundingSphere( int nID, bool bDraw ) = 0;
+	virtual void						DrawAnimationBoundingBox( bool bDraw ) = 0;
+	virtual float						GetBoundingSphereRadius() const = 0;
+	virtual void						Goto( const CVector& oPosition, float fSpeed ) = 0;
+	virtual void						GetEntityName(string& sName) = 0;
+	virtual void						SetEntityName( string sName ) = 0;
+	virtual void						Colorize(float r, float g, float b, float a) = 0;
+	virtual void						AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
+	virtual void						DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
+	virtual void						SetCustomSpecular(const CVector& customSpecular) = 0;
+	virtual void						DrawCollisionBoundingBoxes(bool bDraw) = 0;
+	virtual int							GetCellSize() = 0;
+	virtual void						CreateCollisionMaps(float fBias) = 0;
+	virtual void						SetSkinOffset(float x, float y, float z) = 0;
+	virtual void						AttachScript(string sScript) = 0;
+	virtual bool						TestCollision(INode* pEntity) = 0;
+	virtual const string&				GetAttachedScript() const = 0;
 };
 
 class IBoxEntity : public virtual IEntity
@@ -154,6 +157,7 @@ public:
 	virtual void				AddHairs(string sHairsPath) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
 	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) = 0;
+	virtual void				GetPosition(CVector& oPosition) const = 0;
 };
 
 class IPlayer : public virtual ICharacter
@@ -208,6 +212,7 @@ class IAEntityInterface
 {
 public:
 	virtual void Attack(IFighterEntityInterface* pEntity) = 0;
+	virtual void TalkTo(ICharacter* pEntity) = 0;
 };
 
 class IEntityManager : public CPlugin

@@ -47,8 +47,7 @@ public:
 	virtual void						ConstantLocalTranslate(const CVector& vTranslate) = 0;
 	virtual INode*						GetParent() = 0;
 	virtual void						SetLocalTMByWorldTM() = 0;
-	virtual float						GetGroundHeight(float x, float z) = 0;	
-	virtual bool						TestCollision(INode* pNode) = 0;
+	virtual float						GetGroundHeight(float x, float z) = 0;
 	virtual float						GetBoundingSphereDistance(INode* pEntity) = 0;
 	virtual float						GetBoundingSphereRadius() const = 0;
 	virtual IGeometry*					GetBoundingGeometry() = 0;

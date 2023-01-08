@@ -16,7 +16,7 @@ friend class CFightSystem;
 public:
 	IAEntity();
 	virtual void				Goto(const CVector& oPosition, float fSpeed);
-
+	void						TalkTo(ICharacter* pEntity) override;
 	void						Update();
 
 
@@ -25,6 +25,8 @@ protected:
 	bool						IsArrivedAtDestination();
 	static void 				OnCollision(IAEntity* pEntity);
 	virtual void				UpdateGoto();
+	virtual void				UpdateTalkToState();
+	virtual void				OpenTopicWindow() = 0;
 
 private:
 	enum TFightState
@@ -43,7 +45,17 @@ private:
 		eEndFight
 	};
 
+	enum TTalkToState
+	{
+		eNoTalkTo = 0,
+		eBeginGotoInterlocutor,
+		eGoingToInterlocutor,
+		eArrivedToInterlocutor,
+		eTalkingTo
+	};
+
 	TFightState					m_eFightState;
+	TTalkToState				m_eTalkToState;
 	int							m_nRecoveryTime;
 	int							m_nBeginWaitTimeBeforeNextAttack;
 	int							m_nCurrentWaitTimeBeforeNextAttack;
@@ -54,6 +66,7 @@ private:
 	bool						m_bArriveAtDestination;
 	bool						m_bFaceToTarget;
 	IFighterEntity*				m_pCurrentEnemy;
+	ICharacter*					m_pCurrentInterlocutor;
 	vector< CVector2D >			m_vCurrentPath;
 	int							m_nCurrentPathPointNumber;
 	float						m_fDestinationDeltaRadius;

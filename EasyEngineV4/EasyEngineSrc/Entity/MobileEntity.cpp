@@ -49,6 +49,7 @@ void CObject::Update()
 
 	m_vNextLocalTranslate.Fill(0, 0, 0, 1);
 	DispatchEntityEvent();
+	CEntity::ExecuteScripts();
 }
 
 void CObject::OnCollision(CEntity* pThis, vector<INode*> entities)

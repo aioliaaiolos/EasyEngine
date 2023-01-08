@@ -3,6 +3,7 @@
 #include "IGeometry.h"
 #include "LineEntity.h"
 #include "ICollisionManager.h"
+#include "IGUIManager.h"
 #include "CylinderEntity.h"
 #include "SphereEntity.h"
 #include "Scene.h"
@@ -11,6 +12,7 @@
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
 CMobileEntity(oInterface, sFileName, sID),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
+m_oGUIManager(static_cast<IGUIManager&>(*oInterface.GetPlugin("GUIManager"))),
 m_pGotoBox(nullptr),
 m_pBackupBoundingGeometry(nullptr)
 {
@@ -211,6 +213,14 @@ IBox* CNPCEntity::GetNextCollideBox()
 void CNPCEntity::ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints)
 {
 	ComputePathFind2DAStar(oOrigin, oDestination, vPoints, m_pScene->GetCellSize());
+}
+
+void CNPCEntity::OpenTopicWindow()
+{
+	string sId;
+	GetEntityName(sId);
+	m_oGUIManager.GetTopicsWindow()->SetSpeakerId(sId);
+	m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 }
 
 void CNPCEntity::UpdateGoto()

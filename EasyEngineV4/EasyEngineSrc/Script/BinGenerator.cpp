@@ -1,5 +1,6 @@
 #include "BinGenerator.h"
 #include "AsmGenerator.h"
+#include "Exception.h"
 
 int CBinGenerator::s_tabInstr[ CAsmGenerator::eMnemonicCount ][ eTypeInstrCount ][ eTypeInstrCount ] = {{{-1}}};
 //int CBinGenerator::s_InstrSize[ eTypeInstrCount ][ eTypeInstrCount ] = {{-1}};
@@ -11,8 +12,9 @@ void CBinGenerator::AddImmToByteArray( float nImm, vector< unsigned char >& vBin
 	memcpy( &vBin[ 0 ] + vBin.size() - 4, &nImm, 4 );
 }
 
-CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
-	m_oSyntaxAnalyser(oSyntaxAnalyser)
+CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser, CAsmGenerator& oCodeGenerator) :
+	m_oSyntaxAnalyser(oSyntaxAnalyser),
+	m_oCodeGenerator(oCodeGenerator)
 {
 	int iInstrNum = 1;
 
@@ -53,8 +55,9 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
 	s_tabInstr[CAsmGenerator::eReturn][0][0] = iInstrNum++; // 42
 
 	s_tabInstr[CAsmGenerator::eCmp][eAddr][eImm] = iInstrNum++; // 43
+	s_tabInstr[CAsmGenerator::eCmp][eReg][eImm] = iInstrNum++; // 44
 	
-	s_tabInstr[CAsmGenerator::eJne][eImm][0] = iInstrNum++; // 44
+	s_tabInstr[CAsmGenerator::eJne][eImm][0] = iInstrNum++; // 45
 
 	s_vInstrSize.push_back( -1 ); // pour démarrer à 1
 
@@ -74,26 +77,27 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser) :
 		s_vInstrSize.push_back( 10 );
 	}
 	
-	s_vInstrSize.push_back( 2 );
-	s_vInstrSize.push_back( 5 );
-	s_vInstrSize.push_back( 3 );
+	s_vInstrSize.push_back( 2 ); // 30
+	s_vInstrSize.push_back( 5 ); // 31
+	s_vInstrSize.push_back( 3 ); // 32
 
-	s_vInstrSize.push_back( 2 );
-	s_vInstrSize.push_back( 6 );
+	s_vInstrSize.push_back( 2 ); // 33
+	s_vInstrSize.push_back( 6 ); // 34
 
 	s_vInstrSize.push_back( 2 ); // 35
 	s_vInstrSize.push_back( 5 ); // call imm, 36
 	s_vInstrSize.push_back( 6 ); // call addr, 37
 
 	s_vInstrSize.push_back( 2 ); // 38
-	s_vInstrSize.push_back( 5 ); // 39
-	s_vInstrSize.push_back( 6 ); // 40
+	s_vInstrSize.push_back( 5 ); // int imm : 39
+	s_vInstrSize.push_back( 6 ); // int addr : 40
 
 	s_vInstrSize.push_back( 1 ); // eRet, 41
 	s_vInstrSize.push_back( 1 ); // eReturn, 42
 
-	s_vInstrSize.push_back(7); // cmp, 43
-	s_vInstrSize.push_back(5); // jne, 44
+	s_vInstrSize.push_back(7); // cmp addr, imm : 43
+	s_vInstrSize.push_back(6); // cmp reg, imm : 44
+	s_vInstrSize.push_back(5); // jne, 45
 }
 
 //int	CBinGenerator::GetInstrSize( int nInstrNum )
@@ -105,11 +109,24 @@ void CBinGenerator::GenBinary(const vector<CAsmGenerator::CInstr>& vAsmCode, vec
 {
 	for( unsigned int i = 0; i < vAsmCode.size(); i++ )
 		GenInstructionBinary( vAsmCode[ i ], vBin );
+
+	if (m_oSyntaxAnalyser.m_vFunctions.size() > m_vFunctionsBin.size()) {
+		int oldSize = m_vFunctionsBin.size();
+		m_vFunctionsBin.resize(m_oCodeGenerator.GetFunctions().size());
+		for (unsigned int i = oldSize; i < m_oCodeGenerator.GetFunctions().size(); i++)
+			for (unsigned int j = 0; j < m_oCodeGenerator.GetFunctions()[i].size(); j++)
+				GenInstructionBinary(m_oCodeGenerator.GetFunctions()[i][j], m_vFunctionsBin[i]);
+	}
 }
 
+const vector<vector<unsigned char>>& CBinGenerator::GetFunctions() const
+{
+	return m_vFunctionsBin;
+}
 
 void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin )
 {
+	int instrIndex = 0;
 	if( oInstr.m_vOperand.size() > 0 )
 	{
 		const CRegister* pReg1 = dynamic_cast< const CRegister* >( oInstr.m_vOperand[ 0 ] );
@@ -121,7 +138,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 				if( pReg2 )
 				{
 					// reg reg
-					vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ eReg ][ eReg ] );
+					instrIndex = s_tabInstr[oInstr.m_eMnem][eReg][eReg];
+					vBin.push_back(instrIndex);
 					int r1 = pReg1->m_eValue << 4;
 					int r2 = pReg2->m_eValue;
 					vBin.push_back( r1 | r2 );
@@ -132,7 +150,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 					if( pNum )
 					{
 						// reg imm
-						vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ eReg ][ eImm ] );
+						instrIndex = s_tabInstr[oInstr.m_eMnem][eReg][eImm];
+						vBin.push_back(instrIndex);
 						vBin.push_back( pReg1->m_eValue );
 						AddImmToByteArray( pNum->m_fValue, vBin );
 					}
@@ -140,7 +159,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 						const CMemory* pMemory = dynamic_cast<CMemory*>(oInstr.m_vOperand[1]);
 						if (pMemory) {
 							// reg mem
-							vBin.push_back(s_tabInstr[CAsmGenerator::eMov][eReg][eAddr]);
+							instrIndex = s_tabInstr[CAsmGenerator::eMov][eReg][eAddr];
+							vBin.push_back(instrIndex);
 							vBin.push_back(pReg1->m_eValue);
 							GenMemoryBinary(pMemory, vBin);
 						}
@@ -150,7 +170,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 			else
 			{
 				// reg
-				vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ eReg ][ 0 ] );
+				instrIndex = s_tabInstr[oInstr.m_eMnem][eReg][0];
+				vBin.push_back(instrIndex);
 				vBin.push_back( pReg1->m_eValue );
 			}
 		}
@@ -165,7 +186,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 					if( pReg2 )
 					{
 						// reg imm
-						vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ eImm ][ eReg ] );
+						instrIndex = s_tabInstr[oInstr.m_eMnem][eImm][eReg];
+						vBin.push_back(instrIndex);
 						vBin.push_back( pReg2->m_eValue );
 						AddImmToByteArray( pNum1->m_fValue, vBin );
 					}
@@ -173,7 +195,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 				else
 				{
 					// imm
-					vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ eImm ][ 0 ] );
+					instrIndex = s_tabInstr[oInstr.m_eMnem][eImm][0];
+					vBin.push_back(instrIndex);
 					AddImmToByteArray( pNum1->m_fValue, vBin );
 				}
 			}
@@ -181,7 +204,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 				const CMemory* pMem = dynamic_cast< const CMemory* >(oInstr.m_vOperand[0]);
 				if (pMem) {
 					if (oInstr.m_vOperand.size() < 2) {
-						vBin.push_back(s_tabInstr[oInstr.m_eMnem][eAddr][0]);
+						instrIndex = s_tabInstr[oInstr.m_eMnem][eAddr][0];
+						vBin.push_back(instrIndex);
 						GenMemoryBinary(pMem, vBin);
 					}
 					else {
@@ -189,7 +213,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 						if (pNum)
 						{
 							// mem imm
-							vBin.push_back(s_tabInstr[oInstr.m_eMnem][eAddr][eImm]);
+							instrIndex = s_tabInstr[oInstr.m_eMnem][eAddr][eImm];
+							vBin.push_back(instrIndex);
 							GenMemoryBinary(pMem, vBin);
 							AddImmToByteArray(pNum->m_fValue, vBin);
 						}
@@ -197,7 +222,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 							const CRegister* pReg2 = dynamic_cast<const CRegister*>(oInstr.m_vOperand[1]);
 							if (pReg2) {
 								// mem reg
-								vBin.push_back(s_tabInstr[oInstr.m_eMnem][eAddr][eReg]);
+								instrIndex = s_tabInstr[oInstr.m_eMnem][eAddr][eReg];
+								vBin.push_back(instrIndex);
 								GenMemoryBinary(pMem, vBin);
 								vBin.push_back(pReg2->m_eValue);
 							}
@@ -208,6 +234,7 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 					const CPreprocessorString* pString = dynamic_cast<const CPreprocessorString* >(oInstr.m_vOperand[0]);
 					if (pString) {
 						if (oInstr.m_eMnem == CAsmGenerator::eNone) {
+							instrIndex = -1;
 							int address = vBin.size();
 							string label = pString->m_sValue.substr(0, pString->m_sValue.size() - 1);
 							m_mLabelAddr[label].first = address;
@@ -216,7 +243,8 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 							}
 						}
 						else {
-							vBin.push_back(s_tabInstr[oInstr.m_eMnem][eImm][0]);
+							instrIndex = s_tabInstr[oInstr.m_eMnem][eImm][0];
+							vBin.push_back(instrIndex);
 							m_mLabelAddr[pString->m_sValue].second.push_back(vBin.size());
 							for (int i = 0; i < 4; i++)
 								vBin.push_back(0);
@@ -228,7 +256,14 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 	}
 	else
 	{
+		instrIndex = -1;
 		vBin.push_back( s_tabInstr[ oInstr.m_eMnem ][ 0 ][ 0 ] );
+	}
+
+	if (instrIndex == 0) {
+		CCompilationErrorException e(-1, -1);
+		e.SetErrorMessage("Compilation error : instruction not exists");
+		throw e;
 	}
 }
 

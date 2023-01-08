@@ -233,7 +233,7 @@ IBoxEntity* CEntityManager::CreateAreaEntity(string sAreaName, const CVector& oD
 	IBox* pBox = m_oGeometryManager.CreateBox();
 	pBox->Set(-oDimension / 2.f, oDimension);
 	CAreaEntity* pAreaEntity = new CAreaEntity(sAreaName, m_oInterface, m_oRenderer, *pBox);
-	AddEntity(pAreaEntity);
+	AddEntity(pAreaEntity, sAreaName);
 	return pAreaEntity;
 }
 

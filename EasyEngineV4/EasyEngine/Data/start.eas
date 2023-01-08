@@ -1,16 +1,22 @@
-onLoadingGame();
+GuardAdvise = 0;
+ranja = 0;
+Player = 0;
 
-function testIf()
-{
-	if(GetEntityID("geraldine") == 3)
-	{
-		PrintHUD("Bonjour", 300, 300);
-	}
-}
+onLoadingGame();
 
 function onExitHospitalArea()
 {
-	print("hopitalout");
+	Player = GetEntityID("Player");
+	area = GetEntityID("hospital");
+	if(IsIntersect(Player, area)==0)
+	{
+		if(GuardAdvise==0)
+		{
+			ranja = GetEntityID("ranja");
+			TalkTo(ranja, Player);
+			GuardAdvise = 1;
+		}
+	}
 }
 
 function onLoadingGame()
@@ -24,4 +30,7 @@ function onLoadingGame()
 	SetCameraType("free");
 
 	EnableInstancingMode(0);
+	//EditWorld("area3");
+	LoadWorld("area3");
+	//EditWorld("");
 }

@@ -113,10 +113,10 @@ public:
 		CInstr() : m_eMnem(eNone) {}
 	};
 
-	CAsmGenerator();
-	void GenReverseAssembler( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr );
-	void CreateAssemblerListing( vector< CInstr >& vCodeOut, string sFileName );
-	void GenAssembler( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr, VarMap& mVar );
+	CAsmGenerator(bool bPutAllCodeIntoSameMemory);
+	void CreateAssemblerListing( const vector< CInstr >& vCodeOut, string sFileName ) const;
+	void GenAssembler( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr, CVarMap& mVar );
+	const vector<vector<CInstr>>& GetFunctions() const;
 
 private:
 	void											GenOperation( CLexem::TLexem, const CSyntaxNode& child1, const CSyntaxNode& child2, vector< CInstr >& vAssembler );
@@ -132,7 +132,7 @@ private:
 	void											GenJne(string label, vector< CInstr >& vAssembler);
 	void											GenCmp(CRegister::TType, CRegister::TType, vector< CInstr >& vAssembler);
 	void											GenCmp(CRegister::TType reg, float val, vector< CInstr >& vAssembler);
-	void											GenCmp(const CSyntaxNode& node1, const CSyntaxNode& node2, vector< CInstr >& vAssembler, const map<string, int>& mFuncAddr, VarMap& mVar);
+	void											GenCmp(const CSyntaxNode& node1, const CSyntaxNode& node2, vector< CInstr >& vAssembler, const map<string, int>& mFuncAddr, CVarMap& mVar);
 	void											GenCmp(CMemory* pMemory, float val, vector< CInstr >& vAssembler);
 	void											GenCmp(CMemory* pMemory1, CMemory* pMemory2, vector< CInstr >& vAssembler);
 	void											GenCmp(float val1, float val2, vector< CInstr >& vAssembler);
@@ -141,6 +141,7 @@ private:
 	void											GenReturn(vector< CInstr >&);
 	void											GenMov( CRegister::TType a, CRegister::TType b, vector< CInstr >& );
 	CMemory*										CreateMemoryRegister(CRegister::TType eBase, CRegister::TType eIndex, int nDisplacement);
+	CMemory*										CreateVarMemoryRegister(const CVar& var);
 	void											GenMovAddrImm(CMemory* pMemory, const CSyntaxNode& oImm, vector< CInstr >& vAssembler );
 	void											GenMovAddrReg(CRegister::TType scrReg, CMemory* pdestMem, vector< CInstr >& vAssembler);
 	void											GenMovRegReg(CRegister::TType destReg, CRegister::TType srcReg, vector< CInstr >& vAssembler);
@@ -151,8 +152,7 @@ private:
 	void											GenPop( CRegister::TType, vector< CInstr >& );
 	void											FillOperandFromSyntaxNode( CNumeric* oOperand, const CSyntaxNode& oTree );
 	void											ResolveAddresses( vector< CInstr >& vCodeOut );
-	void											GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr, VarMap& mVar );
-	int												GetVarCountFromScope(const CSyntaxNode& oTree, VarMap& mVar, int nScope);
+	void											GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CInstr >& vCodeOut, const map<string, int>& mFuncAddr, CVarMap& mVar );
 	void											CreateStackFrame(vector< CInstr >& vCodeOut);
 	string											GenerateNewLabel();
 	void											Enter(vector<CInstr>& vAssembler);
@@ -165,6 +165,8 @@ private:
 	bool											m_bEaxBusy;
 	int												m_nLastLabelIndex;
 	bool											m_bMainRetPlaced;
+	bool											m_bPutAllCodeIntoSameMemory;
+	vector<vector<CInstr>>							m_vAssemblerFunctions;
 };
 
 #endif // CODEGEN_H

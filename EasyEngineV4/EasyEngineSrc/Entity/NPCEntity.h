@@ -30,7 +30,8 @@ public:
 	void					Goto( const CVector& oPosition, float fSpeed );
 	IBox*					GetFirstCollideBox();
 	IBox*					GetNextCollideBox();	
-	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints);	
+	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints);
+	void					OpenTopicWindow();
 
 protected:
 	void					UpdateGoto() override;
@@ -41,6 +42,7 @@ private:
 	void					Turn(float fAngle);
 
 	IPathFinder&			m_oPathFinder;
+	IGUIManager&			m_oGUIManager;
 	const float				m_fBBoxReduction = 20.f;
 	IBox*					m_pGotoBox;
 	IGeometry*				m_pBackupBoundingGeometry;

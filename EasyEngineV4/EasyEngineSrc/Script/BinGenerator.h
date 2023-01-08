@@ -73,13 +73,15 @@ public:
 		eReturn,
 
 		eCmpAddrImm,
+		eCmpRegImm,
 
 		eJneImm
 	};
 
 public:
-	CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser);
+	CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser, CAsmGenerator& oCodeGenerator);
 	void									GenBinary(const vector< CAsmGenerator::CInstr >& vAsmCode, vector< unsigned char >& vBin);
+	const vector<vector<unsigned char>>&	GetFunctions() const;
 	static vector< int >					s_vInstrSize;
 
 private:
@@ -87,8 +89,10 @@ private:
 	void									GenInstructionBinary(const CAsmGenerator::CInstr& oInstr, vector< unsigned char >& vBin);
 	void									GenMemoryBinary(const CMemory* pMemory, vector< unsigned char >& vBin);
 	CSyntaxAnalyser&						m_oSyntaxAnalyser;
+	CAsmGenerator&							m_oCodeGenerator;
 	map<string, pair<int, vector<int>>>		m_mLabelAddr; // (label, pair(adresse correspondante, vector(adresses ou le label est référencé)))
 	map< CAsmGenerator::TMnemonic, int >	MnemToInstrNum;
+	vector<vector<unsigned char>> 			m_vFunctionsBin;
 	
 	static void								AddImmToByteArray( float nImm, vector< unsigned char >& vBin );
 	static int								s_tabInstr[ CAsmGenerator::eMnemonicCount ][ eTypeInstrCount ][ eTypeInstrCount ];	

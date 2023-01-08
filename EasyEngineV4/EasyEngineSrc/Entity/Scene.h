@@ -106,8 +106,7 @@ private:
 	int									m_nMapLength;
 	float								m_fMapHeight;
 	vector<CEntity*>					m_vCollideEntities;
-	LevelCompleteProc					m_LoadingCompleteCallback;
-	void*								m_pLoadingCompleteData;
+	pair<LevelCompleteProc, void*>		m_oLoadingCompleteCallback;
 	string								m_sCurrentLevelName;
 
 	void								GetInfos(ILoader::CSceneInfos& si);

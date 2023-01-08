@@ -8,12 +8,13 @@ CVirtualProcessor* CVirtualProcessor::s_pCurrentInstance = nullptr;
 CSemanticAnalyser* CVirtualProcessor::s_pSemanticAnalyser = nullptr;
 CBinGenerator* CVirtualProcessor::s_pBinGenerator = nullptr;
 
-CVirtualProcessor::CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator):
+CVirtualProcessor::CVirtualProcessor( CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator, bool bPutAllCodeIntoSameMemory):
 m_nEip( 0 ),
 m_nEsp( MEM_SIZE - 1 ),
 m_bEnd( false ),
 m_nEax( -1 ), m_nEbx( -1 ), m_nEcx( -1 ), m_nEdx( -1 ), m_nEsi( -1 ), m_nEdi( -1 ), m_nEbp( -1 ),
-m_nFlags(0)
+m_nFlags(0),
+m_bPutAllCodeIntoSameMemory(bPutAllCodeIntoSameMemory)
 {
 	ZeroMemory( m_pMemory, MEM_SIZE * sizeof( float ) );
 	s_pSemanticAnalyser = pSemanticAnalyser;
@@ -87,6 +88,7 @@ m_nFlags(0)
 	m_mInstrFunc[ CBinGenerator::eReturn] = Return;
 
 	m_mInstrFunc[CBinGenerator::eCmpAddrImm] = CmpAddrImm;
+	m_mInstrFunc[CBinGenerator::eCmpRegImm] = CmpRegImm;
 	m_mInstrFunc[CBinGenerator::eJneImm] = JneImm;
 
 	m_vRegAddr.resize( 8 );
@@ -118,6 +120,8 @@ void CVirtualProcessor::Execute( const vector<unsigned char>& vBinary, const vec
 			throw e;
 		}
 		iCurrInstr = vBinary[ (int)m_nEip ];
+		if (iCurrInstr > vInstrSize.size())
+			throw CEException("Runtime error");
 		int nInstrSize = vInstrSize[ iCurrInstr ];
 		if( nInstrSize > 1 )
 			memcpy( pInstr, &vBinary[ (int)m_nEip + 1 ], nInstrSize - 1 );
@@ -129,7 +133,7 @@ void CVirtualProcessor::Execute( const vector<unsigned char>& vBinary, const vec
 		{
 			ostringstream oss;
 			oss << "Erreur, instruction " << iCurrInstr << " inexistante";
-			MessageBox( NULL, oss.str().c_str(), "Erreur de runtime", MB_ICONERROR );
+			throw CEException("Runtime error");
 		}
 		if ( (m_nEip == vBinary.size()) || (m_nEip == -1))
 			m_bEnd = true;
@@ -178,7 +182,7 @@ int CVirtualProcessor::GetMemRegisterAddress(unsigned char* pOperand)
 	displacement /= 4;
 	unsigned char baseId = baseIndexId & 0xf;
 	unsigned char indexId = (baseIndexId >> 4);
-	int base = *s_pCurrentInstance->m_vRegAddr[baseId];
+	int base = baseId < s_pCurrentInstance->m_vRegAddr.size() ? *s_pCurrentInstance->m_vRegAddr[baseId] : 0;
 	int index = indexId == 0xf ? 0 : *s_pCurrentInstance->m_vRegAddr[indexId];
 	int address = base + index + displacement;
 	return address;
@@ -213,6 +217,27 @@ void CVirtualProcessor::CmpAddrImm(unsigned char* pOperand)
 		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
 	}
 	else if (memValue > imm) {
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
+	}
+	else {
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::ZF;
+	}
+}
+
+void CVirtualProcessor::CmpRegImm(unsigned char* pOperand)
+{
+	int reg = (int)pOperand[0];
+	float imm;
+	memcpy(&imm, &pOperand[1], 4);
+	float regValue = *s_pCurrentInstance->m_vRegAddr[reg];
+	
+	if (regValue < imm) {
+		s_pCurrentInstance->m_nFlags &= (unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
+	}
+	else if (regValue > imm) {
 		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
 		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
 	}
@@ -344,12 +369,26 @@ void CVirtualProcessor::PopReg( unsigned char* pOperand )
 
 void CVirtualProcessor::CallImm(unsigned char* pOperand)
 {
-	int address;
-	memcpy(&address, pOperand, 4);
-	float nextInstructionAddress = s_pCurrentInstance->m_nEip;
-	s_pCurrentInstance->m_pMemory[(int)s_pCurrentInstance->m_nEsp] = nextInstructionAddress;
-	s_pCurrentInstance->m_nEsp--;
-	s_pCurrentInstance->m_nEip = address;
+	if (s_pCurrentInstance->m_bPutAllCodeIntoSameMemory) {
+		int address;
+		memcpy(&address, pOperand, 4);
+		float nextInstructionAddress = s_pCurrentInstance->m_nEip;
+		s_pCurrentInstance->m_pMemory[(int)s_pCurrentInstance->m_nEsp] = nextInstructionAddress;
+		s_pCurrentInstance->m_nEsp--;
+		s_pCurrentInstance->m_nEip = address;
+	}
+	else {
+		float address;
+		memcpy(&address, pOperand, 4);
+		int backupIp = s_pCurrentInstance->m_nEip;
+		bool backupEnd = s_pCurrentInstance->m_bEnd;
+		int backupEsp = s_pCurrentInstance->m_nEsp;
+		s_pCurrentInstance->m_nEip = 0;
+		s_pCurrentInstance->Execute(s_pBinGenerator->GetFunctions()[(int)address], CBinGenerator::s_vInstrSize);
+		s_pCurrentInstance->m_nEip = backupIp;
+		s_pCurrentInstance->m_bEnd = backupEnd;
+		s_pCurrentInstance->m_nEsp = backupEsp;
+	}
 }
 
 void CVirtualProcessor::IntImm( unsigned char* pOperand )
@@ -367,12 +406,20 @@ void CVirtualProcessor::IntImm( unsigned char* pOperand )
 
 void CVirtualProcessor::Ret( unsigned char* pOperand )
 {
-	int returnAddress = -1;
-	if (s_pCurrentInstance->m_nEsp + 1 < MEM_SIZE) {
-		s_pCurrentInstance->m_nEsp++;
-		returnAddress = s_pCurrentInstance->m_pMemory[(int)s_pCurrentInstance->m_nEsp];
+	if (s_pCurrentInstance->m_bPutAllCodeIntoSameMemory) {
+		int returnAddress = -1;
+		if (s_pCurrentInstance->m_nEsp + 1 < MEM_SIZE) {
+			s_pCurrentInstance->m_nEsp++;
+			returnAddress = s_pCurrentInstance->m_pMemory[(int)s_pCurrentInstance->m_nEsp];
+		}
+		s_pCurrentInstance->m_nEip = returnAddress;
 	}
-	s_pCurrentInstance->m_nEip = returnAddress;
+	else {
+		if (s_pCurrentInstance->m_nEsp == MEM_SIZE - 1)
+			s_pCurrentInstance->m_bEnd = true;
+		else
+			MessageBox(NULL, "RET : Problème de pile incohérente", "", MB_ICONERROR);
+	}
 }
 
 void CVirtualProcessor::Return(unsigned char* pOperand)

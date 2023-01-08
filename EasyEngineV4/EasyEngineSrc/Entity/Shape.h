@@ -42,24 +42,26 @@ public:
 	void			GetTypeName( string& sName ){}
 	void			SetScaleFactor( float x, float y, float z ){}
 	void			SetRenderingType( IRenderer::TRenderType t ){}
-	void			DrawBoundingSphere( bool bDraw ){}
-	void			DrawBoneBoundingSphere( int nID, bool bDraw ){}
-	void			DrawAnimationBoundingBox( bool bDraw ){}
-	float			GetBoundingSphereRadius() const{ return 0.f; }
-	void			Goto( const CVector& oPosition, float fSpeed ){ throw 1; }
-	void			SetEntityName( string sName ){ throw 1; }
+	void			DrawBoundingSphere( bool bDraw ) override{}
+	void			DrawBoneBoundingSphere( int nID, bool bDraw ) override{}
+	void			DrawAnimationBoundingBox( bool bDraw ) override{}
+	float			GetBoundingSphereRadius() const override{ return 0.f; }
+	void			Goto( const CVector& oPosition, float fSpeed ) override{ throw 1; }
+	void			SetEntityName( string sName ) override{ throw 1; }
 	void			ReloadShader();
 	void			AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			SetDiffuseTexture(string sFileName) override {}
-	void			GetEntityInfos(ILoader::CObjectInfos*& pInfos) {}
 	void			SetCustomSpecular(const CVector& customSpecular) override {}
-	void			DrawCollisionBoundingBoxes(bool bDraw) {}
-	void			PlayCurrentAnimation(bool loop) {}
-	void			PauseCurrentAnimation(bool loop) {}
+	void			DrawCollisionBoundingBoxes(bool bDraw) override{}
+	void			PlayCurrentAnimation(bool loop) override{}
+	void			PauseCurrentAnimation(bool loop) override{}
 	void			CreateCollisionMaps(float fBias) override{}
 	void			SetSkinOffset(float x, float y, float z) override {}
-	void			GetScaleFactor(CVector& factor) {}
+	void			GetScaleFactor(CVector& factor) override{}
+	void			AttachScript(string sScriptName) override {}
+	bool			TestCollision(INode* pEntity) override { return false; }
+	const			string& GetAttachedScript() const override { return ""; }
 };
 
 #endif // SHAPE_H

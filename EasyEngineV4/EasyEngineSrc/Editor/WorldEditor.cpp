@@ -17,8 +17,9 @@ CWorldEditor::CWorldEditor(EEInterface& oInterface, ICameraManager::TCameraType 
 	IWorldEditor(oInterface),
 	CSpawnableEditor(oInterface, cameraType),
 	m_oSceneManager(static_cast<ISceneManager&>(*oInterface.GetPlugin("SceneManager"))),
-	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem")))
+	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem")))	
 {
+	m_eEditingMode = TEditingType::eXForm;
 	m_pScene = m_oSceneManager.GetScene("Game");
 }
 
@@ -74,26 +75,40 @@ void CWorldEditor::OnEntitySelected()
 void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 {
 	string entityName;
-	pEntity->GetRessource()->GetFileName(entityName);
-	string prefix = "Meshes/";
-	entityName = entityName.substr(prefix.size());
-	map<string, vector<pair<IEntity*, CMatrix>>>::iterator itEntity = m_mEntityMatrices.find(entityName);
-	if (itEntity != m_mEntityMatrices.end()) {
-		vector<pair<IEntity*, CMatrix>>& vMatrices = itEntity->second;
-		vector<pair<IEntity*, CMatrix>>::iterator itMat = vMatrices.begin();
-		while(itMat != vMatrices.end()) {
-			if (itMat->first == pEntity)
-				itMat = vMatrices.erase(itMat);
-			else
-				itMat++;
-		}
+	IRessource* pRessource = pEntity->GetRessource();
+	if (pRessource) {
+		pRessource->GetFileName(entityName);
+		string prefix = "Meshes/";
+		entityName = entityName.substr(prefix.size());
+		map<string, vector<pair<IEntity*, CMatrix>>>::iterator itEntity = m_mEntityMatrices.find(entityName);
+		if (itEntity != m_mEntityMatrices.end()) {
+			vector<pair<IEntity*, CMatrix>>& vMatrices = itEntity->second;
+			vector<pair<IEntity*, CMatrix>>::iterator itMat = vMatrices.begin();
+			while (itMat != vMatrices.end()) {
+				if (itMat->first == pEntity)
+					itMat = vMatrices.erase(itMat);
+				else
+					itMat++;
+			}
 
+		}
+		else {
+			pEntity->GetEntityName(entityName);
+			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
+			if (itCharacter != m_mCharacterMatrices.end())
+				m_mCharacterMatrices.erase(itCharacter);
+			else {
+				ostringstream oss;
+				oss << "CWorldEditor::OnEntityRemoved() : Erreur, entite " << entityName << " introuvable";
+				throw CEException(oss.str());
+			}
+		}
 	}
 	else {
 		pEntity->GetEntityName(entityName);
-		map<string, CMatrix>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
-		if(itCharacter != m_mCharacterMatrices.end())
-			m_mCharacterMatrices.erase(itCharacter);
+		map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
+		if (itArea != m_mAreaMatrices.end())
+			m_mAreaMatrices.erase(itArea);
 		else {
 			ostringstream oss;
 			oss << "CWorldEditor::OnEntityRemoved() : Erreur, entite " << entityName << " introuvable";
@@ -138,8 +153,11 @@ void CWorldEditor::Load(string fileName)
 		for (int i = 0; i < characterCount; i++) {
 			string id;
 			CMatrix tm;
+			string script;
 			fs >> id >> tm;
-			m_mCharacterMatrices[id] = tm;
+			fs >> script;
+			m_mCharacterMatrices[id].first = tm;
+			m_mCharacterMatrices[id].second = script;
 		}
 		int entityCount = 0;
 		fs >> entityCount;
@@ -182,12 +200,12 @@ void CWorldEditor::SaveGame(string fileName)
 		}
 		vector<IEntity*> entities;
 		m_pScene->GetCharactersInfos(entities);
-		map<string, CMatrix> mBackupCharacterMatrices = m_mCharacterMatrices;
+		map<string, pair<CMatrix, string>> mBackupCharacterMatrices = m_mCharacterMatrices;
 		for (IEntity* pEntity : entities) {
 			string entityName;
 			pEntity->GetEntityName(entityName);
-			map<string, CMatrix>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
-			itCharacter->second = pEntity->GetWorldMatrix();
+			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
+			itCharacter->second.first = pEntity->GetWorldMatrix();
 		}
 		Save(fileName);
 		m_mCharacterMatrices = mBackupCharacterMatrices;
@@ -205,10 +223,12 @@ void CWorldEditor::Save(string fileName)
 		for (map<string, CVector>::iterator itMap = m_mMaps.begin(); itMap != m_mMaps.end(); itMap++)
 			fs << itMap->first << itMap->second;
 		fs << (int)m_mCharacterMatrices.size();
-		for (map<string, CMatrix>::iterator it = m_mCharacterMatrices.begin(); it != m_mCharacterMatrices.end(); it++) {
+		for (map<string, pair<CMatrix, string>>::iterator it = m_mCharacterMatrices.begin(); it != m_mCharacterMatrices.end(); it++) {
 			IEntity* pEntity = m_oEntityManager.GetEntity(it->first);
-			if (pEntity)
+			if (pEntity) {
 				fs << it->first << pEntity->GetWorldMatrix();
+				fs << pEntity->GetAttachedScript();
+			}
 			else {
 				ostringstream oss;
 				oss << "Erreur : CWorldEditor::Save() -> Personnage " << it->first << " introuvable dans l'EntityManager";
@@ -277,7 +297,7 @@ IEntity* CWorldEditor::SpawnCharacter(string sID)
 	m_oEntityManager.AddEntity(m_pEditingEntity, sID);
 	InitSpawnedEntity();
 	CMatrix m;
-	m_mCharacterMatrices[sID] = m;
+	m_mCharacterMatrices[sID].first = m;
 	m_vEntities.push_back(m_pEditingEntity);
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 	m_eEditorMode = TEditorMode::eAdding;
@@ -342,10 +362,12 @@ void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path)
 
 void CWorldEditor::OnSceneLoaded()
 {
-	for (map<string, CMatrix>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
+	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
 		IEntity* pEntity = m_oEntityManager.BuildCharacterFromDatabase(itCharacter->first, m_pScene);
 		if (pEntity) {
-			pEntity->SetLocalMatrix(itCharacter->second);
+			pEntity->SetLocalMatrix(itCharacter->second.first);
+			if(!itCharacter->second.second.empty())
+				pEntity->AttachScript(itCharacter->second.second);
 			pEntity->SetWeight(1);
 			m_vEntities.push_back(pEntity);
 		}
@@ -379,6 +401,7 @@ void CWorldEditor::OnSceneLoaded()
 			pAreaEntity->SetLocalMatrix(oTM);
 			pAreaEntity->GetBox().Set(minPoint, dim);
 			pAreaEntity->SetWeight(1);
+			pAreaEntity->Update();
 			m_vEntities.push_back(pAreaEntity);
 		}
 	}

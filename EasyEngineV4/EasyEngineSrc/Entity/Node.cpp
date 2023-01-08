@@ -238,12 +238,6 @@ float CNode::GetZ()
 	return m_oWorldMatrix.m_23;
 }
 
-bool CNode::TestCollision(INode* pNode)
-{
-	throw 1;
-	return false;
-}
-
 void CNode::SetName(string sName)
 {
 	m_sName = sName;

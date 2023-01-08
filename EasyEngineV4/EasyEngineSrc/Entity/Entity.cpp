@@ -12,6 +12,8 @@
 #include "ICollisionManager.h"
 #include "Interface.h"
 #include "EntityManager.h"
+#include "IScriptManager.h"
+#include "IConsole.h"
 #include "PlaneEntity.h"
 #include "Bone.h"
 
@@ -29,6 +31,8 @@ m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("Resso
 m_oRenderer(*static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"))),
 m_oGeometryManager(*static_cast<IGeometryManager*>(oInterface.GetPlugin("GeometryManager"))),
 m_oCollisionManager(*static_cast<ICollisionManager*>(oInterface.GetPlugin("CollisionManager"))),
+m_oScriptManager(*static_cast<IScriptManager*>(oInterface.GetPlugin("ScriptManager"))),
+m_oConsole(*static_cast<IConsole*>(oInterface.GetPlugin("Console"))),
 m_oInterface(oInterface),
 m_pCurrentAnimation( NULL ),
 m_pOrgSkeletonRoot( NULL ),
@@ -155,6 +159,14 @@ void CEntity::SetSkinOffset(float x, float y, float z)
 	m_oSkinOffset = CVector(x, y, z);
 }
 
+void CEntity::AttachScript(string sScript)
+{
+	vector<unsigned char> vByteCode;
+	m_oScriptManager.Compile(sScript + "();", vByteCode);
+	m_sAttachedScript = sScript;
+	m_vAttachedScriptByteCode = vByteCode;
+}
+
 void CEntity::SetRenderingType( IRenderer::TRenderType t )
 {
 	m_eRenderType = t;
@@ -279,7 +291,7 @@ void CEntity::LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vec
 {
 	for (CCollisionEntity* pWall : walls) {
 		for (CCollisionEntity* pDoor : doors) {
-			if (pWall->TestLocalCollision(pDoor)) {
+			if (pWall->TestCollision(pDoor)) {
 				pDoor->Link(pWall);
 			}
 		}
@@ -370,7 +382,7 @@ bool CEntity::TestWorldCollision(INode* pEntity)
 	return ret;
 }
 
-bool CEntity::TestLocalCollision(INode* pEntity)
+bool CEntity::TestCollision(INode* pEntity)
 {
 	bool ret = false;
 	if (GetBoundingSphereDistance(pEntity) < 0)
@@ -474,7 +486,7 @@ void CEntity::GetEntitiesCollision(vector<INode*>& entities)
 		if (!pEntity || pEntity == this)
 			continue;
 
-		if (pEntity->IsCollidable() && TestLocalCollision(pEntity))
+		if (pEntity->IsCollidable() && TestCollision(pEntity))
 			entities.push_back(pEntity);
 	}
 }
@@ -554,6 +566,7 @@ void CEntity::Update()
 		UpdateBoundingBox();
 
 	DispatchEntityEvent();
+	ExecuteScripts();
 }
 
 void CEntity::DispatchEntityEvent()
@@ -561,6 +574,36 @@ void CEntity::DispatchEntityEvent()
 	for (int i = 0; i < m_vEntityCallback.size(); i++) {
 		m_vEntityCallback[i](nullptr, IEventDispatcher::TEntityEvent::T_UPDATE, this);
 	}
+}
+
+void CEntity::ExecuteScripts()
+{
+	if (!m_sAttachedScript.empty()) {
+		try {
+			m_oScriptManager.ExecuteByteCode(m_vAttachedScriptByteCode);
+		}
+		catch (CCompilationErrorException& e) {
+			string errorMessage;
+			e.GetErrorMessage(errorMessage);
+			m_oConsole.Println(m_sAttachedScript + "() : " + errorMessage);
+			DetachScript(m_sAttachedScript);
+		}
+		catch (CEException& e) {
+			m_oConsole.Println(m_sAttachedScript + "() : " + e.what());
+			DetachScript(m_sAttachedScript);
+		}
+	}
+}
+
+void CEntity::DetachScript(string sScript)
+{
+	m_sAttachedScript = "";
+	m_vAttachedScriptByteCode.clear();
+}
+
+const string& CEntity::GetAttachedScript() const
+{
+	return m_sAttachedScript;
 }
 
 void CEntity::UpdateBoundingBox()

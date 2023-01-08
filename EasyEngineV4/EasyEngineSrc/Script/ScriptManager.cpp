@@ -8,18 +8,22 @@
 #include "VirtualProcessor.h"
 #include "Exception.h"
 
+// stl
+#include <chrono>
+
 //#define CREATE_ASSEMBLING_LISTING
 
 CScriptManager::CScriptManager(EEInterface& oInterface) :
-m_bGeneratedAssemblerListing(true)
+m_bGeneratedAssemblerListing(false),
+m_bPutAllCodeInSameMemory(false)
 {
 	IFileSystem* pFileSystem = static_cast<IFileSystem*>(oInterface.GetPlugin("FileSystem"));
 	m_pLexAnalyser = new CLexAnalyser( "lexanalyser.csv", pFileSystem);
 	m_pSyntaxAnalyser = new CSyntaxAnalyser;
 	m_pSemanticAnalyser = new CSemanticAnalyser();
-	m_pCodeGenerator = new CAsmGenerator;
-	m_pBinGenerator = new CBinGenerator(*m_pSyntaxAnalyser);
-	m_pProc = new CVirtualProcessor( m_pSemanticAnalyser, m_pBinGenerator );
+	m_pAsmGenerator = new CAsmGenerator(m_bPutAllCodeInSameMemory);
+	m_pBinGenerator = new CBinGenerator(*m_pSyntaxAnalyser, *m_pAsmGenerator);
+	m_pProc = new CVirtualProcessor( m_pSemanticAnalyser, m_pBinGenerator, m_bPutAllCodeInSameMemory);
 
 	m_mRegisterFromName["eax"] = CRegister::eax;
 	m_mRegisterFromName["ebx"] = CRegister::ebx;
@@ -37,7 +41,7 @@ CScriptManager::~CScriptManager()
 	delete m_pLexAnalyser;
 	delete m_pSyntaxAnalyser;
 	delete m_pSemanticAnalyser;
-	delete m_pCodeGenerator;
+	delete m_pAsmGenerator;
 	delete m_pBinGenerator;
 	delete m_pProc;
 }
@@ -47,25 +51,40 @@ void CScriptManager::GenerateAssemblerListing(bool generate)
 	m_bGeneratedAssemblerListing = generate;
 }
 
-void CScriptManager::ExecuteCommand( std::string sCommand )
+void CScriptManager::Compile(string sScript, vector<unsigned char>& vByteCode)
 {
 	string s;
 	vector< CLexem > vLexem;
-	m_pLexAnalyser->GetLexemArrayFromScript( sCommand, vLexem );
+	m_pLexAnalyser->GetLexemArrayFromScript(sScript, vLexem);
+	
 	if (vLexem.size() == 0)
 		return;
 	CSyntaxNode oTree;
-	m_pSyntaxAnalyser->GetSyntaxicTree( vLexem, oTree );
-	m_pSemanticAnalyser->CompleteSyntaxicTree( oTree, m_pSyntaxAnalyser->m_vFunctions);
+	m_pSyntaxAnalyser->GetSyntaxicTree(vLexem, oTree);
+	m_pSemanticAnalyser->CompleteSyntaxicTree(oTree, m_pSyntaxAnalyser->m_vFunctions);
 	vector< CAsmGenerator::CInstr > vAssembler;
 	map< string, int > mFuncAddr;
-	m_pSemanticAnalyser->GetFunctionAddress( mFuncAddr );
-	m_pCodeGenerator->GenAssembler( oTree, vAssembler, mFuncAddr, m_pSemanticAnalyser->GetVarMap() );
-	if(m_bGeneratedAssemblerListing)
-		m_pCodeGenerator->CreateAssemblerListing( vAssembler, "test.asm" );
-	vector< unsigned char > vBin;
-	m_pBinGenerator->GenBinary(vAssembler, vBin);
-	m_pProc->Execute( vBin, CBinGenerator::s_vInstrSize );
+	m_pSemanticAnalyser->GetFunctionAddress(mFuncAddr);
+	m_pAsmGenerator->GenAssembler(oTree, vAssembler, mFuncAddr, m_pSemanticAnalyser->GetVarMap());
+	if (m_bGeneratedAssemblerListing) {
+		m_pAsmGenerator->CreateAssemblerListing(vAssembler, "test.asm");
+		for (int i = 0; i < m_pAsmGenerator->GetFunctions().size(); i++) {
+			m_pAsmGenerator->CreateAssemblerListing(m_pAsmGenerator->GetFunctions()[i], string("test-function") + std::to_string(i) + ".asm");
+		}
+	}
+	m_pBinGenerator->GenBinary(vAssembler, vByteCode);
+}
+
+void CScriptManager::ExecuteCommand( std::string sCommand )
+{
+	vector<unsigned char> vByteCode;
+	Compile(sCommand, vByteCode);
+	ExecuteByteCode(vByteCode);
+}
+
+void CScriptManager::ExecuteByteCode(const vector<unsigned char>& vByteCode)
+{
+	m_pProc->Execute(vByteCode, CBinGenerator::s_vInstrSize);
 }
 
 void CScriptManager::GetRegisteredFunctions( vector< string >& vFuncNames )
