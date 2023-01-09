@@ -82,7 +82,7 @@ private:
 	void InsertToClose(CCell* b);
 	void Init();
 
-	CCell** m_grid;
+	vector<vector<CCell>> m_grid;
 	int m_nRowCount;
 	int m_nColumnCount;
 	CCell* m_pDepart;

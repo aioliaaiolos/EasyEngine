@@ -74,8 +74,11 @@ public:
 
 		eCmpAddrImm,
 		eCmpRegImm,
+		eCmpImmImm,
 
-		eJneImm
+		eJneImm,
+		eJaeImm,
+		eJbeImm
 	};
 
 public:

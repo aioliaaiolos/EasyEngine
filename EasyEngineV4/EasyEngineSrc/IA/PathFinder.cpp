@@ -162,9 +162,9 @@ m_bManualMode(false)
 
 void CGrid::Init()
 {
-	m_grid = new CCell*[m_nRowCount];
+	m_grid.resize(m_nRowCount);
 	for (int row = 0; row < m_nRowCount; row++)
-		m_grid[row] = new CCell[m_nColumnCount];
+		m_grid[row].resize(m_nColumnCount);
 
 	for (int row = 0; row < m_nRowCount; row++)
 		for (int column = 0; column < m_nColumnCount; column++)
@@ -304,9 +304,7 @@ void CGrid::SavePart(string sFileName, int xMin, int yMin, int xMax, int yMax)
 
 void CGrid::Load(string sFileName)
 {
-	for (int row = 0; row < m_nRowCount; row++)
-		delete m_grid[row];
-	delete[] m_grid;
+	m_grid.resize(0);
 	m_vOpenList.clear();
 	m_vCloseList.clear();
 	m_vPath.clear();
@@ -378,6 +376,12 @@ void CGrid::SetDepart(int column, int row)
 
 void CGrid::SetDestination(int column, int row)
 {
+	if ((column > m_nColumnCount) || (row > m_nRowCount)) {
+		ostringstream oss;
+		oss << "Error CGrid::SetDestination : column = " << column << ", row = " << row << " and column count = " << m_nColumnCount << " and rowCount = " << m_nRowCount;
+		CEException e(oss.str());
+		throw e;
+	}
 	if(m_pDestination)
 		m_pDestination->RemoveNodeFlag(CCell::eArrivee);
 	m_pDestination = &m_grid[row][column];

@@ -9,14 +9,19 @@ class CObject : public CEntity
 {
 public:
 	CObject(EEInterface& oInterface, string sFileName);
-	void						Update();
-	void						ManageGravity();
-	void						UpdateCollision();
+	void						Update() override;
+	virtual void				ManageGravity();
+	void						UpdateCollision() override;
+
+protected:
+	bool						m_bFirstUpdate;
+
+	static void 				OnCollision(CEntity* pThis, vector<INode*> entities);
 
 private:
 	CVector						m_vNextLocalTranslate;
-	bool						m_bFirstUpdate;
-	static void 				OnCollision(CEntity* pThis, vector<INode*> entities);
+	
+	
 };
 
 class CMobileEntity : public CObject, public virtual IFighterEntity, public virtual ICharacter
@@ -123,7 +128,6 @@ protected:
 	static void				Dying(CMobileEntity* pHuman, bool bLoop);
 	static void				MoveToGuard(CMobileEntity* pHuman, bool bLoop);
 	static void 			PlayReceiveHit( CMobileEntity* pHuman, bool bLoop );
-	static void 			OnCollision(CEntity* pThis, vector<INode*> entities);
 	static void				OnDyingCallback(IAnimation::TEvent e, void* data);
 };
 

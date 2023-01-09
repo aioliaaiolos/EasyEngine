@@ -19,9 +19,10 @@ public:
 
 struct CVar
 {
-	int		m_nScopePos;
-	int		m_nRelativeStackPosition; // relative var position from current scope ebp
-	bool	m_bIsDeclared;
+	int				m_nScopePos;
+	int				m_nRelativeStackPosition; // relative var position from current scope ebp
+	bool			m_bIsDeclared;
+	int				m_nType;
 	CVar() : m_bIsDeclared( false ), m_nRelativeStackPosition(0){}
 };
 
@@ -31,7 +32,7 @@ class CVarMap
 	typedef map< int, map< string, CVar > >	VarMap;
 public:
 	CVar* GetVariable(string sVarName);
-	void AddVariable(string sVarName, int nScope, int nIndex);
+	void AddVariable(string sVarName, int nScope, int nIndex, int type);
 	int GetVarCountInScope(const CSyntaxNode& node, int nScope);
 	CVar* GetVar(int nScope, string sVarName);
 
@@ -43,7 +44,7 @@ private:
 
 class CSemanticAnalyser
 {
-	typedef map< string, pair< ScriptFunction, vector< TFuncArgType > > > FuncMap;
+	typedef map< string, pair< ScriptFunction, pair<vector< TFuncArgType >, TFuncArgType> > > FuncMap;
 	
 	FuncMap						m_mInterruption;
 	set<string>					m_vCommand;
@@ -53,9 +54,12 @@ class CSemanticAnalyser
 	int							m_nCurrentScopeNumber;
 	int							m_nVariableIndex;
 
+	map<TFuncArgType, CSyntaxNode::Type>	m_mTypes;
+	map<CSyntaxNode::Type, string>			m_mTypeToString;
+
 public:
 	CSemanticAnalyser();
-	void			RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType );
+	void			RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType);
 	void			CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions);
 	void			GetFunctionAddress( map< string, int >& mFuncAddr );
 	void			SetTypeFromChildType( CSyntaxNode& oTree );
@@ -67,6 +71,7 @@ public:
 
 protected:
 	void			AddNewVariable(CSyntaxNode& oTree);
+	CSyntaxNode::Type	GetFunctionReturnType(CSyntaxNode& node);
 };
 
 #endif // SEMANTICANALYSER_H

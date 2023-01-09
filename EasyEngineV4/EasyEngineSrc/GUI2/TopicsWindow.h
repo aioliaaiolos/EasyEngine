@@ -1,6 +1,13 @@
 #pragma once
 #include "GUIWindow.h"
 
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+
+
 class CGUIManager;
 class CTopicFrame;
 class IScriptManager;
@@ -46,21 +53,27 @@ public:
 	CTopicsWindow(EEInterface& oInterface, int width, int height);
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, vector<CCondition>& conditions);
+	void									AddGreating(string sText, vector<CCondition>& conditions);
 	void									AddTopicText(const string& sTopicText);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
+	string									GetSpeakerId();
 	void									RemoveTopicTexts();
+	IScriptManager*							GetScriptManager();
+	int										SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId);
 
 private:
 
 	void									LoadTopics(string sFileName);
+	void									LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName);
 	void									DecodeString(string& sIn, string& sOut);
 	void									OnShow(bool bShow) override;
 	void									DestroyTopicsWidgets();
 	int										GetTopicTextLineCount();
 	static void								OnLinkClicked(CLink* pLink);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, void* pData);
-	static void								OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int);
+	static void								OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int);	
+	static void								OnScriptManagerCreated(CPlugin* plugin, void* pData);
 
 	EEInterface&							m_oInterface;
 	IRenderer&								m_oRenderer;
@@ -73,7 +86,9 @@ private:
 	const int								m_nMaxCharPerLine;
 	int										m_nTopicTextPointer;
 	string									m_sNextTopicTextToAdd;
-	
+	vector<CTopicInfo>						m_vGreatings;
+	IScriptManager*							m_pScriptManager;
+	string									m_sSpeakerId;
 };
 
 class CTopicFrame : public CGUIWindow
@@ -93,7 +108,6 @@ public:
 	void										GetTopicText(string sTopicTitle, string& sTopicText);
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
-	void										SetSpeakerId(string sId);
 	void										CreateTopicsWidgets();
 	void										DestroyTopicsWidgets();
 
@@ -103,11 +117,9 @@ private:
 	int											GetTopicIndexFromY(int y);
 	void										OnItemSelected(CLink* pTitle);
 	void										OnItemHover(CGUIWidget* pTitle);
-	int											SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId);
 	int											IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
 	static void									OnGUIManagerCreated(CPlugin* plugin, void* pData);
-	static void									OnScriptManagerCreated(CPlugin* plugin, void* pData);
 	static void									OnClickTopic(CLink* pLink);
 	static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
@@ -124,7 +136,6 @@ private:
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
-	string													m_sSpeakerId;
 };
 
 

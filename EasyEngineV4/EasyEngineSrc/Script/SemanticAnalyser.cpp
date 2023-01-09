@@ -42,11 +42,12 @@ CVar* CVarMap::GetVariable(string sVarName)
 	return nullptr;
 }
 
-void CVarMap::AddVariable(string sVarName, int nScope, int nIndex)
+void CVarMap::AddVariable(string sVarName, int nScope, int nIndex, int type)
 {
 	CVar v;
 	v.m_nScopePos = nScope;
 	v.m_nRelativeStackPosition = nIndex;
+	v.m_nType = type;
 	m_mVars[nScope][sVarName] = v;
 }
 
@@ -86,15 +87,25 @@ CSemanticAnalyser::CSemanticAnalyser():
 	m_nVariableIndex(0)
 {
 	m_vCommand.insert("return");
+	m_mTypes[TFuncArgType::eFloat] = CSyntaxNode::eFloat;
+	m_mTypes[TFuncArgType::eInt] = CSyntaxNode::eInt;
+	m_mTypes[TFuncArgType::eString] = CSyntaxNode::eString;
+	m_mTypes[TFuncArgType::eVoid] = CSyntaxNode::eVoid;
+
+	m_mTypeToString[CSyntaxNode::eFloat] = "float";
+	m_mTypeToString[CSyntaxNode::eInt] = "int";
+	m_mTypeToString[CSyntaxNode::eString] = "string";
+	m_mTypeToString[CSyntaxNode::eVoid] = "void";
 }
 
-void CSemanticAnalyser::RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType  )
+void CSemanticAnalyser::RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType)
 {
 	FuncMap::const_iterator it = m_mInterruption.find( sFunctionName );
 	if( it == m_mInterruption.end() )
 	{
 		m_mInterruption[ sFunctionName ].first = Function;
-		m_mInterruption[ sFunctionName ].second = vArgsType;
+		m_mInterruption[ sFunctionName ].second.first = vArgsType;
+		m_mInterruption[sFunctionName].second.second = returnType;
 	}
 	else
 		throw 1;
@@ -137,10 +148,10 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 		}
 		else {
 			oTree.m_eType = CSyntaxNode::eAPICall;
-			if (it->second.second.size() != oTree.m_vChild.size())
+			if (it->second.second.first.size() != oTree.m_vChild.size())
 			{
 				ostringstream oss;
-				oss << "Fonction \"" << oTree.m_Lexem.m_sValue << "\" : nombre d'argument incorrect, " << it->second.second.size() << " arguments requis";
+				oss << "Fonction \"" << oTree.m_Lexem.m_sValue << "\" : nombre d'argument incorrect, " << it->second.second.first.size() << " arguments requis";
 				CCompilationErrorException e(-1, -1);
 				e.SetErrorMessage(oss.str());
 				throw e;
@@ -150,8 +161,29 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 		
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
+		
+		if (oTree.m_eType == CSyntaxNode::eAPICall) {
+			int argIndex = 1;
+			vector<CSyntaxNode>::iterator itChild = oTree.m_vChild.begin();
+			for (TFuncArgType& type : it->second.second.first) {
+				if (m_mTypes[type] != itChild->m_eType) {
+					CCompilationErrorException e(-1, -1);
+					CSyntaxNode::Type eExpected = m_mTypes[type];
+					string sExpected = m_mTypeToString[eExpected];
+					CSyntaxNode::Type eCurrent = itChild->m_eType;
+					string sCurrent = m_mTypeToString[eCurrent];
+					e.SetErrorMessage(string("Warning : function '") + oTree.m_Lexem.m_sValue + "' argument " + std::to_string(argIndex) +
+						" is a " + sCurrent + ", a " + sExpected + " is expected");
+					throw e;
+				}
+				argIndex++;
+				itChild++;
+			}
+		}
 	}
-	else if (oTree.m_Lexem.m_eType == CLexem::TLexem::eComp) {
+	else if ( (oTree.m_Lexem.m_eType == CLexem::Type::eComp) ||
+				(oTree.m_Lexem.m_eType == CLexem::Type::eInf) ||
+				(oTree.m_Lexem.m_eType == CLexem::Type::eSup) ) {
 		oTree.m_eType = CSyntaxNode::eInt;
 		for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
 			CompleteSyntaxicTree(oTree.m_vChild[i], vFunctions);
@@ -233,11 +265,23 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 void CSemanticAnalyser::AddNewVariable(CSyntaxNode& oTree)
 {
 	string sVarName = oTree.m_Lexem.m_sValue;
-	if(!m_oVars.GetVariable(sVarName)) {
-		m_oVars.AddVariable(sVarName, m_nCurrentScopeNumber, m_nVariableIndex);
+	CVar* pVar = m_oVars.GetVariable(sVarName);
+	if(!pVar) {
+		m_oVars.AddVariable(sVarName, m_nCurrentScopeNumber, m_nVariableIndex, oTree. m_eType);
 		m_nVariableIndex++;
 		oTree.m_nScope = m_nCurrentScopeNumber;
-	}	
+	}
+	else
+		oTree.m_eType = (CSyntaxNode::Type)pVar->m_nType;
+}
+
+CSyntaxNode::Type CSemanticAnalyser::GetFunctionReturnType(CSyntaxNode& node)
+{
+	string sFunctionName = node.m_Lexem.m_sValue;
+	FuncMap::iterator itFunc = m_mInterruption.find(sFunctionName);
+	if (itFunc != m_mInterruption.end())
+		return m_mTypes[itFunc->second.second.second];
+	return node.m_eType;
 }
 
 void CSemanticAnalyser::SetTypeFromChildType( CSyntaxNode& oTree )
@@ -278,8 +322,22 @@ void CSemanticAnalyser::SetTypeFromChildType( CSyntaxNode& oTree )
 		if( oTree.m_Lexem.m_eType != CLexem::eCall )
 			if( oTree.m_Lexem.m_eType == CLexem::eAffect )
 			{
-				oTree.m_vChild[ 0 ].m_eType = oTree.m_vChild[ 1 ].m_eType;
-				oTree.m_eType = oTree.m_vChild[ 1 ].m_eType;
+				if ((oTree.m_vChild[1].m_eType == CSyntaxNode::eVal) && (oTree.m_vChild[1].m_Lexem.m_eType == CLexem::eCall)) {
+					string sFuncName = oTree.m_vChild[1].m_Lexem.m_sValue;
+					CSyntaxNode::Type returnType = GetFunctionReturnType(oTree.m_vChild[1]);
+					if (returnType == CSyntaxNode::Type::eVoid) {
+						CCompilationErrorException e(-1, -1);
+						e.SetErrorMessage("Error : try to assign a 'void' return (function '" + sFuncName + "') to a variable ('" + oTree.m_vChild[0].m_Lexem.m_sValue + "')");
+						throw e;
+					}
+					else {
+						oTree.m_vChild[0].m_eType = returnType;
+						oTree.m_vChild[1].m_eType = returnType;
+					}
+				}
+				else
+					oTree.m_vChild[ 0 ].m_eType = oTree.m_vChild[ 1 ].m_eType;
+				oTree.m_eType = oTree.m_vChild[0].m_eType;
 			}
 			else
 				SetTypeFromChildType( oTree );
@@ -296,7 +354,7 @@ unsigned int CSemanticAnalyser::GetFuncArgsCount( int nFuncIndex )
 {
 	FuncMap::iterator itFunc = m_mInterruption.begin();
 	std::advance( itFunc, nFuncIndex );
-	return (unsigned int)itFunc->second.second.size();
+	return (unsigned int)itFunc->second.second.first.size();
 }
 
 float CSemanticAnalyser::CallInterruption( int nIntIndex, const vector< float >& vArgs )
@@ -304,7 +362,7 @@ float CSemanticAnalyser::CallInterruption( int nIntIndex, const vector< float >&
 	FuncMap::iterator itFunc = m_mInterruption.begin();
 	std::advance( itFunc, nIntIndex );
 	CScriptState* pState = new CScriptState;
-	vector< TFuncArgType >& vArgType = itFunc->second.second;
+	vector< TFuncArgType >& vArgType = itFunc->second.second.first;
 	try
 	{
 		for( unsigned int i = 0; i < vArgs.size(); i++ )
@@ -330,7 +388,7 @@ float CSemanticAnalyser::CallInterruption( int nIntIndex, const vector< float >&
 	catch( CBadArgCountException& e )
 	{
 		ostringstream oss;
-		oss << itFunc->first + " : nombre d'arguments incorrect, " << itFunc->second.second.size() << " arguments requis";
+		oss << itFunc->first + " : nombre d'arguments incorrect, " << itFunc->second.second.first.size() << " arguments requis";
 		e.SetErrorMessage( oss.str() );
 		throw e;
 	}

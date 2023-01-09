@@ -8,11 +8,7 @@
 #include "IRessource.h"
 #include <sstream>
 
-// rapidjson
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/filereadstream.h"
-#include <fstream>
+
 
 using namespace rapidjson;
 
@@ -30,7 +26,8 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_nTopicTextPointer(0),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
-	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager")))
+	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
+	m_pScriptManager(nullptr)
 {
 	SetPosition(400, 200);
 	m_pTopicFrame = new CTopicFrame(oInterface, 198, 759);
@@ -41,7 +38,19 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	SetGUIMode(true);
 
 	LoadTopics("topics.json");
-	oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
+	m_oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
+	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
+}
+
+void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, void* pData)
+{
+	CTopicsWindow* pTopicWindow = (CTopicsWindow*)pData;
+	pTopicWindow->m_pScriptManager = static_cast<IScriptManager*>(plugin);
+}
+
+IScriptManager* CTopicsWindow::GetScriptManager()
+{
+	return m_pScriptManager;
 }
 
 void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, void* pData)
@@ -59,12 +68,24 @@ void CTopicsWindow::OnShow(bool bShow)
 	}
 	else {
 		m_pTopicFrame->CreateTopicsWidgets();
+
+		int index = SelectTopic(m_vGreatings, m_sSpeakerId);
+		if(index != -1)
+			AddTopicText(m_vGreatings[index].m_sText);
 	}
 }
 
 void CTopicsWindow::AddTopic(string sTopicName, string sText, vector<CCondition>& conditions)
 {
 	m_pTopicFrame->AddTopic(sTopicName, sText, conditions);
+}
+
+void CTopicsWindow::AddGreating(string sText, vector<CCondition>& conditions)
+{
+	CTopicInfo greating;
+	greating.m_sText = sText;
+	greating.m_vConditions = conditions;
+	m_vGreatings.push_back(greating);
 }
 
 CTopicsWindow::~CTopicsWindow()
@@ -74,11 +95,6 @@ CTopicsWindow::~CTopicsWindow()
 void CTopicsWindow::Display()
 {
 	CGUIWindow::Display();
-}
-
-void CTopicsWindow::SetSpeakerId(string sId)
-{
-	m_pTopicFrame->SetSpeakerId(sId);
 }
 
 void ExtractLink(string sText, vector<pair<bool, string>>& vText)
@@ -354,8 +370,137 @@ void CTopicsWindow::LoadTopics(string sFileName)
 				}
 			}
 		}
+		if (doc.HasMember("Greatings")) {
+			rapidjson::Value& greatings = doc["Greatings"];
+			if (greatings.IsArray()) {
+				int count = greatings.Size();
+				for (int iGreating = 0; iGreating < count; iGreating++) {
+					string sText;
+					vector<CCondition> vConditions;
+					rapidjson::Value& greating = greatings[iGreating];
+					if (greating.IsObject()) {
+						if (greating.HasMember("Text")) {
+							rapidjson::Value& text = greating["Text"];
+							if (text.IsString())
+								sText += text.GetString();
+							else if (text.IsArray()) {
+								for (int iLine = 0; iLine < text.GetArray().Size(); iLine++) {
+									rapidjson::Value& line = text[iLine];
+									if (line.IsString())
+										sText += line.GetString();
+								}
+							}
+						}
+						LoadJsonConditions(greating, vConditions, sFileName);						
+					}
+					DecodeString(sText, sText);
+					AddGreating(sText, vConditions);
+				}
+			}
+		}
 	}
 	ifs.close();
+}
+
+
+void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName)
+{
+	if (oParentNode.HasMember("Conditions")) {
+		rapidjson::Value& conditions = oParentNode["Conditions"];
+		if (conditions.IsArray()) {
+			for (int iCondition = 0; iCondition < conditions.GetArray().Size(); iCondition++) {
+				rapidjson::Value& condition = conditions[iCondition];
+				CCondition c;
+				string sTestVariableName, sTestVariableValue;
+				if (condition.IsObject()) {
+					if (condition.HasMember("VariableName")) {
+						rapidjson::Value& varName = condition["VariableName"];
+						if (varName.IsString())
+							c.m_sVariableName = varName.GetString();
+						rapidjson::Value& value = condition["Value"];
+						if (value.IsString())
+							c.m_sValue = value.GetString();
+						if (condition.HasMember("Comp")) {
+							rapidjson::Value& comp = condition["Comp"];
+							if (value.IsString()) {
+								string sComp = comp.GetString();
+								if (sComp == "==")
+									c.m_eComp = CCondition::eEqual;
+								else if (sComp == "!=")
+									c.m_eComp = CCondition::eDifferent;
+								else if (sComp == "<")
+									c.m_eComp = CCondition::eInf;
+								else if (sComp == ">")
+									c.m_eComp = CCondition::eSup;
+								else if (sComp == "is")
+									c.m_eComp = CCondition::eIs;
+								else if (sComp == "isNot")
+									c.m_eComp = CCondition::eIsNot;
+							}
+						}
+						else
+							throw CEException(string("Error during parsing '") + sFileName + "' : 'Comp' is missing in condition for topic '" + oParentNode.GetString());
+					}
+				}
+				vConditions.push_back(c);
+			}
+		}
+	}
+}
+
+
+int CTopicsWindow::SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId)
+{
+	vector<int> topicVerifiedConditionCount;
+	for (int k = 0; k < topics.size(); k++)
+		topicVerifiedConditionCount.push_back(0);
+	int i = 0;
+	for (CTopicInfo& topic : topics) {
+		for (CCondition& condition : topic.m_vConditions) {
+			if (condition.m_sVariableName == "CharacterId") {
+				if (condition.m_eComp == condition.eEqual) {
+					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
+						topicVerifiedConditionCount[i] = -1;
+						break;
+					}
+					else {
+						topicVerifiedConditionCount[i] += 1;
+					}
+				}
+			}
+			else {
+				float fValue = m_pScriptManager->GetVariableValue(condition.m_sVariableName);
+				int nValue = atoi(condition.m_sValue.c_str());
+				if (float(nValue) == fValue) {
+					topicVerifiedConditionCount[i] += 1;
+				}
+				else {
+					topicVerifiedConditionCount[i] = -1;
+				}
+			}
+		}
+		i++;
+	}
+	int max = -1;
+	int higherIndex = -1;
+	for (int i = 0; i < topicVerifiedConditionCount.size(); i++) {
+		if (max < topicVerifiedConditionCount[i]) {
+			max = topicVerifiedConditionCount[i];
+			higherIndex = i;
+		}
+	}
+
+	return higherIndex;
+}
+
+void CTopicsWindow::SetSpeakerId(string sId)
+{
+	m_sSpeakerId = sId;
+}
+
+string CTopicsWindow::GetSpeakerId()
+{
+	return m_sSpeakerId;
 }
 
 CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height) :
@@ -372,7 +517,6 @@ CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height) :
 	m_mFontColorFromTopicState[eNormal] = IGUIManager::eWhite;
 	m_mFontColorFromTopicState[ePressed] = IGUIManager::eTurquoise;
 	m_oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
-	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
 }
 
 CTopicFrame::~CTopicFrame()
@@ -391,20 +535,9 @@ void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, void* pData)
 	pTopicFrame->m_pGUIManager = static_cast<CGUIManager*>(plugin);
 }
 
-void CTopicFrame::OnScriptManagerCreated(CPlugin* plugin, void* pData)
-{
-	CTopicFrame* pTopicFrame = (CTopicFrame*)pData;
-	pTopicFrame->m_pScriptManager = static_cast<IScriptManager*>(plugin);
-}
-
 int CTopicFrame::GetTextHeight()
 {
 	return m_nTextHeight;
-}
-
-void CTopicFrame::SetSpeakerId(string sId)
-{
-	m_sSpeakerId = sId;
 }
 
 void CTopicFrame::AddTopic(string sTopicName, string sText, vector<CCondition>& conditions)
@@ -461,17 +594,17 @@ void CTopicFrame::CreateTopicsWidgets()
 	int iLine = 0;
 	Clear();
 	for (map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.begin(); itTopic != m_mTopics.end(); itTopic++) {
-		if (IsConditionChecked(itTopic->second, m_sSpeakerId)) {
+		if (IsConditionChecked(itTopic->second, GetParent()->GetSpeakerId())) {
 			int y = iLine * m_nTextHeight + m_nYTextmargin;
 			string sTopic = itTopic->first;
 			CLink* pTitle = new CLink(m_oInterface, sTopic);
 			pTitle->m_sUserData = sTopic;
-			int nIdx = SelectTopic(itTopic->second, m_sSpeakerId);
+			int nIdx = GetParent()->SelectTopic(itTopic->second, GetParent()->GetSpeakerId());
 			if (nIdx < 0)
 				nIdx = 0;
 			
 			string sFormatedText;
-			Format(itTopic->second[nIdx].m_sText, m_sSpeakerId, sFormatedText);
+			Format(itTopic->second[nIdx].m_sText, GetParent()->GetSpeakerId(), sFormatedText);
 			m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
 			pTitle->SetClickedCallback(OnClickTopic);
 			AddWidget(pTitle);
@@ -531,50 +664,6 @@ void CTopicFrame::OnItemHover(CGUIWidget* pTitle)
 int CTopicFrame::ConvertValueToInt(string sValue)
 {
 	return atoi(sValue.c_str());
-}
-
-int CTopicFrame::SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId)
-{
-	vector<int> topicVerifiedConditionCount;
-	for (int k = 0; k < topics.size(); k++)
-		topicVerifiedConditionCount.push_back(0);
-	int i = 0;
-	for (CTopicInfo& topic : topics) {
-		for (CCondition& condition : topic.m_vConditions) {
-			if (condition.m_sVariableName == "CharacterId") {
-				if (condition.m_eComp == condition.eEqual) {
-					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
-						topicVerifiedConditionCount[i] = -1;
-						break;
-					}
-					else {
-						topicVerifiedConditionCount[i] += 1;
-					}
-				}
-			}
-			else{ 
-				float fValue = m_pScriptManager->GetVariableValue(condition.m_sVariableName);
-				int nValue = ConvertValueToInt(condition.m_sValue);
-				if (float(nValue) == fValue) {
-					topicVerifiedConditionCount[i] += 1;
-				}
-				else {
-					topicVerifiedConditionCount[i] = -1;
-				}
-			}
-		}
-		i++;
-	}
-	int max = -1;
-	int higherIndex = -1;
-	for (int i = 0; i < topicVerifiedConditionCount.size(); i++) {
-		if (max < topicVerifiedConditionCount[i]) {
-			max = topicVerifiedConditionCount[i];
-			higherIndex = i;
-		}
-	}
-		
-	return higherIndex;
 }
 
 int CTopicFrame::IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerId)

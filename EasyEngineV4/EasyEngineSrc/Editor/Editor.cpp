@@ -48,7 +48,7 @@ void CEditor::HandleEditorManagerCreation(CPlugin* plugin, void* pData)
 
 void CEditor::SetEditionMode(bool bEditionMode)
 {
-	if (m_bEditionMode != bEditionMode) {
+	//if (m_bEditionMode != bEditionMode) {
 		m_bEditionMode = bEditionMode;
 		m_pEditorManager->CloseAllEditorButThis(this);
 		m_bEditionMode = bEditionMode;
@@ -59,5 +59,5 @@ void CEditor::SetEditionMode(bool bEditionMode)
 			m_oHud.Print("Mode Edition : Vous pouvez importer un modele en utilisant la commande 'SpawnEntity'", m_nHudX, m_nHudY);
 			m_oHud.Print("Vous pouvez sauvegarder le niveau grace la commande 'SaveLavel(levelName)'", m_nHudX, m_nHudY + m_nHudLineHeight);
 		}
-	}
+	//}
 }

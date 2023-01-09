@@ -50,7 +50,8 @@ enum TFuncArgType
 {
 	eInt = 0,
 	eFloat,
-	eString
+	eString,
+	eVoid
 };
 
 class IScriptManager : public CPlugin
@@ -61,7 +62,7 @@ protected:
 public:
 
 	
-	virtual void	RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType ) = 0;
+	virtual void	RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType) = 0;
 	virtual void	ExecuteCommand( std::string sCommand ) = 0;
 	virtual void	ExecuteByteCode(const vector<unsigned char>& vByteCode) = 0;
 	virtual void	GetRegisteredFunctions( vector< string >& vFuncNames ) = 0;

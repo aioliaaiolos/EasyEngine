@@ -258,18 +258,6 @@ void CMobileEntity::InitStatics()
 	s_mStringToAnimation["run"] = IEntity::eRun;
 }
 
-
-void CMobileEntity::OnCollision(CEntity* pThis, vector<INode*> entities)
-{
-	for (int i = 0; i < entities.size(); i++) {
-		CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-		IMesh* pMesh = static_cast<IMesh*>(pThis->GetRessource());
-		ICollisionMesh* pCollisionMesh = pEntity ? pEntity->GetCollisionMesh() : NULL;
-		if (pCollisionMesh)
-			pThis->LinkAndUpdateMatrices(pEntity);
-	}
-}
-
 IGeometry* CMobileEntity::GetBoundingGeometry()
 {
 	return m_pBoundingGeometry;

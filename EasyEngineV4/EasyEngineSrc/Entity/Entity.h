@@ -39,7 +39,7 @@ public:
 	void							SetRessource(string sFileName, bool bDuplicate = false);
 	void							SetDiffuseTexture(string sFileName);
 	float							GetWeight();
-	void							SetWeight( float fWeight );
+	void							SetWeight( float fWeight ) override;
 	void							SetMesh( IMesh* pMesh );
 	void							AddAnimation( std::string sAnimationFile );
 	void							SetCurrentAnimation( std::string sAnimation );
@@ -154,6 +154,7 @@ protected:
 	CVector											m_oSkinOffset;
 	string											m_sAttachedScript;
 	vector<unsigned char>							m_vAttachedScriptByteCode;
+	time_t											m_nLastAttachScriptTime;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);

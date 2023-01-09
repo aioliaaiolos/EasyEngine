@@ -109,9 +109,9 @@ string CScriptManager::GetName()
 	return "ScriptManager";
 }
 
-void CScriptManager::RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType )
+void CScriptManager::RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType)
 {
-	m_pSemanticAnalyser->RegisterFunction( sFunctionName, Function, vArgsType );
+	m_pSemanticAnalyser->RegisterFunction( sFunctionName, Function, vArgsType, returnType);
 }
 
 extern "C" _declspec(dllexport) IScriptManager* CreateScriptManager(EEInterface& oInterface)

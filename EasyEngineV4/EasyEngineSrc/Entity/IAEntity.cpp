@@ -95,32 +95,40 @@ void IAEntity::UpdateFightState()
 
 void IAEntity::UpdateTalkToState()
 {
-	CVector oInterlocuteurPosition;
-	
-	switch (m_eTalkToState)
+	try {
+		CVector oInterlocuteurPosition;
+
+		switch (m_eTalkToState)
+		{
+		case eNoTalkTo:
+			break;
+		case eBeginGotoInterlocutor:
+			m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
+			Goto(oInterlocuteurPosition, -1.f);
+			m_eTalkToState = eGoingToInterlocutor;
+			break;
+		case eGoingToInterlocutor:
+			m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
+			if (GetDistanceTo2dPoint(oInterlocuteurPosition) > 100.f) {
+				SetDestination(oInterlocuteurPosition);
+				Run();
+			}
+			else {
+				m_eTalkToState = eNoTalkTo;
+				m_bArriveAtDestination = true;
+				Stand();
+				OpenTopicWindow();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	catch (CEException& e)
 	{
-	case eNoTalkTo:
-		break;
-	case eBeginGotoInterlocutor:
-		m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
-		Goto(oInterlocuteurPosition, -1.f);
-		m_eTalkToState = eGoingToInterlocutor;
-		break;
-	case eGoingToInterlocutor:
-		m_pCurrentInterlocutor->GetPosition(oInterlocuteurPosition);
-		if (GetDistanceTo2dPoint(oInterlocuteurPosition) > 100.f) {
-			SetDestination(oInterlocuteurPosition);
-			Run();
-		}
-		else {
-			m_eTalkToState = eNoTalkTo;
-			m_bArriveAtDestination = true;
-			Stand();
-			OpenTopicWindow();
-		}
-		break;
-	default:
-		break;
+		m_eTalkToState = eNoTalkTo;
+		m_bArriveAtDestination = true;
+		throw e;
 	}
 }
 

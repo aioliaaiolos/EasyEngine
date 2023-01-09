@@ -80,9 +80,14 @@ private:
 	static void Ret( unsigned char* pOperand );
 	static void Return(unsigned char* pOperand);
 
+	static void Cmp(float dest, float src);
 	static void CmpAddrImm(unsigned char* pOperand);
 	static void CmpRegImm(unsigned char* pOperand);
+	static void CmpImmImm(unsigned char* pOperand);
+
 	static void JneImm(unsigned char* pOperand);
+	static void JaeImm(unsigned char* pOperand);
+	static void JbeImm(unsigned char* pOperand);
 
 	static CVirtualProcessor* s_pCurrentInstance;
 	static CSemanticAnalyser* s_pSemanticAnalyser;

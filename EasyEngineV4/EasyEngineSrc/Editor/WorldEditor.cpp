@@ -322,7 +322,7 @@ int CWorldEditor::SpawnArea(string areaName)
 
 void CWorldEditor::SetEditionMode(bool bEditionMode)
 {
-	if (m_bEditionMode != bEditionMode) {
+	//if (m_bEditionMode != bEditionMode) {
 		CEditor::SetEditionMode(bEditionMode);
 		if (bEditionMode) {
 			m_pScene->Clear();
@@ -331,7 +331,7 @@ void CWorldEditor::SetEditionMode(bool bEditionMode)
 		else {
 			// Ask to save world
 		}
-	}
+	//}
 }
 
 void CWorldEditor::CollectSelectableEntity(vector<IEntity*>& entities)
@@ -400,7 +400,6 @@ void CWorldEditor::OnSceneLoaded()
 			CVector minPoint = - dim / 2.f;
 			pAreaEntity->SetLocalMatrix(oTM);
 			pAreaEntity->GetBox().Set(minPoint, dim);
-			pAreaEntity->SetWeight(1);
 			pAreaEntity->Update();
 			m_vEntities.push_back(pAreaEntity);
 		}

@@ -89,7 +89,12 @@ m_bPutAllCodeIntoSameMemory(bPutAllCodeIntoSameMemory)
 
 	m_mInstrFunc[CBinGenerator::eCmpAddrImm] = CmpAddrImm;
 	m_mInstrFunc[CBinGenerator::eCmpRegImm] = CmpRegImm;
+	m_mInstrFunc[CBinGenerator::eCmpImmImm] = CmpImmImm;
+
 	m_mInstrFunc[CBinGenerator::eJneImm] = JneImm;
+	m_mInstrFunc[CBinGenerator::eJaeImm] = JaeImm;
+	m_mInstrFunc[CBinGenerator::eJbeImm] = JbeImm;
+
 
 	m_vRegAddr.resize( 8 );
 	m_vRegAddr[CRegister::eax] = &m_nEax;
@@ -204,6 +209,26 @@ void CVirtualProcessor::MovAddrReg( unsigned char* pOperand )
 	s_pCurrentInstance->m_pMemory[address] = regValue;
 }
 
+void CVirtualProcessor::Cmp(float dest, float src)
+{
+	// dst < src : cf = 1, zf = 0
+	// dst > src : cf = 0, zf = 0
+	// dst = src : cf = 0, zf = 1
+
+	if (dest < src) {
+		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= ~(unsigned int)TFlag::ZF;
+	}
+	else if (dest > src) {
+		s_pCurrentInstance->m_nFlags &= ~(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags &= ~(unsigned int)TFlag::ZF;
+	}
+	else {
+		s_pCurrentInstance->m_nFlags &= ~(unsigned int)TFlag::CF;
+		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::ZF;
+	}
+}
+
 void CVirtualProcessor::CmpAddrImm(unsigned char* pOperand)
 {
 	int address = GetMemRegisterAddress(pOperand);
@@ -212,18 +237,7 @@ void CVirtualProcessor::CmpAddrImm(unsigned char* pOperand)
 	memcpy(&fimm, &pOperand[2], 4);
 	imm = fimm;
 	float memValue = s_pCurrentInstance->m_pMemory[address];
-	if (memValue < imm ) {
-		s_pCurrentInstance->m_nFlags &= (unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
-	}
-	else if (memValue > imm) {
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
-	}
-	else {
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::ZF;
-	}
+	Cmp(memValue, imm);
 }
 
 void CVirtualProcessor::CmpRegImm(unsigned char* pOperand)
@@ -232,27 +246,40 @@ void CVirtualProcessor::CmpRegImm(unsigned char* pOperand)
 	float imm;
 	memcpy(&imm, &pOperand[1], 4);
 	float regValue = *s_pCurrentInstance->m_vRegAddr[reg];
-	
-	if (regValue < imm) {
-		s_pCurrentInstance->m_nFlags &= (unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
-	}
-	else if (regValue > imm) {
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::ZF;
-	}
-	else {
-		s_pCurrentInstance->m_nFlags &= !(unsigned int)TFlag::CF;
-		s_pCurrentInstance->m_nFlags |= (unsigned int)TFlag::ZF;
-	}
+	Cmp(regValue, imm);
+}
+
+void CVirtualProcessor::CmpImmImm(unsigned char* pOperand)
+{
+	float src, dst;
+	memcpy(&dst, pOperand, 4);
+	memcpy(&src, pOperand + 4, 4);
+	Cmp(dst, src);
 }
 
 void CVirtualProcessor::JneImm(unsigned char* pOperand)
 {
 	unsigned char jmpAddr = pOperand[0];
-	if (!((s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF) == 0 && (s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF) != 0)) {
+	int zf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF;
+	if(zf == 0)
 		s_pCurrentInstance->m_nEip = jmpAddr;
-	}	
+}
+
+void CVirtualProcessor::JaeImm(unsigned char* pOperand)
+{
+	unsigned char jmpAddr = pOperand[0];
+	int cf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF;
+	if (cf == 0 )
+		s_pCurrentInstance->m_nEip = jmpAddr;
+}
+
+void CVirtualProcessor::JbeImm(unsigned char* pOperand)
+{
+	unsigned char jmpAddr = pOperand[0];
+	int cf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF;
+	int zf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF;
+	if ( (cf != 0) || (zf != 1))
+		s_pCurrentInstance->m_nEip = jmpAddr;
 }
 
 void CVirtualProcessor::MovAddrImm( unsigned char* pOperand )

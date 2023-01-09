@@ -1,22 +1,21 @@
 #pragma once
 
-#include "Shape.h"
+#include "MobileEntity.h"
 
-class IBox;
-
-class CBoxEntity : public CShape, public IBoxEntity
+class CBoxEntity : public CObject, public IBoxEntity
 {
 public:
-	CBoxEntity( IRenderer& oRenderer, IBox& oBox );
+	CBoxEntity(EEInterface& oInterface, IBox& oBox);
+
 	void				Update();
 	IBox&				GetBox();
-	void				Colorize(float r, float g, float b, float a) {}
 	void				GetEntityName(string& sName);
 	IGeometry*			GetBoundingGeometry();
-	int					GetCellSize() { throw 1; return -1.f; };
+	void				SetWeight(float fWeight) override;
 
 protected:
 	IBox&				m_oBox;
 	string				m_sEntityName;
 	CVector				m_oColor;
+	IShader*			m_pShader;
 };

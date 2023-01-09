@@ -45,6 +45,8 @@ void CLexAnalyser::InitStringToLexemTypeArray()
 	m_mStringToLexemType["RBrace"] = CLexem::eRBraket;
 	m_mStringToLexemType["If"] = CLexem::eIf;
 	m_mStringToLexemType["Comp"] = CLexem::eComp;
+	m_mStringToLexemType["Sup"] = CLexem::eSup;
+	m_mStringToLexemType["Inf"] = CLexem::eInf;
 }
 
 void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vLexem )
@@ -96,7 +98,7 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 				nNextState = keywordStateTo;
 			}
 
-			map< int, CLexem::TLexem >::iterator it = m_mFinalStates.find( nNextState );
+			map< int, CLexem::Type >::iterator it = m_mFinalStates.find( nNextState );
 			if (  it != m_mFinalStates.end() )
 				bFinalState = true;
 			else if( nNextState != 0 )
@@ -108,7 +110,10 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 			}
 			nCurrentState = nNextState;
 			i++;
-			column++;
+			if (c = '\t')
+				column += 4;
+			else
+				column++;
 			if( i >= sScript.size() )
 				bEnd = true;
 		}
@@ -385,7 +390,7 @@ void CLexAnalyser::CalculFinalStates( CCSVReader& r )
 		int nState = atoi( sCell.c_str() );
 		sCell.clear();
 		r.ReadCell( sCell );
-		map< string, CLexem::TLexem >::iterator it = m_mStringToLexemType.find( sCell );
+		map< string, CLexem::Type >::iterator it = m_mStringToLexemType.find( sCell );
 		if( it != m_mStringToLexemType.end() )
 			m_mFinalStates[ nState ] = it->second;
 		else

@@ -18,7 +18,7 @@ m_nScope(0)
 {
 }
 
-bool CSyntaxNode::IsValue(NODE_TYPE node)
+bool CSyntaxNode::IsValue(Type node)
 {
 	return (node == eVal) || (node == eInt) || (node == eFloat) || (node == eString);
 }
@@ -140,7 +140,7 @@ void CSyntaxAnalyser::DeleteTempNodes( CSyntaxNode& oNode )
 
 void CSyntaxAnalyser::ReduceAllOperations(  CSyntaxNode& oNode )
 {
-	vector< CLexem::TLexem > vTypes;
+	vector< CLexem::Type > vTypes;
 	vTypes.push_back( CLexem::eMult );
 	vTypes.push_back( CLexem::eDiv );
 	ReduceOperations( oNode, vTypes  );
@@ -150,13 +150,15 @@ void CSyntaxAnalyser::ReduceAllOperations(  CSyntaxNode& oNode )
 	ReduceOperations( oNode, vTypes );
 	vTypes.clear();
 	vTypes.push_back(CLexem::eComp);
+	vTypes.push_back(CLexem::eSup);
+	vTypes.push_back(CLexem::eInf);
 	ReduceOperations(oNode, vTypes);
 	vTypes.clear();
 	vTypes.push_back( CLexem::eAffect );
 	ReduceOperations( oNode, vTypes );
 }
 
-void CSyntaxAnalyser::ReduceOperations( CSyntaxNode& oNode, const vector< CLexem::TLexem >& vType )
+void CSyntaxAnalyser::ReduceOperations( CSyntaxNode& oNode, const vector< CLexem::Type >& vType )
 {
 	for( unsigned int i = 0; i < oNode.m_vChild.size(); i ++ ) {
 		bool bIsType = false;
@@ -191,7 +193,7 @@ int min(int a, int b)
 }
 
 
-void GetClosingLexemIndices(const vector< CSyntaxNode >& vNode, CLexem::TLexem LClosing, CLexem::TLexem RClosing,
+void GetClosingLexemIndices(const vector< CSyntaxNode >& vNode, CLexem::Type LClosing, CLexem::Type RClosing,
 	int& iBegin, int& iEnd, unsigned int iFirst = 0, unsigned int iLast = -1)
 {
 	int lPar = 0;
@@ -215,8 +217,8 @@ void GetClosingLexemIndices(const vector< CSyntaxNode >& vNode, CLexem::TLexem L
 		iEnd = i - 1;
 }
 
-void CSyntaxAnalyser::ReduceLargestClosingLexem(vector<CSyntaxNode>& vNode, CLexem::TLexem leftLexem, CLexem::TLexem rightLexem, 
-	CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst)
+void CSyntaxAnalyser::ReduceLargestClosingLexem(vector<CSyntaxNode>& vNode, CLexem::Type leftLexem, CLexem::Type rightLexem, 
+	CSyntaxNode::Type nt, TParenthesisReductionType rt, unsigned int iFirst)
 {
 	int iBegin, iEnd;
 	GetClosingLexemIndices(vNode, leftLexem, rightLexem, iBegin, iEnd, iFirst);
@@ -228,14 +230,14 @@ void CSyntaxAnalyser::ReduceLargestClosingLexem(vector<CSyntaxNode>& vNode, CLex
 		vNode.erase(vNode.begin() + iBegin, vNode.begin() + iEnd + 1);
 
 		vector<CSyntaxNode>::iterator itNode = vNode.begin() + iBegin - 1;
-		if (itNode->m_Lexem.m_eType == CLexem::TLexem::eCall || 
-			(itNode->m_Lexem.m_eType == CLexem::TLexem::eIf) || 
-			(itNode->m_Lexem.m_eType == CLexem::TLexem::eFunctionDef)) 
+		if (itNode->m_Lexem.m_eType == CLexem::Type::eCall || 
+			(itNode->m_Lexem.m_eType == CLexem::Type::eIf) || 
+			(itNode->m_Lexem.m_eType == CLexem::Type::eFunctionDef)) 
 		{
-			if ( (itNode->m_Lexem.m_eType == CLexem::TLexem::eCall) && (itNode != vNode.begin())) {
+			if ( (itNode->m_Lexem.m_eType == CLexem::Type::eCall) && (itNode != vNode.begin())) {
 				vector<CSyntaxNode>::iterator itPreviousNode = itNode - 1;
-				if (itPreviousNode->m_Lexem.m_eType == CLexem::TLexem::eFunctionDef) {
-					itNode->m_Lexem.m_eType = CLexem::TLexem::eFunctionDef;
+				if (itPreviousNode->m_Lexem.m_eType == CLexem::Type::eFunctionDef) {
+					itNode->m_Lexem.m_eType = CLexem::Type::eFunctionDef;
 					itNode->m_eType = CSyntaxNode::eFunctionDef;
 					itNode = vNode.erase(itPreviousNode);
 					vector<string>::iterator itFuncName = std::find(m_vFunctions.begin(), m_vFunctions.end(), itNode->m_Lexem.m_sValue);
@@ -259,7 +261,7 @@ void CSyntaxAnalyser::ReduceScopes(CSyntaxNode& oTree)
 		int iPred = i > 0 ? i - 1 : 0;
 		if (oTree.m_vChild[i].m_Lexem.m_eType == CLexem::eLBraket) {
 			TParenthesisReductionType rt = oTree.m_vChild[iPred].m_Lexem.m_eType == eFuncDef ? eFuncDef : eFunc;
-			ReduceLargestClosingLexem(oTree.m_vChild, CLexem::TLexem::eLBraket, CLexem::TLexem::eRBraket, CSyntaxNode::eScope, rt, i);
+			ReduceLargestClosingLexem(oTree.m_vChild, CLexem::Type::eLBraket, CLexem::Type::eRBraket, CSyntaxNode::eScope, rt, i);
 		}
 	}
 	for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
@@ -274,9 +276,9 @@ void CSyntaxAnalyser::ReduceParenthesis( CSyntaxNode& oTree )
 		if( oTree.m_vChild[ i ].m_Lexem.m_eType == CLexem::eLPar ) {
 			if( oTree.m_vChild[ iPred ].m_Lexem.m_eType == CLexem::eCall ||
 				oTree.m_vChild[iPred].m_Lexem.m_eType == CLexem::eFunctionDef)
-				ReduceLargestClosingLexem(oTree.m_vChild, CLexem::TLexem::eLPar, CLexem::TLexem::eRPar, CSyntaxNode::eVecArgs, eFunc, i);
+				ReduceLargestClosingLexem(oTree.m_vChild, CLexem::Type::eLPar, CLexem::Type::eRPar, CSyntaxNode::eVecArgs, eFunc, i);
 			else
-				ReduceLargestClosingLexem(oTree.m_vChild, CLexem::TLexem::eLPar, CLexem::TLexem::eRPar, CSyntaxNode::ePar, eNormal, i);
+				ReduceLargestClosingLexem(oTree.m_vChild, CLexem::Type::eLPar, CLexem::Type::eRPar, CSyntaxNode::ePar, eNormal, i);
 		}
 	}
 	for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )	

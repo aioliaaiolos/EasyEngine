@@ -48,5 +48,48 @@
 				}
 			]
 		}
+	],
+	
+	"Greatings" : [
+		{
+			"Text": [
+				"Bonjour étranger"				
+			]
+		},
+		{
+			"Text": [
+				"Halte ! Vous devez retourner à l'infirmerie, restez-y tant que vous n'aurez pas obtenu le bon de sortie."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "garde hopital",
+					"Comp": "=="
+				}
+				,
+				{
+					"VariableName": "stateGuardHospital",
+					"Value": "0",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Text": [
+				"Je vous avais prévenu de rester à l'infirmerie ! Votre désobéissance va vous couter cher !"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "garde hopital",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "stateGuardHospital",
+					"Value": "1",
+					"Comp": "=="
+				}
+			]
+		}
 	]
 }

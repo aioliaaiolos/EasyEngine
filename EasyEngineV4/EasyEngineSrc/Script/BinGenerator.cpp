@@ -56,8 +56,11 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser, CAsmGenerator& oC
 
 	s_tabInstr[CAsmGenerator::eCmp][eAddr][eImm] = iInstrNum++; // 43
 	s_tabInstr[CAsmGenerator::eCmp][eReg][eImm] = iInstrNum++; // 44
+	s_tabInstr[CAsmGenerator::eCmp][eImm][eImm] = iInstrNum++; // 45
 	
-	s_tabInstr[CAsmGenerator::eJne][eImm][0] = iInstrNum++; // 45
+	s_tabInstr[CAsmGenerator::eJne][eImm][0] = iInstrNum++; // 46
+	s_tabInstr[CAsmGenerator::eJae][eImm][0] = iInstrNum++; // 47
+	s_tabInstr[CAsmGenerator::eJbe][eImm][0] = iInstrNum++; // 48
 
 	s_vInstrSize.push_back( -1 ); // pour démarrer à 1
 
@@ -97,7 +100,11 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser, CAsmGenerator& oC
 
 	s_vInstrSize.push_back(7); // cmp addr, imm : 43
 	s_vInstrSize.push_back(6); // cmp reg, imm : 44
-	s_vInstrSize.push_back(5); // jne, 45
+	s_vInstrSize.push_back(9); // cmp imm, imm : 45
+
+	s_vInstrSize.push_back(5); // jne, 46
+	s_vInstrSize.push_back(5); // jae, 47
+	s_vInstrSize.push_back(5); // jbe, 48
 }
 
 //int	CBinGenerator::GetInstrSize( int nInstrNum )
@@ -191,6 +198,15 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 						vBin.push_back( pReg2->m_eValue );
 						AddImmToByteArray( pNum1->m_fValue, vBin );
 					}
+					else {
+						const CNumeric* pNum2 = dynamic_cast< const CNumeric* >(oInstr.m_vOperand[1]);
+						if (pNum2) {
+							instrIndex = s_tabInstr[oInstr.m_eMnem][eImm][eImm];
+							vBin.push_back(instrIndex);							
+							AddImmToByteArray(pNum1->m_fValue, vBin);
+							AddImmToByteArray(pNum2->m_fValue, vBin);
+						}
+					}
 				}
 				else
 				{
@@ -262,7 +278,7 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 
 	if (instrIndex == 0) {
 		CCompilationErrorException e(-1, -1);
-		e.SetErrorMessage("Compilation error : instruction not exists");
+		e.SetErrorMessage("Bytecode generation error : instruction not exists");
 		throw e;
 	}
 }

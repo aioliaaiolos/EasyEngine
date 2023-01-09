@@ -2315,6 +2315,8 @@ void CreateLight(IScriptState* pState)
 	ostringstream oss;
 	oss << "La lumière a été créée avec l'identifiant " << m_pEntityManager->GetEntityID( pEntity );;
 	m_pConsole->Println( oss.str() );
+	pState->SetReturnValue(m_pEntityManager->GetEntityID(pEntity));
+	
 }
 
 void CreateLightw( IScriptState* pState )
@@ -2696,6 +2698,10 @@ void AttachScriptToEntity(IScriptState* pState)
 	IEntity* pEntity = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityName->m_sValue));
 	if (pEntity) {
 		pEntity->AttachScript(pScriptName->m_sValue);
+	}
+	if (!pEntity) {
+		CEException e(string("Error : entity '") + pEntityName->m_sValue + "' doesn't exists");
+		throw e;
 	}
 }
 
@@ -3369,49 +3375,60 @@ void SetCollisionMapBias(IScriptState* pState)
 	m_pMapEditor->SetBias(pBias->m_fValue);
 }
 
+void GetTime(IScriptState* pState)
+{
+	__int64 t, filter = 0xffffff;
+	time(&t);
+	t = t & filter;
+	pState->SetReturnValue(t);
+}
+
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
 
 	vType.clear();
+	m_pScriptManager->RegisterFunction("GetTime", GetTime, vType, eInt);
+
+	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("SetNPCState", SetNPCState, vType);
+	m_pScriptManager->RegisterFunction("SetNPCState", SetNPCState, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("IsIntersect", IsIntersect, vType);
+	m_pScriptManager->RegisterFunction("IsIntersect", IsIntersect, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("AttachScriptToEntity", AttachScriptToEntity, vType);
+	m_pScriptManager->RegisterFunction("AttachScriptToEntity", AttachScriptToEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("PrintHUD", PrintHUD, vType);
+	m_pScriptManager->RegisterFunction("PrintHUD", PrintHUD, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("RemoveHUDSlot", RemoveHudSlot, vType);
+	m_pScriptManager->RegisterFunction("RemoveHUDSlot", RemoveHudSlot, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("Reset", Reset, vType);
+	m_pScriptManager->RegisterFunction("Reset", Reset, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetCollisionMapBias", SetCollisionMapBias, vType);
+	m_pScriptManager->RegisterFunction("SetCollisionMapBias", SetCollisionMapBias, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("TestRegExpr", TestRegExpr, vType);	
+	m_pScriptManager->RegisterFunction("TestRegExpr", TestRegExpr, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("IsAbsolutePath", IsAbsolutePath, vType);
+	m_pScriptManager->RegisterFunction("IsAbsolutePath", IsAbsolutePath, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eInt);
@@ -3419,332 +3436,332 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("EnablePathFindSaving", EnablePathFindSaving, vType);
+	m_pScriptManager->RegisterFunction("EnablePathFindSaving", EnablePathFindSaving, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("AdaptGroundToAllEntities", AdaptGroundToAllEntities, vType);
+	m_pScriptManager->RegisterFunction("AdaptGroundToAllEntities", AdaptGroundToAllEntities, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("GetCharacterID", GetCharacterID, vType);
+	m_pScriptManager->RegisterFunction("GetCharacterID", GetCharacterID, vType, eInt);
 	
 	
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SaveGame", SaveGame, vType);
+	m_pScriptManager->RegisterFunction("SaveGame", SaveGame, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("LoadGame", LoadGame, vType);
+	m_pScriptManager->RegisterFunction("LoadGame", LoadGame, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("CreateCollisionMap", CreateCollisionMap, vType);
+	m_pScriptManager->RegisterFunction("CreateCollisionMap", CreateCollisionMap, vType, eVoid);
 		
 	vType.clear();
-	m_pScriptManager->RegisterFunction("SaveCloth", SaveCloth, vType);
+	m_pScriptManager->RegisterFunction("SaveCloth", SaveCloth, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("OffsetCloth", OffsetCloth, vType);
-
-	vType.clear();
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("EditCloth", EditCloth, vType);
-
-	vType.clear();
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("OffsetEyes", OffsetEyes, vType);
-
-	vType.clear();
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("TurnEyes", TurnEyes, vType);	
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("SaveCurrentEditableBody", SaveCurrentEditableBody, vType);
+	m_pScriptManager->RegisterFunction("OffsetCloth", OffsetCloth, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetBody", SetBody, vType);
+	m_pScriptManager->RegisterFunction("EditCloth", EditCloth, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("OffsetEyes", OffsetEyes, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("TurnEyes", TurnEyes, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("SaveCurrentEditableBody", SaveCurrentEditableBody, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SetBody", SetBody, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("EnableInstancingMode", EnableInstancingMode, vType);
+	m_pScriptManager->RegisterFunction("EnableInstancingMode", EnableInstancingMode, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetTexture", SetTexture, vType);
+	m_pScriptManager->RegisterFunction("SetTexture", SetTexture, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetTextureInWorld", SetTextureInWorld, vType);
+	m_pScriptManager->RegisterFunction("SetTextureInWorld", SetTextureInWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DrawCollisionModels", DrawCollisionModels, vType);
+	m_pScriptManager->RegisterFunction("DrawCollisionModels", DrawCollisionModels, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("GenerateAssemblerListing", GenerateAssemblerListing, vType);
-
-	vType.clear();
-	vType.push_back(eInt);
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("ColorizeEntity", ColorizeEntity, vType);
-
-	vType.clear();
-	vType.push_back(eInt);
-	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetEntityShininess", SetEntityShininess, vType);
+	m_pScriptManager->RegisterFunction("GenerateAssemblerListing", GenerateAssemblerListing, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetEntitySpecular", SetEntitySpecular, vType);
+	m_pScriptManager->RegisterFunction("ColorizeEntity", ColorizeEntity, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetEntityShininess", SetEntityShininess, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetEntitySpecular", SetEntitySpecular, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetSpecular", SetSpecular, vType);
+	m_pScriptManager->RegisterFunction("SetSpecular", SetSpecular, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("CreatePlaneEntity", CreatePlaneEntity, vType);
+	m_pScriptManager->RegisterFunction("CreatePlaneEntity", CreatePlaneEntity, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("GetOpenglVersion", DisplayOpenglVersion, vType);
+	m_pScriptManager->RegisterFunction("GetOpenglVersion", DisplayOpenglVersion, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayGlslVersion", DisplayGlslVersion, vType);
+	m_pScriptManager->RegisterFunction("DisplayGlslVersion", DisplayGlslVersion, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("EnableHMHack", EnableHMHack, vType);
+	m_pScriptManager->RegisterFunction("EnableHMHack", EnableHMHack, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetGroundMargin", SetGroundMargin, vType);
+	m_pScriptManager->RegisterFunction("SetGroundMargin", SetGroundMargin, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("GetPlayerId", GetPlayerId, vType);
+	m_pScriptManager->RegisterFunction("GetPlayerId", GetPlayerId, vType, eInt);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayGroundMargin", DisplayGroundMargin, vType);
+	m_pScriptManager->RegisterFunction("DisplayGroundMargin", DisplayGroundMargin, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("DisplayGroundHeight", DisplayGroundHeight, vType);
+	m_pScriptManager->RegisterFunction("DisplayGroundHeight", DisplayGroundHeight, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SpawnEntity", SpawnEntity, vType);
+	m_pScriptManager->RegisterFunction("SpawnEntity", SpawnEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SpawnCharacter", SpawnCharacter, vType);
+	m_pScriptManager->RegisterFunction("SpawnCharacter", SpawnCharacter, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SpawnArea", SpawnArea, vType);
+	m_pScriptManager->RegisterFunction("SpawnArea", SpawnArea, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("EditCharacter", EditCharacter, vType);
+	m_pScriptManager->RegisterFunction("EditCharacter", EditCharacter, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("ChangeCharacterName", ChangeCharacterName, vType);
+	m_pScriptManager->RegisterFunction("ChangeCharacterName", ChangeCharacterName, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("EditWorld", EditWorld, vType);
+	m_pScriptManager->RegisterFunction("EditWorld", EditWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("EditMap", EditMap, vType);
+	m_pScriptManager->RegisterFunction("EditMap", EditMap, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("AddHairs", AddHairs, vType);
+	m_pScriptManager->RegisterFunction("AddHairs", AddHairs, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("PrintReg", PrintReg, vType);
+	m_pScriptManager->RegisterFunction("PrintReg", PrintReg, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("ShowGUICursor", ShowGUICursor, vType);
+	m_pScriptManager->RegisterFunction("ShowGUICursor", ShowGUICursor, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("Kill", Kill, vType);
+	m_pScriptManager->RegisterFunction("Kill", Kill, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayCamera", DisplayCamera, vType);
+	m_pScriptManager->RegisterFunction("DisplayCamera", DisplayCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("InitCamera", InitCamera, vType);	
+	m_pScriptManager->RegisterFunction("InitCamera", InitCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("PatchBMEMeshTextureName", PatchBMEMeshTextureName, vType);
+	m_pScriptManager->RegisterFunction("PatchBMEMeshTextureName", PatchBMEMeshTextureName, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("ResetFreeCamera", ResetFreeCamera, vType);	
+	m_pScriptManager->RegisterFunction("ResetFreeCamera", ResetFreeCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("SetLineWidth", SetLineWidth, vType);	
+	m_pScriptManager->RegisterFunction("SetLineWidth", SetLineWidth, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayBoneBoundingSphere", DisplayBoneBoundingSphere, vType );
+	m_pScriptManager->RegisterFunction( "DisplayBoneBoundingSphere", DisplayBoneBoundingSphere, vType, eVoid);
 
 	vType.push_back( eString );
 	vType.push_back( eFloat);
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Merge", Merge, vType );
+	m_pScriptManager->RegisterFunction( "Merge", Merge, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back( eString );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "MessageBox", TestMessageBox, vType );
+	m_pScriptManager->RegisterFunction( "MessageBox", TestMessageBox, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Operation", Operation, vType );
+	m_pScriptManager->RegisterFunction( "Operation", Operation, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Operation3", Operation3, vType );
-
-	vType.clear();
-	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "LoadMap", LoadMap, vType );
+	m_pScriptManager->RegisterFunction( "Operation3", Operation3, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SaveMap", SaveMap, vType );
+	m_pScriptManager->RegisterFunction( "LoadMap", LoadMap, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eString );
+	m_pScriptManager->RegisterFunction( "SaveMap", SaveMap, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("LoadWorld", LoadWorld, vType);
+	m_pScriptManager->RegisterFunction("LoadWorld", LoadWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SaveWorld", SaveWorld, vType);
+	m_pScriptManager->RegisterFunction("SaveWorld", SaveWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "CreateEntity", CreateEntity, vType );
+	m_pScriptManager->RegisterFunction( "CreateEntity", CreateEntity, vType, eInt);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "cls", cls, vType );
+	m_pScriptManager->RegisterFunction( "cls", cls, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "exit", Exit, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayEntityPosition", DisplayEntityPosition, vType );
+	m_pScriptManager->RegisterFunction( "exit", Exit, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "DisplayEntityPosition", DisplayEntityPosition, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eInt );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetEntityPos", SetEntityPos, vType );
+	m_pScriptManager->RegisterFunction( "SetEntityPos", SetEntityPos, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetEntityDummyRootPos", SetEntityDummyRootPos, vType);
+	m_pScriptManager->RegisterFunction("SetEntityDummyRootPos", SetEntityDummyRootPos, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplayCamPos", DisplayCamPos, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	vType.push_back( eInt );
-	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "SetBkgColor", SetBkgColor, vType );
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplayBkgColor", DisplayBkgColor, vType );
+	m_pScriptManager->RegisterFunction( "DisplayCamPos", DisplayCamPos, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayBBox", DisplayBBox, vType );
+	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "SetBkgColor", SetBkgColor, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplayEntities", DisplayEntities, vType );
+	m_pScriptManager->RegisterFunction( "DisplayBkgColor", DisplayBkgColor, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eInt );
+	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "DisplayBBox", DisplayBBox, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction( "DisplayEntities", DisplayEntities, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayCollisionEntities", DisplayCollisionEntities, vType);
+	m_pScriptManager->RegisterFunction("DisplayCollisionEntities", DisplayCollisionEntities, vType, eVoid);
 	
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayMobileEntities", DisplayMobileEntities, vType);
+	m_pScriptManager->RegisterFunction("DisplayMobileEntities", DisplayMobileEntities, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "GetEntityID", GetEntityID, vType );
+	m_pScriptManager->RegisterFunction( "GetEntityID", GetEntityID, vType, eInt );
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SetEntityShader", SetEntityShader, vType );
+	m_pScriptManager->RegisterFunction( "SetEntityShader", SetEntityShader, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "YawEntity", YawEntity, vType );
+	m_pScriptManager->RegisterFunction( "YawEntity", YawEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "PitchEntity", PitchEntity, vType );
+	m_pScriptManager->RegisterFunction( "PitchEntity", PitchEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "RollEntity", RollEntity, vType );
+	m_pScriptManager->RegisterFunction( "RollEntity", RollEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
@@ -3752,153 +3769,153 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back( eInt );
 	vType.push_back( eString );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "CreateLight", CreateLight, vType );
+	m_pScriptManager->RegisterFunction( "CreateLight", CreateLight, vType, eInt);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetLightIntensity", SetLightIntensity, vType );
+	m_pScriptManager->RegisterFunction( "SetLightIntensity", SetLightIntensity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetLightAmbient", SetLightAmbient, vType);	
+	m_pScriptManager->RegisterFunction("SetLightAmbient", SetLightAmbient, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayLightIntensity", DisplayLightIntensity, vType);
+	m_pScriptManager->RegisterFunction("DisplayLightIntensity", DisplayLightIntensity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayBBoxInfos", DisplayBBoxInfos, vType );
+	m_pScriptManager->RegisterFunction( "DisplayBBoxInfos", DisplayBBoxInfos, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "ScreenCapture", ScreenCapture, vType );
+	m_pScriptManager->RegisterFunction( "ScreenCapture", ScreenCapture, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "CreateHM", CreateHM, vType );
+	m_pScriptManager->RegisterFunction( "CreateHM", CreateHM, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("CreateHMFromFile", CreateHMFromFile, vType);
+	m_pScriptManager->RegisterFunction("CreateHMFromFile", CreateHMFromFile, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "LoadHM", LoadHM, vType );
+	m_pScriptManager->RegisterFunction( "LoadHM", LoadHM, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetEntityWeight", SetEntityWeight, vType );
+	m_pScriptManager->RegisterFunction( "SetEntityWeight", SetEntityWeight, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "ClearScene", ClearScene, vType );
+	m_pScriptManager->RegisterFunction( "ClearScene", ClearScene, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction( "SetSceneMap", SetSceneMap, vType );
+	m_pScriptManager->RegisterFunction( "SetSceneMap", SetSceneMap, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction( "ExportBMEToAscii", ExportBMEToAscii, vType );
+	m_pScriptManager->RegisterFunction( "ExportBMEToAscii", ExportBMEToAscii, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "ExportBKEToAscii", ExportBKEToAscii, vType );
+	m_pScriptManager->RegisterFunction( "ExportBKEToAscii", ExportBKEToAscii, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("ExportBSEToAscii", ExportBSEToAscii, vType);
+	m_pScriptManager->RegisterFunction("ExportBSEToAscii", ExportBSEToAscii, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayRepere", DisplayRepere, vType );
+	m_pScriptManager->RegisterFunction( "DisplayRepere", DisplayRepere, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayPickingRaySelected", DisplayPickingRaySelected, vType);
+	m_pScriptManager->RegisterFunction("DisplayPickingRaySelected", DisplayPickingRaySelected, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayPickingRayMouseMove", DisplayPickingRayMouseMove, vType);
+	m_pScriptManager->RegisterFunction("DisplayPickingRayMouseMove", DisplayPickingRayMouseMove, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayPickingIntersectPlane", DisplayPickingIntersectPlane, vType);
+	m_pScriptManager->RegisterFunction("DisplayPickingIntersectPlane", DisplayPickingIntersectPlane, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayCharacters", DisplayCharacters, vType);
+	m_pScriptManager->RegisterFunction("DisplayCharacters", DisplayCharacters, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "LoadImage", LoadImage, vType );
+	m_pScriptManager->RegisterFunction( "LoadImage", LoadImage, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "run", run, vType );
+	m_pScriptManager->RegisterFunction( "run", run, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetCamPos", SetCamPos, vType );
+	m_pScriptManager->RegisterFunction( "SetCamPos", SetCamPos, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("YawCamera", YawCamera, vType);
+	m_pScriptManager->RegisterFunction("YawCamera", YawCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("PitchCamera", PitchCamera, vType);
+	m_pScriptManager->RegisterFunction("PitchCamera", PitchCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("RollCamera", RollCamera, vType);
+	m_pScriptManager->RegisterFunction("RollCamera", RollCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("WatchEntityPosition", WatchEntityPosition, vType);
+	m_pScriptManager->RegisterFunction("WatchEntityPosition", WatchEntityPosition, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("StopWatchEntityPosition", StopWatchEntityPosition, vType);
+	m_pScriptManager->RegisterFunction("StopWatchEntityPosition", StopWatchEntityPosition, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "CreateLightw", CreateLightw, vType );
+	m_pScriptManager->RegisterFunction( "CreateLightw", CreateLightw, vType, eInt );
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "flist", flist, vType );
+	m_pScriptManager->RegisterFunction( "flist", flist, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplaySceneChilds", DisplaySceneChilds, vType );
+	m_pScriptManager->RegisterFunction( "DisplaySceneChilds", DisplaySceneChilds, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "DisplayHM", DisplayHM, vType );
+	m_pScriptManager->RegisterFunction( "DisplayHM", DisplayHM, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "StopDisplayHM", StopDisplayHM, vType );
+	m_pScriptManager->RegisterFunction( "StopDisplayHM", StopDisplayHM, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "SetHMPrecision", SetHMPrecision, vType );
+	m_pScriptManager->RegisterFunction( "SetHMPrecision", SetHMPrecision, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayShaderName", DisplayShaderName, vType );	
+	m_pScriptManager->RegisterFunction( "DisplayShaderName", DisplayShaderName, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "LoadShader", LoadShader, vType );
+	m_pScriptManager->RegisterFunction( "LoadShader", LoadShader, vType, eVoid);
 	
 	//vType.clear();
 	//m_pScriptManager->RegisterFunction( "ClearRessources", ClearRessources, vType );
@@ -3906,58 +3923,58 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SetAnimation", SetAnimation, vType );
+	m_pScriptManager->RegisterFunction( "SetAnimation", SetAnimation, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction( "PlayCurrentAnimation", PlayCurrentAnimation, vType );
+	m_pScriptManager->RegisterFunction( "PlayCurrentAnimation", PlayCurrentAnimation, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "reset", reset, vType );
+	m_pScriptManager->RegisterFunction( "reset", reset, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayEntitySkeletonInfos", DisplayEntitySkeletonInfos, vType );
+	m_pScriptManager->RegisterFunction( "DisplayEntitySkeletonInfos", DisplayEntitySkeletonInfos, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SelectBone", SelectBone, vType );
+	m_pScriptManager->RegisterFunction( "SelectBone", SelectBone, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Yaw", Yaw, vType );
+	m_pScriptManager->RegisterFunction( "Yaw", Yaw, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Pitch", Pitch, vType );
+	m_pScriptManager->RegisterFunction( "Pitch", Pitch, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Roll", Roll, vType );
+	m_pScriptManager->RegisterFunction( "Roll", Roll, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "PauseAnimation", PauseAnimation, vType );
+	m_pScriptManager->RegisterFunction( "PauseAnimation", PauseAnimation, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DetachAnimation", DetachAnimation, vType );
+	m_pScriptManager->RegisterFunction( "DetachAnimation", DetachAnimation, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "StopAnimation", StopAnimation, vType );
+	m_pScriptManager->RegisterFunction( "StopAnimation", StopAnimation, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Sleep", Sleep, vType );
+	m_pScriptManager->RegisterFunction( "Sleep", Sleep, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "HideEntity", HideEntity, vType );
+	m_pScriptManager->RegisterFunction( "HideEntity", HideEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
@@ -3965,228 +3982,227 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back( eInt );
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "LinkToId", LinkToId, vType );
+	m_pScriptManager->RegisterFunction( "LinkToId", LinkToId, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetZCollisionError", SetZCollisionError, vType );
+	m_pScriptManager->RegisterFunction( "SetZCollisionError", SetZCollisionError, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetConstantLocalTranslate", SetConstantLocalTranslate, vType );
+	m_pScriptManager->RegisterFunction( "SetConstantLocalTranslate", SetConstantLocalTranslate, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "NextAnimationFrame", NextAnimationFrame, vType );
+	m_pScriptManager->RegisterFunction( "NextAnimationFrame", NextAnimationFrame, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "NextAnimationKey", NextAnimationKey, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "SetAnimationTime", SetAnimationTime, vType );
+	m_pScriptManager->RegisterFunction( "NextAnimationKey", NextAnimationKey, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayAnimationTime", DisplayAnimationTime, vType );	
+	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "SetAnimationTime", SetAnimationTime, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "DisplayAnimationTime", DisplayAnimationTime, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction( "CreateMobileEntity", CreateMobileEntity, vType );
+	m_pScriptManager->RegisterFunction( "CreateMobileEntity", CreateMobileEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("CreatePlayer", CreatePlayer, vType);
+	m_pScriptManager->RegisterFunction("CreatePlayer", CreatePlayer, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction( "CreateNPC", CreateNPC, vType );
+	m_pScriptManager->RegisterFunction( "CreateNPC", CreateNPC, vType, eInt);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("SaveCharacter", SaveCharacter, vType);
-
-	vType.clear();
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SaveCharacterInWorld", SaveCharacterInWorld, vType);	
+	m_pScriptManager->RegisterFunction("SaveCharacter", SaveCharacter, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("RemoveCharacterFromWorld", RemoveCharacterFromWorld, vType);
+	m_pScriptManager->RegisterFunction("SaveCharacterInWorld", SaveCharacterInWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("RemoveCharacterFromDB", RemoveCharacterFromDB, vType);
+	m_pScriptManager->RegisterFunction("RemoveCharacterFromWorld", RemoveCharacterFromWorld, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("CreateMinimapEntity", CreateMinimapEntity, vType);
+	m_pScriptManager->RegisterFunction("RemoveCharacterFromDB", RemoveCharacterFromDB, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("CreateMinimapEntity", CreateMinimapEntity, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("CreateTestEntity", CreateTestEntity, vType);
+	m_pScriptManager->RegisterFunction("CreateTestEntity", CreateTestEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Walk", Walk, vType );
+	m_pScriptManager->RegisterFunction( "Walk", Walk, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Stand", Stand, vType );
+	m_pScriptManager->RegisterFunction( "Stand", Stand, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Run", Run, vType );
+	m_pScriptManager->RegisterFunction( "Run", Run, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayNodeInfos", DisplayNodeInfos, vType );
+	m_pScriptManager->RegisterFunction( "DisplayNodeInfos", DisplayNodeInfos, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "StopRender", StopRender, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	vType.push_back( eString );
-	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetAnimationSpeed", SetAnimationSpeed, vType );
-
-	vType.clear();
-	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetGravity", SetGravity, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "SetCurrentPlayer", SetCurrentPlayer, vType );
-
-	vType.clear();
-	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SetCameraType", SetCameraType, vType );
-
-	vType.clear();
-	vType.push_back( eInt );
-	vType.push_back( eFloat );
-	vType.push_back( eFloat );
-	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "LocalTranslate", LocalTranslate, vType );
+	m_pScriptManager->RegisterFunction( "StopRender", StopRender, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
+	vType.push_back( eFloat );
+	m_pScriptManager->RegisterFunction( "SetAnimationSpeed", SetAnimationSpeed, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eFloat );
+	m_pScriptManager->RegisterFunction( "SetGravity", SetGravity, vType, eVoid);
+
+	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "RunAction", RunAction, vType );
+	m_pScriptManager->RegisterFunction( "SetCurrentPlayer", SetCurrentPlayer, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eString );
+	m_pScriptManager->RegisterFunction( "SetCameraType", SetCameraType, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetScale", SetScale, vType );
+	m_pScriptManager->RegisterFunction( "LocalTranslate", LocalTranslate, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SetRenderType", SetRenderType, vType );
+	vType.push_back( eInt );
+	m_pScriptManager->RegisterFunction( "RunAction", RunAction, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eInt );
+	vType.push_back( eFloat );
+	vType.push_back( eFloat );
+	vType.push_back( eFloat );
+	m_pScriptManager->RegisterFunction( "SetScale", SetScale, vType, eVoid);
+
+	vType.clear();
+	vType.push_back( eInt );
+	vType.push_back( eString );
+	m_pScriptManager->RegisterFunction( "SetRenderType", SetRenderType, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayBoundingSphere", DisplayBoundingSphere, vType );
+	m_pScriptManager->RegisterFunction( "DisplayBoundingSphere", DisplayBoundingSphere, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "Unlink", Unlink, vType );
+	m_pScriptManager->RegisterFunction( "Unlink", Unlink, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back( eString );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "ComputeKeysBoundingBoxes", ComputeKeysBoundingBoxes, vType );
+	m_pScriptManager->RegisterFunction( "ComputeKeysBoundingBoxes", ComputeKeysBoundingBoxes, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("Attack", Attack, vType);
+	m_pScriptManager->RegisterFunction("Attack", Attack, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("TalkTo", TalkTo, vType);
+	m_pScriptManager->RegisterFunction("TalkTo", TalkTo, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );
 	vType.push_back( eString );
 	vType.push_back( eString );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "SetPreferedKeyBBox", SetPreferedKeyBBox, vType );
+	m_pScriptManager->RegisterFunction( "SetPreferedKeyBBox", SetPreferedKeyBBox, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "CreateBox", CreateBox, vType );
-
+	m_pScriptManager->RegisterFunction( "CreateBox", CreateBox, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "CreateSphere", CreateSphere, vType );
+	m_pScriptManager->RegisterFunction( "CreateSphere", CreateSphere, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("CreateQuad", CreateQuad, vType);
+	m_pScriptManager->RegisterFunction("CreateQuad", CreateQuad, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("RayTrace", RayTrace, vType);
+	m_pScriptManager->RegisterFunction("RayTrace", RayTrace, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "ChangeBase", ChangeBase, vType );
+	m_pScriptManager->RegisterFunction( "ChangeBase", ChangeBase, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayAnimationBBox", DisplayAnimationBBox, vType );
+	m_pScriptManager->RegisterFunction( "DisplayAnimationBBox", DisplayAnimationBBox, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "Goto", Goto, vType );
+	m_pScriptManager->RegisterFunction( "Goto", Goto, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "CreateRepere", CreateRepere, vType );
+	m_pScriptManager->RegisterFunction( "CreateRepere", CreateRepere, vType, eInt);
 
 	vType.clear();
 	vType.push_back( eInt );
 	vType.push_back( eString );
-	m_pScriptManager->RegisterFunction( "SetEntityName", SetEntityName, vType );
+	m_pScriptManager->RegisterFunction( "SetEntityName", SetEntityName, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplayFov", DisplayFov, vType );
+	m_pScriptManager->RegisterFunction( "DisplayFov", DisplayFov, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eFloat );
-	m_pScriptManager->RegisterFunction( "SetFov", SetFov, vType );
+	m_pScriptManager->RegisterFunction( "SetFov", SetFov, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("print", print, vType);
+	m_pScriptManager->RegisterFunction("print", print, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("GetCameraID", GetCameraID, vType);
+	m_pScriptManager->RegisterFunction("GetCameraID", GetCameraID, vType, eInt);
 
 
 	vType.clear();
@@ -4206,45 +4222,45 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetCameraMatrix", SetCameraMatrix, vType);
-
-	vType.clear();
-	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("LockCamera", LockCamera, vType);
-
-	vType.clear();
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("SetProjectionMatrixType", SetProjectionMatrixType, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayProjectionMatrix", DisplayProjectionMatrix, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayModelViewProjectionMatrix", DisplayModelViewProjectionMatrix, vType);
-
-	vType.clear();
-	m_pScriptManager->RegisterFunction("DisplayCameraMatrix", DisplayCameraMatrix, vType);
+	m_pScriptManager->RegisterFunction("SetCameraMatrix", SetCameraMatrix, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("DisplayEntityMatrix", DisplayEntityMatrix, vType);
+	m_pScriptManager->RegisterFunction("LockCamera", LockCamera, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("testCollisionShader", testCollisionShader, vType);
+	m_pScriptManager->RegisterFunction("SetProjectionMatrixType", SetProjectionMatrixType, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplayProjectionMatrix", DisplayProjectionMatrix, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplayModelViewProjectionMatrix", DisplayModelViewProjectionMatrix, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplayCameraMatrix", DisplayCameraMatrix, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("DisplayEntityMatrix", DisplayEntityMatrix, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("testCollisionShader", testCollisionShader, vType, eVoid);
 	
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("ReloadShader", ReloadShader, vType);
+	m_pScriptManager->RegisterFunction("ReloadShader", ReloadShader, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("CullFace", CullFace, vType);
+	m_pScriptManager->RegisterFunction("CullFace", CullFace, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("EnableRenderCallback", EnableRenderCallback, vType);
+	m_pScriptManager->RegisterFunction("EnableRenderCallback", EnableRenderCallback, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
@@ -4253,57 +4269,57 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("CreateLineEntity", CreateLineEntity, vType);
+	m_pScriptManager->RegisterFunction("CreateLineEntity", CreateLineEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("OpenConsole", OpenConsole, vType);
+	m_pScriptManager->RegisterFunction("OpenConsole", OpenConsole, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("GetNodeId", GetNodeId, vType);
+	m_pScriptManager->RegisterFunction("GetNodeId", GetNodeId, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
-	m_pScriptManager->RegisterFunction("SetCurrentAnimationSpeed", SetCurrentAnimationSpeed, vType);
+	m_pScriptManager->RegisterFunction("SetCurrentAnimationSpeed", SetCurrentAnimationSpeed, vType, eVoid);
 
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("WearArmorToDummy", WearArmorToDummy, vType);
+	m_pScriptManager->RegisterFunction("WearArmorToDummy", WearArmorToDummy, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("WearShoes", WearShoes, vType);
+	m_pScriptManager->RegisterFunction("WearShoes", WearShoes, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("UnWearShoes", UnWearShoes, vType);
+	m_pScriptManager->RegisterFunction("UnWearShoes", UnWearShoes, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("UnWearAllShoes", UnWearAllShoes, vType);
+	m_pScriptManager->RegisterFunction("UnWearAllShoes", UnWearAllShoes, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("WearCloth", WearCloth, vType);
+	m_pScriptManager->RegisterFunction("WearCloth", WearCloth, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("UnwearAllClothes", UnwearAllClothes, vType);
+	m_pScriptManager->RegisterFunction("UnwearAllClothes", UnwearAllClothes, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("GenerateRandomNPC", GenerateRandomNPC, vType);
+	m_pScriptManager->RegisterFunction("GenerateRandomNPC", GenerateRandomNPC, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("SetLife", SetLife, vType);
+	m_pScriptManager->RegisterFunction("SetLife", SetLife, vType, eVoid);
 }

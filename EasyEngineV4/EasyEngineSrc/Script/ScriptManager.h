@@ -18,7 +18,7 @@ class CScriptManager : public IScriptManager
 public:
 	CScriptManager(EEInterface& oInterface);
 	~CScriptManager();
-	void	RegisterFunction(std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType) override;
+	void	RegisterFunction(std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType) override;
 	void	ExecuteCommand(std::string sCommand) override;
 	void	ExecuteByteCode(const vector<unsigned char>& vByteCode) override;
 	void	GetRegisteredFunctions(vector< string >& vFuncNames) override;

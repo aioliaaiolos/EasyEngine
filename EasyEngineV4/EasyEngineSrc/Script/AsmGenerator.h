@@ -103,6 +103,8 @@ public:
 		eCmp,
 		eJe,
 		eJne,
+		eJae,
+		eJbe,
 		eMnemonicCount
 	};
 
@@ -119,9 +121,9 @@ public:
 	const vector<vector<CInstr>>& GetFunctions() const;
 
 private:
-	void											GenOperation( CLexem::TLexem, const CSyntaxNode& child1, const CSyntaxNode& child2, vector< CInstr >& vAssembler );
-	void											GenOperation( CLexem::TLexem, CRegister::TType, const CSyntaxNode&, vector< CInstr >& );
-	void											GenOperation( CLexem::TLexem, CRegister::TType reg1, CRegister::TType reg2, vector< CInstr >& );
+	void											GenOperation( CLexem::Type, const CSyntaxNode& child1, const CSyntaxNode& child2, vector< CInstr >& vAssembler );
+	void											GenOperation( CLexem::Type, CRegister::TType, const CSyntaxNode&, vector< CInstr >& );
+	void											GenOperation( CLexem::Type, CRegister::TType reg1, CRegister::TType reg2, vector< CInstr >& );
 	void											GenMov( CRegister::TType, const CSyntaxNode&, vector< CInstr >& );
 	void											GenPush( CRegister::TType, vector< CInstr >& );
 	void											GenPush( const CSyntaxNode&, vector< CInstr >& );
@@ -130,6 +132,8 @@ private:
 	void											GenCall( const CSyntaxNode& oNode, vector< CInstr >& );
 	void											GenJe(string label, vector< CInstr >& vAssembler);
 	void											GenJne(string label, vector< CInstr >& vAssembler);
+	void											GenJae(string label, vector< CInstr >& vAssembler);
+	void											GenJbe(string label, vector< CInstr >& vAssembler);
 	void											GenCmp(CRegister::TType, CRegister::TType, vector< CInstr >& vAssembler);
 	void											GenCmp(CRegister::TType reg, float val, vector< CInstr >& vAssembler);
 	void											GenCmp(const CSyntaxNode& node1, const CSyntaxNode& node2, vector< CInstr >& vAssembler, const map<string, int>& mFuncAddr, CVarMap& mVar);
@@ -158,7 +162,7 @@ private:
 	void											Enter(vector<CInstr>& vAssembler);
 	void											Leave(vector<CInstr>& vAssembler);
 
-	map< CLexem::TLexem, TMnemonic >				m_mTypeToMnemonic;
+	map< CLexem::Type, TMnemonic >				m_mTypeToMnemonic;
 	map< TMnemonic, string >						m_mMnemonicToString;
 	map< string, vector< pair< int, int > >	>		m_mStringInstr; // Pour chaque string en dur, contient le numéro de l'instruction et de l'opérande
 	int												m_nCurrentScopeNumber;

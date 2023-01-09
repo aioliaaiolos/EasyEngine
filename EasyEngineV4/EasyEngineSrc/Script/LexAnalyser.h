@@ -12,7 +12,7 @@ class CCSVReader;
 
 struct CLexem
 {
-	enum TLexem
+	enum Type
 	{
 		eNone = -1,
 		eVar = 0,
@@ -36,15 +36,17 @@ struct CLexem
 		eLBraket,
 		eRBraket,
 		eIf,
-		eComp
+		eComp,
+		eSup,
+		eInf
 	};
 	string			m_sValue;
 	int				m_nValue;
 	float			m_fValue;
-	TLexem			m_eType;
+	Type			m_eType;
 
 	CLexem() : m_eType(eNone), m_nValue(0), m_fValue(0.f) {}
-	CLexem(TLexem t) : m_eType(t), m_nValue(0), m_fValue(0.f) {}
+	CLexem(Type t) : m_eType(t), m_nValue(0), m_fValue(0.f) {}
 	bool	IsOperation()const;
 	bool	IsNumeric()const;
 };
@@ -59,8 +61,8 @@ public:
 private:
 	int									m_nStateCount;
 	vector< vector< int > >				m_vAutomate;
-	map< int, CLexem::TLexem >		m_mFinalStates;
-	map< string, CLexem::TLexem >	m_mStringToLexemType;
+	map< int, CLexem::Type >		m_mFinalStates;
+	map< string, CLexem::Type >	m_mStringToLexemType;
 	map<string, pair<int, int>>		m_mKeyWord;
 
 	void					CalculStateCount( CCSVReader& r );

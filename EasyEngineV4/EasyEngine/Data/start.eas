@@ -1,20 +1,40 @@
-GuardAdvise = 0;
-ranja = 0;
 Player = 0;
-
+GuardAdvise = 0;
+guardHospital = 0;
+lastTime = 0;
+numberAdvertises = 0;
+stateGuardHospital = 0;
 onLoadingGame();
 
 function onExitHospitalArea()
 {
 	Player = GetEntityID("Player");
-	area = GetEntityID("hospital");
+	area = GetEntityID("area-hospital");
 	if(IsIntersect(Player, area)==0)
 	{
+		//print(0);
 		if(GuardAdvise==0)
 		{
-			ranja = GetEntityID("ranja");
-			TalkTo(ranja, Player);
+			guardHospital = GetEntityID("garde hopital");
+			//numberAdvertises = numberAdvertises + 1;
+			if(numberAdvertises > 2)
+			{
+				stateGuardHospital = 1;
+			}
+			TalkTo(guardHospital, Player);
 			GuardAdvise = 1;
+			//print(1);
+			lastTime = GetTime()
+		}
+		if(GuardAdvise == 1)
+		{
+			//print(2);
+			timeElapsedSinceLastAdvise = GetTime() - lastTime;
+			if(timeElapsedSinceLastAdvise > 5)
+			{
+				//print(3);
+				GuardAdvise = 0;
+			}
 		}
 	}
 }
@@ -25,12 +45,17 @@ function onLoadingGame()
 	SetBkgColor(0, 100, 255);
 	r=CreateRepere();
 
-	l=CreateLightw("omni", 1)
-	SetEntityPos(l, 0, 700, 0);
+	l=CreateLightw("omni", 1.0)
+	SetEntityPos(l, 0.0, 700.0, 0.0);
 	SetCameraType("free");
 
 	EnableInstancingMode(0);
+	
+	//EditWorld("empty");
 	//EditWorld("area3");
-	LoadWorld("area3");
+	//LoadWorld("area3");
 	//EditWorld("");
+	LoadWorld("");
+	
+	//SetAnimationSpeed(Player, "run", 5.0);
 }

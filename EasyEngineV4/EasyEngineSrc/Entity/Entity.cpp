@@ -4,6 +4,9 @@
 // stl
 #include <algorithm>
 
+// misc
+#include <time.h>
+
 // engine
 #include "IRenderer.h"
 #include "IRessource.h"
@@ -165,6 +168,8 @@ void CEntity::AttachScript(string sScript)
 	m_oScriptManager.Compile(sScript + "();", vByteCode);
 	m_sAttachedScript = sScript;
 	m_vAttachedScriptByteCode = vByteCode;
+	time(&m_nLastAttachScriptTime);
+	
 }
 
 void CEntity::SetRenderingType( IRenderer::TRenderType t )
@@ -580,7 +585,10 @@ void CEntity::ExecuteScripts()
 {
 	if (!m_sAttachedScript.empty()) {
 		try {
-			m_oScriptManager.ExecuteByteCode(m_vAttachedScriptByteCode);
+			time_t tCurrent;
+			time(&tCurrent);
+			if( (tCurrent - m_nLastAttachScriptTime) > 3)
+				m_oScriptManager.ExecuteByteCode(m_vAttachedScriptByteCode);
 		}
 		catch (CCompilationErrorException& e) {
 			string errorMessage;

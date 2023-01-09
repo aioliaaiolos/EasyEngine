@@ -338,15 +338,21 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 	else if (oTree.m_Lexem.m_eType == CLexem::eIf) {
 		GenAssemblerFirstPass(oTree.m_vChild[0], vAssembler, mFuncAddr, oVars);
 		string sLabel = GenerateNewLabel();
-		GenJne(sLabel, vAssembler);
+		if(oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eComp)
+			GenJne(sLabel, vAssembler);
+		else if (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eInf)
+			GenJae(sLabel, vAssembler);
+		else if (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eSup)
+			GenJbe(sLabel, vAssembler);
 		GenAssemblerFirstPass(oTree.m_vChild[1], vAssembler, mFuncAddr, oVars);
 		PutLabel(sLabel, vAssembler);
 	}
-	else if (oTree.m_Lexem.m_eType == CLexem::TLexem::eComp) {
+	else if ( (oTree.m_Lexem.m_eType == CLexem::Type::eComp) ||
+				(oTree.m_Lexem.m_eType == CLexem::Type::eSup) ||
+				(oTree.m_Lexem.m_eType == CLexem::Type::eInf) ) {
 		GenCmp(oTree.m_vChild[0], oTree.m_vChild[1], vAssembler, mFuncAddr, oVars);
 	}
-	else
-	{
+	else {
 		for (int i = 0; i < oTree.m_vChild.size(); i++) {
 			GenAssemblerFirstPass(oTree.m_vChild[i], vAssembler, mFuncAddr, oVars);
 			if (m_bPutAllCodeIntoSameMemory) {
@@ -433,6 +439,24 @@ void CAsmGenerator::GenJne(string label, vector< CInstr >& vAssembler)
 	vAssembler.push_back(oInstr);
 }
 
+void CAsmGenerator::GenJae(string label, vector< CInstr >& vAssembler)
+{
+	CInstr oInstr;
+	oInstr.m_eMnem = CAsmGenerator::eJae;
+	CPreprocessorString* pLabel = new CPreprocessorString(label);
+	oInstr.m_vOperand.push_back(pLabel);
+	vAssembler.push_back(oInstr);
+}
+
+void CAsmGenerator::GenJbe(string label, vector< CInstr >& vAssembler)
+{
+	CInstr oInstr;
+	oInstr.m_eMnem = CAsmGenerator::eJbe;
+	CPreprocessorString* pLabel = new CPreprocessorString(label);
+	oInstr.m_vOperand.push_back(pLabel);
+	vAssembler.push_back(oInstr);
+}
+
 void CAsmGenerator::GenCmp(CRegister::TType reg1, CRegister::TType reg2, vector< CInstr >& vAssembler)
 {
 	CInstr oInstr;
@@ -490,9 +514,9 @@ void CAsmGenerator::GenCmp(const CSyntaxNode& node1, const CSyntaxNode& node2, v
 	if (node1.m_vChild.size() > 0) {
 		if ((node2.m_vChild.size() == 0)) {
 			GenAssemblerFirstPass(node1, vAssembler, mFuncAddr, oVars);
-			if (node2.m_Lexem.m_eType == CLexem::TLexem::eInt)
+			if (node2.m_Lexem.m_eType == CLexem::Type::eInt)
 				GenCmp(CRegister::eax, node2.m_Lexem.m_nValue, vAssembler);
-			else if (node2.m_Lexem.m_eType == CLexem::TLexem::eFloat)
+			else if (node2.m_Lexem.m_eType == CLexem::Type::eFloat)
 				GenCmp(CRegister::eax, node2.m_Lexem.m_fValue, vAssembler);
 			else {
 				CCompilationErrorException e(-1, -1);
@@ -762,7 +786,7 @@ void CAsmGenerator::GenPush(CMemory* pMemory, vector< CInstr >& vAssembler)
 	vAssembler.push_back(oInstr);
 }
 
-void CAsmGenerator::GenOperation( CLexem::TLexem optype, CRegister::TType reg1, CRegister::TType reg2, vector< CInstr >& vAssembler )
+void CAsmGenerator::GenOperation( CLexem::Type optype, CRegister::TType reg1, CRegister::TType reg2, vector< CInstr >& vAssembler )
 {
 	CInstr oInstr;
 	CRegister* pReg1 = new CRegister( reg1 );
@@ -773,7 +797,7 @@ void CAsmGenerator::GenOperation( CLexem::TLexem optype, CRegister::TType reg1, 
 	vAssembler.push_back( oInstr );
 }
 
-void CAsmGenerator::GenOperation( CLexem::TLexem optype, const CSyntaxNode& child1, const CSyntaxNode& child2, vector< CInstr >& vAssembler )
+void CAsmGenerator::GenOperation( CLexem::Type optype, const CSyntaxNode& child1, const CSyntaxNode& child2, vector< CInstr >& vAssembler )
 {
 	CInstr oInstr;
 	GenMov( CRegister::eax, child1, vAssembler );
@@ -786,7 +810,7 @@ void CAsmGenerator::GenOperation( CLexem::TLexem optype, const CSyntaxNode& chil
 	vAssembler.push_back( oInstr );
 }
 
-void CAsmGenerator::GenOperation( CLexem::TLexem optype, CRegister::TType reg, const CSyntaxNode& oNode, vector< CInstr >& vAssembler )
+void CAsmGenerator::GenOperation( CLexem::Type optype, CRegister::TType reg, const CSyntaxNode& oNode, vector< CInstr >& vAssembler )
 {
 	CInstr oInstr;
 	oInstr.m_eMnem = m_mTypeToMnemonic[ optype ];

@@ -14,7 +14,7 @@ using namespace std;
 class CSyntaxNode
 {
 public:
-	enum NODE_TYPE
+	enum Type
 	{
 		eNone = -1,
 		eVal = 0,
@@ -23,6 +23,7 @@ public:
 		eInt,
 		eFloat,
 		eString,
+		eVoid,
 		eAPICall,
 		eFunctionCall,
 		eProg,
@@ -36,10 +37,10 @@ public:
 	CSyntaxNode();
 	CSyntaxNode( CLexem );
 	bool					FindVar(string varName) const;
-	static bool				IsValue(NODE_TYPE node);
+	static bool				IsValue(Type node);
 	CLexem	m_Lexem;
 	vector< CSyntaxNode >	m_vChild;
-	NODE_TYPE				m_eType;
+	Type				m_eType;
 	unsigned int			m_nAddress;
 	int						m_nScope;
 };
@@ -57,14 +58,14 @@ class CSyntaxAnalyser
 	void ReduceParenthesis( CSyntaxNode& oTree );
 	void ReduceInstruction( CSyntaxNode& oTree );
 	void ReduceAllOperations(  CSyntaxNode& oNode );
-	void ReduceOperations( CSyntaxNode& oNode, const vector< CLexem::TLexem >& vType );
+	void ReduceOperations( CSyntaxNode& oNode, const vector< CLexem::Type >& vType );
 	void DeleteTempNodes( CSyntaxNode& oNode );
 	void ReduceVecArgs( CSyntaxNode& oNode );
 	void DeleteParNodes( CSyntaxNode& oNode );
 
 public:
 	void GetSyntaxicTree( const vector< CLexem >& vLexem, CSyntaxNode& oTree );
-	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CLexem::TLexem leftLexem, CLexem::TLexem rightLexem, CSyntaxNode::NODE_TYPE nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
+	void ReduceLargestClosingLexem(vector< CSyntaxNode >& vNode, CLexem::Type leftLexem, CLexem::Type rightLexem, CSyntaxNode::Type nt, TParenthesisReductionType rt, unsigned int iFirst = 0);
 	vector<string>	m_vFunctions;
 };
 
