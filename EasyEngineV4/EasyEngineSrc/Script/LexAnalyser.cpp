@@ -13,14 +13,24 @@ CLexAnalyser::CLexAnalyser( string sCSVConfigName, IFileSystem* pFS )
 	CalculLexicalArrayFromCSV( sCSVConfigName, pFS );
 }
 
-bool CLexem::IsOperation()const
+bool CLexem::IsOperation() const
 {
 	return ( m_eType == eAdd || m_eType == eSub || m_eType == eDiv || m_eType == eMult );
 }
 
-bool CLexem::IsNumeric()const
+bool CLexem::IsCall() const
+{
+	return m_eType == eCall || m_eType == eAPICall;
+}
+
+bool CLexem::IsNumeric() const
 {
 	return m_eType == eInt || m_eType == eFloat || m_eType == eString;
+}
+
+bool CLexem::IsComparaison() const
+{
+	return m_eType == eComp || m_eType == eInf || m_eType == eSup;
 }
 
 void CLexAnalyser::InitStringToLexemTypeArray()
@@ -110,7 +120,7 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 			}
 			nCurrentState = nNextState;
 			i++;
-			if (c = '\t')
+			if (c == '\t')
 				column += 4;
 			else
 				column++;
@@ -157,8 +167,30 @@ void CLexAnalyser::GetLexemArrayFromScript( string sScript, vector< CLexem >& vL
 		vLexem.push_back( l );
 		if( i < sScript.size() )
 			bEnd = false;
-		if( bEnd )
+		if (bEnd) {
+			//NormalizeSub(vLexem);
 			return;
+		}
+	}
+}
+
+void CLexAnalyser::NormalizeSub(vector< CLexem >& vLexem)
+{
+	for (int i = 0; i < vLexem.size(); i++) {
+		if (vLexem[i].m_eType == CLexem::eInt && vLexem[i].m_nValue < 0 ||
+			vLexem[i].m_eType == CLexem::eFloat && vLexem[i].m_fValue < 0.f) {
+			if (i > 0) {
+				if (vLexem[i - 1].m_eType == CLexem::eInt || vLexem[i - 1].m_eType == CLexem::eFloat ||
+					vLexem[i - 1].m_eType == CLexem::eVar || vLexem[i - 1].m_eType == CLexem::eCall ||
+					vLexem[i - 1].m_eType == CLexem::eRPar) {
+					CLexem lSub;
+					lSub.m_eType = CLexem::eSub;
+					vLexem.insert(vLexem.begin() + i - 1, lSub);
+					vLexem[i].m_fValue = -vLexem[i].m_fValue;
+					vLexem[i].m_nValue = -vLexem[i].m_nValue;
+				}
+			}
+		}
 	}
 }
 

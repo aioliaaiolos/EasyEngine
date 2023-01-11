@@ -209,6 +209,7 @@ const vector<vector<CAsmGenerator::CInstr>>& CAsmGenerator::GetFunctions() const
 
 void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CInstr >& vAssembler, const map<string, int>& mFuncAddr, CVarMap& oVars )
 {
+	m_pVars = &oVars;
 	int nVarCountInThisScope = 0;
 	if ( oTree.m_eType == CSyntaxNode::eScope)
 		m_nCurrentScopeNumber++;
@@ -257,7 +258,7 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 			}
 		}
 	}
-	else if( oTree.m_Lexem.m_eType == CLexem::eCall )
+	else if(oTree.m_Lexem.m_eType == CLexem::eCall || oTree.m_Lexem.m_eType == CLexem::eAPICall)
 	{
 		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
 		{
@@ -300,14 +301,14 @@ void CAsmGenerator::GenAssemblerFirstPass( const CSyntaxNode& oTree, vector< CIn
 			GenMovAddrAddr(pSrcMemory, pDestMemory, vAssembler);
 		}
 		else if (oTree.m_vChild[1].m_eType == CSyntaxNode::eInt || oTree.m_vChild[1].m_eType == CSyntaxNode::eFloat || oTree.m_vChild[1].m_eType == CSyntaxNode::eString) {
-			if (oTree.m_vChild[1].m_vChild.size() > 0) {
+			if (oTree.m_vChild[1].m_vChild.size() > 0 || oTree.m_vChild[1].m_Lexem.IsCall()) {
 				GenAssemblerFirstPass(oTree.m_vChild[1], vAssembler, mFuncAddr, oVars);
 				GenMovAddrReg(CRegister::eax, pDestMemory, vAssembler);
 			}
 			else
 				GenMovAddrImm(pDestMemory, srcNode, vAssembler);
 		}
-		else if (oTree.m_vChild[1].m_Lexem.m_eType == CLexem::eCall) {
+		else if (oTree.m_vChild[1].m_Lexem.IsCall()) {
 			GenAssemblerFirstPass(oTree.m_vChild[1], vAssembler, mFuncAddr, oVars);
 			GenMovAddrReg(CRegister::eax, pDestMemory, vAssembler);
 		}
@@ -399,7 +400,7 @@ void CAsmGenerator::ResolveAddresses( vector< CInstr >& vCodeOut )
 void CAsmGenerator::GenCall( const CSyntaxNode& oNode, vector< CInstr >& vAssembler )
 {
 	CInstr oInstr;
-	if (oNode.m_eType == CSyntaxNode::eAPICall) {
+	if (oNode.m_Lexem.m_eType == CLexem::eAPICall) {
 		oInstr.m_eMnem = CAsmGenerator::eInt;
 		if (m_bPutAllCodeIntoSameMemory) {
 			CNumeric* pNumeric = new CNumeric(oNode.m_nAddress);
@@ -639,11 +640,32 @@ void CAsmGenerator::GenMov( CRegister::TType reg, const CSyntaxNode& oNode, vect
 	CInstr oInstr;
 	oInstr.m_eMnem = CAsmGenerator::eMov;
 	CRegister* pReg = new CRegister( reg );
-	CNumeric* pNum = new CNumeric;
-	FillOperandFromSyntaxNode( pNum, oNode );
-	oInstr.m_vOperand.push_back( pReg );
-	oInstr.m_vOperand.push_back( pNum );
-	vAssembler.push_back( oInstr );
+	oInstr.m_vOperand.push_back(pReg);
+
+	if (oNode.m_Lexem.IsNumeric()) {
+		CNumeric* pNum = new CNumeric;
+		FillOperandFromSyntaxNode(pNum, oNode);
+		oInstr.m_vOperand.push_back(pNum);
+		vAssembler.push_back(oInstr);
+	}
+	else if (oNode.m_Lexem.m_eType == CLexem::Type::eVar) {
+		CVar* pVar = m_pVars->GetVariable(oNode.m_Lexem.m_sValue);
+		CMemory* pMemory = CreateVarMemoryRegister(*pVar);
+		oInstr.m_vOperand.push_back(pMemory);
+		vAssembler.push_back(oInstr);
+	}
+	else if (oNode.m_Lexem.IsCall()) {
+		GenCall(oNode, vAssembler);
+		if (reg != CRegister::eax)
+			GenMov(reg, CRegister::eax, vAssembler);
+	}
+	else {
+		CCompilationErrorException e(-1, -1);
+		e.SetErrorMessage("Compilation error in CAsmGenerator::GenMov() : case not managed by compiler");
+		throw e;
+	}
+	
+	
 	if( oNode.m_Lexem.m_eType == CLexem::eString )
 		m_mStringInstr[ oNode.m_Lexem.m_sValue ].push_back( pair< int, int >::pair( (int)vAssembler.size() - 1, 1 ) );
 }
@@ -801,12 +823,27 @@ void CAsmGenerator::GenOperation( CLexem::Type optype, const CSyntaxNode& child1
 {
 	CInstr oInstr;
 	GenMov( CRegister::eax, child1, vAssembler );
-	CRegister* pOp1 = new CRegister( CRegister::eax );
-	CNumeric* pOp2 = new CNumeric();
-	FillOperandFromSyntaxNode( pOp2, child2 );
-	oInstr.m_vOperand.push_back( pOp1 );
-	oInstr.m_vOperand.push_back( pOp2 );
-	oInstr.m_eMnem = m_mTypeToMnemonic[ optype ];
+
+	if (child2.m_Lexem.IsNumeric()) {
+		CRegister* pOp1 = new CRegister(CRegister::eax);
+		CNumeric* pOp2 = new CNumeric();
+		FillOperandFromSyntaxNode(pOp2, child2);
+		oInstr.m_vOperand.push_back(pOp1);
+		oInstr.m_vOperand.push_back(pOp2);
+		oInstr.m_eMnem = m_mTypeToMnemonic[optype];
+	}
+	else if (child2.m_Lexem.m_eType == CLexem::eVar) {
+		CRegister* pOp1 = new CRegister(CRegister::eax);
+		CVar* pVar = m_pVars->GetVariable(child2.m_Lexem.m_sValue);
+		CMemory* pOp2 = CreateVarMemoryRegister(*pVar);
+		oInstr.m_vOperand.push_back(pOp1);
+		oInstr.m_vOperand.push_back(pOp2);
+		oInstr.m_eMnem = m_mTypeToMnemonic[optype];
+	}
+	else {
+		CCompilationErrorException e(-1, -1);
+		e.SetErrorMessage("Erreur dans CAsmGenerator::GenOperation() : cas non géré par le compilateur");
+	}
 	vAssembler.push_back( oInstr );
 }
 

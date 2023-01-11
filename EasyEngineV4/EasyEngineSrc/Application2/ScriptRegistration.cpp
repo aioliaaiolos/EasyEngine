@@ -882,6 +882,12 @@ void DisplayNodeInfos( IScriptState* pState )
 	}
 }
 
+void Debug(IScriptState* pState)
+{
+	CScriptFuncArgInt* pValue = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	pValue = pValue;
+}
+
 void SetCurrentAnimationSpeed(IScriptState* pState)
 {
 	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
@@ -3386,6 +3392,10 @@ void GetTime(IScriptState* pState)
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("Debug", Debug, vType, eInt);
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction("GetTime", GetTime, vType, eInt);

@@ -171,6 +171,7 @@ private:
 	bool											m_bMainRetPlaced;
 	bool											m_bPutAllCodeIntoSameMemory;
 	vector<vector<CInstr>>							m_vAssemblerFunctions;
+	CVarMap*										m_pVars;
 };
 
 #endif // CODEGEN_H

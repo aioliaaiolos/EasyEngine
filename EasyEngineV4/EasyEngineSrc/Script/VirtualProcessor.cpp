@@ -38,8 +38,8 @@ m_bPutAllCodeIntoSameMemory(bPutAllCodeIntoSameMemory)
 	m_mInstrFunc[ CBinGenerator::eSubRegReg ] = SubRegReg;
 #endif // 0
 	m_mInstrFunc[ CBinGenerator::eSubRegImm ] = SubRegImm;
-#if 0
 	m_mInstrFunc[ CBinGenerator::eSubRegAddr] = SubRegAddr;
+#if 0
 	m_mInstrFunc[ CBinGenerator::eSubImmReg ] = SubImmReg;
 	m_mInstrFunc[ CBinGenerator::eSubAddrReg ] = SubAddrReg;
 	m_mInstrFunc[ CBinGenerator::eSubAddrImm ] = SubAddrImm;
@@ -150,8 +150,13 @@ float CVirtualProcessor::GetVariableValue(string varName)
 {
 	const CVar* var = s_pSemanticAnalyser->GetVariable(varName);
 	if (var) {
-		int ebp = m_mEbpValueByScope[var->m_nScopePos];
-		return m_pMemory[ebp - var->m_nRelativeStackPosition];
+		int ebp = 0;
+		if (var->m_nScopePos == 0)
+			return m_pMemory[var->m_nRelativeStackPosition];
+		else {
+			ebp = m_mEbpValueByScope[var->m_nScopePos];
+			return m_pMemory[ebp - var->m_nRelativeStackPosition];
+		}
 	}
 	return -1.f;
 }
@@ -278,7 +283,7 @@ void CVirtualProcessor::JbeImm(unsigned char* pOperand)
 	unsigned char jmpAddr = pOperand[0];
 	int cf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF;
 	int zf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF;
-	if ( (cf != 0) || (zf != 1))
+	if ( (cf != 0) || (zf != 0))
 		s_pCurrentInstance->m_nEip = jmpAddr;
 }
 
@@ -351,6 +356,14 @@ void CVirtualProcessor::SubRegImm( unsigned char* pOperand )
 	float f;
 	memcpy( &f, &pOperand[ 1 ], 4 );
 	*s_pCurrentInstance->m_vRegAddr[r] -= f;
+}
+
+void CVirtualProcessor::SubRegAddr(unsigned char* pOperand)
+{
+	int r = (int)pOperand[0];
+	int address = GetMemRegisterAddress(pOperand + 1);
+	float fValue = s_pCurrentInstance->m_pMemory[address];
+	*s_pCurrentInstance->m_vRegAddr[r] -= fValue;
 }
 
 void CVirtualProcessor::DivRegReg( unsigned char* pOperand )

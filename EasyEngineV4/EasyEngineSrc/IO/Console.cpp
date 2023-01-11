@@ -365,8 +365,10 @@ void CConsole::OnKeyPress( unsigned char key )
 		}
 		if ( c != 0 )
 		{
-			sLine.insert( sLine.begin() + m_nCursorPos, c );
-			m_nCursorPos++;
+			if (sLine.size() >= m_nCursorPos) {
+				sLine.insert(sLine.begin() + m_nCursorPos, c);
+				m_nCursorPos++;
+			}
 		}
 	}
 }

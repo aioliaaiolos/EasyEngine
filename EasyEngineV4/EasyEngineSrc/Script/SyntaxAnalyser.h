@@ -24,8 +24,6 @@ public:
 		eFloat,
 		eString,
 		eVoid,
-		eAPICall,
-		eFunctionCall,
 		eProg,
 		eVecArgs,
 		ePar,
@@ -37,10 +35,10 @@ public:
 	CSyntaxNode();
 	CSyntaxNode( CLexem );
 	bool					FindVar(string varName) const;
-	static bool				IsValue(Type node);
-	CLexem	m_Lexem;
+	bool					IsResolved();
+	CLexem					m_Lexem;
 	vector< CSyntaxNode >	m_vChild;
-	Type				m_eType;
+	Type					m_eType;
 	unsigned int			m_nAddress;
 	int						m_nScope;
 };

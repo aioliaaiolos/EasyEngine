@@ -17,6 +17,7 @@ struct CLexem
 		eNone = -1,
 		eVar = 0,
 		eCall,
+		eAPICall,
 		eInt,
 		eFloat,
 		eLPar,
@@ -48,7 +49,9 @@ struct CLexem
 	CLexem() : m_eType(eNone), m_nValue(0), m_fValue(0.f) {}
 	CLexem(Type t) : m_eType(t), m_nValue(0), m_fValue(0.f) {}
 	bool	IsOperation()const;
+	bool	IsCall() const;
 	bool	IsNumeric()const;
+	bool	IsComparaison()const;
 };
 
 
@@ -72,6 +75,7 @@ private:
 	int						GenStringFromRegExpr(std::string sExpr, std::string& sOut);
 	int						GenHookRegExpr(string sExpr, string& sOut);
 	void					InitStringToLexemTypeArray();
+	void					NormalizeSub(vector< CLexem >& vLexem);
 	static void				ReadUntilEndComment(string sScript, unsigned int& startIndex, int& line);
 	static void				ReadUntilEndLine(string sScript, unsigned int& startIndex);	
 };

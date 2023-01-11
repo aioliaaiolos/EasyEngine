@@ -64,20 +64,20 @@ CBinGenerator::CBinGenerator(CSyntaxAnalyser& oSyntaxAnalyser, CAsmGenerator& oC
 
 	s_vInstrSize.push_back( -1 ); // pour démarrer à 1
 
-	s_vInstrSize.push_back( 2 );
-	s_vInstrSize.push_back( 6 );
-	s_vInstrSize.push_back( 4 );
-	s_vInstrSize.push_back( 4 );
-	s_vInstrSize.push_back( 7 );
+	s_vInstrSize.push_back( 2 ); // mov reg, reg
+	s_vInstrSize.push_back( 6 ); // mov reg, imm
+	s_vInstrSize.push_back( 4 ); // mov imm, reg
+	s_vInstrSize.push_back( 4 ); // mov addr, reg
+	s_vInstrSize.push_back( 7 ); // mov addr, imm
 
 	for( int i = CAsmGenerator::eAdd; i <= CAsmGenerator::eDiv; i++ )
 	{
-		s_vInstrSize.push_back( 2 );
-		s_vInstrSize.push_back( 6 );
-		s_vInstrSize.push_back( 6 );
-		s_vInstrSize.push_back( 6 );
-		s_vInstrSize.push_back( 6 );
-		s_vInstrSize.push_back( 10 );
+		s_vInstrSize.push_back( 2 ); // op reg, reg
+		s_vInstrSize.push_back( 6 ); // op reg, imm
+		s_vInstrSize.push_back( 4 ); // op reg, addr
+		s_vInstrSize.push_back( 6 ); // op imm, reg
+		s_vInstrSize.push_back( 6 ); // op addr, reg
+		s_vInstrSize.push_back( 10 );// op addr, imm
 	}
 	
 	s_vInstrSize.push_back( 2 ); // 30
@@ -166,7 +166,7 @@ void CBinGenerator::GenInstructionBinary( const CAsmGenerator::CInstr& oInstr, v
 						const CMemory* pMemory = dynamic_cast<CMemory*>(oInstr.m_vOperand[1]);
 						if (pMemory) {
 							// reg mem
-							instrIndex = s_tabInstr[CAsmGenerator::eMov][eReg][eAddr];
+							instrIndex = s_tabInstr[oInstr.m_eMnem][eReg][eAddr];
 							vBin.push_back(instrIndex);
 							vBin.push_back(pReg1->m_eValue);
 							GenMemoryBinary(pMemory, vBin);

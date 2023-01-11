@@ -18,11 +18,6 @@ m_nScope(0)
 {
 }
 
-bool CSyntaxNode::IsValue(Type node)
-{
-	return (node == eVal) || (node == eInt) || (node == eFloat) || (node == eString);
-}
-
 bool CSyntaxNode::FindVar(string sVarName) const
 {
 	if (m_Lexem.m_sValue == sVarName)
@@ -32,6 +27,11 @@ bool CSyntaxNode::FindVar(string sVarName) const
 			return true;
 	}
 	return false;
+}
+
+bool CSyntaxNode::IsResolved()
+{
+	return m_eType != CSyntaxNode::eVal && m_eType != CSyntaxNode::eNone;
 }
 
 void CSyntaxAnalyser::ReduceInstruction( CSyntaxNode& oTree )

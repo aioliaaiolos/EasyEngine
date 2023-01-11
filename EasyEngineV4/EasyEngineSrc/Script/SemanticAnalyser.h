@@ -60,9 +60,8 @@ class CSemanticAnalyser
 public:
 	CSemanticAnalyser();
 	void			RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType);
-	void			CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions);
+	void			CompleteSyntaxicTree(CSyntaxNode& oTree, vector<string> vFunctions);
 	void			GetFunctionAddress( map< string, int >& mFuncAddr );
-	void			SetTypeFromChildType( CSyntaxNode& oTree );
 	unsigned int	GetFuncArgsCount( int nFuncIndex );
 	float			CallInterruption( int nIndex, const vector< float >& vArgs );
 	void			GetRegisteredFunctions( vector< string >& vFuncNames );
@@ -70,7 +69,11 @@ public:
 	const CVar*		GetVariable(string varName);
 
 protected:
+	void			SetType(CSyntaxNode& oTree, vector<string> vFunctions, bool checkAPIArgs = false);
+	void			SetTypeFromChildType(CSyntaxNode& oTree);
+	void			CheckApiArgs(CSyntaxNode& oTree, const vector< TFuncArgType >& vArgs);
 	void			AddNewVariable(CSyntaxNode& oTree);
+	int				GetUnresolvedNodeCount(CSyntaxNode& node);
 	CSyntaxNode::Type	GetFunctionReturnType(CSyntaxNode& node);
 };
 

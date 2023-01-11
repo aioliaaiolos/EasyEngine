@@ -127,12 +127,29 @@ const CVar* CSemanticAnalyser::GetVariable(string varName)
 	return m_oVars.GetVariable(varName);
 }
 
-void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string> vFunctions )
+void CSemanticAnalyser::CompleteSyntaxicTree(CSyntaxNode& oTree, vector<string> vFunctions)
 {
-	if( oTree.m_Lexem.m_eType == CLexem::eCall )
+	int nUnresolvedNode = 0;
+	do {
+		SetType(oTree, vFunctions);
+		SetTypeFromChildType(oTree);
+		int lastUnresolvedNodeCount = nUnresolvedNode;
+		nUnresolvedNode = GetUnresolvedNodeCount(oTree);
+		if (lastUnresolvedNodeCount > 0 && lastUnresolvedNodeCount <= nUnresolvedNode) {
+			CCompilationErrorException e(-1, -1);
+			e.SetErrorMessage("Error : semantic analyser is not able to resolve all nodes.");
+			throw e;
+		}
+	} while (nUnresolvedNode > 0);
+	SetType(oTree, vFunctions, true);
+}
+
+void CSemanticAnalyser::SetType( CSyntaxNode& oTree, vector<string> vFunctions, bool checkAPIArgs)
+{
+	if (oTree.m_Lexem.m_eType == CLexem::eCall || oTree.m_Lexem.m_eType == CLexem::eAPICall)
 	{
-		FuncMap::iterator it = m_mInterruption.find( oTree.m_Lexem.m_sValue );
-		if( it == m_mInterruption.end() )
+		FuncMap::iterator it = m_mInterruption.find(oTree.m_Lexem.m_sValue);
+		if (it == m_mInterruption.end())
 		{
 			vector<string>::iterator itFunc = std::find(vFunctions.begin(), vFunctions.end(), oTree.m_Lexem.m_sValue);
 			if (itFunc == vFunctions.end()) {
@@ -142,58 +159,36 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 				throw e;
 			}
 			else {
-				oTree.m_eType = CSyntaxNode::eFunctionCall;
 				oTree.m_nAddress = (unsigned int)std::distance(vFunctions.begin(), itFunc);
+				oTree.m_eType = CSyntaxNode::eVoid;
 			}
 		}
 		else {
-			oTree.m_eType = CSyntaxNode::eAPICall;
-			if (it->second.second.first.size() != oTree.m_vChild.size())
-			{
+			if (it->second.second.first.size() != oTree.m_vChild.size()) {
 				ostringstream oss;
 				oss << "Fonction \"" << oTree.m_Lexem.m_sValue << "\" : nombre d'argument incorrect, " << it->second.second.first.size() << " arguments requis";
 				CCompilationErrorException e(-1, -1);
 				e.SetErrorMessage(oss.str());
 				throw e;
 			}
+			oTree.m_Lexem.m_eType = CLexem::eAPICall;
 			oTree.m_nAddress = (unsigned int)std::distance(m_mInterruption.begin(), it);
-		}
-		
-		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
-		
-		if (oTree.m_eType == CSyntaxNode::eAPICall) {
-			int argIndex = 1;
-			vector<CSyntaxNode>::iterator itChild = oTree.m_vChild.begin();
-			for (TFuncArgType& type : it->second.second.first) {
-				if (m_mTypes[type] != itChild->m_eType) {
-					CCompilationErrorException e(-1, -1);
-					CSyntaxNode::Type eExpected = m_mTypes[type];
-					string sExpected = m_mTypeToString[eExpected];
-					CSyntaxNode::Type eCurrent = itChild->m_eType;
-					string sCurrent = m_mTypeToString[eCurrent];
-					e.SetErrorMessage(string("Warning : function '") + oTree.m_Lexem.m_sValue + "' argument " + std::to_string(argIndex) +
-						" is a " + sCurrent + ", a " + sExpected + " is expected");
-					throw e;
-				}
-				argIndex++;
-				itChild++;
-			}
+			oTree.m_eType = GetFunctionReturnType(oTree);
+			if(checkAPIArgs)
+				CheckApiArgs(oTree, it->second.second.first);
 		}
 	}
-	else if ( (oTree.m_Lexem.m_eType == CLexem::Type::eComp) ||
-				(oTree.m_Lexem.m_eType == CLexem::Type::eInf) ||
-				(oTree.m_Lexem.m_eType == CLexem::Type::eSup) ) {
+	else if ((oTree.m_Lexem.m_eType == CLexem::Type::eComp) ||
+		(oTree.m_Lexem.m_eType == CLexem::Type::eInf) ||
+		(oTree.m_Lexem.m_eType == CLexem::Type::eSup)) {
 		oTree.m_eType = CSyntaxNode::eInt;
-		for (unsigned int i = 0; i < oTree.m_vChild.size(); i++)
-			CompleteSyntaxicTree(oTree.m_vChild[i], vFunctions);
 	}
-	else if( oTree.m_eType == CSyntaxNode::eVal || 
-		oTree.m_eType == CSyntaxNode::eInt || 
-		oTree.m_eType == CSyntaxNode::eFloat || 
-		oTree.m_eType == CSyntaxNode::eString )
+	else if (oTree.m_eType == CSyntaxNode::eVal ||
+		oTree.m_eType == CSyntaxNode::eInt ||
+		oTree.m_eType == CSyntaxNode::eFloat ||
+		oTree.m_eType == CSyntaxNode::eString)
 	{
-		if( oTree.m_vChild.size() == 0 )
+		if (oTree.m_vChild.size() == 0)
 		{
 			switch (oTree.m_Lexem.m_eType)
 			{
@@ -227,38 +222,80 @@ void CSemanticAnalyser::CompleteSyntaxicTree( CSyntaxNode& oTree, vector<string>
 				break;
 			}
 		}
-		else
-		{
-			SetTypeFromChildType( oTree );
-			for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-				CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
+	}
+
+	else if (oTree.m_eType == CSyntaxNode::eInstr) {
+		if ((oTree.m_vChild.size() == 1) && (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eVar)) {
+			oTree.m_vChild[0].m_eType = CSyntaxNode::eCommand;
+			oTree.m_vChild[0].m_Lexem.m_eType = CLexem::eNone;
 		}
 	}
-	else if (oTree.m_eType == CSyntaxNode::eCommand) {
-		set<string>::iterator itCommand = m_vCommand.find(oTree.m_Lexem.m_sValue);
-		if (itCommand == m_vCommand.end()) {
-			string sMessage = string("Commande \"") + oTree.m_Lexem.m_sValue + "\" non définie";
-			CCompilationErrorException e(-1, -1);
-			e.SetErrorMessage(sMessage);
-			throw e;
-		}
+	else if (oTree.m_Lexem.m_eType == CLexem::eFunctionDef)
+		m_nVariableIndex = 0;
+	else if (oTree.m_eType == CSyntaxNode::eScope)
+		m_nCurrentScopeNumber++;
+	else if (oTree.m_Lexem.m_eType == CLexem::eIf)
+		oTree.m_eType = CSyntaxNode::eVoid;
+	for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
+		SetType( oTree.m_vChild[ i ], vFunctions);
+		
+	if (oTree.m_eType == CSyntaxNode::eScope)
+		m_nCurrentScopeNumber--;
+}
+
+void CSemanticAnalyser::SetTypeFromChildType(CSyntaxNode& oTree)
+{
+	vector< int > vChildToAnalayse;
+	if (oTree.m_vChild.size() > 1 && (oTree.m_Lexem.IsOperation() || oTree.m_Lexem.IsComparaison() || oTree.m_Lexem.m_eType == CLexem::eAffect)) {
+		if (oTree.m_vChild[0].m_eType == CSyntaxNode::eInt && oTree.m_vChild[1].m_eType == CSyntaxNode::eFloat)
+			oTree.m_eType = CSyntaxNode::eFloat;
+		else if (oTree.m_vChild[0].m_eType == CSyntaxNode::eFloat && oTree.m_vChild[1].m_eType == CSyntaxNode::eInt)
+			oTree.m_eType = CSyntaxNode::eFloat;
+		else if (oTree.m_vChild[0].m_eType == CSyntaxNode::eFloat && oTree.m_vChild[1].m_eType == CSyntaxNode::eFloat)
+			oTree.m_eType = CSyntaxNode::eFloat;
+		else if (oTree.m_vChild[0].m_eType == CSyntaxNode::eInt && oTree.m_vChild[1].m_eType == CSyntaxNode::eInt)
+			oTree.m_eType = CSyntaxNode::eInt;
+		else if (oTree.m_vChild[0].m_eType == CSyntaxNode::eString && oTree.m_vChild[1].m_eType == CSyntaxNode::eString)
+			oTree.m_eType = CSyntaxNode::eString;
 	}
-	else
-	{
-		if (oTree.m_eType == CSyntaxNode::eInstr) {
-			if ((oTree.m_vChild.size() == 1) && (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eVar)) {
-				oTree.m_vChild[0].m_eType = CSyntaxNode::eCommand;
-				oTree.m_vChild[0].m_Lexem.m_eType = CLexem::eNone;
+	if (oTree.m_Lexem.m_eType == CLexem::eAffect) {
+		if (!oTree.m_vChild[0].IsResolved() && oTree.m_vChild[1].IsResolved()) {
+			oTree.m_vChild[0].m_eType = oTree.m_vChild[1].m_eType;
+			if (oTree.m_vChild[0].m_Lexem.m_eType == CLexem::eVar) {
+				CVar* pVar = m_oVars.GetVariable(oTree.m_vChild[0].m_Lexem.m_sValue);
+				pVar->m_nType = oTree.m_vChild[1].m_eType;
 			}
 		}
-		if (oTree.m_Lexem.m_eType == CLexem::eFunctionDef)
-			m_nVariableIndex = 0;
-		if (oTree.m_eType == CSyntaxNode::eScope)
-			m_nCurrentScopeNumber++;
-		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-			CompleteSyntaxicTree( oTree.m_vChild[ i ], vFunctions);
-		if (oTree.m_eType == CSyntaxNode::eScope)
-			m_nCurrentScopeNumber--;
+		if (oTree.m_vChild[1].m_eType == CSyntaxNode::eVoid) {
+			CCompilationErrorException e(-1, -1);
+			e.SetErrorMessage("Error : try to assign a 'void' value to '" + oTree.m_vChild[0].m_Lexem.m_sValue + "'");
+			throw e;
+		}
+		oTree.m_eType = oTree.m_vChild[0].m_eType;
+	}
+	for (CSyntaxNode& oChild : oTree.m_vChild)
+		SetTypeFromChildType(oChild);
+}
+
+void CSemanticAnalyser::CheckApiArgs(CSyntaxNode& oTree, const vector< TFuncArgType >& vArgs)
+{
+	int argIndex = 1;
+	vector<CSyntaxNode>::iterator itChild = oTree.m_vChild.begin();
+	for (const TFuncArgType& type : vArgs) {
+		if (m_mTypes[type] != itChild->m_eType) {
+			CCompilationErrorException e(-1, -1);
+			CSyntaxNode::Type eExpected = m_mTypes[type];
+			string sExpected = m_mTypeToString[eExpected];
+			CSyntaxNode::Type eCurrent = itChild->m_eType;
+			string sCurrent = m_mTypeToString[eCurrent];
+			if (!sCurrent.empty()) {
+				e.SetErrorMessage(string("Warning : function '") + oTree.m_Lexem.m_sValue + "' argument " + std::to_string(argIndex) +
+					" is a " + sCurrent + ", a " + sExpected + " is expected");
+				throw e;
+			}
+		}
+		argIndex++;
+		itChild++;
 	}
 }
 
@@ -275,6 +312,14 @@ void CSemanticAnalyser::AddNewVariable(CSyntaxNode& oTree)
 		oTree.m_eType = (CSyntaxNode::Type)pVar->m_nType;
 }
 
+int CSemanticAnalyser::GetUnresolvedNodeCount(CSyntaxNode& node)
+{
+	int result = node.IsResolved() ? 0 : 1;
+	for (CSyntaxNode& child : node.m_vChild)
+		result += GetUnresolvedNodeCount(child);
+	return result;
+}
+
 CSyntaxNode::Type CSemanticAnalyser::GetFunctionReturnType(CSyntaxNode& node)
 {
 	string sFunctionName = node.m_Lexem.m_sValue;
@@ -282,66 +327,6 @@ CSyntaxNode::Type CSemanticAnalyser::GetFunctionReturnType(CSyntaxNode& node)
 	if (itFunc != m_mInterruption.end())
 		return m_mTypes[itFunc->second.second.second];
 	return node.m_eType;
-}
-
-void CSemanticAnalyser::SetTypeFromChildType( CSyntaxNode& oTree )
-{
-	vector< int > vChildToAnalayse;
-	if( oTree.m_vChild.size() == 0 )
-	{
-		switch( oTree.m_Lexem.m_eType )
-		{
-		case CLexem::eInt:
-			oTree.m_eType = CSyntaxNode::eInt;
-			break;
-		case CLexem::eFloat:
-			oTree.m_eType = CSyntaxNode::eFloat;
-			break;
-		}
-	}
-	else if( (oTree.m_vChild.size() > 1) && 
-			 (oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eInt || oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eFloat ) &&
-			 (oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eInt || oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eFloat )) 
-	{
-		if( oTree.m_vChild[ 0 ].m_eType == CSyntaxNode::eInt &&
-			oTree.m_vChild[ 1 ].m_eType == CSyntaxNode::eInt )
-			oTree.m_eType = CSyntaxNode::eInt;
-		else
-			oTree.m_eType = CSyntaxNode::eFloat;
-	}
-	else
-	{
-		for( unsigned int i = 0; i < oTree.m_vChild.size(); i++ )
-		{
-			if( oTree.m_vChild[ i ].m_eType != CSyntaxNode::eInt &&
-				oTree.m_vChild[ i ].m_eType != CSyntaxNode::eFloat )
-			{
-				SetTypeFromChildType( oTree.m_vChild[ i ] );
-			}
-		}
-		if( oTree.m_Lexem.m_eType != CLexem::eCall )
-			if( oTree.m_Lexem.m_eType == CLexem::eAffect )
-			{
-				if ((oTree.m_vChild[1].m_eType == CSyntaxNode::eVal) && (oTree.m_vChild[1].m_Lexem.m_eType == CLexem::eCall)) {
-					string sFuncName = oTree.m_vChild[1].m_Lexem.m_sValue;
-					CSyntaxNode::Type returnType = GetFunctionReturnType(oTree.m_vChild[1]);
-					if (returnType == CSyntaxNode::Type::eVoid) {
-						CCompilationErrorException e(-1, -1);
-						e.SetErrorMessage("Error : try to assign a 'void' return (function '" + sFuncName + "') to a variable ('" + oTree.m_vChild[0].m_Lexem.m_sValue + "')");
-						throw e;
-					}
-					else {
-						oTree.m_vChild[0].m_eType = returnType;
-						oTree.m_vChild[1].m_eType = returnType;
-					}
-				}
-				else
-					oTree.m_vChild[ 0 ].m_eType = oTree.m_vChild[ 1 ].m_eType;
-				oTree.m_eType = oTree.m_vChild[0].m_eType;
-			}
-			else
-				SetTypeFromChildType( oTree );
-	}
 }
 
 void CSemanticAnalyser::GetFunctionAddress( map< string, int >& mFuncAddr )

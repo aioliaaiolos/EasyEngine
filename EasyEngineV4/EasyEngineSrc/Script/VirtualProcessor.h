@@ -67,6 +67,7 @@ private:
 	static void DivRegImm( unsigned char* pOperand );
 
 	static void SubRegImm( unsigned char* pOperand );
+	static void SubRegAddr(unsigned char* pOperand);
 
 	static void PushReg( unsigned char* pOperand );
 	static void PushImm( unsigned char* pOperand );
