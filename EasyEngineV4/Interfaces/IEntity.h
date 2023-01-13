@@ -160,13 +160,6 @@ public:
 	virtual void				GetPosition(CVector& oPosition) const = 0;
 };
 
-class IPlayer : public virtual ICharacter
-{
-public:
-	virtual void				Action() = 0;
-	virtual void				ToggleDisplayPlayerWindow() = 0;
-};
-
 class IScene : public virtual IEntity
 {
 public:
@@ -195,6 +188,7 @@ public:
 	virtual void				HandleLoadingComplete(LevelCompleteProc callback, void* pData) = 0;
 	virtual void				UnhandleLoadingComplete() = 0;
 	virtual void				OnChangeSector() = 0;
+	virtual void				SetRessourceFileName(string sNewFileName) = 0;
 };
 
 class IFighterEntityInterface
@@ -205,14 +199,29 @@ public:
 	virtual void				IncreaseLife(int nLife) = 0;
 	virtual void				MainHit() = 0;
 	virtual void				SecondaryHit() = 0;
+	virtual void				GetPosition(CVector& v) const = 0;
 };
 
-
-class IAEntityInterface
+class IPlayer : public virtual ICharacter, virtual public IFighterEntityInterface
 {
 public:
+	virtual void				Action() = 0;
+	virtual void				ToggleDisplayPlayerWindow() = 0;
+};
+
+class IAEntityInterface : virtual public IFighterEntityInterface
+{
+public:
+	typedef void (*TalkToCallback)(IAEntityInterface* pThis, IFighterEntityInterface* pInterlocutor);
+
 	virtual void Attack(IFighterEntityInterface* pEntity) = 0;
-	virtual void TalkTo(ICharacter* pEntity) = 0;
+	virtual void TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback = nullptr) = 0;
+};
+
+class ICollisionEntity : virtual public IEntity
+{
+public:
+	virtual ~ICollisionEntity() {};
 };
 
 class IEntityManager : public CPlugin

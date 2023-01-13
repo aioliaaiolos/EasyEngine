@@ -91,6 +91,7 @@ char* CShader::LoadSource( string sFileName, IFileSystem& oFileSystem )
 	fread( pSource, 1, nPos , pFile );
 	pSource[ nPos ] = 0;
 	fclose( pFile );
+	CStringUtils::GetShortFileName(sFileName, sFileName);
 	CStringUtils::GetFileNameWithoutExtension( sFileName, m_sName );
 	return pSource;
 }

@@ -58,7 +58,9 @@ public:
 class  CFileNotFoundException : public CFileException
 {
 public:
-	CFileNotFoundException( const std::string& sFileName ) : CFileException( sFileName ){}
+	CFileNotFoundException( const std::string& sFileName ) : CFileException( sFileName )
+	{
+	}
 };
 
 class  CRenderException : public CEException

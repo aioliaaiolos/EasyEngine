@@ -66,6 +66,10 @@ void CBMPLoader::WriteBMP(string sFileName, const vector< unsigned char >& vData
 	infoHeader.biPlanes = 1;
 
 	FILE* pFile = fopen(sFileName.c_str(), "wb");
+	if (!pFile) {
+		CFileNotFoundException e(sFileName);
+		throw e;
+	}
 
 	fwrite(&header, sizeof(BITMAPFILEHEADER), 1, pFile);
 	fwrite(&infoHeader, sizeof(BITMAPINFOHEADER), 1, pFile);

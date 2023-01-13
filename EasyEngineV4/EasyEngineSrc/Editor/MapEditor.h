@@ -41,6 +41,8 @@ public:
 	void							Edit(string id) override;
 	void							AdaptGroundToAllEntities();
 	void							SetBias(float fBias);
+	void							FlushTmpFolder();
+	void							SetSceneMap(string sRessourceFileName, string sDiffuseFileName, int lengh, float fHeight);
 
 private:
 		

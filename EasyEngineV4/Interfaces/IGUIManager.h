@@ -14,14 +14,18 @@ class ICameraManager;
 class IEntityManager;
 class IScene;
 class ITexture;
+class IObject;
 
 using namespace std;
 
 class IGUIWindow
 {
 public:
+	typedef void(*CloseWindowCallback)(IGUIWindow*, IObject* pObject);
+
 	virtual void	Display() = 0;
 	virtual void	SetVisibility(bool bVisible) = 0;
+	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IObject* pData) = 0;
 };
 
 class ITopicWindow : public virtual IGUIWindow

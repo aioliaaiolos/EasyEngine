@@ -8,7 +8,7 @@ class IMesh;
 class IAnimation;
 class IGeometryManager;
 
-class IAEntity : public virtual IFighterEntity, public IAEntityInterface
+class IAEntity : virtual public IFighterEntity, virtual public IAEntityInterface
 {
 friend class CFightSystem;
 
@@ -16,9 +16,10 @@ friend class CFightSystem;
 public:
 	IAEntity();
 	virtual void				Goto(const CVector& oPosition, float fSpeed);
-	void						TalkTo(ICharacter* pEntity) override;
+	void						TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback) override;
 	void						Update();
 
+	pair<TalkToCallback, IFighterEntityInterface*>	m_oTalkToCallback;
 
 protected:
 
@@ -27,6 +28,8 @@ protected:
 	virtual void				UpdateGoto();
 	virtual void				UpdateTalkToState();
 	virtual void				OpenTopicWindow() = 0;
+
+	
 
 private:
 	enum TFightState
@@ -66,7 +69,7 @@ private:
 	bool						m_bArriveAtDestination;
 	bool						m_bFaceToTarget;
 	IFighterEntity*				m_pCurrentEnemy;
-	ICharacter*					m_pCurrentInterlocutor;
+	IFighterEntityInterface*	m_pCurrentInterlocutor;
 	vector< CVector2D >			m_vCurrentPath;
 	int							m_nCurrentPathPointNumber;
 	float						m_fDestinationDeltaRadius;

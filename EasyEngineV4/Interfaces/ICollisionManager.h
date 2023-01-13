@@ -43,6 +43,7 @@ public:
 	virtual void GetPositionFromCellCoord(int row, int column, float& x, float& y) = 0;
 	virtual void Generate() = 0;
 	virtual void Load() = 0;
+	virtual void SetFileName(string sFileName) = 0;
 };
 
 class ICollisionManager : public CPlugin

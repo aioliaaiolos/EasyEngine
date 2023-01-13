@@ -264,7 +264,8 @@ void CVirtualProcessor::CmpImmImm(unsigned char* pOperand)
 
 void CVirtualProcessor::JneImm(unsigned char* pOperand)
 {
-	unsigned char jmpAddr = pOperand[0];
+	int jmpAddr;
+	memcpy(&jmpAddr, pOperand, 4);
 	int zf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF;
 	if(zf == 0)
 		s_pCurrentInstance->m_nEip = jmpAddr;
@@ -272,7 +273,8 @@ void CVirtualProcessor::JneImm(unsigned char* pOperand)
 
 void CVirtualProcessor::JaeImm(unsigned char* pOperand)
 {
-	unsigned char jmpAddr = pOperand[0];
+	int jmpAddr;
+	memcpy(&jmpAddr, pOperand, 4);
 	int cf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF;
 	if (cf == 0 )
 		s_pCurrentInstance->m_nEip = jmpAddr;
@@ -280,7 +282,8 @@ void CVirtualProcessor::JaeImm(unsigned char* pOperand)
 
 void CVirtualProcessor::JbeImm(unsigned char* pOperand)
 {
-	unsigned char jmpAddr = pOperand[0];
+	int jmpAddr;
+	memcpy(&jmpAddr, pOperand, 4);
 	int cf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::CF;
 	int zf = s_pCurrentInstance->m_nFlags & (unsigned int)TFlag::ZF;
 	if ( (cf != 0) || (zf != 0))

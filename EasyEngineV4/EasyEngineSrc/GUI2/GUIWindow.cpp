@@ -12,14 +12,16 @@ CGUIWindow::CGUIWindow()
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize) :
 	CGUIWidget(oInterface, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bVisible(false),
-	m_bGUIMode(false)
+	m_bGUIMode(false),
+	m_oCloseWindowCallback(nullptr, nullptr)
 {
 }
 
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight) :
 	CGUIWidget(oInterface, fileName, nWidth, nHeight),
 	m_bVisible(false),
-	m_bGUIMode(false)
+	m_bGUIMode(false),
+	m_oCloseWindowCallback(nullptr, nullptr)
 {
 
 }
@@ -27,7 +29,8 @@ CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int
 CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
 	CGUIWidget(oInterface, windowSize, skin),
 	m_bVisible(false),
-	m_bGUIMode(false)
+	m_bGUIMode(false),
+	m_oCloseWindowCallback(nullptr, nullptr)
 {
 }
 
@@ -97,6 +100,11 @@ void CGUIWindow::SetVisibility(bool bVisible)
 	m_bVisible = bVisible;
 }
 
+void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback, IObject* pData)
+{
+	m_oCloseWindowCallback.first = callback;
+	m_oCloseWindowCallback.second = pData;
+}
 
 bool CGUIWindow::IsVisible()
 {
@@ -138,5 +146,6 @@ deque<CGUIWidget*>& CGUIWindow::GetChildren()
 
 void CGUIWindow::OnShow(bool bShow)
 {
-
+	if (!bShow && m_oCloseWindowCallback.first)
+		m_oCloseWindowCallback.first(this, m_oCloseWindowCallback.second);
 }

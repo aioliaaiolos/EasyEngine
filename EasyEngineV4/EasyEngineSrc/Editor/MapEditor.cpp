@@ -212,6 +212,28 @@ bool CMapEditor::CreateLevelFolderIfNotExists(string levelName, string& levelFol
 	return true;
 }
 
+void CMapEditor::FlushTmpFolder()
+{
+	RemoveDirectoryA(m_sTmpFolder.c_str());
+}
+
+void CMapEditor::SetSceneMap(string sRessourceFileName, string sDiffuseFileName, int nLengh, float fHeight)
+{
+	if (IsEnabled()) {
+		FlushTmpFolder();
+		m_pScene->SetLength(nLengh);
+		m_pScene->SetHeight(fHeight);
+		m_pScene->SetDiffuseFileName(sDiffuseFileName);
+		m_pScene->SetRessource(sRessourceFileName);
+		string sError;
+		m_oRessourceManager.PopErrorMessage(sError);
+		if (sError.size() > 0)
+			m_oConsole.Println(sError);
+	}
+	else
+		m_oConsole.Println("Error : You have to enable Map Editor Mode to be able to save the map");
+}
+
 void CMapEditor::Save(string mapName)
 {
 	if (m_bEditionMode) {
@@ -248,6 +270,7 @@ void CMapEditor::Save(string mapName)
 					srcPath = root + sGroundFileName;
 					CopyFileA(srcPath.c_str(), destPath.c_str(), FALSE);
 				}
+				m_pScene->SetRessourceFileName(destPath);
 			}
 			SaveMap(levelFolder + mapName + ".bse", m_fBias);
 		}
@@ -382,6 +405,7 @@ void CMapEditor::Edit(string id)
 	}
 	catch (CEException& e) {
 		m_oConsole.Println("Map inexistante, vous pouvez demarrer la creation d'une nouvelle map avec la commande 'SetSceneMap(HeightMapName, DiffuseTextureName, width, height)' ou editer une map existante");
+		m_pScene->Clear();
 		InitCamera();
 	}
 }

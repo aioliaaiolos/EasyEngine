@@ -3,6 +3,8 @@
 
 #include "math/matrix.h"
 
+#include "IObject.h"
+
 // stl
 #include <string>
 
@@ -10,7 +12,7 @@
 
 class IGeometry;
 
-class INode
+class INode : public IObject
 {
 public:
 	virtual ~INode() {}

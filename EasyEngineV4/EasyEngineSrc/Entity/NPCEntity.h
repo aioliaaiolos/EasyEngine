@@ -3,6 +3,9 @@
 
 #pragma warning( disable:4250 )
 
+
+class IGUIWindow;
+
 class CNPCEntity : public CMobileEntity, public IAEntity
 {
 public:
@@ -35,8 +38,10 @@ public:
 
 protected:
 	void					UpdateGoto() override;
-	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
 	void					ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize);
+
+	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
+	static void				OnTopicWindowClosed(IGUIWindow*, IObject*);
 
 private:
 	void					Turn(float fAngle);

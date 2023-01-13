@@ -197,7 +197,7 @@ void CCollisionManager::CreateHeightMapWithoutRender(string sFileName)
 	m_oLoaderManager.Load(sFileName, ami);
 	ILoader::CMeshInfos& mi = ami.m_vMeshes[0];
 	CVector dim = mi.m_pBoundingBox->GetDimension();
-	int nCellCount = dim.m_x * dim.m_z;
+	int nCellCount = (int)(dim.m_x * dim.m_z);
 	int quadCount = mi.m_vIndex.size() / 6;
 	set<float> setx;
 	set<float> sety;

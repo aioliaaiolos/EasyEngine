@@ -178,7 +178,7 @@ protected:
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
 };
 
-class CCollisionEntity : public CEntity
+class CCollisionEntity : public CEntity, public ICollisionEntity
 {
 public:
 	CCollisionEntity(EEInterface& oInterface) : CEntity(oInterface) {}

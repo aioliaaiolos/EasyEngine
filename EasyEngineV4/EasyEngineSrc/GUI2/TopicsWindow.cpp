@@ -61,6 +61,7 @@ void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, void* pData)
 
 void CTopicsWindow::OnShow(bool bShow)
 {
+	CGUIWindow::OnShow(bShow);
 	if (!bShow) {
 		m_sText.clear();
 		m_pTopicFrame->DestroyTopicsWidgets();

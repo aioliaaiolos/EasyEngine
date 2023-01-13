@@ -344,6 +344,14 @@ void CScene::UnhandleLoadingComplete()
 	m_oLoadingCompleteCallback.second = nullptr;
 }
 
+void CScene::SetRessourceFileName(string sNewFileName)
+{
+	m_pRessource->SetFileName(sNewFileName);
+	string sCollisionFileName;
+	CStringUtils::GetFileNameWithoutExtension(sNewFileName, sCollisionFileName);
+	sCollisionFileName += "-collision.bmp";
+	m_pCollisionMap->SetFileName(sCollisionFileName);
+}
 
 void  CScene::RenderScene()
 {
@@ -574,7 +582,6 @@ void CScene::LoadSceneObject( const ILoader::CObjectInfos* pSceneObjInfos, CEnti
 void CScene::Load( const ILoader::CSceneInfos& si )
 {
 	Clear();
-	m_vCollideEntities.clear();
 	m_oRenderer.SetBackgroundColor(si.m_oBackgroundColor);
 	if (si.m_bUseDisplacementMap) {
 		m_nMapLength = si.m_nMapLength;

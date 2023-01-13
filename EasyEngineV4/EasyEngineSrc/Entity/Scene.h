@@ -76,6 +76,7 @@ public:
 	void								DeleteTempDirectories() override;
 	void								HandleLoadingComplete(LevelCompleteProc callback, void* pData) override;
 	void								UnhandleLoadingComplete();
+	void								SetRessourceFileName(string sNewFileName) override;
 
 private:
 	ICameraManager&						m_oCameraManager;

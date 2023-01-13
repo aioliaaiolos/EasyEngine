@@ -127,6 +127,8 @@ void CObject::UpdateCollision()
 						last.m_y = fMaxHeight;
 					m_oBody.m_oSpeed.m_y = 0;
 				}
+				oLocalMatrix.SetAffinePart(last.m_x, last.m_y, last.m_z);
+				GetBoundingGeometry()->SetTM(backupLocal);
 			}
 			else {
 				bCollision = true;

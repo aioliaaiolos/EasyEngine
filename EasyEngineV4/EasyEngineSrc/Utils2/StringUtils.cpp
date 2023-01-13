@@ -105,9 +105,8 @@ void CStringUtils::GetExtension( std::string sFileName, std::string& sExtension 
 
 void CStringUtils::GetFileNameWithoutExtension( string sFileName, string& sOut )
 {
-	int nSlashPos = sFileName.find_last_of( "\\" );
 	int nDotPos = sFileName.find_last_of( "." );
-	sOut = sFileName.substr( nSlashPos + 1, nDotPos - nSlashPos - 1 );
+	sOut = sFileName.substr( 0, nDotPos );
 }
 
 void CStringUtils::ConvertStringToWString(const string& s, wstring& w)
@@ -137,7 +136,10 @@ void CStringUtils::GetFolderPathFromCompleteFileName(string sFileName, string& s
 
 void CStringUtils::GetShortFileName(string sPathFile, string& sFileName)
 {
-	int idx = sPathFile.find_last_of('/');
+	int idx = sFileName.find_last_of('/');
+	if (idx == -1) {
+		idx = sFileName.find_last_of('\\');
+	}
 	if(idx >= 0)
 		sFileName = sPathFile.substr(idx + 1);
 }

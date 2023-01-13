@@ -17,7 +17,8 @@ m_fDestinationDeltaRadius( 100.f ),
 m_nCurrentPathPointNumber( 0 ),
 m_pCurrentEnemy(NULL),
 m_bFaceToTarget(false),
-m_pCurrentInterlocutor(nullptr)
+m_pCurrentInterlocutor(nullptr),
+m_oTalkToCallback(nullptr, nullptr)
 {
 }
 
@@ -330,10 +331,14 @@ void IAEntity::Attack(IFighterEntityInterface* pEntity)
 		Attack(pEnemy);
 }
 
-void IAEntity::TalkTo(ICharacter* pEntity)
+void IAEntity::TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback)
 {
-	m_pCurrentInterlocutor = pEntity;
-	m_eTalkToState = eBeginGotoInterlocutor;
+	if (pEntity->GetLife() > 0) {
+		m_pCurrentInterlocutor = pEntity;
+		m_eTalkToState = eBeginGotoInterlocutor;
+		m_oTalkToCallback.first = callback;
+		m_oTalkToCallback.second = pEntity;
+	}
 }
 
 void IAEntity::Attack(IFighterEntity* pEntity)

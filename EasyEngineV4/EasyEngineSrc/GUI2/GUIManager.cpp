@@ -46,7 +46,8 @@ m_nCharspace( 1 ),
 m_bGUIMode(false),
 m_bDisplayMap(false),
 m_pScene(nullptr),
-m_pCurrentFont(nullptr)
+m_pCurrentFont(nullptr),
+m_pLoaderManager(nullptr)
 {
 	ISceneManager* pSceneManager = static_cast<ISceneManager*>(oInterface.GetPlugin("SceneManager"));
 	m_pScene = dynamic_cast<IScene*>(pSceneManager->GetScene("Game"));

@@ -19,6 +19,8 @@ public:
 	// Collision map
 	CCollisionMap(EEInterface& oInterface, IEntity* pScene, int nCellSize);
 
+	void SetFileName(string sFileName) override;
+
 protected:
 
 	void		GetCellCoordFromPosition(float x, float y, int& cellx, int& celly) override;

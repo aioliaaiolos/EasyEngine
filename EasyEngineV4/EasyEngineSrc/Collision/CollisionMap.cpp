@@ -30,6 +30,11 @@ CCollisionMap::CCollisionMap(EEInterface& oInterface, IEntity* pScene, int nCell
 	}
 }
 
+void CCollisionMap::SetFileName(string sFileName)
+{
+	m_sFileName = sFileName;
+}
+
 void CCollisionMap::Generate()
 {
 	vector<vector<bool>> vGrid;

@@ -16,7 +16,7 @@ class ICollisionManager;
 
 using namespace std;
 
-class IFighterEntity : public IFighterEntityInterface
+class IFighterEntity : virtual public IFighterEntityInterface
 {
 
 public:
@@ -25,9 +25,7 @@ public:
 	void						IncreaseLife(int nLife);
 	virtual void				ReceiveHit(IFighterEntity* pEnemy);
 	virtual void				MainHit() override;
-	virtual void				SecondaryHit() override;
-
-	virtual void				GetPosition(CVector& v) const = 0;
+	virtual void				SecondaryHit() override;	
 	virtual void				Die() = 0;
 	virtual void				PlayReceiveHit() = 0;
 	virtual void				PlayHitAnimation() = 0;

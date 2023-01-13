@@ -581,15 +581,32 @@ void Attack(IScriptState* pState)
 	}
 }
 
+
+vector<unsigned char> vCallbackByteCode;
+void TalkToCallback(IAEntityInterface* pThis, IFighterEntityInterface* pInterlocutor)
+{
+	m_pScriptManager->ExecuteByteCode(vCallbackByteCode);
+}
+
 void TalkTo(IScriptState* pState)
 {
 	CScriptFuncArgInt* pTalkerId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
 	CScriptFuncArgInt* pInterlocutorId = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CScriptFuncArgString* pCallback = static_cast< CScriptFuncArgString* >(pState->GetArg(2));
+
+	string sTalkToScriptCallback;
+	sTalkToScriptCallback = pCallback->m_sValue;
+
 	IAEntityInterface* pTalker = dynamic_cast<IAEntityInterface*>(m_pEntityManager->GetEntity(pTalkerId->m_nValue));
 	if (pTalker) {
-		ICharacter* pInterlocutor = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pInterlocutorId->m_nValue));
+		IFighterEntityInterface* pInterlocutor = dynamic_cast<IFighterEntityInterface*>(m_pEntityManager->GetEntity(pInterlocutorId->m_nValue));
 		if (pInterlocutor) {
-			pTalker->TalkTo(pInterlocutor);
+			if (!sTalkToScriptCallback.empty()) {
+				pTalker->TalkTo(pInterlocutor, TalkToCallback);
+				m_pScriptManager->Compile(sTalkToScriptCallback + "();", vCallbackByteCode);
+			}
+			else
+				pTalker->TalkTo(pInterlocutor);
 		}
 	}
 }
@@ -2018,25 +2035,12 @@ void SetSceneMap( IScriptState* pState )
 	CScriptFuncArgString* pDiffuseFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
 	CScriptFuncArgInt* pLength = static_cast< CScriptFuncArgInt* >(pState->GetArg(2));
 	CScriptFuncArgFloat* pHeight = static_cast< CScriptFuncArgFloat* >(pState->GetArg(3));
-	string ressourceFileName = pRessourceFileName->m_sValue;
-	string diffuseFileName = pDiffuseFileName->m_sValue;
 
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException( false );
 	try
 	{
-		if (m_pMapEditor->IsEnabled()) {
-			m_pScene->SetLength(pLength->m_nValue);
-			m_pScene->SetHeight(pHeight->m_fValue);
-			m_pScene->SetDiffuseFileName(diffuseFileName);
-			m_pScene->SetRessource(ressourceFileName);
-			string sError;
-			m_pRessourceManager->PopErrorMessage(sError);
-			if (sError.size() > 0)
-				m_pConsole->Println(sError);
-		}
-		else
-			m_pConsole->Println("Error : You have to enable Map Editor Mode to be able to save the map");
+		m_pMapEditor->SetSceneMap(pRessourceFileName->m_sValue, pDiffuseFileName->m_sValue, pLength->m_nValue, pHeight->m_fValue);
 	}
 	catch( CRessourceException& e )
 	{
@@ -2057,7 +2061,7 @@ void SetSceneMap( IScriptState* pState )
 	}
 	catch( CEException&  )
 	{
-		string sMessage = string( "\"" ) + ressourceFileName + "\" introuvable";
+		string sMessage = string( "\"" ) + pRessourceFileName->m_sValue + "\" introuvable";
 		m_pConsole->Println( sMessage );
 	}
 	m_pRessourceManager->EnableCatchingException( bak );
@@ -2513,21 +2517,23 @@ void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
 {
 	IEntity* pEntity = dynamic_cast< IEntity* >(pNode);
 	if (pEntity) {
-
-		ostringstream sLine;
-		for (int j = 0; j < nLevel; j++)
-			sLine << "\t";
-		string sEntityName;
-		pEntity->GetEntityName(sEntityName);
-		if (sEntityName.empty())
-			pEntity->GetName(sEntityName);
-		if (sEntityName.find("CollisionPrimitive") != -1) {
+		ICollisionEntity* pCollisionEntity = dynamic_cast<ICollisionEntity*>(pEntity);
+		if (pCollisionEntity) {
+			ostringstream sLine;
+			for (int j = 0; j < nLevel; j++)
+				sLine << "\t";
+			string sEntityName;
+			pEntity->GetEntityName(sEntityName);
+			if (sEntityName.empty())
+				pEntity->GetName(sEntityName);
 			sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
 			g_vStringsResumeMode.push_back(sLine.str());
 		}
 	}
-	for (unsigned int i = 0; i < pNode->GetChildCount(); i++)
-		GetCollisionNodeInfos(pNode->GetChild(i), nLevel + 1);
+	if (pNode) {
+		for (unsigned int i = 0; i < pNode->GetChildCount(); i++)
+			GetCollisionNodeInfos(pNode->GetChild(i), nLevel + 1);
+	}
 }
 
 void Kill(IScriptState* pState)
@@ -4145,6 +4151,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
+	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("TalkTo", TalkTo, vType, eVoid);
 
 	vType.clear();

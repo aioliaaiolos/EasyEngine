@@ -4,40 +4,61 @@ guardHospital = 0;
 lastTime = 0;
 numberAdvertises = 0;
 stateGuardHospital = 0;
+GuardTimerStarted = 0;
+
 onLoadingGame();
 
 function onExitHospitalArea()
 {
 	Player = GetEntityID("Player");
 	area = GetEntityID("area-hospital");
+	Debug(9);
 	if(IsIntersect(Player, area)==0)
 	{
-		//Debug(0);
+		Debug(0);
 		if(GuardAdvise==0)
 		{
 			guardHospital = GetEntityID("garde hopital");
 			numberAdvertises = numberAdvertises + 1;
+			Debug(1);
 			if(numberAdvertises > 2)
 			{
-				Debug(4);
+				Debug(2);
 				stateGuardHospital = 1;
 			}
-			TalkTo(guardHospital, Player);
 			GuardAdvise = 1;
-			Debug(1);
-			lastTime = GetTime()
+			TalkTo(guardHospital, Player, "OnGuardTopicClosed");
+			Debug(3);
+			
 		}
 		if(GuardAdvise == 1)
 		{
-			Debug(2);
-			timeElapsedSinceLastAdvise = GetTime() - lastTime;
-			Debug(timeElapsedSinceLastAdvise);
-			if(timeElapsedSinceLastAdvise > 30)
+			Debug(4);
+			if(GuardTimerStarted == 1)
 			{
-				Debug(3);
-				GuardAdvise = 0;
+				timeElapsedSinceLastAdvise = GetTime() - lastTime;
+				Debug(5);
+				if(timeElapsedSinceLastAdvise > 10)
+				{
+					Debug(6);
+					GuardAdvise = 0;
+					GuardTimerStarted = 0;
+				}
 			}
 		}
+	}
+}
+
+function OnGuardTopicClosed()
+{
+	GuardTimerStarted = 1;
+	lastTime = GetTime();
+	Debug(7);
+	if(stateGuardHospital == 1)
+	{
+		GuardTimerStarted = 0;
+		Attack(guardHospital, Player);
+		Debug(8);
 	}
 }
 
@@ -54,10 +75,15 @@ function onLoadingGame()
 	EnableInstancingMode(0);
 	
 	//EditWorld("empty");
+	//LoadWorld("testMur");
 	//EditWorld("area3");
 	//LoadWorld("area3");
 	//EditWorld("");
 	LoadWorld("");
 	
+	//LoadWorld("plane");
+	//EditWorld("plane");
+	
 	//SetAnimationSpeed(Player, "run", 4.0);
+	//SetSceneMap("HM_terrain02.bmp", "stone001b.bmp", 20000, 1000);
 }

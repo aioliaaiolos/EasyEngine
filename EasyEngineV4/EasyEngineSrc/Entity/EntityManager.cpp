@@ -563,8 +563,10 @@ IGUIManager* CEntityManager::GetGUIManager()
 void CEntityManager::Kill(int entityId)
 {
 	CMobileEntity* pEntity = dynamic_cast<CMobileEntity*>(GetEntity(entityId));
-	if (pEntity)
+	if (pEntity) {
+		pEntity->SetLife(0);
 		pEntity->Die();
+	}
 }
 
 
