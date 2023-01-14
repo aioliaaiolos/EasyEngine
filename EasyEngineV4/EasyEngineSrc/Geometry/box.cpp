@@ -2,6 +2,7 @@
 #include "IRenderer.h"
 #include "Cylinder.h"
 #include "Exception.h"
+#include "Utils2/Logger.h"
 
 CBox::CBox():
 m_bInitialized( false )
@@ -457,7 +458,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 
 	// Ici on se trouve dans l'espace de l'obstacle
 	for (int i = 0; i < box1PointsLocal.size(); i++) {
-
+		// O et P sont les 4 milieux des aretes verticales de la box
 		CVector O = box1PointsLocal[i];
 		CVector P = box2PointsLocal[i];
 
@@ -467,51 +468,69 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 			(O.m_y + box1.GetDimension().m_y / 2.f) > -halfDimy ) {
 			CVector A, B;
 			// collision sur le plan x positif
-			if (P.m_x > (halfDimx - margin - box1.GetDimension().m_z / 2.f) && P.m_x < dimx && P.m_x < O.m_x && P.m_z < halfDimz && P.m_z > -halfDimz) {
+			// Si P est de l'autre coté du plan, qu'il est plus proche du plan que O et qu'il est entre les deux cotés de l'obstacle
+			if(P.m_x < O.m_x && 
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_x - halfDimx) <  box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz) )
+			{
 				int closedPointIndex = CVector::GetMinxIndex(box2PointsLocal);
-				O = box1PointsLocal[closedPointIndex];
+				// P est maintenant le point le plus proches de l'obstacle
 				P = box2PointsLocal[closedPointIndex];
-				A = CVector(halfDimx, O.m_y, -halfDimz);
-				B = CVector(halfDimx, O.m_y, halfDimz);
-				RLocal = CVector(A.m_x + box1.GetDimension().m_z / 2.f, (O.m_y + P.m_y) / 2.f, box2Position.m_z);
+				float offset = P.m_x - halfDimx;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x -= offset;
 				face = eXPositive;
 				collision = true;
+				return face;
 				break;
 			}
 			// collision sur le plan x négatif
-			else if (P.m_x < (-halfDimx + margin + box1.GetDimension().m_z / 2.f) && P.m_x > -dimx && P.m_x > O.m_x && P.m_z < halfDimz && P.m_z > -halfDimz) {
+			else if (P.m_x > O.m_x &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimx - P.m_x) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz) )
+			{
 				int closedPointIndex = CVector::GetMaxxIndex(box2PointsLocal);
-				O = box1PointsLocal[closedPointIndex];
 				P = box2PointsLocal[closedPointIndex];
-				A = CVector(-halfDimx, O.m_y, -halfDimz);
-				B = CVector(-halfDimx, O.m_y, halfDimz);
-				RLocal = CVector(A.m_x - box1.GetDimension().m_z / 2.f, (O.m_y + P.m_y) / 2.f, box2Position.m_z);
+				float offset = -halfDimx - P.m_x;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x += offset;
 				face = eXNegative;
 				collision = true;
+				return face;
 				break;
 			}
 			// collision sur le plan z positif
-			else if (P.m_z > (halfDimz - margin - box1.GetDimension().m_z / 2.f) && P.m_z < halfDimz && P.m_z < O.m_z && P.m_x < halfDimx && P.m_x > -halfDimx) {
+			else if (P.m_z < O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_z - halfDimz) <  box2.GetDimension().m_z / 2.f)
+			{
 				int closedPointIndex = CVector::GetMinzIndex(box2PointsLocal);
-				O = box1PointsLocal[closedPointIndex];
 				P = box2PointsLocal[closedPointIndex];
-				A = CVector(-halfDimx, O.m_y, halfDimz);
-				B = CVector(halfDimx, O.m_y, halfDimz);
-				RLocal = CVector(box2Position.m_x, (O.m_y + P.m_y) / 2.f, A.m_z + box1.GetDimension().m_z / 2.f);
+				float offset = P.m_z - halfDimz;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z -= offset;
 				face = eZPositive;
 				collision = true;
+				return face;
 				break;
 			}
 			// collision sur le plan z négatif
-			else if (P.m_z < (-halfDimz + margin + box1.GetDimension().m_z / 2.f) && P.m_z > -halfDimz && P.m_z > O.m_z && P.m_x < halfDimx && P.m_x > -halfDimx) {
-				int closedPointIndex = CVector::GetMinzIndex(box2PointsLocal);
-				O = box1PointsLocal[closedPointIndex];
+			else if (P.m_z > O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimz - P.m_z) < box2.GetDimension().m_z / 2.f)
+			{
+				int closedPointIndex = CVector::GetMaxzIndex(box2PointsLocal);
 				P = box2PointsLocal[closedPointIndex];
-				A = CVector(-halfDimx, O.m_y, -halfDimz);
-				B = CVector(halfDimx, O.m_y, -halfDimz);
-				RLocal = CVector(box2Position.m_x, (O.m_y + P.m_y) / 2.f, A.m_z - box1.GetDimension().m_z / 2.f);
+				float offset = -halfDimz - P.m_z;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z += offset;
 				face = eZNegative;
 				collision = true;
+				return face;
 				break;
 			}
 		}

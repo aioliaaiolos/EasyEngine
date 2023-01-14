@@ -63,7 +63,7 @@ void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKe
 					pEditor->m_pEditingEntity->Unlink();
 					pEditor->m_pEditingEntity = nullptr;
 				}
-				if (pEditor->m_eEditingMode == TEditingType::eXForm) {
+				else if (pEditor->m_eEditingMode == TEditingType::eXForm && pEditor->m_pEditingEntity) {
 					float yawStep = (pEditor->m_oInputManager.GetKeyState(VK_CONTROL) == IInputManager::KEY_STATE::PRESSED) ? 1.f : 10.f;
 					float translateValue = 10.f;
 					
@@ -92,7 +92,7 @@ void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKe
 							pEditor->m_pEditingEntity->LocalTranslate(0, -translateValue, 0);
 					}
 				}
-				else if (pEditor->m_eEditingMode == TEditingType::eScale) {
+				else if (pEditor->m_eEditingMode == TEditingType::eScale && pEditor->m_pEditingEntity) {
 					CVector scaleFactor;
 					pEditor->m_pEditingEntity->GetScaleFactor(scaleFactor);
 					float s = 1.01f;

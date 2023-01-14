@@ -79,10 +79,13 @@ function onLoadingGame()
 	//EditWorld("area3");
 	//LoadWorld("area3");
 	//EditWorld("");
-	LoadWorld("");
+	//LoadWorld("");
 	
 	//LoadWorld("plane");
 	//EditWorld("plane");
+	
+	//EditWorld("TestHopital");
+	//LoadWorld("TestHopital");
 	
 	//SetAnimationSpeed(Player, "run", 4.0);
 	//SetSceneMap("HM_terrain02.bmp", "stone001b.bmp", 20000, 1000);

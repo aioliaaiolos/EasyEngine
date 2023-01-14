@@ -126,9 +126,14 @@ void CObject::UpdateCollision()
 					else
 						last.m_y = fMaxHeight;
 					m_oBody.m_oSpeed.m_y = 0;
+					oLocalMatrix.m_13 = last.m_y;
+					GetBoundingGeometry()->SetTM(oLocalMatrix);
 				}
-				oLocalMatrix.SetAffinePart(last.m_x, last.m_y, last.m_z);
-				GetBoundingGeometry()->SetTM(backupLocal);
+				else {
+					oLocalMatrix.m_03 = last.m_x;
+					oLocalMatrix.m_23 = last.m_z;
+					GetBoundingGeometry()->SetTM(oLocalMatrix);
+				}
 			}
 			else {
 				bCollision = true;
