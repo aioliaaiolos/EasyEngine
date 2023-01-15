@@ -23,6 +23,7 @@ public :
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
 	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	void				GetBBoxDimension(CVector& dim) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
+	const CVector&		GetBBoxDimension() const override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;

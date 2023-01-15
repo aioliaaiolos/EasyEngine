@@ -8,6 +8,7 @@ class CCylinder : public ICylinder
 	CMatrix		m_oTM;
 	float		m_fRadius;
 	float		m_fHeight;
+	CVector		m_oDimension;
 
 public:
 	CCylinder();
@@ -35,6 +36,7 @@ public:
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
 	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	void				GetBBoxDimension(CVector& dim) override;
+	const CVector&		GetBBoxDimension() const override;
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CCylinder::GetBBoxDimension()"); }
 	
 

@@ -33,6 +33,7 @@ class CVarMap
 public:
 	CVar* GetVariable(string sVarName);
 	void AddVariable(string sVarName, int nScope, int nIndex, int type);
+	int GetVarCountInScope(int nScope);
 	int GetVarCountInScope(const CSyntaxNode& node, int nScope);
 	CVar* GetVar(int nScope, string sVarName);
 

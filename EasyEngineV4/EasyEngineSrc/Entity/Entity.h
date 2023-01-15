@@ -94,6 +94,7 @@ public:
 	void							CreateCollisionMaps(float fBias) override;
 	void							LoadCollisionMaps();
 	ICollisionMap*					GetCollisionMap();
+	IGrid*							GetCollisionGrid();
 	void							SetSkinOffset(float x, float y, float z) override;
 	void							SetSkinOffset(CVector& oSkinOffset);
 	void							AttachScript(string sScript) override;

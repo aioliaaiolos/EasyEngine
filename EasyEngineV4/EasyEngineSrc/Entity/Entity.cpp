@@ -113,10 +113,12 @@ void CEntity::CreateCollisionGrid()
 void CEntity::CreateCollisionMaps(float fBias)
 {
 	string sFileName;
-	m_pMesh->GetFileName(sFileName);
-	string sFolder;
-	CStringUtils::GetFolderPathFromCompleteFileName(sFileName, sFolder);
-	m_pCollisionMap->Generate();
+	if (m_pMesh) {
+		m_pMesh->GetFileName(sFileName);
+		string sFolder;
+		CStringUtils::GetFolderPathFromCompleteFileName(sFileName, sFolder);
+		m_pCollisionMap->Generate();
+	}
 
 	for (INode* pNode : m_vChild) {
 		CEntity* pEntity = dynamic_cast<CEntity*>(pNode);
@@ -150,6 +152,11 @@ void CEntity::LoadCollisionMaps()
 ICollisionMap* CEntity::GetCollisionMap()
 {
 	return m_pCollisionMap;
+}
+
+IGrid* CEntity::GetCollisionGrid()
+{
+	return m_pCollisionGrid;
 }
 
 void CEntity::SetSkinOffset(CVector& oSkinOffset)

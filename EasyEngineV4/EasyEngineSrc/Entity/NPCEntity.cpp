@@ -244,7 +244,8 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2
 	int originx, originy, destinationx, destinationy;
 	m_pCollisionMap->GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originx, originy);
 	m_pCollisionMap->GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationx, destinationy);
-	IGrid* pGrid = m_pScene->GetCollisionGrid();
+	CEntity* pParent = dynamic_cast<CEntity*>(GetParent());
+	IGrid* pGrid = pParent->GetCollisionGrid();
 	if (!pGrid) {
 		string sSceneName;
 		m_pScene->GetEntityName(sSceneName);
@@ -252,21 +253,22 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2
 	}
 	pGrid->SetDepart(originx, originy);
 	pGrid->SetDestination(destinationx, destinationy);
-	m_oPathFinder.FindPath(pGrid);
-	vector<IGrid::ICell*> path;
-	pGrid->GetPath(path);
+	if (m_oPathFinder.FindPath(pGrid)) {
+		vector<IGrid::ICell*> path;
+		pGrid->GetPath(path);
 
-	path.erase(path.begin());
-	for (vector<IGrid::ICell*>::iterator it = path.begin(); it != path.end(); it++) {
-		IGrid::ICell* pCell = (*it);
-		int r, c;
-		float x, y;
-		pCell->GetCoordinates(r, c);
-		m_pCollisionMap->GetPositionFromCellCoord(r, c, x, y);
-		vPoints.push_back(CVector2D(x, y));
+		path.erase(path.begin());
+		for (vector<IGrid::ICell*>::iterator it = path.begin(); it != path.end(); it++) {
+			IGrid::ICell* pCell = (*it);
+			int r, c;
+			float x, y;
+			pCell->GetCoordinates(r, c);
+			m_pCollisionMap->GetPositionFromCellCoord(r, c, x, y);
+			vPoints.push_back(CVector2D(x, y));
+		}
+		if (!vPoints.empty())
+			vPoints.pop_back();
 	}
-	if(!vPoints.empty())
-		vPoints.pop_back();
 	vPoints.push_back(oDestination);
 	pGrid->ResetAllExceptObstacles();
 }

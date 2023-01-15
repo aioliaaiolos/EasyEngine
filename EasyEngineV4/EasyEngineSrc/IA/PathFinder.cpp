@@ -7,6 +7,8 @@
 #include <sstream>
 #include <fstream>
 
+#include "Utils2/TimeManager.h"
+
 using namespace std;
 
 
@@ -376,7 +378,7 @@ void CGrid::SetDepart(int column, int row)
 
 void CGrid::SetDestination(int column, int row)
 {
-	if ((column > m_nColumnCount) || (row > m_nRowCount)) {
+	if (column < 0 || row < 0 || column > m_nColumnCount || row > m_nRowCount) {
 		ostringstream oss;
 		oss << "Error CGrid::SetDestination : column = " << column << ", row = " << row << " and column count = " << m_nColumnCount << " and rowCount = " << m_nRowCount;
 		CEException e(oss.str());
@@ -401,22 +403,6 @@ IGrid::ICell* CGrid::GetDestination()
 	return m_pDestination;
 }
 
-/*
-void CGrid::GetDepart(int& x, int& y)
-{
-	m_oDepart.GetCoordinates(y, x);
-}
-
-void CGrid::GetDestination(int& x, int& y)
-{
-	m_oDestination.GetCoordinates(y, x);
-}*/
-
-void CGrid::FindPath()
-{
-
-}
-
 int CGrid::RowCount() const
 {
 	return m_nRowCount;
@@ -437,19 +423,27 @@ void CGrid::UpdateOpenList(CCell& cell)
 	}
 }
 
-void CGrid::ProcessGrid(int startRow, int startColumn)
+bool CGrid::ProcessGrid(int startRow, int startColumn)
 {
 	int currentRow = startRow, currentColumn = startColumn, nextRow = -1, nextColumn = -1;
 	bool complete = false;
+	int t1 = CTimeManager::Instance()->GetCurrentTimeInMillisecond();
 	while (!complete) {
 		complete = ProcessNode(currentRow, currentColumn, nextRow, nextColumn);
 		currentRow = nextRow;
-		currentColumn = nextColumn;		
+		currentColumn = nextColumn;
+		int t2 = CTimeManager::Instance()->GetCurrentTimeInMillisecond();
+		if (t2 - t1 > 0)
+			return false;
 	}
 }
 
 bool CGrid::ProcessNode(int currentRow, int currentColumn, int& nextRow, int& nextColumn)
 {
+	if (currentRow < 0 || currentColumn < 0) {
+		CEException e("Error in CGrid::ProcessNode(), currentRow and currentColumn has to be positive or null");
+		throw e;
+	}
 	CCell& current = m_grid[currentRow][currentColumn];
 	if (current.GetCellType() & IGrid::ICell::eArrivee)
 		return true;
@@ -606,15 +600,17 @@ IGrid* CPathFinder::CreateGrid(int rowCount, int columnCount)
 	return new CGrid(rowCount, columnCount);
 }
 
-void CPathFinder::FindPath(IGrid* grid)
+bool CPathFinder::FindPath(IGrid* grid)
 {
 	if (m_bSaveAStarGrid)
 		SaveAStarGrid(grid, m_xMinMargin, m_yMinMargin, m_xMaxMargin, m_yMaxMargin);
 	int row, column;
 	CGrid* pGrid = static_cast<CGrid*>(grid);
 	pGrid->GetDepart()->GetCoordinates(row, column);
-	pGrid->ProcessGrid(row, column);
+	if (!pGrid->ProcessGrid(row, column))
+		return false;
 	pGrid->BuildPath();
+	return true;
 }
 
 string CPathFinder::GetName()

@@ -3039,6 +3039,12 @@ void SaveMap(IScriptState* pState)
 	}
 }
 
+void Advertise(IScriptState* pState)
+{
+	CScriptFuncArgString* pCharacterId = (CScriptFuncArgString*)pState->GetArg(0);
+
+}
+
 void LoadWorld(IScriptState* pState)
 {
 	try

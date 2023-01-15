@@ -38,7 +38,14 @@ void CCollisionMap::SetFileName(string sFileName)
 void CCollisionMap::Generate()
 {
 	vector<vector<bool>> vGrid;
-	CreateCollisionArray(m_pScene, vGrid, m_nCellSize, 0);
+
+	int nCellSize = m_nCellSize;
+	float lenght = max(m_pScene->GetBoundingGeometry()->GetBBoxDimension().m_x, m_pScene->GetBoundingGeometry()->GetBBoxDimension().m_z);
+	if (lenght > 500000)
+		nCellSize = 200;
+	else
+		nCellSize = 64;
+	CreateCollisionArray(m_pScene, vGrid, nCellSize, 0);
 	CreateTextureFromCollisionArray(m_sFileName, vGrid);
 }
 
@@ -79,11 +86,17 @@ void CCollisionMap::SortObjectsByHeight(IEntity* pRoot, vector<pair<float, IEnti
 	}
 }
 
+bool IsWallDimensions(const CVector& oBoxDimension)
+{
+	float scaleFactor = 2.f;
+	return (oBoxDimension.m_y > 200 && (scaleFactor * oBoxDimension.m_x < oBoxDimension.m_y || scaleFactor * oBoxDimension.m_z < oBoxDimension.m_y));
+}
+
 float CCollisionMap::GetFloors(const vector<pair<float, IEntity*>>& vSortedObjectHeight, vector<pair<float, IEntity*>>& floors, vector<pair<float, IEntity*>>& nonFloors)
 {
 	float fGroundHeight = 0;
 	for (vector<pair<float, IEntity*>>::const_iterator it = vSortedObjectHeight.begin(); it != vSortedObjectHeight.end(); it++) {
-		if (it->first < fGroundHeight + 80.f)
+		if ( (it->first < fGroundHeight + 80.f) && !IsWallDimensions(it->second->GetBoundingGeometry()->GetBBoxDimension()) )
 			floors.push_back(*it);
 		else {
 			IEntity* pNonFloor = it->second;
@@ -131,6 +144,22 @@ void CCollisionMap::GetRoofs(float fFloorHeight, const vector<pair<float, IEntit
 	}
 }
 
+void CCollisionMap::GetDoors(const vector<IEntity*>& vCollisionEntities, vector<IEntity*>& doors)
+{
+	for (const IEntity* pEntity : vCollisionEntities)
+	{
+		if (pEntity->GetChildCount() > 0) {
+			for (int i = 0; i < pEntity->GetChildCount(); i++) {
+				INode* pChild = pEntity->GetChild(i);
+				if (pChild->GetName().find("Door") != -1) {
+					IEntity* pChildEntity = dynamic_cast<IEntity*>(pChild);
+					doors.push_back(pChildEntity);
+				}
+			}
+		}
+	}
+}
+
 void CCollisionMap::GetCollisionEntities(IEntity* pRoot, vector<IEntity*>& vCollisionEntities)
 {
 	ISceneManager* pSceneManager = static_cast<ISceneManager*>(m_oInterface.GetPlugin("SceneManager"));
@@ -152,11 +181,15 @@ void CCollisionMap::GetCollisionEntities(IEntity* pRoot, vector<IEntity*>& vColl
 
 		vector<IEntity*> roofs;
 		GetRoofs(fFloorHeight, nonFloors, roofs, vCollisionEntities);
+
+		vector<IEntity*> doors;
+		GetDoors(vCollisionEntities, doors);
+		vCollisionEntities.insert(vCollisionEntities.end(), doors.begin(), doors.end());
 	}
 }
 
 
-void CCollisionMap::AddObjectToCollisionGrid(const CVector& rootDim, const CDimension& gridDimension, const CVector& objectDim, const CMatrix& modelTM, vector<vector<bool>>& vGrid, int nCellSize, float fBias)
+void CCollisionMap::AddObjectToCollisionGrid(const CVector& rootDim, const CDimension& gridDimension, const CVector& objectDim, const CMatrix& modelTM, vector<vector<bool>>& vGrid, int nCellSize, bool isObstacle, float fBias)
 {
 	float x0, z0, x1, z1;
 	CDimension mapDimension(rootDim.m_x, rootDim.m_z);
@@ -176,7 +209,7 @@ void CCollisionMap::AddObjectToCollisionGrid(const CVector& rootDim, const CDime
 			ModelToGrid(PTransform.m_x, PTransform.m_z, mapDimension, gridDimension, xGrid, yGrid);
 			xGrid = xGrid < 0.f ? 0 : (xGrid >= gridDimension.GetWidth() ? gridDimension.GetWidth() - 1 : xGrid);
 			yGrid = yGrid < 0.f ? 0 : (yGrid >= gridDimension.GetHeight() ? gridDimension.GetHeight() - 1 : yGrid);
-			vGrid[xGrid][yGrid] = true;
+			vGrid[xGrid][yGrid] = isObstacle;
 			zModel += modelUnit;
 		}
 		xModel += modelUnit;
@@ -206,6 +239,7 @@ void CCollisionMap::CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& v
 		vGrid[i].resize(nGridHeight);
 
 	vector<IEntity*> collisionEntities;
+	vector<INode*> doors;
 	GetCollisionEntities(pRoot, collisionEntities);
 
 	for (IEntity* pChild : collisionEntities) {
@@ -213,7 +247,7 @@ void CCollisionMap::CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& v
 		if (pChildGeometry) {
 			CVector boxDim;
 			pChildGeometry->GetBBoxDimension(boxDim);
-			AddObjectToCollisionGrid(pRootBBox->GetDimension(), CDimension(nGridWidth, nGridHeight), boxDim, pChild->GetLocalMatrix(), vGrid, nCellSize, fBias);
+			AddObjectToCollisionGrid(pRootBBox->GetDimension(), CDimension(nGridWidth, nGridHeight), boxDim, pChild->GetLocalMatrix(), vGrid, nCellSize, pChild->GetName().find("Door") == -1, fBias);
 		}
 	}
 }

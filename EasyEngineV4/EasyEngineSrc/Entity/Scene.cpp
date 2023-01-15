@@ -224,11 +224,6 @@ IGeometry* CScene::GetBoundingGeometry()
 	return nullptr;
 }
 
-IGrid* CScene::GetCollisionGrid()
-{
-	return m_pCollisionGrid;
-}
-
 void CScene::CreateHeightMap()
 {
 	IMesh* pMesh = static_cast< IMesh* >(m_pRessource);

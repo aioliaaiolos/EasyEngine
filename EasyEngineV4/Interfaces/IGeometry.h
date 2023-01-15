@@ -70,6 +70,7 @@ public:
 	virtual TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R) = 0;
 	virtual bool				IsIncludedInto(const IGeometry& oGeometry) = 0;
 	virtual void				GetBBoxDimension(CVector& dim) = 0;
+	virtual const CVector&		GetBBoxDimension() const = 0;
 	virtual void				GetBBoxPoints(vector< CVector >& vPoints) = 0;
 	virtual void				GetName(string& sName) { sName = m_sName; }
 	virtual void				SetName(string& sName) { m_sName = sName; }

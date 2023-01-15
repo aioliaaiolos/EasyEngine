@@ -44,6 +44,10 @@ void CCylinder::Set( const CMatrix& oTM, float fRadius, float fHeight )
 	m_oTM = oTM;
 	m_fRadius = fRadius;
 	m_fHeight = fHeight;
+
+	m_oDimension.m_x = m_fRadius * 2.f;
+	m_oDimension.m_y = m_fHeight;
+	m_oDimension.m_z = m_fRadius * 2.f;
 }
 
 void CCylinder::ComputeTangent( const CVector& oLinePoint, CVector& oTangentPoint, bool bLeft )
@@ -409,4 +413,9 @@ void CCylinder::GetBBoxDimension(CVector& dim)
 	dim.m_x = m_fRadius * 2.f;
 	dim.m_y = m_fHeight;
 	dim.m_z = m_fRadius * 2.f;
+}
+
+const CVector& CCylinder::GetBBoxDimension() const
+{
+	return m_oDimension;
 }

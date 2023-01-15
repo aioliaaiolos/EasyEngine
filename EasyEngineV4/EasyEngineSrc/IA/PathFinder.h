@@ -55,11 +55,10 @@ public:
 	ICell& FindClosestNonObstacle(int row, int column);
 	IGrid::ICell* GetDepart();
 	IGrid::ICell* GetDestination();
-	void FindPath();
 	int RowCount() const;
 	int ColumnCount() const;
 	bool ProcessNode(int currentRow, int currentColumn, int& nextRow, int& nextColumn);
-	void ProcessGrid(int startRow, int startColumn);
+	bool ProcessGrid(int startRow, int startColumn);
 	void BuildPath();
 	void GetOpenList(vector<ICell*>& openList);
 	void GetCloseList(vector<ICell*>& closeList);
@@ -98,7 +97,7 @@ class CPathFinder : public IPathFinder
 public:
 	CPathFinder(EEInterface& oInterface);
 	IGrid* CreateGrid(int rowCount, int columnCount);
-	void FindPath(IGrid* grid);
+	bool FindPath(IGrid* grid);
 	string GetName() override;
 	void EnableSaveGrid(bool bEnable, int xMinMargin, int yMinMargin, int xMaxMargin, int yMaxMargin) override;
 

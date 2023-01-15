@@ -12,6 +12,7 @@
 using namespace std;
 
 class IEntity;
+class INode;
 
 class CCollisionMap : public ICollisionMap
 {
@@ -29,11 +30,12 @@ protected:
 	bool		TestCellObstacle(int x, int y) override;
 	void		ConvertLinearToCoord(int pixelNumber, int nTextureWidth, int& x, int& y);
 	void		CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& vGrid, int nCelSize, float fBias);
-	void		AddObjectToCollisionGrid(const CVector& rootDim, const CDimension& gridDimension, const CVector& objectDim, const CMatrix& modelTM, vector<vector<bool>>& vGrid, int nCelSize, float fBias);
+	void		AddObjectToCollisionGrid(const CVector& rootDim, const CDimension& gridDimension, const CVector& objectDim, const CMatrix& modelTM, vector<vector<bool>>& vGrid, int nCelSize, bool isObstacle, float fBias);
 	void		GetCollisionEntities(IEntity* pRoot, vector<IEntity*>& vCollisionEntities);
 	void		SortObjectsByHeight(IEntity* pRoot, vector<pair<float, IEntity*>>& vSortedObjectHeight);
 	float		GetFloors(const vector<pair<float, IEntity*>>& vSortedObjectHeight, vector<pair<float, IEntity*>>& floors, vector<pair<float, IEntity*>>& nonFloors);
 	void		GetRoofs(float fFloorHeight, const vector<pair<float, IEntity*>>& nonFloors, vector<IEntity*>& roofs, vector<IEntity*>& nonRoofs);
+	void		GetDoors(const vector<IEntity*>& vCollisionEntities, vector<IEntity*>& doors);
 	void		CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid);
 	void		ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid);
 	void		GridToMap(int xGrid, int yGrid, const CDimension& mapDimension, const CDimension& gridDimension, float& xMap, float& zMap);

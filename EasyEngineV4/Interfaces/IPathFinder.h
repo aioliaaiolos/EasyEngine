@@ -60,7 +60,7 @@ public:
 	IPathFinder() : CPlugin(nullptr, "") {}
 
 	virtual IGrid* CreateGrid(int rowCount, int columnCount) = 0;
-	virtual void FindPath(IGrid* grid) = 0;
+	virtual bool FindPath(IGrid* grid) = 0;
 	virtual void EnableSaveGrid(bool bEnable, int xMinMargin, int yMinMargin, int xMaxMargin, int yMaxMargin) = 0;
 
 protected:

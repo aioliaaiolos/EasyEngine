@@ -568,6 +568,11 @@ void CBox::GetBBoxDimension(CVector& dim)
 	dim = m_oDimension;
 }
 
+const CVector& CBox::GetBBoxDimension() const
+{
+	return m_oDimension;
+}
+
 IGeometry::TFace CBox::GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R)
 {
 	CBox temp(*this);

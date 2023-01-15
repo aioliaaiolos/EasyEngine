@@ -65,6 +65,14 @@ int CVarMap::GetVarCountInScope(const CSyntaxNode& node, int nScope)
 	return nVarCountInThisScope;
 }
 
+int CVarMap::GetVarCountInScope(int nScope)
+{
+	VarMap::iterator itScope = m_mVars.find(nScope);
+	if (itScope != m_mVars.end())
+		return itScope->second.size();
+	return 0;
+}
+
 CVar* CVarMap::GetVar(int nScope, string sVarName)
 {
 	VarMap::iterator itScope = m_mVars.find(nScope);
@@ -304,8 +312,11 @@ void CSemanticAnalyser::AddNewVariable(CSyntaxNode& oTree)
 	string sVarName = oTree.m_Lexem.m_sValue;
 	CVar* pVar = m_oVars.GetVariable(sVarName);
 	if(!pVar) {
+		if (m_nCurrentScopeNumber == 0)
+			m_nVariableIndex = m_oVars.GetVarCountInScope(0);
 		m_oVars.AddVariable(sVarName, m_nCurrentScopeNumber, m_nVariableIndex, oTree. m_eType);
-		m_nVariableIndex++;
+		if (m_nCurrentScopeNumber != 0)
+			m_nVariableIndex++;
 		oTree.m_nScope = m_nCurrentScopeNumber;
 	}
 	else

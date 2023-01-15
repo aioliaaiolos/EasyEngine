@@ -58,7 +58,6 @@ public:
 	float								GetGroundHeight( float x, float z );
 	void								SetRessource( string sFileName, bool bDuplicate = false );
 	IGeometry*							GetBoundingGeometry();
-	IGrid*								GetCollisionGrid();
 	void								RenderScene();
 	void								RenderMinimap();
 	ITexture*							CreateMinimapTexture();
