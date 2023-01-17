@@ -47,7 +47,7 @@ public:
 	bool			IsSegmentInsideSegment(float fS1Center, float fS1Radius, float fS2Center, float fS2Radius);
 
 	// Collision map
-	ICollisionMap*	CreateCollisionMap(IEntity* pScene, int cellSize, float fBias) override;
+	ICollisionMap*	CreateCollisionMap(IEntity* pScene, float fBias) override;
 
 	// temp	
 	void	SetEntityManager(IEntityManager* pEntityManager);

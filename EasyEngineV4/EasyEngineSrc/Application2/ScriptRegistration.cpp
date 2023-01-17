@@ -2367,7 +2367,8 @@ void CreateCollisionMap(IScriptState* pState)
 	else
 		pNode = dynamic_cast<IEntity*>(m_pEntityManager->GetEntity(pId->m_nValue));
 	vector<vector<bool>> vGrid;
-	m_pCollisionManager->CreateCollisionMap(pNode, pCellSize->m_nValue, pBias->m_fValue);
+	ICollisionMap* pCollisionMap = m_pCollisionManager->CreateCollisionMap(pNode, pBias->m_fValue);
+	pCollisionMap->Generate(pCellSize->m_nValue);
 }
 
 void EnablePathFindSaving(IScriptState* pState)

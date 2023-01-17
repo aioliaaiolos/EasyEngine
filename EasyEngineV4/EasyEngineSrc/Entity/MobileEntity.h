@@ -15,6 +15,7 @@ public:
 
 protected:
 	bool						m_bFirstUpdate;
+	bool						m_bCollideOnObstacle;
 
 	static void 				OnCollision(CEntity* pThis, vector<INode*> entities);
 

@@ -366,7 +366,7 @@ void CWorldEditor::OnSceneLoaded()
 		IEntity* pEntity = m_oEntityManager.BuildCharacterFromDatabase(itCharacter->first, m_pScene);
 		if (pEntity) {
 			pEntity->SetLocalMatrix(itCharacter->second.first);
-			if(!itCharacter->second.second.empty())
+			if(!itCharacter->second.second.empty() && !m_bEditionMode)
 				pEntity->AttachScript(itCharacter->second.second);
 			pEntity->SetWeight(1);
 			m_vEntities.push_back(pEntity);

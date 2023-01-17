@@ -18,7 +18,9 @@ m_nCurrentPathPointNumber( 0 ),
 m_pCurrentEnemy(NULL),
 m_bFaceToTarget(false),
 m_pCurrentInterlocutor(nullptr),
-m_oTalkToCallback(nullptr, nullptr)
+m_oTalkToCallback(nullptr, nullptr),
+
+m_fForceDeltaRotation(0.)
 {
 }
 
@@ -196,16 +198,16 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 	m_vCurrentPath.clear();
 	CVector oPos;
 	GetPosition( oPos );
-	CVector2D oDestination2D( oDestination.m_x, oDestination.m_z ), oPos2D( oPos.m_x, oPos.m_z );
-	ComputePathFind2D( oPos2D, oDestination2D, m_vCurrentPath);
+	
+	ComputePathFind2D(oPos, oDestination, m_vCurrentPath);
+
 	if (!m_vCurrentPath.empty()) {
 		if (m_vCurrentPath.size() > 1)
 			m_fDestinationDeltaRadius = 50.f;
 		else
 			m_fDestinationDeltaRadius = 100.f;
 		m_nCurrentPathPointNumber = 0;
-		oDestination2D = m_vCurrentPath[m_nCurrentPathPointNumber];
-		m_oDestination = CVector(oDestination2D.m_x, 0.f, oDestination2D.m_y);
+		m_oDestination = m_vCurrentPath[m_nCurrentPathPointNumber];
 		m_fAngleRemaining = GetDestinationAngleRemaining();
 
 		//LookAt( m_fAngleRemaining );
@@ -245,8 +247,7 @@ void IAEntity::UpdateGoto()
 			else
 			{
 				m_nCurrentPathPointNumber++;
-				CVector2D oDestination = m_vCurrentPath[ m_nCurrentPathPointNumber ];
-				m_oDestination = CVector( oDestination.m_x, 0.f, oDestination.m_y );
+				m_oDestination = m_vCurrentPath[ m_nCurrentPathPointNumber ];
 			}
 		}
 	}
@@ -273,10 +274,7 @@ void IAEntity::SetDestination( const CVector& oDestination )
 	m_oDestination = oDestination;
 	m_bArriveAtDestination = false;
 	if( m_vCurrentPath.size() == 0 )
-	{
-		CVector2D oDestination2D( m_oDestination.m_x, m_oDestination.m_z );
-		m_vCurrentPath.push_back( oDestination2D );
-	}
+		m_vCurrentPath.push_back(m_oDestination);
 }
 
 float IAEntity::GetDestinationAngleRemaining()
@@ -289,7 +287,7 @@ float IAEntity::GetDestinationAngleRemaining()
 	if (oDirection == CVector(0, 0, 0)) {
 		return 0.f;
 	}
-	return GetAngleBetween2Vectors(oBefore, oDirection);
+	return m_fForceDeltaRotation + GetAngleBetween2Vectors(oBefore, oDirection);
 }
 
 float IAEntity::GetAngleBetween2Vectors(CVector& v1, CVector& v2)
@@ -315,7 +313,7 @@ bool IAEntity::IsArrivedAtDestination()
 void IAEntity::OnCollision( IAEntity* pEntity )
 {
 	IAEntity* pHuman = static_cast< IAEntity* >( pEntity );
-	pHuman->m_bArriveAtDestination = true;
+	//pHuman->m_bArriveAtDestination = true;
 	pHuman->Stand();
 }
 

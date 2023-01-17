@@ -110,14 +110,14 @@ void CEntity::CreateCollisionGrid()
 }
 
 
-void CEntity::CreateCollisionMaps(float fBias)
+void CEntity::CreateCollisionMaps(float fBias, int nCellSize)
 {
 	string sFileName;
 	if (m_pMesh) {
 		m_pMesh->GetFileName(sFileName);
 		string sFolder;
 		CStringUtils::GetFolderPathFromCompleteFileName(sFileName, sFolder);
-		m_pCollisionMap->Generate();
+		m_pCollisionMap->Generate(nCellSize);
 	}
 
 	for (INode* pNode : m_vChild) {
@@ -125,7 +125,7 @@ void CEntity::CreateCollisionMaps(float fBias)
 		if (pEntity) {
 			IBox* pBBox = dynamic_cast<IBox*>(pEntity->GetBoundingGeometry());
 			if (pBBox && pEntity->GetChildCount() > 0) {
-				pEntity->CreateCollisionMaps(fBias);
+				pEntity->CreateCollisionMaps(fBias, nCellSize);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ void CEntity::CreateCollisionMaps(float fBias)
 
 void CEntity::LoadCollisionMaps()
 {
-	m_pCollisionMap = m_oCollisionManager.CreateCollisionMap(this, m_nCollisionGridCellSize, 0);
+	m_pCollisionMap = m_oCollisionManager.CreateCollisionMap(this, 0);
 	try {
 		m_pCollisionMap->Load();
 		CreateCollisionGrid();
@@ -848,7 +848,7 @@ void CEntity::GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix)
 
 int CEntity::GetCellSize()
 {
-	return m_nCollisionGridCellSize;
+	return m_pCollisionMap->GetCellSize();
 }
 
 void CEntity::GetBonesMatrix( INode* pInitRoot, INode* pCurrentRoot, vector< CMatrix >& vMatrix )

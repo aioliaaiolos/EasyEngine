@@ -66,7 +66,7 @@ public:
 	static int		GetMaxzIndex(const vector< CVector >& vPoints);
 };
 
-class CVector2D
+class CVector2D : public IPersistantObject
 {
 public:
 	float m_x;
@@ -83,6 +83,13 @@ public:
 	CVector2D	operator+( const CVector2D& v ) const;
 	void		Normalize();
 	float		Norm() const;
+
+	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
+	IPersistantObject& operator << (CBinaryFileStorage& store);
+	const IPersistantObject& operator >> (CAsciiFileStorage& store) const;
+	IPersistantObject& operator << (CAsciiFileStorage& store);
+	const IPersistantObject& operator >> (CStringStorage& store) const;
+	IPersistantObject& operator << (CStringStorage& store);
 
 };
 

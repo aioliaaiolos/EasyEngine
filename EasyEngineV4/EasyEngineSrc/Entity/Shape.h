@@ -56,7 +56,7 @@ public:
 	void			DrawCollisionBoundingBoxes(bool bDraw) override{}
 	void			PlayCurrentAnimation(bool loop) override{}
 	void			PauseCurrentAnimation(bool loop) override{}
-	void			CreateCollisionMaps(float fBias) override{}
+	void			CreateCollisionMaps(float fBias, int nCellSize = -1) override{}
 	void			SetSkinOffset(float x, float y, float z) override {}
 	void			GetScaleFactor(CVector& factor) override{}
 	void			AttachScript(string sScriptName) override {}

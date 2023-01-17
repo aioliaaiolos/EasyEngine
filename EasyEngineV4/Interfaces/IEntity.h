@@ -126,7 +126,7 @@ public:
 	virtual void						SetCustomSpecular(const CVector& customSpecular) = 0;
 	virtual void						DrawCollisionBoundingBoxes(bool bDraw) = 0;
 	virtual int							GetCellSize() = 0;
-	virtual void						CreateCollisionMaps(float fBias) = 0;
+	virtual void						CreateCollisionMaps(float fBias, int nCellSize) = 0;
 	virtual void						SetSkinOffset(float x, float y, float z) = 0;
 	virtual void						AttachScript(string sScript) = 0;
 	virtual bool						TestCollision(INode* pEntity) = 0;

@@ -28,7 +28,10 @@ protected:
 	virtual void				UpdateGoto();
 	virtual void				UpdateTalkToState();
 	virtual void				OpenTopicWindow() = 0;
+	virtual INode*				GetParent() = 0;
+	float						m_fForceDeltaRotation;
 
+	float						m_fAngleRemaining;
 	
 
 private:
@@ -65,12 +68,11 @@ private:
 	bool						m_bHitEnemy;
 	string						m_sCurrentHitBoneName;
 	CVector						m_oDestination;
-	float						m_fAngleRemaining;
 	bool						m_bArriveAtDestination;
 	bool						m_bFaceToTarget;
 	IFighterEntity*				m_pCurrentEnemy;
 	IFighterEntityInterface*	m_pCurrentInterlocutor;
-	vector< CVector2D >			m_vCurrentPath;
+	vector<CVector>				m_vCurrentPath;
 	int							m_nCurrentPathPointNumber;
 	float						m_fDestinationDeltaRadius;
 
@@ -85,7 +87,7 @@ private:
 	void						FaceTo(const CVector& point);
 	void						Attack(IFighterEntity* pEntity);
 	void						Attack(IFighterEntityInterface* pEntity);
-	virtual void				ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints) = 0;
+	virtual void				ComputePathFind2D( const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints) = 0;
 	virtual void				SetDestination( const CVector& oDestination );
 
 	virtual void				Turn( float fAngle ) = 0;

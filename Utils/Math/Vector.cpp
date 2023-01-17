@@ -428,3 +428,41 @@ CVector2D CVector2D::operator+( const CVector2D& v ) const
 {
 	return CVector2D( m_x + v.m_x, m_y + v.m_y );
 }
+
+
+const IPersistantObject& CVector2D::operator >> (CBinaryFileStorage& store) const
+{
+	store << m_x << m_y << m_w;
+	return *this;
+}
+
+IPersistantObject& CVector2D::operator << (CBinaryFileStorage& store)
+{
+	store >> m_x >> m_y >> m_w;
+	return *this;
+}
+
+const IPersistantObject& CVector2D::operator >> (CAsciiFileStorage& store) const
+{
+	CStringStorage oString;
+	oString.SetWidth(10);
+	oString << *this;
+	store << oString.GetValue();
+	return *this;
+}
+
+IPersistantObject& CVector2D::operator << (CAsciiFileStorage& store)
+{
+	return *this;
+}
+
+const IPersistantObject& CVector2D::operator >> (CStringStorage& store) const
+{
+	store << "( " << m_x << ", " << m_y << ", " << ", " << m_w << " )";
+	return *this;
+}
+
+IPersistantObject& CVector2D::operator << (CStringStorage& store)
+{
+	return *this;
+}

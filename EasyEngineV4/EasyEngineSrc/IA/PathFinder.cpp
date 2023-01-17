@@ -286,8 +286,14 @@ void CGrid::SavePart(string sFileName, int xMin, int yMin, int xMax, int yMax)
 	int newDestinationColumn = destinationColumn - newRepereColumn;
 	int newRowCount = newOriginRow > newDestinationRow ? newOriginRow + 1 : newDestinationRow + 1;
 	newRowCount += yMax;
+	if (newRowCount + newRepereRow > m_grid.size()) {
+		newRowCount = m_grid.size() - newRepereRow;
+	}
 	int newColumnCount = newOriginColumn > newDestinationColumn ? newOriginColumn + 1 : newDestinationColumn + 1;
 	newColumnCount += xMax;
+	if (newColumnCount + newRepereColumn > m_grid[0].size()) {
+		newColumnCount = m_grid.size() - newRepereColumn;
+	}
 
 	file.write((char*)&newRowCount, sizeof(int));
 	file.write((char*)&newColumnCount, sizeof(int));
@@ -357,14 +363,17 @@ void CGrid::RemoveObstacle(int row, int column)
 
 IGrid::ICell& CGrid::FindClosestNonObstacle(int row, int column)
 {
-	for (int iRow = -1; iRow <= 1; iRow++) {
-		for (int iColumn = -1; iColumn <= 1; iColumn++) {
+	int range = 2;
+	for (int iRow = -range; iRow <= range; iRow++) {
+		for (int iColumn = -range; iColumn <= range; iColumn++) {
 			ICell& cell = m_grid[row + iRow][column + iColumn];
 			if ( !(cell.GetCellType() & IGrid::ICell::eObstacle) ) {
 				return cell;
 			}
 		}
 	}
+	CEException e("Error in CGrid::FindClosestNonObstacle() : no path found");
+	throw e;
 }
 
 void CGrid::SetDepart(int column, int row)

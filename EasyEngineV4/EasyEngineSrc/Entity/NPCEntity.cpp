@@ -210,9 +210,9 @@ IBox* CNPCEntity::GetNextCollideBox()
 	return pBoxRet;
 }
 
-void CNPCEntity::ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints)
+void CNPCEntity::ComputePathFind2D( const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints)
 {
-	ComputePathFind2DAStar(oOrigin, oDestination, vPoints, m_pScene->GetCellSize());
+	ComputePathFind2DAStar(oOrigin, oDestination, vPoints);
 }
 
 void CNPCEntity::OnTopicWindowClosed(IGUIWindow* pWindow, IObject* pThisEntity)
@@ -237,14 +237,36 @@ void CNPCEntity::UpdateGoto()
 	if (IsArrivedAtDestination() && m_pBackupBoundingGeometry) {
 		m_pBoundingGeometry = m_pBackupBoundingGeometry;
 	}
+	if (!IsArrivedAtDestination() && m_bCollideOnObstacle && (m_fAngleRemaining != 0.f)) {
+		if (m_fAngleRemaining > 0)
+			m_fForceDeltaRotation++;
+		else if (m_fAngleRemaining < 0)
+			m_fForceDeltaRotation--;
+	}
+	else {
+		if(m_fForceDeltaRotation > 0)
+			m_fForceDeltaRotation--;
+		else if(m_fForceDeltaRotation < 0)
+			m_fForceDeltaRotation++;
+	}
 }
 
-void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize)
+#include "Utils2/Logger.h"
+void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints)
 {
 	int originx, originy, destinationx, destinationy;
-	m_pCollisionMap->GetCellCoordFromPosition(oOrigin.m_x, oOrigin.m_y, originx, originy);
-	m_pCollisionMap->GetCellCoordFromPosition(oDestination.m_x, oDestination.m_y, destinationx, destinationy);
 	CEntity* pParent = dynamic_cast<CEntity*>(GetParent());
+
+	// convert gobal to local coordinates
+	CMatrix oParentInv;
+	pParent->GetWorldMatrix().GetInverse(oParentInv);
+	CVector oLocalOrigin = oParentInv * oOrigin;
+	CVector oLocalDestination = oParentInv * oDestination;
+	//CVector2D oDestination2D(oLocalDestination.m_x, oLocalDestination.m_z), oPos2D(oLocalOrigin.m_x, oLocalOrigin.m_z);
+	
+	m_pCollisionMap->GetCellCoordFromPosition(oLocalOrigin.m_x, oLocalOrigin.m_z, originx, originy);
+	m_pCollisionMap->GetCellCoordFromPosition(oLocalDestination.m_x, oLocalDestination.m_z, destinationx, destinationy);
+	
 	IGrid* pGrid = pParent->GetCollisionGrid();
 	if (!pGrid) {
 		string sSceneName;
@@ -253,7 +275,14 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2
 	}
 	pGrid->SetDepart(originx, originy);
 	pGrid->SetDestination(destinationx, destinationy);
-	if (m_oPathFinder.FindPath(pGrid)) {
+	bool bPathFound = false;
+	try {
+		bPathFound = m_oPathFinder.FindPath(pGrid);
+	}
+	catch (CEException& e) {
+		CLogger::Log() << "Error : ComputePathFind2DAStar(" << oOrigin << "), " << oDestination << ") failed";
+	}
+	if (bPathFound) {
 		vector<IGrid::ICell*> path;
 		pGrid->GetPath(path);
 
@@ -264,11 +293,21 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2
 			float x, y;
 			pCell->GetCoordinates(r, c);
 			m_pCollisionMap->GetPositionFromCellCoord(r, c, x, y);
-			vPoints.push_back(CVector2D(x, y));
+			vPoints.push_back(CVector(x, 0, y));
 		}
 		if (!vPoints.empty())
 			vPoints.pop_back();
 	}
-	vPoints.push_back(oDestination);
+	vPoints.push_back(oLocalDestination);
 	pGrid->ResetAllExceptObstacles();
+
+	// convert local path to world
+	for (CVector& point : vPoints) {
+		point = pParent->GetWorldMatrix() * point;
+	}
+}
+
+INode* CNPCEntity::GetParent()
+{
+	return CNode::GetParent();
 }

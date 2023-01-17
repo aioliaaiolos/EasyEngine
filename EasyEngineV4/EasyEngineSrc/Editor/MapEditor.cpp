@@ -287,7 +287,7 @@ void CMapEditor::SaveMap(string sFileName, float fBias)
 	m_pScene->GetInfos(si);
 	ClearCharacters(si.m_vObject);
 	m_oLoaderManager.Export(sFileName, si);
-	m_pScene->CreateCollisionMaps(fBias);
+	m_pScene->CreateCollisionMaps(fBias, 200);
 }
 
 void CMapEditor::Load(string sFileName)

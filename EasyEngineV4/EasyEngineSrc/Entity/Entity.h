@@ -91,7 +91,7 @@ public:
 	void							GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix);
 	int								GetCellSize();
 	void							CreateCollisionGrid();
-	void							CreateCollisionMaps(float fBias) override;
+	void							CreateCollisionMaps(float fBias, int nCellSize) override;
 	void							LoadCollisionMaps();
 	ICollisionMap*					GetCollisionMap();
 	IGrid*							GetCollisionGrid();
@@ -148,7 +148,7 @@ protected:
 	bool											m_bUseCustomSpecular;
 	CEntity*										m_pCloth;
 	IGrid*											m_pCollisionGrid;
-	const int										m_nCollisionGridCellSize = 200;
+	//int												m_nCollisionGridCellSize;
 	IPathFinder&									m_oPathFinder;
 	ICollisionMap*									m_pCollisionMap;
 	vector< CMatrix >								m_vBoneMatrix;

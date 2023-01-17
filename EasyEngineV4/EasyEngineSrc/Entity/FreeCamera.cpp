@@ -1,15 +1,18 @@
 #include "FreeCamera.h"
 #include "IRenderer.h"
+#include "Interface.h"
 
-CFreeCamera::CFreeCamera(EEInterface& oInterface, float fFov):
+CFreeCamera::CFreeCamera(EEInterface& oInterface, float fFov, string sCamName):
 CCamera(oInterface, fFov),
 m_fYaw( 0.f ),
 m_fPitch( 0.f ),
 m_fSpeed(1.f),
 m_bDisplayViewCone(false)
 {
-	m_sEntityName = "FreeCamera";
-	m_sName = "FreeCamera";
+	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));	
+	m_sEntityName = sCamName;
+	m_sName = sCamName;
+	pEntityManager->AddEntity(this, sCamName);
 }
 
 CFreeCamera::~CFreeCamera()

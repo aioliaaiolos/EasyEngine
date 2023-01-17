@@ -18,7 +18,7 @@ class CCollisionMap : public ICollisionMap
 {
 public:
 	// Collision map
-	CCollisionMap(EEInterface& oInterface, IEntity* pScene, int nCellSize);
+	CCollisionMap(EEInterface& oInterface, IEntity* pScene);
 
 	void SetFileName(string sFileName) override;
 
@@ -37,12 +37,14 @@ protected:
 	void		GetRoofs(float fFloorHeight, const vector<pair<float, IEntity*>>& nonFloors, vector<IEntity*>& roofs, vector<IEntity*>& nonRoofs);
 	void		GetDoors(const vector<IEntity*>& vCollisionEntities, vector<IEntity*>& doors);
 	void		CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid);
-	void		ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid);
+	//void		ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid);
 	void		GridToMap(int xGrid, int yGrid, const CDimension& mapDimension, const CDimension& gridDimension, float& xMap, float& zMap);
 	unsigned	int GetWidth() override;
 	unsigned	int GetHeight() override;
-	void		Generate() override;
+	void		Generate(int nCellSize) override;
 	void		Load() override;
+	int			GetCellCoordFromPosition();
+	int			GetCellSize() override;
 
 private:
 	float						m_fGroundMapWidth;

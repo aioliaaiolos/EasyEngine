@@ -104,6 +104,7 @@ void CObject::UpdateCollision()
 		CVector lastBottom = last;
 		CVector R = last;
 		bool bCollision = false;
+		m_bCollideOnObstacle = false;
 		float fMaxHeight = -999999.f;
 		for (int i = 0; i < entities.size(); i++) {
 			INode* pEntity = entities[i];
@@ -133,6 +134,7 @@ void CObject::UpdateCollision()
 					oLocalMatrix.m_03 = last.m_x;
 					oLocalMatrix.m_23 = last.m_z;
 					GetBoundingGeometry()->SetTM(oLocalMatrix);
+					m_bCollideOnObstacle = true;
 				}
 			}
 			else {

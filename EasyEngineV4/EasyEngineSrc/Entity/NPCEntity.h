@@ -33,12 +33,13 @@ public:
 	void					Goto( const CVector& oPosition, float fSpeed );
 	IBox*					GetFirstCollideBox();
 	IBox*					GetNextCollideBox();	
-	void					ComputePathFind2D( const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints);
+	void					ComputePathFind2D( const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints);
 	void					OpenTopicWindow();
 
 protected:
 	void					UpdateGoto() override;
-	void					ComputePathFind2DAStar(const CVector2D& oOrigin, const CVector2D& oDestination, vector< CVector2D >& vPoints, int nCellSize);
+	void					ComputePathFind2DAStar(const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints);
+	INode*					GetParent() override;
 
 	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
 	static void				OnTopicWindowClosed(IGUIWindow*, IObject*);

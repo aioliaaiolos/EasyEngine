@@ -8,7 +8,7 @@ class IRenderer;
 class CFreeCamera : public CCamera
 {
 public:
-	CFreeCamera(EEInterface& oInterface, float fFov);
+	CFreeCamera(EEInterface& oInterface, float fFov, string sCamName);
 	virtual ~CFreeCamera();
 	void				Move( float fOffsetYaw, float fOffsetPitch, float fOffsetRoll, float fAvanceOffet, float fLeftOffset, float fUpOffset );
 	void				Colorize(float r, float g, float b, float a) {}

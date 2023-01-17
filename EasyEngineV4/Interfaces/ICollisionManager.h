@@ -41,9 +41,10 @@ public:
 	virtual unsigned int GetHeight() = 0;
 	virtual void GetCellCoordFromPosition(float x, float y, int& cellx, int& celly) = 0;
 	virtual void GetPositionFromCellCoord(int row, int column, float& x, float& y) = 0;
-	virtual void Generate() = 0;
+	virtual void Generate(int nCellSize) = 0;
 	virtual void Load() = 0;
 	virtual void SetFileName(string sFileName) = 0;
+	virtual int GetCellSize() = 0;
 };
 
 class ICollisionManager : public CPlugin
@@ -71,7 +72,7 @@ public:
 	virtual void			ClearHeightMaps() = 0;
 	
 	// Collision map
-	virtual ICollisionMap*	CreateCollisionMap(IEntity* pScene, int cellSize, float fBias) = 0;
+	virtual ICollisionMap*	CreateCollisionMap(IEntity* pScene, float fBias) = 0;
 
 	virtual void	EnableHMHack(bool enable) = 0;
 	virtual void	EnableHMHack2(bool enable) = 0;

@@ -5,15 +5,13 @@
 
 #include "Utils2/StringUtils.h"
 
-CCollisionMap::CCollisionMap(EEInterface& oInterface, IEntity* pScene, int nCellSize) :
+CCollisionMap::CCollisionMap(EEInterface& oInterface, IEntity* pScene) :
 	m_pScene(pScene),
 	m_oInterface(oInterface),
 	m_oLoaderManager(*dynamic_cast<ILoaderManager*>(m_oInterface.GetPlugin("LoaderManager"))),
 	m_oEntityManager(*dynamic_cast<IEntityManager*>(m_oInterface.GetPlugin("EntityManager"))),
 	m_pGround(nullptr)
 {
-	m_nCellSize = nCellSize;	
-	
 	m_pGround = dynamic_cast<IMesh*>(m_pScene->GetRessource());
 	if (m_pGround) {
 		IBox* pBox = m_pGround->GetBBox();
@@ -35,16 +33,9 @@ void CCollisionMap::SetFileName(string sFileName)
 	m_sFileName = sFileName;
 }
 
-void CCollisionMap::Generate()
+void CCollisionMap::Generate(int nCellSize)
 {
 	vector<vector<bool>> vGrid;
-
-	int nCellSize = m_nCellSize;
-	float lenght = max(m_pScene->GetBoundingGeometry()->GetBBoxDimension().m_x, m_pScene->GetBoundingGeometry()->GetBBoxDimension().m_z);
-	if (lenght > 500000)
-		nCellSize = 200;
-	else
-		nCellSize = 64;
 	CreateCollisionArray(m_pScene, vGrid, nCellSize, 0);
 	CreateTextureFromCollisionArray(m_sFileName, vGrid);
 }
@@ -52,6 +43,14 @@ void CCollisionMap::Generate()
 void CCollisionMap::Load()
 {
 	m_oLoaderManager.LoadTexture(m_sFileName, m_oCollisionTexture);
+	float fLonguestSide = max(m_fGroundWidth, m_fGroundHeight);
+	int nLonguestTextureSide = max(m_oCollisionTexture.m_nWidth, m_oCollisionTexture.m_nHeight);
+	m_nCellSize = (int)(fLonguestSide / (float)nLonguestTextureSide);
+}
+
+int CCollisionMap::GetCellSize()
+{
+	return m_nCellSize;
 }
 
 void CCollisionMap::SortObjectsByHeight(IEntity* pRoot, vector<pair<float, IEntity*>>& vSortedObjectHeight)
@@ -206,7 +205,8 @@ void CCollisionMap::AddObjectToCollisionGrid(const CVector& rootDim, const CDime
 			CVector P((float)xModel, 0, (float)zModel);
 			CVector PTransform = modelTM * P;
 			int xGrid = 0, yGrid = 0;
-			ModelToGrid(PTransform.m_x, PTransform.m_z, mapDimension, gridDimension, xGrid, yGrid);
+			//ModelToGrid(PTransform.m_x, PTransform.m_z, mapDimension, gridDimension, xGrid, yGrid);
+			GetCellCoordFromPosition(PTransform.m_x, PTransform.m_z, xGrid, yGrid);
 			xGrid = xGrid < 0.f ? 0 : (xGrid >= gridDimension.GetWidth() ? gridDimension.GetWidth() - 1 : xGrid);
 			yGrid = yGrid < 0.f ? 0 : (yGrid >= gridDimension.GetHeight() ? gridDimension.GetHeight() - 1 : yGrid);
 			vGrid[xGrid][yGrid] = isObstacle;
@@ -226,6 +226,7 @@ bool CCollisionMap::TestCellObstacle(int x, int y)
 
 void CCollisionMap::CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& vGrid, int nCellSize, float fBias)
 {
+	m_nCellSize = nCellSize;
 	IBox* pRootBBox = dynamic_cast<IBox*>(pRoot->GetBoundingGeometry());
 	if (!pRootBBox)
 		throw CEException("CreateCollisionArray() : entity root has no bounding box");
@@ -233,6 +234,8 @@ void CCollisionMap::CreateCollisionArray(IEntity* pRoot, vector<vector<bool>>& v
 	int nGridHeight = pRootBBox->GetDimension().m_z / nCellSize;
 	nGridWidth = nGridWidth % 4 ? ((nGridWidth) >> 2) << 2 : nGridWidth;
 	nGridHeight = nGridHeight % 2 ? (nGridHeight >> 1) << 1 : nGridHeight;
+	nCellSize = pRootBBox->GetDimension().m_x / nGridWidth;
+	float f = pRootBBox->GetDimension().m_x / (float)nGridWidth;
 
 	vGrid.resize(nGridWidth);
 	for (int i = 0; i < vGrid.size(); i++)
@@ -261,9 +264,17 @@ void CCollisionMap::GetPositionFromCellCoord(int row, int column, float& x, floa
 	y = (-(float)row + (float)rowCount / 2.f) * (float)nCellSize;
 }
 
+/*
+void CCollisionMap::ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid)
+{
+	xGrid = xMap * gridDimension.GetWidth() / mapDimension.GetWidth() + gridDimension.GetWidth() / 2.f;
+	yGrid = gridDimension.GetHeight() * (0.5f - zMap / mapDimension.GetHeight());
+}*/
+
 void CCollisionMap::GetCellCoordFromPosition(float x, float y, int& cellx, int& celly)
 {
-	cellx = (int)((x + m_fGroundWidth / 2) / (float)m_nCellSize);
+	cellx = ((m_fGroundWidth / 2.f + x) / m_fGroundWidth) * (m_fGroundWidth / (float)m_nCellSize);
+	//cellx = (int)((x + m_fGroundWidth) / (2.f * (float)m_nCellSize));
 	celly = (int)((-y + m_fGroundHeight / 2) / (float)m_nCellSize);
 }
 
@@ -293,12 +304,6 @@ unsigned int CCollisionMap::GetWidth()
 unsigned int CCollisionMap::GetHeight()
 {
 	return m_oCollisionTexture.m_nHeight;
-}
-
-void CCollisionMap::ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid)
-{
-	xGrid = xMap * gridDimension.GetWidth() / mapDimension.GetWidth() + gridDimension.GetWidth() / 2.f;
-	yGrid = gridDimension.GetHeight() * (0.5f - zMap / mapDimension.GetHeight());
 }
 
 void CCollisionMap::CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid)

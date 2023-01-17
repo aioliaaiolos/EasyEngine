@@ -37,7 +37,7 @@ ICamera* CCameraManager::CreateCamera( TCameraType type, float fFov)
 	switch( type )
 	{
 	case ICameraManager::TFree:
-		pCamera = new CFreeCamera(m_oInterface, fFov);
+		pCamera = new CFreeCamera(m_oInterface, fFov, "FreeCamera");
 		sCameraName = "FreeCamera";
 		/*if (!m_pActiveCamera)
 			m_pActiveCamera = pCamera;*/
@@ -47,19 +47,19 @@ ICamera* CCameraManager::CreateCamera( TCameraType type, float fFov)
 		sCameraName = "LinkedCamera";
 		break;
 	case ICameraManager::TMap:
-		pCamera = new CFreeCamera(m_oInterface, fFov);
+		pCamera = new CFreeCamera(m_oInterface, fFov, "MapCamera");
 		sCameraName = "MapCamera";
 		break;
 	case ICameraManager::TGuiMap:
-		pCamera = new CFreeCamera(m_oInterface, fFov);
+		pCamera = new CFreeCamera(m_oInterface, fFov, "GUIMapCamera");
 		sCameraName = "GuiMapCamera";
 		break;
 	case ICameraManager::TEditor:
-		pCamera = new CFreeCamera(m_oInterface, fFov);
+		pCamera = new CFreeCamera(m_oInterface, fFov, "EditorCamera");
 		sCameraName = "CharacterEditorCamera";
 		break;
 	default:
-		pCamera = new CFreeCamera(m_oInterface, fFov);
+		pCamera = new CFreeCamera(m_oInterface, fFov, "DefaultFreeCamera");
 		sCameraName = "noNameCamera";
 		break;
 	}

@@ -55,9 +55,9 @@ void CCollisionManager::StopDisplayHeightMap()
 	m_oRenderer.SetBackgroundColor(m_oOriginBackgroundColor.m_x, m_oOriginBackgroundColor.m_y, m_oOriginBackgroundColor.m_z);
 }
 
-ICollisionMap* CCollisionManager::CreateCollisionMap(IEntity* pScene, int nCellSize, float fBias)
+ICollisionMap* CCollisionManager::CreateCollisionMap(IEntity* pScene, float fBias)
 {
-	CCollisionMap* pCollisionMap = new CCollisionMap(m_oInterface, pScene, nCellSize);
+	CCollisionMap* pCollisionMap = new CCollisionMap(m_oInterface, pScene);
 	return pCollisionMap;
 }
 

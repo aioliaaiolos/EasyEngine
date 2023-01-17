@@ -78,8 +78,8 @@ function onLoadingGame()
 	//LoadWorld("testMur");
 	//EditWorld("area3");
 	//LoadWorld("area3");
-	//EditWorld("");
-	LoadWorld("");
+	EditWorld("");
+	//LoadWorld("");
 	
 	//LoadWorld("plane");
 	//EditWorld("plane");
@@ -89,4 +89,7 @@ function onLoadingGame()
 	
 	//SetAnimationSpeed(Player, "run", 4.0);
 	//SetSceneMap("HM_terrain02.bmp", "stone001b.bmp", 20000, 1000);
+	
+	//g=GetCharacterID("garde hopital");
+	//Goto(g, -23698, 0, -185424);`
 }
