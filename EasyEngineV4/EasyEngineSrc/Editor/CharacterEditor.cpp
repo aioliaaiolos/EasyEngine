@@ -26,10 +26,10 @@ CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCam
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorCreation, this);
 }
 
-void CCharacterEditor::HandleEditorCreation(CPlugin* pPlugin, void* pData)
+void CCharacterEditor::HandleEditorCreation(CPlugin* pPlugin, IObject* pData)
 {
 	CEditorManager* pEditorManager = (CEditorManager*)pPlugin;
-	CCharacterEditor* pCharacterEditor = (CCharacterEditor*)pData;
+	CCharacterEditor* pCharacterEditor = dynamic_cast<CCharacterEditor*>(pData);
 	if (pCharacterEditor && pEditorManager) {
 		pCharacterEditor->m_pWorldEditor = dynamic_cast<CWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
 	}
@@ -284,12 +284,15 @@ void CCharacterEditor::SetBody(string sBodyName)
 	if (sBodyName.find(".bme") == -1)
 		sBodyName += ".bme";
 	m_pCurrentCharacter->SetBody(sBodyName);
+
+	/*
 	string sCharacterName;
 	ILoader::CAnimatedEntityInfos characterInfos;
 	m_pCurrentCharacter->GetEntityName(sCharacterName);
 	m_oEntityManager.GetCharacterInfosFromDatabase(sCharacterName, characterInfos);
 	characterInfos.m_sRessourceFileName = string("Meshes/Bodies/") + sBodyName;
 	m_pCurrentCharacter->BuildFromInfos(characterInfos, m_pScene);
+	*/
 	InitSpawnedCharacter();
 	InitEyeNodes();
 	InitHeadNode(m_pCurrentCharacter);

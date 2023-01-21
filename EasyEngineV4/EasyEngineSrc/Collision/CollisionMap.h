@@ -37,7 +37,6 @@ protected:
 	void		GetRoofs(float fFloorHeight, const vector<pair<float, IEntity*>>& nonFloors, vector<IEntity*>& roofs, vector<IEntity*>& nonRoofs);
 	void		GetDoors(const vector<IEntity*>& vCollisionEntities, vector<IEntity*>& doors);
 	void		CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid);
-	//void		ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid);
 	void		GridToMap(int xGrid, int yGrid, const CDimension& mapDimension, const CDimension& gridDimension, float& xMap, float& zMap);
 	unsigned	int GetWidth() override;
 	unsigned	int GetHeight() override;

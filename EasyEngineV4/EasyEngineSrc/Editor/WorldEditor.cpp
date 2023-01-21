@@ -144,7 +144,7 @@ void CWorldEditor::Load(string fileName)
 			string root;
 			m_oFileSystem.GetLastDirectory(root);
 			IMapEditor* pMapEditor = dynamic_cast<IMapEditor*>(m_pEditorManager->GetEditor(IEditor::Type::eMap));
-			m_pScene->HandleLoadingComplete(HandleSceneLoadingComplete, this);
+			m_pScene->HandleStateChanged(HandleSceneLoadingComplete, this);
 			pMapEditor->Load(m_mMaps.begin()->first);
 		}
 
@@ -182,6 +182,9 @@ void CWorldEditor::Load(string fileName)
 		}
 	}
 	m_pEditorCamera->Link(m_pScene);
+
+	if (m_bEditionMode)
+		InitCamera();
 }
 
 void CWorldEditor::Save()
@@ -360,13 +363,24 @@ void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path)
 	path = root + "/" + worldName;
 }
 
+/*
+void CWorldEditor::SetEntitiesWeight()
+{
+	for (IEntity* pEntity : m_vEntities) {
+		IBoxEntity* pArea = dynamic_cast<IBoxEntity*>(pEntity);
+		if (!pArea) {
+			pEntity->SetWeight(1);
+		}
+	}
+}*/
+
 void CWorldEditor::OnSceneLoaded()
 {
 	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
 		IEntity* pEntity = m_oEntityManager.BuildCharacterFromDatabase(itCharacter->first, m_pScene);
 		if (pEntity) {
 			pEntity->SetLocalMatrix(itCharacter->second.first);
-			if(!itCharacter->second.second.empty() && !m_bEditionMode)
+			if(!itCharacter->second.second.empty())
 				pEntity->AttachScript(itCharacter->second.second);
 			pEntity->SetWeight(1);
 			m_vEntities.push_back(pEntity);
@@ -404,22 +418,35 @@ void CWorldEditor::OnSceneLoaded()
 			m_vEntities.push_back(pAreaEntity);
 		}
 	}
-	if (m_bEditionMode)
-		InitCamera();
+	if(m_bEditionMode)
+		m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 }
 
-void CWorldEditor::HandleSceneLoadingComplete(void* pWorldEditorData)
-{
-	CWorldEditor* pWorldEditor = (CWorldEditor*)pWorldEditorData;
+void CWorldEditor::HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin* pWorldEditorData)
+{	
+	CWorldEditor* pWorldEditor = dynamic_cast<CWorldEditor*>(pWorldEditorData);
 	try {
 		if (pWorldEditor) {
-			pWorldEditor->OnSceneLoaded();
+			switch (state)
+			{
+			case IScene::eStart:
+				break;
+			case IScene::eLoadingComplete:
+				pWorldEditor->OnSceneLoaded();
+				pWorldEditor->m_pScene->OnChangeSector();
+				break;
+			case IScene::eFirstUpdateDone:
+				//pWorldEditor->SetEntitiesWeight();
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	catch (CEException& e)
 	{
 		pWorldEditor->m_oConsole.Println(e.what());
 	}
-	pWorldEditor->m_pScene->UnhandleLoadingComplete();
-	pWorldEditor->m_pScene->OnChangeSector();
+	//pWorldEditor->m_pScene->UnhandleStateChanged();
+	
 }

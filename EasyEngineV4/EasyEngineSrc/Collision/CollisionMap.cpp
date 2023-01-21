@@ -205,7 +205,6 @@ void CCollisionMap::AddObjectToCollisionGrid(const CVector& rootDim, const CDime
 			CVector P((float)xModel, 0, (float)zModel);
 			CVector PTransform = modelTM * P;
 			int xGrid = 0, yGrid = 0;
-			//ModelToGrid(PTransform.m_x, PTransform.m_z, mapDimension, gridDimension, xGrid, yGrid);
 			GetCellCoordFromPosition(PTransform.m_x, PTransform.m_z, xGrid, yGrid);
 			xGrid = xGrid < 0.f ? 0 : (xGrid >= gridDimension.GetWidth() ? gridDimension.GetWidth() - 1 : xGrid);
 			yGrid = yGrid < 0.f ? 0 : (yGrid >= gridDimension.GetHeight() ? gridDimension.GetHeight() - 1 : yGrid);
@@ -263,13 +262,6 @@ void CCollisionMap::GetPositionFromCellCoord(int row, int column, float& x, floa
 	x = (0.5f + (float)column - (float)columnCount / 2.f) * (float)nCellSize;
 	y = (-(float)row + (float)rowCount / 2.f) * (float)nCellSize;
 }
-
-/*
-void CCollisionMap::ModelToGrid(int xMap, int zMap, const CDimension& mapDimension, const CDimension& gridDimension, int& xGrid, int& yGrid)
-{
-	xGrid = xMap * gridDimension.GetWidth() / mapDimension.GetWidth() + gridDimension.GetWidth() / 2.f;
-	yGrid = gridDimension.GetHeight() * (0.5f - zMap / mapDimension.GetHeight());
-}*/
 
 void CCollisionMap::GetCellCoordFromPosition(float x, float y, int& cellx, int& celly)
 {

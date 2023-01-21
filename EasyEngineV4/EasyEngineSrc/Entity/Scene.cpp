@@ -22,6 +22,7 @@
 #include "NPCEntity.h"
 #include "Player.h"
 #include "Repere.h"
+#include "IPhysic.h"
 
 using namespace std;
 
@@ -61,7 +62,8 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_sDiffuseFileName(diffuseFileName),
 	m_nMapLength(1000),
 	m_fMapHeight(10),
-	m_oLoadingCompleteCallback(nullptr, nullptr)
+	m_oStateChangedCallback(nullptr, nullptr),
+	m_eSceneState(eStart)
 {
 	m_nID = 0;
 	SetName("Scene");
@@ -327,16 +329,16 @@ void CScene::DeleteTempDirectories()
 	m_oFileSystem.DeleteDirectory(root + "/Levels/Tmp");
 }
 
-void CScene::HandleLoadingComplete(LevelCompleteProc callback, void* pData)
+void CScene::HandleStateChanged(StateChangedCallback callback, CPlugin* pData)
 {
-	m_oLoadingCompleteCallback.first = callback;
-	m_oLoadingCompleteCallback.second = pData;
+	m_oStateChangedCallback.first = callback;
+	m_oStateChangedCallback.second = pData;
 }
 
-void CScene::UnhandleLoadingComplete()
+void CScene::UnhandleStateChanged()
 {
-	m_oLoadingCompleteCallback.first = nullptr;
-	m_oLoadingCompleteCallback.second = nullptr;
+	m_oStateChangedCallback.first = nullptr;
+	m_oStateChangedCallback.second = nullptr;
 }
 
 void CScene::SetRessourceFileName(string sNewFileName)
@@ -348,6 +350,32 @@ void CScene::SetRessourceFileName(string sNewFileName)
 	m_pCollisionMap->SetFileName(sCollisionFileName);
 }
 
+void CScene::UpdateState()
+{
+	switch (m_eSceneState) {
+
+	case eStart:
+		if (IsLoadingComplete() && m_oStateChangedCallback.first) {
+			m_eSceneState = eLoadingComplete;
+			m_oStateChangedCallback.first(m_eSceneState, m_oStateChangedCallback.second);
+			m_oPhysic.SetGravity(0);
+		}
+		break;
+	case eLoadingComplete:
+		m_eSceneState = eFirstUpdateDone;
+		m_oStateChangedCallback.first(m_eSceneState, m_oStateChangedCallback.second);
+		break;
+	case eFirstUpdateDone:
+		m_oPhysic.RestoreGravity();
+		m_eSceneState = eRunning;
+		break;
+	case eRunning:
+		break;
+	default:
+		break;
+	}
+}
+
 void  CScene::RenderScene()
 {
 	if (m_oCameraManager.GetActiveCamera()) {
@@ -356,9 +384,13 @@ void  CScene::RenderScene()
 		m_oCameraManager.GetActiveCamera()->GetWorldMatrix(oCamMatrix);
 		m_oRenderer.SetCameraMatrix(oCamMatrix);
 	}
-	CNode::Update();
+	UpdateState();
+
+	/*
 	if (IsLoadingComplete() && m_oLoadingCompleteCallback.first)
-		m_oLoadingCompleteCallback.first(m_oLoadingCompleteCallback.second);
+		m_oLoadingCompleteCallback.first(m_oLoadingCompleteCallback.second);*/
+
+	CNode::Update();	
 
 	if (m_pEntityManager->IsUsingInstancing()) {
 		RenderInstances();
@@ -618,8 +650,11 @@ void CScene::Clear()
 	m_pEntityManager->Clear();
 	m_oCollisionManager.ClearHeightMaps();
 	m_vCollideEntities.clear();
-	ICamera* pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::TFree, 40.f);
+	ICamera* pMapCamera = m_oCameraManager.GetCameraFromType(ICameraManager::TFree);
+	if(!pMapCamera)
+		pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::TFree, 40.f);
 	pMapCamera->Link(this);
+	m_eSceneState = eStart;
 }
 
 void CScene::ClearCharacters()

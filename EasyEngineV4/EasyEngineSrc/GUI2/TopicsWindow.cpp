@@ -42,9 +42,9 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
 }
 
-void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, void* pData)
+void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, IObject* pData)
 {
-	CTopicsWindow* pTopicWindow = (CTopicsWindow*)pData;
+	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
 	pTopicWindow->m_pScriptManager = static_cast<IScriptManager*>(plugin);
 }
 
@@ -53,9 +53,9 @@ IScriptManager* CTopicsWindow::GetScriptManager()
 	return m_pScriptManager;
 }
 
-void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, void* pData)
+void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, IObject* pData)
 {
-	CTopicsWindow* pTopicWindow = (CTopicsWindow*)pData;
+	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
 	pTopicWindow->m_pGUIManager = static_cast<CGUIManager*>(pGUIManager);
 }
 
@@ -68,7 +68,7 @@ void CTopicsWindow::OnShow(bool bShow)
 		m_nTopicTextPointer = 0;
 	}
 	else {
-		m_pTopicFrame->CreateTopicsWidgets();
+		m_pTopicFrame->AddTopicsToWindow();
 
 		int index = SelectTopic(m_vGreatings, m_sSpeakerId);
 		if(index != -1)
@@ -76,9 +76,9 @@ void CTopicsWindow::OnShow(bool bShow)
 	}
 }
 
-void CTopicsWindow::AddTopic(string sTopicName, string sText, vector<CCondition>& conditions)
+void CTopicsWindow::AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction)
 {
-	m_pTopicFrame->AddTopic(sTopicName, sText, conditions);
+	m_pTopicFrame->AddTopic(sTopicName, sText, conditions, vAction);
 }
 
 void CTopicsWindow::AddGreating(string sText, vector<CCondition>& conditions)
@@ -302,6 +302,7 @@ void CTopicsWindow::LoadTopics(string sFileName)
 					string sTitle;
 					string sText;
 					vector<CCondition> vConditions;
+					vector<string> vAction;
 					rapidjson::Value& topic = topics[iTopic];
 					if (topic.IsObject()) {
 						if (topic.HasMember("Title")) {
@@ -362,12 +363,24 @@ void CTopicsWindow::LoadTopics(string sFileName)
 								}
 							}
 						}
+						if (topic.HasMember("Action")) {
+							rapidjson::Value& actions = topic["Action"];
+							if (actions.IsArray()) {
+								for (int iAction = 0; iAction < actions.GetArray().Size(); iAction++) {
+									rapidjson::Value& action = actions[iAction];
+									if (action.IsString()) {
+										string sAction = action.GetString();
+										vAction.push_back(sAction);
+									}
+								}
+							}
+						}
 					}
 					else if (topic.IsString()) {
 					}
 					DecodeString(sTitle, sTitle);
 					DecodeString(sText, sText);
-					AddTopic(sTitle, sText, vConditions);
+					AddTopic(sTitle, sText, vConditions, vAction);
 				}
 			}
 		}
@@ -399,6 +412,10 @@ void CTopicsWindow::LoadTopics(string sFileName)
 				}
 			}
 		}
+	}
+	else {
+		CTopicException e("Erreur de chargement de topics.json");
+		throw e;
 	}
 	ifs.close();
 }
@@ -450,14 +467,14 @@ void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCo
 }
 
 
-int CTopicsWindow::SelectTopic(vector<CTopicInfo>& topics, string sSpeakerId)
+int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeakerId)
 {
 	vector<int> topicVerifiedConditionCount;
 	for (int k = 0; k < topics.size(); k++)
 		topicVerifiedConditionCount.push_back(0);
 	int i = 0;
-	for (CTopicInfo& topic : topics) {
-		for (CCondition& condition : topic.m_vConditions) {
+	for (const CTopicInfo& topic : topics) {
+		for (const CCondition& condition : topic.m_vConditions) {
 			if (condition.m_sVariableName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
 					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
@@ -512,12 +529,13 @@ CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height) :
 	m_nYTextmargin(5),
 	m_nYmargin(21),
 	m_nTextHeight(25),
-	m_nTopicBorderWidth(218),
-	m_pScriptManager(nullptr)
+	m_nTopicBorderWidth(218)
 {
 	m_mFontColorFromTopicState[eNormal] = IGUIManager::eWhite;
 	m_mFontColorFromTopicState[ePressed] = IGUIManager::eTurquoise;
 	m_oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
+
+	CTopicsWindow* pTopicsWindow = GetParent();
 }
 
 CTopicFrame::~CTopicFrame()
@@ -530,9 +548,9 @@ CTopicsWindow* CTopicFrame::GetParent()
 	return (CTopicsWindow*)m_pParent;
 }
 
-void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, void* pData)
+void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, IObject* pData)
 {
-	CTopicFrame* pTopicFrame = (CTopicFrame*)pData;
+	CTopicFrame* pTopicFrame = dynamic_cast<CTopicFrame*>(pData);
 	pTopicFrame->m_pGUIManager = static_cast<CGUIManager*>(plugin);
 }
 
@@ -541,19 +559,33 @@ int CTopicFrame::GetTextHeight()
 	return m_nTextHeight;
 }
 
-void CTopicFrame::AddTopic(string sTopicName, string sText, vector<CCondition>& conditions)
+void CTopicFrame::AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction)
 {
 	CTopicInfo topic;
 	topic.m_sText = sText;
 	topic.m_vConditions = conditions;
+	topic.m_vAction = vAction;
 	m_mTopics[sTopicName].push_back(topic);
 }
 
 void CTopicFrame::GetTopicText(string sTopicTitle, string& sTopicText)
 {
 	map<CLink*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
-		[sTopicTitle](pair<CGUIWidget*, string> const& p) {return p.first->m_sUserData == sTopicTitle; });
-	sTopicText = itTopic->second;
+		[sTopicTitle](pair<CGUIWidget*, string> const& p) 
+	{
+		return p.first->m_sUserData == sTopicTitle; 
+	});
+	if (itTopic != m_mDisplayedTopicWidgets.end())
+		sTopicText = itTopic->second;
+	else {
+		map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicTitle);
+		if (itTopic != m_mTopics.end()) {
+			AddTopicToWindow(*itTopic, GetParent()->GetSpeakerId());
+		}
+		else {
+			sTopicText = string("Error, topic '") + sTopicTitle + "' not found";
+		}
+	}
 }
 
 void CTopicFrame::GetVarValue(string sVarName, string sCharacterId, string& sValue)
@@ -590,11 +622,13 @@ void CTopicFrame::Format(string sTopicText, string sSpeakerId, string& sFormated
 	}
 }
 
-void CTopicFrame::CreateTopicsWidgets()
+void CTopicFrame::AddTopicsToWindow()
 {
 	int iLine = 0;
 	Clear();
 	for (map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.begin(); itTopic != m_mTopics.end(); itTopic++) {
+
+#if 0
 		if (IsConditionChecked(itTopic->second, GetParent()->GetSpeakerId())) {
 			int y = iLine * m_nTextHeight + m_nYTextmargin;
 			string sTopic = itTopic->first;
@@ -615,6 +649,34 @@ void CTopicFrame::CreateTopicsWidgets()
 			pTitle->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eTurquoise);
 			iLine++;
 		}
+#else
+		AddTopicToWindow(*itTopic, GetParent()->GetSpeakerId());
+#endif // 0
+	}
+}
+
+void CTopicFrame::AddTopicToWindow(const pair<string, vector<CTopicInfo>>& topic, string sSpeakerId)
+{
+	if (IsConditionChecked(topic.second, GetParent()->GetSpeakerId())) {
+		int iLine = GetWidgetCount();
+		int y = iLine * m_nTextHeight + m_nYTextmargin;
+		string sTopic = topic.first;
+		CLink* pTitle = new CLink(m_oInterface, sTopic);
+		pTitle->m_sUserData = sTopic;
+		int nIdx = GetParent()->SelectTopic(topic.second, GetParent()->GetSpeakerId());
+		if (nIdx < 0)
+			nIdx = 0;
+
+		string sFormatedText;
+		Format(topic.second[nIdx].m_sText, GetParent()->GetSpeakerId(), sFormatedText);
+		m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
+		pTitle->SetClickedCallback(OnClickTopic);
+		AddWidget(pTitle);
+		pTitle->SetRelativePosition(m_nXTextMargin, iLine * m_nTextHeight + m_nYTextmargin);
+		pTitle->SetColorByState(CLink::TState::eNormal, IGUIManager::TFontColor::eWhite);
+		pTitle->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eYellow);
+		pTitle->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eTurquoise);
+		iLine++;
 	}
 }
 
@@ -667,14 +729,14 @@ int CTopicFrame::ConvertValueToInt(string sValue)
 	return atoi(sValue.c_str());
 }
 
-int CTopicFrame::IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerId)
+int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSpeakerId)
 {
 	vector<bool> checked;
-	for(CTopicInfo& topic : topics)
+	for(const CTopicInfo& topic : topics)
 		checked.push_back(true);
 	int i = 0;
-	for (CTopicInfo& topic : topics) {
-		for (CCondition& condition : topic.m_vConditions) {
+	for (const CTopicInfo& topic : topics) {
+		for (const CCondition& condition : topic.m_vConditions) {
 			if (condition.m_sVariableName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
 					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
@@ -687,7 +749,7 @@ int CTopicFrame::IsConditionChecked(vector<CTopicInfo>& topics, string sSpeakerI
 				}
 			}
 			else {
-				float fValue = m_pScriptManager->GetVariableValue(condition.m_sVariableName);
+				float fValue = GetParent()->GetScriptManager()->GetVariableValue(condition.m_sVariableName);
 				int nValue = ConvertValueToInt(condition.m_sValue);
 				if (float(nValue) == fValue) {
 					checked[i] = true;

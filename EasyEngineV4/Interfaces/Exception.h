@@ -21,6 +21,7 @@ public:
 
 class CTopicException : public CEException
 {
+public:
 	CTopicException(string sMessage) : CEException(sMessage) {}
 };
 

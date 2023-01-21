@@ -171,6 +171,7 @@
     <ClInclude Include="MobileEntity.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NPCEntity.h" />
+    <ClInclude Include="Physic.h" />
     <ClInclude Include="PlaneEntity.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="QuadEntity.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="MobileEntity.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NPCEntity.cpp" />
+    <ClCompile Include="Physic.cpp" />
     <ClCompile Include="PlaneEntity.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="QuadEntity.cpp" />

@@ -17,6 +17,8 @@ class ICollisionMap;
 class CCollisionEntity;
 class IScriptManager;
 class IConsole;
+class IPhysic;
+class IWorldEditor;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 
@@ -112,6 +114,7 @@ protected:
 	ILoaderManager*									m_pLoaderManager;
 	IScriptManager&									m_oScriptManager;
 	IConsole&										m_oConsole;
+	//IEditorManager&									m_oEditorManager;
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
@@ -148,7 +151,6 @@ protected:
 	bool											m_bUseCustomSpecular;
 	CEntity*										m_pCloth;
 	IGrid*											m_pCollisionGrid;
-	//int												m_nCollisionGridCellSize;
 	IPathFinder&									m_oPathFinder;
 	ICollisionMap*									m_pCollisionMap;
 	vector< CMatrix >								m_vBoneMatrix;
@@ -156,6 +158,8 @@ protected:
 	string											m_sAttachedScript;
 	vector<unsigned char>							m_vAttachedScriptByteCode;
 	time_t											m_nLastAttachScriptTime;
+	IPhysic&										m_oPhysic;
+	IWorldEditor*									m_pWorldEditor;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -176,7 +180,8 @@ protected:
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
 	virtual CEntity*	CreateEmptyEntity(string sName);
 	void				ExecuteScripts();
-	static void			OnAnimationCallback(IAnimation::TEvent e, void*);	
+	static void			OnAnimationCallback(IAnimation::TEvent e, void*);
+	static void			OnEditorManagerCreated(CPlugin* plugin, IObject* pData);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

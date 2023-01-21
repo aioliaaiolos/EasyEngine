@@ -4,11 +4,13 @@
 #include <algorithm>
 #include "ICollisionManager.h"
 #include "IGeometry.h"
+#include "IPhysic.h"
 #include "Utils2/TimeManager.h"
 #include "Scene.h"
 #include "EntityManager.h"
 #include "IGUIManager.h"
 #include "Bone.h"
+#include "Interface.h"
 #include "../Utils2/StringUtils.h"
 
 map< string, IEntity::TAnimation >			CMobileEntity::s_mAnimationStringToType;
@@ -24,6 +26,7 @@ CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
 {
 	m_pfnCollisionCallback = OnCollision;
+	
 }
 
 void CObject::Update()
@@ -89,10 +92,7 @@ void CObject::UpdateCollision()
 		CMatrix oLocalMatrix = m_oLocalMatrix;
 
 		vector<INode*> entities;
-		if (!m_bFirstUpdate)
-			GetEntitiesCollision(entities);
-		else
-			m_bFirstUpdate = false;
+		GetEntitiesCollision(entities);		
 
 		CVector localPos;
 		oLocalMatrix.GetPosition(localPos);
@@ -106,39 +106,41 @@ void CObject::UpdateCollision()
 		bool bCollision = false;
 		m_bCollideOnObstacle = false;
 		float fMaxHeight = -999999.f;
-		for (int i = 0; i < entities.size(); i++) {
-			INode* pEntity = entities[i];
-			pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
-			IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
-			firstBox->SetTM(backupLocal);
-			IGeometry* lastBox = GetBoundingGeometry();
-			lastBox->SetTM(oLocalMatrix);
-			IGeometry::TFace collisionFace = IGeometry::eNone;
-			collisionFace = pEntity->GetBoundingGeometry()->GetReactionYAlignedBox(*firstBox, *lastBox, R);
-			delete firstBox;
-			if (collisionFace != IBox::eNone) {
-				lastBottom = R;
-				last = R;
-				bCollision = true;
-				if (collisionFace == IBox::eYPositive) {
-					last.m_y += h / 2.f;
-					if (fMaxHeight < last.m_y)
-						fMaxHeight = last.m_y;
-					else
-						last.m_y = fMaxHeight;
-					m_oBody.m_oSpeed.m_y = 0;
-					oLocalMatrix.m_13 = last.m_y;
-					GetBoundingGeometry()->SetTM(oLocalMatrix);
+		if (m_oPhysic.GetGravity() > 0.f) {
+			for (int i = 0; i < entities.size(); i++) {
+				INode* pEntity = entities[i];
+				pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
+				IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
+				firstBox->SetTM(backupLocal);
+				IGeometry* lastBox = GetBoundingGeometry();
+				lastBox->SetTM(oLocalMatrix);
+				IGeometry::TFace collisionFace = IGeometry::eNone;
+				collisionFace = pEntity->GetBoundingGeometry()->GetReactionYAlignedBox(*firstBox, *lastBox, R);
+				delete firstBox;
+				if (collisionFace != IBox::eNone) {
+					lastBottom = R;
+					last = R;
+					bCollision = true;
+					if (collisionFace == IBox::eYPositive) {
+						last.m_y += h / 2.f;
+						if (fMaxHeight < last.m_y)
+							fMaxHeight = last.m_y;
+						else
+							last.m_y = fMaxHeight;
+						m_oBody.m_oSpeed.m_y = 0;
+						oLocalMatrix.m_13 = last.m_y;
+						GetBoundingGeometry()->SetTM(oLocalMatrix);
+					}
+					else {
+						oLocalMatrix.m_03 = last.m_x;
+						oLocalMatrix.m_23 = last.m_z;
+						GetBoundingGeometry()->SetTM(oLocalMatrix);
+						m_bCollideOnObstacle = true;
+					}
 				}
 				else {
-					oLocalMatrix.m_03 = last.m_x;
-					oLocalMatrix.m_23 = last.m_z;
-					GetBoundingGeometry()->SetTM(oLocalMatrix);
-					m_bCollideOnObstacle = true;
+					bCollision = true;
 				}
-			}
-			else {
-				bCollision = true;
 			}
 		}
 		// Ground collision
@@ -147,7 +149,7 @@ void CObject::UpdateCollision()
 		float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
 		float fGroundHeightNext = m_pParent->GetGroundHeight(nextPosition.m_x, nextPosition.m_z) + margin;
 		float fEntityY = last.m_y - h / 2.f;
-		if (fEntityY <= fGroundHeight + CBody::GetEpsilonError()) {
+		if (fEntityY <= fGroundHeight + m_oPhysic.GetEpsilonError()) {
 			m_oBody.m_oSpeed.m_x = 0;
 			m_oBody.m_oSpeed.m_y = 0;
 			m_oBody.m_oSpeed.m_z = 0;
@@ -163,7 +165,7 @@ void CObject::UpdateCollision()
 				LinkAndUpdateMatrices(pEntity);
 		}
 
-		if (bCollision && m_pfnCollisionCallback) {
+		if ((bCollision || !m_oPhysic.GetGravity()) && m_pfnCollisionCallback) {
 			m_pfnCollisionCallback(this, entities);
 		}
 	}
@@ -181,7 +183,6 @@ m_fEyesRotH( 0 ),
 m_fEyesRotV( 0 ),
 m_fNeckRotH( 0 ),
 m_fNeckRotV( 0 ),
-m_bFirstUpdate(true),
 m_sStandAnimation("stand-normal")
 {
 	m_sEntityName = sID;
@@ -741,7 +742,8 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 			m_vCustomSpecular = pAnimatedEntityInfos->m_vSpecular;
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
 			SetAnimationSpeed(CMobileEntity::s_mStringToAnimation[it->first], it->second);
-		GetCurrentAnimation()->Play(true);
+		//GetCurrentAnimation()->Play(true);
+		Stand();
 
 		for (const pair<string, string>& clothesInfos : pAnimatedEntityInfos->m_mClothesToNode) {
 			WearCloth(clothesInfos.first, clothesInfos.second);

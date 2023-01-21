@@ -25,11 +25,12 @@ class ISphere;
 class IAEntity;
 class IFighterEntity;
 class IGUIManager;
+class IPhysic;
 
 using namespace std;
 
 #define orgEpsilonError 0.001f
-
+#define DEFAULT_GRAVITY 0
 
 struct CKey
 {
@@ -44,21 +45,23 @@ struct CKey
 
 class CBody
 {
-	static float	s_fEpsilonError;
-	static float	s_fZCollisionError;
 public:
+	CBody(IPhysic& oPhysic);
 	float		m_fWeight;
 	CVector		m_oSpeed;
 				CBody();
 	void		Update();
 
+private:
+	IPhysic&	m_oPhysic;
+
 	//static float		GetEpsilonError(){ return 0.001f; }
-	static float		GetEpsilonError(){ return s_fEpsilonError; }
-	static void			SetZCollisionError( float e );
-	static float		GetZCollisionError();
+	
 };
 
-float GetGravity();
+
+
+
 
 class IEntity : virtual public INode
 {
@@ -163,7 +166,15 @@ public:
 class IScene : public virtual IEntity
 {
 public:
-	typedef void(*LevelCompleteProc)(void*);
+	enum TSceneState
+	{
+		eStart = 0,
+		eLoadingComplete,
+		eFirstUpdateDone,
+		eRunning
+	};
+
+	typedef void(*StateChangedCallback)(TSceneState, CPlugin*);
 	virtual void				RenderMinimap() = 0;
 	virtual ITexture*			GetMinimapTexture() = 0;
 	virtual void				DisplayMinimap(bool display) = 0;
@@ -185,8 +196,8 @@ public:
 	virtual void				SetHeight(float height) = 0;
 	virtual void				SetHMFile(string sHMFile) = 0;
 	virtual void				DeleteTempDirectories() = 0;
-	virtual void				HandleLoadingComplete(LevelCompleteProc callback, void* pData) = 0;
-	virtual void				UnhandleLoadingComplete() = 0;
+	virtual void				HandleStateChanged(StateChangedCallback callback, CPlugin* pData) = 0;
+	virtual void				UnhandleStateChanged() = 0;
 	virtual void				OnChangeSector() = 0;
 	virtual void				SetRessourceFileName(string sNewFileName) = 0;
 };
@@ -253,7 +264,6 @@ public:
 	virtual IEntity*			CreateBox(const CVector& oDimension ) = 0;
 	virtual IBoxEntity*			CreateAreaEntity(string sAreaName, const CVector& oDimension) = 0;
 	virtual IEntity*			CreateQuad(float lenght, float width) = 0;
-	virtual void				SetZCollisionError( float e ) = 0;
 	virtual IAEntity*			GetFirstIAEntity() = 0;
 	virtual IAEntity*			GetNextIAEntity() = 0;
 	virtual IFighterEntity*		GetFirstFighterEntity() = 0;

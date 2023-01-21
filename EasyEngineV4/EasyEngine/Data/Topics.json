@@ -7,13 +7,140 @@
 		{
 			"Title": "Que fais-je ici ?",
 			"Text": [
-				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient, ",
-				"adressez-vous a l'<link>administration</link> quand vous vous sentirez pret à sortir"
+				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient pres du rivage,",
+				"vous avez dériré pendant plusieurs jours mais vous etes enfin reveillé, prevenez-moi quand vous vous sentirez <link>pret à sortir</link>"
 			],
 			"Conditions": [
 				{
 					"VariableName": "CharacterId",
 					"Value": "Geraldine",
+					"Comp": "=="
+				}				
+			]
+		},
+		{
+			"Title" : "Pret à sortir",
+			"Text" : [
+				"Vous vous sentez mieux ? Tres bien, allez voir Ranja à l'accueil, elle s'occupera de tout."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Geraldine",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 1;"]
+		},
+		{
+			"Title" : "Pret à sortir",
+			"Text" : [
+				"Revenez plus tard, je suis occupée pour le moment, un <link>flacon</link> important a disparu de la réserve, je dois d'abord le retrouver"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "ranja",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 2;"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Je suis certaine de l'avoir posé ici, voudriez-vous le retrouver pour moi ? Je vous promet de m'occuper de vous des que je l'aurai retrouvé."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "ranja",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 3;"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Un flacon ? Hmm... qui me dit que ce n'est pas Ranja qui vous envoie ? Je ne sais pas, je vais y réfléchir... ",
+				"Mais peut etre que si vous me rendez un <link>petit service</link>, je serais dans de meilleures disposition pour vous aider... Qui sait ?"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "3",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 4;"]
+		},
+		{
+			"Title" : "Petit service",
+			"Text" : [
+				"Depuis qu'elle est arrivée, je ne peux m'empecher d'admirer le <link>bracelet de Namia</link>. Il brille tellement que l'on pourrait presque penser qu'il est magique !",
+				"Je sais qu'il n'y a pas plus de magie dans cet endroit que de sourire sur le visage de Ranja, ",
+				"mais il irait si bien à mon teint, vous ne trouvez-pas ? Allez, faites-moi plaisir, pourriez-vous... l'emprunter pour moi ?"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "4",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 5;"]
+		},
+		{
+			"Title" : "Bracelet de Namia",
+			"Text" : [
+				"Oui, un bracelet, et il appartient à Namia, la grosse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée,",
+				"elle est juste à coté de son lit. Ce n'est quand meme pas tres compliqué comme mission, etes-vous décidé à m'aider ou faut-il que j'y aille à votre place ?"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "5",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 5;"]
+		},
+		{
+			"Title": "République",
+			"Text": [
+				"Hein ? La République ? Heu... c'est un truc qui nous dirige et heu... dans laquelle tous les Hommes sont égaux et... de temps en temps on élit quelqu'un qui heu...",
+				" désolée, je dois vous laisser, il faut que je m'occupe de mes cheveux, ils sont si fins qu'ils se décoiffent en un rien de temps !"
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
 					"Comp": "=="
 				}
 			]
@@ -30,6 +157,20 @@
 			]
 		},
 		{
+			"Title": "Armée républicaine", 
+			"Text": [
+				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link> nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois, ",
+				"je passais devant chaque semaine en me rendant chez ma manucure."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
+					"Comp": "=="
+				}
+			]
+		},
+		{
 			"Title": "Mission", 
 			"Text": ["Je n'ai pas de mission à vous confier"]
 		},
@@ -39,7 +180,7 @@
 		},
 		{
 			"Title": "Administration", 
-			"Text": ["Vous la trouverez juste à coté de la chambre, adressez-vous à la préposée"],
+			"Text": ["Vous la trouverez juste à coté de la chambre, adressez-vous à Ranja, c'est la responsable"],
 			"Conditions": [
 				{
 					"VariableName": "CharacterId",

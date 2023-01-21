@@ -99,6 +99,9 @@
     <ClInclude Include="AreaEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoxEntity.cpp">
@@ -186,6 +189,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AreaEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

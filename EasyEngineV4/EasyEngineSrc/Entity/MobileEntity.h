@@ -22,7 +22,6 @@ protected:
 private:
 	CVector						m_vNextLocalTranslate;
 	
-	
 };
 
 class CMobileEntity : public CObject, public virtual IFighterEntity, public virtual ICharacter
@@ -82,7 +81,6 @@ protected:
 	string										m_sAttackBoneName;
 	string										m_sSecondaryAttackBoneName;
 	CVector										m_vNextLocalTranslate;
-	bool										m_bFirstUpdate;
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
 	vector<INode*>								m_vClothes;

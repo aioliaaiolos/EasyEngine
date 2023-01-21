@@ -8,6 +8,7 @@
 #include "SphereEntity.h"
 #include "Scene.h"
 #include "EntityManager.h"
+#include "Utils2/Logger.h"
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
 CMobileEntity(oInterface, sFileName, sID),
@@ -251,7 +252,6 @@ void CNPCEntity::UpdateGoto()
 	}
 }
 
-#include "Utils2/Logger.h"
 void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints)
 {
 	int originx, originy, destinationx, destinationy;
@@ -262,8 +262,6 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& o
 	pParent->GetWorldMatrix().GetInverse(oParentInv);
 	CVector oLocalOrigin = oParentInv * oOrigin;
 	CVector oLocalDestination = oParentInv * oDestination;
-	//CVector2D oDestination2D(oLocalDestination.m_x, oLocalDestination.m_z), oPos2D(oLocalOrigin.m_x, oLocalOrigin.m_z);
-	
 	m_pCollisionMap->GetCellCoordFromPosition(oLocalOrigin.m_x, oLocalOrigin.m_z, originx, originy);
 	m_pCollisionMap->GetCellCoordFromPosition(oLocalDestination.m_x, oLocalDestination.m_z, destinationx, destinationy);
 	

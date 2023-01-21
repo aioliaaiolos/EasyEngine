@@ -9,13 +9,16 @@
 #include <map>
 #include <string>
 
+// Engine
+#include "IObject.h"
+
 using namespace std;
 
 class EEInterface;
 class CPlugin;
 
 
-class CPlugin
+class CPlugin : public IObject
 {
 public:
 

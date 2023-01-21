@@ -173,6 +173,7 @@
     <ClInclude Include="..\..\Interfaces\IInputManager.h" />
     <ClInclude Include="..\..\Interfaces\ILoader.h" />
     <ClInclude Include="..\..\Interfaces\INode.h" />
+    <ClInclude Include="..\..\Interfaces\IPhysic.h" />
     <ClInclude Include="..\..\Interfaces\IRenderer.h" />
     <ClInclude Include="..\..\Interfaces\IRessource.h" />
     <ClInclude Include="..\..\Interfaces\IScriptManager.h" />

@@ -13,10 +13,12 @@
 #include "IShader.h"
 #include "IGeometry.h"
 #include "ICollisionManager.h"
+#include "IPhysic.h"
 #include "Interface.h"
 #include "EntityManager.h"
 #include "IScriptManager.h"
 #include "IConsole.h"
+#include "IEditor.h"
 #include "PlaneEntity.h"
 #include "Bone.h"
 
@@ -63,8 +65,16 @@ m_bUseCustomSpecular(false),
 m_pCloth(nullptr),
 m_pCollisionGrid(nullptr),
 m_pCollisionMap(nullptr),
-m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder")))
+m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
+m_oPhysic(static_cast<IPhysic&>(*oInterface.GetPlugin("Physic"))),
+m_oBody(static_cast<IPhysic&>(*oInterface.GetPlugin("Physic"))),
+m_pWorldEditor(nullptr)
 {
+	IEditorManager* pEditorManager = static_cast<IEditorManager*>(oInterface.GetPlugin("EditorManager"));
+	if (!pEditorManager)
+		oInterface.HandlePluginCreation("EditorManager", OnEditorManagerCreated, this);
+	else
+		m_pWorldEditor = dynamic_cast<IWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
 	m_bIsCollidable = true;
@@ -86,6 +96,22 @@ CEntity(oInterface)
 
 CEntity::~CEntity()
 {
+}
+
+void CEntity::OnEditorManagerCreated(CPlugin* plugin, IObject* pData)
+{
+	CEntity* pThisEntity = dynamic_cast<CEntity*>(pData);
+	if (pThisEntity) {
+		IEditorManager* pEditorManager = static_cast<IEditorManager*>(pThisEntity->m_oInterface.GetPlugin("EditorManager"));
+		if (pEditorManager) {
+			pThisEntity->m_pWorldEditor = dynamic_cast<IWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
+		}
+	}
+	if (!pThisEntity || !pThisEntity->m_pWorldEditor) {
+		CEException e("Error : IEditorManager is not loaded into CEntity::OnEditorCreated()");
+		throw e;
+	}
+
 }
 
 float CEntity::GetBoundingSphereRadius() const
@@ -344,7 +370,7 @@ void CEntity::UpdateCollision()
 			const float margin = -20.;
 			float fGroundHeight = m_pScene->GetGroundHeight(x, z) + m_pScene->GetGroundMargin();
 			float fEntityZ = m_oLocalMatrix.m_13 + m_pBoundingGeometry->GetBase().m_y + m_oBody.m_oSpeed.m_y * (float)nDelta / 1000.f;
-			if( fEntityZ > fGroundHeight + CBody::GetEpsilonError() )
+			if( fEntityZ > fGroundHeight + m_oPhysic.GetEpsilonError() )
 			{
 				m_bIsOnTheGround = false;
 				if( nDelta != 0 )
@@ -358,7 +384,7 @@ void CEntity::UpdateCollision()
 				m_oBody.m_oSpeed.m_x = 0;
 				m_oBody.m_oSpeed.m_y = 0;
 				m_oBody.m_oSpeed.m_z = 0;
-				if (fEntityZ < fGroundHeight + CBody::GetEpsilonError()) {
+				if (fEntityZ < fGroundHeight + m_oPhysic.GetEpsilonError()) {
 					SetLocalPosition(m_oLocalMatrix.m_03, fGroundHeight - m_pBoundingGeometry->GetBase().m_y, m_oLocalMatrix.m_23);
 					m_bIsOnTheGround = true;
 				}
@@ -590,7 +616,7 @@ void CEntity::DispatchEntityEvent()
 
 void CEntity::ExecuteScripts()
 {
-	if (!m_sAttachedScript.empty()) {
+	if (!m_sAttachedScript.empty() && !m_pWorldEditor->IsEnabled()) {
 		try {
 			time_t tCurrent;
 			time(&tCurrent);
@@ -748,7 +774,7 @@ bool CEntity::ManageGroundCollision(const CMatrix& olastLocalTM)
 	m_oWorldMatrix.GetPosition(worldPos);
 	float fGroundHeight = m_pParent->GetGroundHeight(worldPos.m_x, worldPos.m_z) + m_pScene->GetGroundMargin();
 	float fEntityY = localPos.m_y - h / 2.f;
-	if (fEntityY <= fGroundHeight + CBody::GetEpsilonError()) {
+	if (fEntityY <= fGroundHeight + m_oPhysic.GetEpsilonError()) {
 		m_oBody.m_oSpeed.m_x = 0;
 		m_oBody.m_oSpeed.m_y = 0;
 		m_oBody.m_oSpeed.m_z = 0;

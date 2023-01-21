@@ -47,7 +47,8 @@ public:
 	bool				IsIntersect(const CBox& box) const;
 	void				Draw(IRenderer& oRenderer) const;
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
-	IGeometry::TFace	GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				GetReactionYAlignedBoxOld(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	bool				IsIncludedInto(const IGeometry& oGeometry) override;
 	void				GetBBoxDimension(CVector& dim) override;
 	const CVector&		GetBBoxDimension() const override;

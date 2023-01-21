@@ -26,7 +26,7 @@ public:
 
 private:
 	
-	static void		HandleEntityManagerCreated(CPlugin* plugin, void* pData);
+	static void		HandleEntityManagerCreated(CPlugin* plugin, IObject* pData);
 
 	map< TCameraType, ICamera* >	m_mCamera;
 	map< ICamera*, TCameraType >	m_mCameraType;

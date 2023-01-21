@@ -66,7 +66,7 @@ private:
 	void					Zoom(const CVector& pos, float fYaw, float fPitch, float fRoll);
 	static void				OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y);
 	static void				OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key);
-	static void				HandleEditorCreation(CPlugin* pPlugin, void* pDatar);
+	static void				HandleEditorCreation(CPlugin* pPlugin, IObject* pDatar);
 
 	IScene*					m_pScene;
 	ICharacter*				m_pCurrentCharacter;

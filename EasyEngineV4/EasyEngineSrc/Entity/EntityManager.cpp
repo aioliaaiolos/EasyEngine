@@ -49,7 +49,7 @@ m_bUseInstancing(true)
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
 }
 
-void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, void* pData)
+void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IObject* pData)
 {
 	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
 	pEntityManager->m_pEditorManager = static_cast<IEditorManager*>(pEntityManager->m_oInterface.GetPlugin("EditorManager"));
@@ -289,6 +289,7 @@ void CEntityManager::GetCharacterInfosFromDatabase(string sCharacterId, ILoader:
 		oss << "CEntityManager::GetCharacterInfosFromDatabase() : Erreur : CEntityManager::BuildCharacterFromDatabase() -> id " 
 			<< sCharacterId << " inexistant dans la base de donneees des personnages.";
 		CEException e(oss.str());
+		throw e;
 	}
 	else {
 		infos = itCharacter->second;
@@ -462,11 +463,6 @@ void CEntityManager::DestroyAll()
 		DestroyEntity( pEntity );
 		itIDEntity = m_mIDEntities.begin();
 	}
-}
-
-void CEntityManager::SetZCollisionError( float e )
-{
-	CBody::SetZCollisionError( e );
 }
 
 IEntity* CEntityManager::CreateSphere( float fSize )

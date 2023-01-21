@@ -38,10 +38,10 @@ m_nHudLineHeight(15)
 	m_oEntityManager.AddEntity(m_pEditorCamera, m_pEditorCamera->GetName());
 }
 
-void CEditor::HandleEditorManagerCreation(CPlugin* plugin, void* pData)
+void CEditor::HandleEditorManagerCreation(CPlugin* plugin, IObject* pData)
 {
 	if (pData) {
-		CEditor* pEditor = static_cast<CEditor*>(pData);
+		CEditor* pEditor = dynamic_cast<CEditor*>(pData);
 		pEditor->m_pEditorManager = static_cast<CEditorManager*>(plugin);
 	}
 }

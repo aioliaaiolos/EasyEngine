@@ -5,6 +5,7 @@ lastTime = 0;
 numberAdvertises = 0;
 stateGuardHospital = 0;
 GuardTimerStarted = 0;
+Mission_Infirmerie = 0;
 
 onLoadingGame();
 

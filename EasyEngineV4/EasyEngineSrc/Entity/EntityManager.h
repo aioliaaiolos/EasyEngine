@@ -50,7 +50,6 @@ public:
 	void													DestroyEntity( IEntity* pEntity );
 	void													DestroyAll();
 	void													Clear();
-	void													SetZCollisionError( float e );
 	IEntity*												CreateSphere( float fSize );
 	IEntity*												CreateQuad(float lenght, float width);
 	IEntity*												CreateBox(const CVector& oDimension ) override;
@@ -123,7 +122,7 @@ private:
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
 
-	static void												HandleEditorManagerCreation(CPlugin* plugin, void* pData);
+	static void												HandleEditorManagerCreation(CPlugin* plugin, IObject* pData);
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

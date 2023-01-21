@@ -19,6 +19,7 @@
 #include "IGeometry.h"
 #include "IHud.h"
 #include "IEditor.h"
+#include "IPhysic.h"
 #include "../Utils2/RenderUtils.h"
 #include "../Utils2/DebugTool.h"
 #include "../Utils2/EasyFile.h"
@@ -51,6 +52,7 @@ extern bool					m_bRenderScene;
 extern IEventDispatcher*	m_pEventDispatcher;
 extern IEditorManager*		m_pEditorManager;
 extern IPathFinder*			m_pPathFinder;
+extern IPhysic*				m_pPhysic;
 
 IEntity* m_pRepere = NULL;
 vector< string > g_vStringsResumeMode;
@@ -865,7 +867,7 @@ void GetPlayerId(IScriptState* pState)
 void SetGravity( IScriptState* pState )
 {
 	CScriptFuncArgFloat* pGravity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
-	pGravity->m_fValue;
+	m_pPhysic->SetGravity(pGravity->m_fValue);
 }
 
 void DisplayNodeInfos( IScriptState* pState )
@@ -1423,7 +1425,7 @@ void SetConstantLocalTranslate( IScriptState* pState )
 void SetZCollisionError( IScriptState* pState )
 {
 	CScriptFuncArgFloat* pEpsilon = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
-	m_pEntityManager->SetZCollisionError( pEpsilon->m_fValue );
+	m_pPhysic->SetZCollisionError( pEpsilon->m_fValue );
 }
 
 void GetNodeId(IScriptState* pState)

@@ -32,6 +32,7 @@
 #include "IGeometry.h"
 #include "IPathFinder.h"
 #include "IEditor.h"
+#include "IPhysic.h"
 #include "Interface.h"
 
 //#define CATCH_EXCEPTION
@@ -71,6 +72,7 @@ IEventDispatcher*		m_pEventDispatcher = NULL;
 IXMLParser*				m_pXMLParser = NULL;
 IGeometryManager*		m_pGeometryManager = NULL;
 IPathFinder*			m_pPathFinder = NULL;
+IPhysic*				m_pPhysic = nullptr;
 IEditorManager*			m_pEditorManager = nullptr;
 
 vector< IEntity* > m_vLight;
@@ -302,7 +304,7 @@ EEInterface* InitPlugins( string sCmdLine )
 #endif
 
 	CGFXOption oOption;
-	GetOptionsByCommandLine( sCmdLine, oOption );
+	GetOptionsByCommandLine( sCmdLine, oOption );	
 
 	m_pPathFinder = static_cast<IPathFinder*>(CPlugin::Create(*pInterface, sDirectoryName + "IA.dll", "CreatePathFinder"));
 		
@@ -338,7 +340,8 @@ EEInterface* InitPlugins( string sCmdLine )
 	m_pRessourceManager = static_cast< IRessourceManager* >( CPlugin::Create(*pInterface, sDirectoryName + "Ressource.dll", "CreateRessourceManager" ) );
 	m_pCollisionManager = static_cast< ICollisionManager* >( CPlugin::Create(*pInterface, "Collision.dll", "CreateCollisionManager" ));
 	m_pCameraManager = static_cast< ICameraManager* >( CPlugin::Create( *pInterface, sDirectoryName + "Entity.dll", "CreateCameraManager" ) );
-	m_pEntityManager = static_cast< IEntityManager* >(CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreateEntityManager"));
+	m_pEntityManager =	static_cast< IEntityManager* >	(CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreateEntityManager"));
+	m_pPhysic =			static_cast<IPhysic*>			(CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreatePhysic"));
 	m_pCollisionManager->SetEntityManager(m_pEntityManager);
 
 	m_pSceneManager = static_cast< ISceneManager* >( CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreateSceneManager" ) );

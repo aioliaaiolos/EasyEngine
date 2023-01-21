@@ -408,7 +408,36 @@ bool IsComplexCollision(IBox& box1, IBox& box2)
 	return true;
 }
 
-IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
+bool IsUpper(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
+{
+	bool upper = (oEntityPos.m_y - oEntityDim.m_y / 2.f > oObstacleHalfDim.m_y) &&
+		abs(oEntityPos.m_x) < oObstacleHalfDim.m_x && abs(oEntityPos.m_z) < oObstacleHalfDim.m_z;
+	return upper;
+}
+
+bool IsUnder(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
+{
+	bool Under = (oEntityPos.m_y + oEntityDim.m_y / 2.f < oObstacleHalfDim.m_y) &&
+		abs(oEntityPos.m_x) < oObstacleHalfDim.m_x && abs(oEntityPos.m_z) < oObstacleHalfDim.m_z;
+	return Under;
+}
+
+bool IsIntoYPlanGeneratrice(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
+{
+	return abs(oEntityPos.m_x) < oObstacleHalfDim.m_x && abs(oEntityPos.m_z) < oObstacleHalfDim.m_z;
+}
+
+bool IsCollisionWithPlanYUp(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
+{
+	return ((oEntityPos.m_y + oEntityDim.m_y / .2f > oObstacleHalfDim.m_y) && (oEntityPos.m_y - oEntityDim.m_y / 2.f > -oObstacleHalfDim.m_y));
+}
+
+bool IsCollisionWithPlanYDown(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
+{
+	return ((oEntityPos.m_y + oEntityDim.m_y / 2.f < oObstacleHalfDim.m_y) && (oEntityPos.m_y - oEntityDim.m_y / 2.f < -oObstacleHalfDim.m_y));
+}
+
+IGeometry::TFace CBox::GetReactionYAlignedBoxOld(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
 {
 	CBox& box1 = static_cast<CBox&>(firstPositionBox);
 	CBox& box2 = static_cast<CBox&>(lastPositionBox);
@@ -419,7 +448,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 	// Si l'obstacle est dans le meme ordre de taille que la box de l'entité, on fait des tests simplifiés
 	if (!IsComplexCollision(box1, *this)) {
 		float dFirst = (box1.GetTM().GetPosition() - m_oTM.GetPosition()).Norm();
-		float dLast  = (box2.GetTM().GetPosition() - m_oTM.GetPosition()).Norm();
+		float dLast = (box2.GetTM().GetPosition() - m_oTM.GetPosition()).Norm();
 		if (dLast < dFirst) {
 			R = firstPositionBox.GetTM().GetPosition();
 			return eFace;
@@ -430,7 +459,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 	}
 	// Une marge pour éviter les erreurs d'imprécision
 	float margin = (box2.GetTM().GetPosition() - box1.GetTM().GetPosition()).Norm();
-	
+
 	bool collision = false;
 	TFace face = eNone;
 
@@ -441,7 +470,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 	float halfDimy = dimy / 2.f;
 	float halfDimz = dimz / 2.f;
 	CVector RLocal;
-	
+
 	vector<CVector> box1PointsWorld;
 	box1.GetCenterPoints(box1PointsWorld);
 
@@ -456,6 +485,14 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 		box2PointsLocal.push_back(P);
 	}
 
+	CVector lastPos = box1PointsLocal[0];
+	bool isUpper = (lastPos.m_y + box1.GetDimension().m_y / 2.f > halfDimy) &&
+		(lastPos.m_y - box1.GetDimension().m_y / 2.f > -halfDimy) &&
+		abs(lastPos.m_x) < halfDimx && abs(lastPos.m_z) < halfDimz;
+
+	bool isUnder = (lastPos.m_y - box1.GetDimension().m_y / 2.f < -halfDimy) &&
+		(lastPos.m_y + box1.GetDimension().m_y / 2.f < halfDimy) &&
+		abs(lastPos.m_x) < halfDimx && abs(lastPos.m_z) < halfDimz;
 	// Ici on se trouve dans l'espace de l'obstacle
 	for (int i = 0; i < box1PointsLocal.size(); i++) {
 		// O et P sont les 4 milieux des aretes verticales de la box
@@ -463,16 +500,14 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 		CVector P = box2PointsLocal[i];
 
 		// Si l'entité n'est ni au dessus et ni en dessous de l'obstacle
-		if ( (box1.GetDimension().m_y < dimy) && 
-			(O.m_y- box1.GetDimension().m_y / 2.f < halfDimy) && 
-			(O.m_y + box1.GetDimension().m_y / 2.f) > -halfDimy ) {
+		if (!isUpper && !isUnder) {
 			CVector A, B;
 			// collision sur le plan x positif
 			// Si P est de l'autre coté du plan, qu'il est plus proche du plan que O et qu'il est entre les deux cotés de l'obstacle
-			if(P.m_x < O.m_x && 
+			if (P.m_x < O.m_x &&
 				abs(P.m_x) < abs(halfDimx) &&
-				abs(P.m_x - halfDimx) <  box2.GetDimension().m_x / 2.f &&
-				abs(P.m_z) < abs(halfDimz) )
+				abs(P.m_x - halfDimx) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz))
 			{
 				int closedPointIndex = CVector::GetMinxIndex(box2PointsLocal);
 				// P est maintenant le point le plus proches de l'obstacle
@@ -489,7 +524,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 			else if (P.m_x > O.m_x &&
 				abs(P.m_x) < abs(halfDimx) &&
 				abs(-halfDimx - P.m_x) < box2.GetDimension().m_x / 2.f &&
-				abs(P.m_z) < abs(halfDimz) )
+				abs(P.m_z) < abs(halfDimz))
 			{
 				int closedPointIndex = CVector::GetMaxxIndex(box2PointsLocal);
 				P = box2PointsLocal[closedPointIndex];
@@ -505,7 +540,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 			else if (P.m_z < O.m_z &&
 				abs(P.m_z) < abs(halfDimz) &&
 				abs(P.m_x) < abs(halfDimx) &&
-				abs(P.m_z - halfDimz) <  box2.GetDimension().m_z / 2.f)
+				abs(P.m_z - halfDimz) < box2.GetDimension().m_z / 2.f)
 			{
 				int closedPointIndex = CVector::GetMinzIndex(box2PointsLocal);
 				P = box2PointsLocal[closedPointIndex];
@@ -537,15 +572,14 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 		else {
 			O = oTMInv * firstPositionBox.GetTM().GetPosition();
 			P = oTMInv * lastPositionBox.GetTM().GetPosition();
-			if ( (P.m_y > halfDimy) ||
-				((P.m_y < halfDimy) && (P.m_y + box1.GetDimension().m_y / 2.f) > halfDimy) ) {
+			if (isUpper) {
 				RLocal = P;
 				RLocal.m_y = halfDimy;
 				face = eYPositive;
 				collision = true;
 				break;
 			}
-			else if ((O.m_y + box1.GetDimension().m_y) < -halfDimy) {
+			else if (isUnder) {
 				face = eYNegative;
 				collision = true;
 				break;
@@ -553,7 +587,266 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 		}
 	}
 	if (collision)
-		R = m_oTM * RLocal;	
+		R = m_oTM * RLocal;
+	return face;
+}
+
+
+IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
+{
+	CBox& box1 = static_cast<CBox&>(firstPositionBox);
+	CBox& box2 = static_cast<CBox&>(lastPositionBox);
+	CMatrix oTMInv;
+	m_oTM.GetInverse(oTMInv);
+	CVector box1Position = oTMInv * box1.GetTM().GetPosition();
+	CVector box2Position = oTMInv * box2.GetTM().GetPosition();
+
+	// Si l'obstacle est dans le meme ordre de taille que la box de l'entité, on fait des tests simplifiés
+	if (!IsComplexCollision(box1, *this)) {
+		float dFirst = (box1.GetTM().GetPosition() - m_oTM.GetPosition()).Norm();
+		float dLast = (box2.GetTM().GetPosition() - m_oTM.GetPosition()).Norm();
+		if (dLast < dFirst) {
+			R = firstPositionBox.GetTM().GetPosition();
+			return eFace;
+		}
+		else {
+			return eNone;
+		}
+	}
+	// Une marge pour éviter les erreurs d'imprécision
+	float margin = (box2.GetTM().GetPosition() - box1.GetTM().GetPosition()).Norm();
+
+	bool collision = false;
+	TFace face = eNone;
+
+	float dimx = m_oDimension.m_x;
+	float dimy = m_oDimension.m_y;
+	float dimz = m_oDimension.m_z;
+	float halfDimx = dimx / 2.f;
+	float halfDimy = dimy / 2.f;
+	float halfDimz = dimz / 2.f;
+	CVector RLocal;
+
+	vector<CVector> box1PointsWorld;
+	box1.GetCenterPoints(box1PointsWorld);
+
+	vector<CVector> box2PointsWorld;
+	box2.GetCenterPoints(box2PointsWorld);
+
+	vector<CVector> box1PointsLocal, box2PointsLocal;
+	for (int i = 0; i < box1PointsWorld.size(); i++) {
+		CVector O = oTMInv * box1PointsWorld[i];
+		CVector P = oTMInv * box2PointsWorld[i];
+		box1PointsLocal.push_back(O);
+		box2PointsLocal.push_back(P);
+	}
+
+
+#ifndef OLD_VERSION
+
+	if (IsIntoYPlanGeneratrice(box1Position, box1.GetDimension(), CVector(halfDimx, halfDimy, halfDimz)) && 
+		IsIntoYPlanGeneratrice(box2Position, box2.GetDimension(), CVector(halfDimx, halfDimy, halfDimz))) {
+		R = lastPositionBox.GetTM().GetPosition();
+		if (IsCollisionWithPlanYUp(box1Position, box1.GetDimension(), CVector(halfDimx, halfDimy, halfDimz))) {
+			R.m_y = m_oTM.GetPosition().m_y + halfDimy;
+			face = eYPositive;
+		}
+		else if (IsCollisionWithPlanYDown(box1Position, box1.GetDimension(), CVector(halfDimx, halfDimy, halfDimz))) {
+			R.m_y = m_oTM.GetPosition().m_y - halfDimy;
+			face = eYNegative;
+		}
+	}
+	/*
+	if (IsUpper(box1Position, box1.GetDimension(), CVector(halfDimx, halfDimy, halfDimz))) {
+		if (IsUnder(box2Position, box2.GetDimension(), CVector(halfDimx, halfDimy, halfDimz))) {
+			R = box1Position;
+			R.m_y = halfDimy;
+		}
+	}*/
+	else {
+		for (int i = 0; i < box1PointsLocal.size(); i++) {
+			CVector O = box1PointsLocal[i];
+			CVector P = box2PointsLocal[i];
+			CVector A, B;
+			// collision sur le plan x positif
+			// Si P est de l'autre coté du plan, qu'il est plus proche du plan que O et qu'il est entre les deux cotés de l'obstacle
+			if (P.m_x < O.m_x &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_x - halfDimx) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz))
+			{
+				int closedPointIndex = CVector::GetMinxIndex(box2PointsLocal);
+				// P est maintenant le point le plus proches de l'obstacle
+				P = box2PointsLocal[closedPointIndex];
+				float offset = P.m_x - halfDimx;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x -= offset;
+				face = eXPositive;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan x négatif
+			else if (P.m_x > O.m_x &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimx - P.m_x) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz))
+			{
+				int closedPointIndex = CVector::GetMaxxIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = -halfDimx - P.m_x;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x += offset;
+				face = eXNegative;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan z positif
+			else if (P.m_z < O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_z - halfDimz) < box2.GetDimension().m_z / 2.f)
+			{
+				int closedPointIndex = CVector::GetMinzIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = P.m_z - halfDimz;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z -= offset;
+				face = eZPositive;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan z négatif
+			else if (P.m_z > O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimz - P.m_z) < box2.GetDimension().m_z / 2.f)
+			{
+				int closedPointIndex = CVector::GetMaxzIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = -halfDimz - P.m_z;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z += offset;
+				face = eZNegative;
+				collision = true;
+				return face;
+				break;
+			}
+		}
+	}
+
+
+#else
+
+
+
+
+	CVector lastPos = box1PointsLocal[0];
+	bool isUpper = (lastPos.m_y + box1.GetDimension().m_y / 2.f > halfDimy) &&
+		(lastPos.m_y - box1.GetDimension().m_y / 2.f > -halfDimy) &&
+		abs(lastPos.m_x) < halfDimx && abs(lastPos.m_z) < halfDimz;
+
+	bool isUnder = (lastPos.m_y - box1.GetDimension().m_y / 2.f < -halfDimy) &&
+		(lastPos.m_y + box1.GetDimension().m_y / 2.f < halfDimy) &&
+		abs(lastPos.m_x) < halfDimx && abs(lastPos.m_z) < halfDimz;
+	// Ici on se trouve dans l'espace de l'obstacle
+	for (int i = 0; i < box1PointsLocal.size(); i++) {
+		// O et P sont les 4 milieux des aretes verticales de la box
+		CVector O = box1PointsLocal[i];
+		CVector P = box2PointsLocal[i];
+
+		// Si l'entité n'est ni au dessus et ni en dessous de l'obstacle
+		if (!isUpper && !isUnder) {
+			CVector A, B;
+			// collision sur le plan x positif
+			// Si P est de l'autre coté du plan, qu'il est plus proche du plan que O et qu'il est entre les deux cotés de l'obstacle
+			if (P.m_x < O.m_x &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_x - halfDimx) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz))
+			{
+				int closedPointIndex = CVector::GetMinxIndex(box2PointsLocal);
+				// P est maintenant le point le plus proches de l'obstacle
+				P = box2PointsLocal[closedPointIndex];
+				float offset = P.m_x - halfDimx;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x -= offset;
+				face = eXPositive;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan x négatif
+			else if (P.m_x > O.m_x &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimx - P.m_x) < box2.GetDimension().m_x / 2.f &&
+				abs(P.m_z) < abs(halfDimz))
+			{
+				int closedPointIndex = CVector::GetMaxxIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = -halfDimx - P.m_x;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_x += offset;
+				face = eXNegative;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan z positif
+			else if (P.m_z < O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(P.m_z - halfDimz) < box2.GetDimension().m_z / 2.f)
+			{
+				int closedPointIndex = CVector::GetMinzIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = P.m_z - halfDimz;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z -= offset;
+				face = eZPositive;
+				collision = true;
+				return face;
+				break;
+			}
+			// collision sur le plan z négatif
+			else if (P.m_z > O.m_z &&
+				abs(P.m_z) < abs(halfDimz) &&
+				abs(P.m_x) < abs(halfDimx) &&
+				abs(-halfDimz - P.m_z) < box2.GetDimension().m_z / 2.f)
+			{
+				int closedPointIndex = CVector::GetMaxzIndex(box2PointsLocal);
+				P = box2PointsLocal[closedPointIndex];
+				float offset = -halfDimz - P.m_z;
+				R = lastPositionBox.GetTM().GetPosition();
+				R.m_z += offset;
+				face = eZNegative;
+				collision = true;
+				return face;
+				break;
+			}
+		}
+		else {
+			O = oTMInv * firstPositionBox.GetTM().GetPosition();
+			P = oTMInv * lastPositionBox.GetTM().GetPosition();
+			if (isUpper) {
+				RLocal = P;
+				RLocal.m_y = halfDimy;
+				face = eYPositive;
+				collision = true;
+				break;
+			}
+			else if (isUnder) {
+				face = eYNegative;
+				collision = true;
+				break;
+			}
+		}
+	}
+	if (collision)
+		R = m_oTM * RLocal;
+#endif // NEW_VERSION
 	return face;
 }
 

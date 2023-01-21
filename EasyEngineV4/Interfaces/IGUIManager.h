@@ -3,6 +3,7 @@
 
 #include <string>
 #include "EEPlugin.h"
+#include "IObject.h"
 
 class IRenderer;
 class IRessourceManager;
@@ -18,7 +19,7 @@ class IObject;
 
 using namespace std;
 
-class IGUIWindow
+class IGUIWindow : public IObject
 {
 public:
 	typedef void(*CloseWindowCallback)(IGUIWindow*, IObject* pObject);
