@@ -123,6 +123,9 @@
     <ClInclude Include="..\..\Interfaces\IPhysic.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Interfaces\IObject.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

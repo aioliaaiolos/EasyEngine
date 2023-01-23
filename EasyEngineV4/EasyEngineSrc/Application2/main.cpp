@@ -304,7 +304,7 @@ EEInterface* InitPlugins( string sCmdLine )
 #endif
 
 	CGFXOption oOption;
-	GetOptionsByCommandLine( sCmdLine, oOption );	
+	GetOptionsByCommandLine( sCmdLine, oOption );
 
 	m_pPathFinder = static_cast<IPathFinder*>(CPlugin::Create(*pInterface, sDirectoryName + "IA.dll", "CreatePathFinder"));
 		

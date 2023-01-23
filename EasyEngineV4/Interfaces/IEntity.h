@@ -30,7 +30,6 @@ class IPhysic;
 using namespace std;
 
 #define orgEpsilonError 0.001f
-#define DEFAULT_GRAVITY 0
 
 struct CKey
 {
@@ -284,6 +283,7 @@ public:
 	virtual void				AddNewCharacter(IEntity* pEntity) = 0;
 	virtual ICharacter*			BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) = 0;
 	virtual void				GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos) = 0;
+	virtual void				NormalizeCharacterDatabase() = 0;
 	virtual void				SaveCharacter(string sNPCID) = 0;
 	virtual void				RemoveCharacterFromDB(string sID) = 0;
 	virtual void				EnableInstancing(bool enable) = 0;

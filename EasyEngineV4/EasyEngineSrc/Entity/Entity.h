@@ -114,7 +114,6 @@ protected:
 	ILoaderManager*									m_pLoaderManager;
 	IScriptManager&									m_oScriptManager;
 	IConsole&										m_oConsole;
-	//IEditorManager&									m_oEditorManager;
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
@@ -181,7 +180,7 @@ protected:
 	virtual CEntity*	CreateEmptyEntity(string sName);
 	void				ExecuteScripts();
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);
-	static void			OnEditorManagerCreated(CPlugin* plugin, IObject* pData);
+	static void			OnEditorManagerCreated(CPlugin* plugin, IBaseObject* pData);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

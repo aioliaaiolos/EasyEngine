@@ -34,7 +34,6 @@ private:
 	void																CollectSelectableEntity(vector<IEntity*>& entities) override;
 	void																GetRelativeDatabasePath(string worldName, string& path);
 	void																OnSceneLoaded();
-	//void																SetEntitiesWeight();
 	static void															HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin* pWorldEditor);
 
 	IFileSystem&														m_oFileSystem;

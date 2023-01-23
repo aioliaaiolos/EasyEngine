@@ -1,9 +1,9 @@
 #pragma once
 
 
-class IObject
+class IBaseObject
 {
 public:
 
-	virtual ~IObject() {}
+	virtual ~IBaseObject() {}
 };

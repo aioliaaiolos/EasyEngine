@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\Interfaces\IGeometry.h" />
     <ClInclude Include="..\..\Interfaces\IGUIManager.h" />
     <ClInclude Include="..\..\Interfaces\IHud.h" />
+    <ClInclude Include="..\..\Interfaces\IObject.h" />
     <ClInclude Include="..\..\Interfaces\IPathFinder.h" />
     <ClInclude Include="..\..\Interfaces\IInputManager.h" />
     <ClInclude Include="..\..\Interfaces\ILoader.h" />

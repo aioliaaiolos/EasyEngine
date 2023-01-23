@@ -26,7 +26,7 @@ CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCam
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorCreation, this);
 }
 
-void CCharacterEditor::HandleEditorCreation(CPlugin* pPlugin, IObject* pData)
+void CCharacterEditor::HandleEditorCreation(CPlugin* pPlugin, IBaseObject* pData)
 {
 	CEditorManager* pEditorManager = (CEditorManager*)pPlugin;
 	CCharacterEditor* pCharacterEditor = dynamic_cast<CCharacterEditor*>(pData);
@@ -81,7 +81,7 @@ void CCharacterEditor::ZoomCameraLarge()
 void CCharacterEditor::ZoomCameraHead()
 {
 	m_eZoomType = eHead;
-	CVector pos(30, 157, -10);
+	CVector pos(30, 163, -10);
 	Zoom(pos, 106, -5, -1);
 }
 
@@ -284,15 +284,6 @@ void CCharacterEditor::SetBody(string sBodyName)
 	if (sBodyName.find(".bme") == -1)
 		sBodyName += ".bme";
 	m_pCurrentCharacter->SetBody(sBodyName);
-
-	/*
-	string sCharacterName;
-	ILoader::CAnimatedEntityInfos characterInfos;
-	m_pCurrentCharacter->GetEntityName(sCharacterName);
-	m_oEntityManager.GetCharacterInfosFromDatabase(sCharacterName, characterInfos);
-	characterInfos.m_sRessourceFileName = string("Meshes/Bodies/") + sBodyName;
-	m_pCurrentCharacter->BuildFromInfos(characterInfos, m_pScene);
-	*/
 	InitSpawnedCharacter();
 	InitEyeNodes();
 	InitHeadNode(m_pCurrentCharacter);
@@ -307,6 +298,16 @@ void CCharacterEditor::Edit(string id)
 void CCharacterEditor::SetSpecular(float r, float g, float b)
 {
 	m_pCurrentCharacter->SetCustomSpecular(CVector(r, g, b));
+}
+
+void CCharacterEditor::SetShininess(float fValue)
+{
+	IMesh* pMesh = dynamic_cast<IMesh*>(m_pCurrentCharacter->GetRessource());
+	if (pMesh) {
+		for (int i = 0; i < pMesh->GetMaterialCount(); i++) {
+			pMesh->GetMaterial(i)->SetShininess(fValue);
+		}
+	}
 }
 
 void CCharacterEditor::EditCloth(string sClothName)
@@ -410,54 +411,57 @@ void CCharacterEditor::OnEditorExit()
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)
 {
 	CCharacterEditor* pEditor = dynamic_cast<CCharacterEditor*>(plugin);
-	if (pEditor->m_bEditionMode) {
-		if (e == IEventDispatcher::TMouseEvent::T_LBUTTONDOWN) {
-			pEditor->m_bIsLeftMousePressed = true;
-			pEditor->m_nMousePosX = x;
-		}
-		else if (e == IEventDispatcher::TMouseEvent::T_LBUTTONUP) {
-			pEditor->m_bIsLeftMousePressed = false;
-		}
-		else if (e == IEventDispatcher::TMouseEvent::T_MOVE) {
-			if (pEditor->m_bIsLeftMousePressed) {
-				int delta = (x - pEditor->m_nMousePosX) / 5;
-				pEditor->m_pCurrentCharacter->Yaw(delta);
+	if (pEditor->m_pCurrentCharacter) {
+		if (pEditor->m_bEditionMode) {
+			if (e == IEventDispatcher::TMouseEvent::T_LBUTTONDOWN) {
+				pEditor->m_bIsLeftMousePressed = true;
 				pEditor->m_nMousePosX = x;
 			}
-		}
-		else if (e == IEventDispatcher::TMouseEvent::T_WHEEL) {
-			if (x > 0) {
-				switch (pEditor->m_eZoomType)
-				{
-				case eLarge:
-					pEditor->ZoomCameraBody();
-					break;
-				case eBody:
-					pEditor->ZoomCameraHead();
-					break;
-				case eHead:
-					pEditor->ZoomCameraEye();
-					break;
-				default:
-					break;
+			else if (e == IEventDispatcher::TMouseEvent::T_LBUTTONUP) {
+				pEditor->m_bIsLeftMousePressed = false;
+			}
+			else if (e == IEventDispatcher::TMouseEvent::T_MOVE) {
+				if (pEditor->m_bIsLeftMousePressed) {
+					int delta = (x - pEditor->m_nMousePosX) / 5;
+					pEditor->m_pCurrentCharacter->Yaw(delta);
+					pEditor->m_nMousePosX = x;
 				}
-				
-			} else if (x < 0) {
-				switch (pEditor->m_eZoomType)
-				{
-				case eEye:
-					pEditor->ZoomCameraHead();
-					break;
-				case eHead:
-					pEditor->ZoomCameraBody();
-					break;
-				case eBody:
-					pEditor->ZoomCameraLarge();
-					break;
-				default:
-					break;
-				}
+			}
+			else if (e == IEventDispatcher::TMouseEvent::T_WHEEL) {
+				if (x > 0) {
+					switch (pEditor->m_eZoomType)
+					{
+					case eLarge:
+						pEditor->ZoomCameraBody();
+						break;
+					case eBody:
+						pEditor->ZoomCameraHead();
+						break;
+					case eHead:
+						pEditor->ZoomCameraEye();
+						break;
+					default:
+						break;
+					}
 
+				}
+				else if (x < 0) {
+					switch (pEditor->m_eZoomType)
+					{
+					case eEye:
+						pEditor->ZoomCameraHead();
+						break;
+					case eHead:
+						pEditor->ZoomCameraBody();
+						break;
+					case eBody:
+						pEditor->ZoomCameraLarge();
+						break;
+					default:
+						break;
+					}
+
+				}
 			}
 		}
 	}

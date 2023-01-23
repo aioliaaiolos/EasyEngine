@@ -42,7 +42,7 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
 }
 
-void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, IObject* pData)
+void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData)
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
 	pTopicWindow->m_pScriptManager = static_cast<IScriptManager*>(plugin);
@@ -53,7 +53,7 @@ IScriptManager* CTopicsWindow::GetScriptManager()
 	return m_pScriptManager;
 }
 
-void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, IObject* pData)
+void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData)
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
 	pTopicWindow->m_pGUIManager = static_cast<CGUIManager*>(pGUIManager);
@@ -68,7 +68,7 @@ void CTopicsWindow::OnShow(bool bShow)
 		m_nTopicTextPointer = 0;
 	}
 	else {
-		m_pTopicFrame->AddTopicsToWindow();
+		m_pTopicFrame->UpdateTopics();
 
 		int index = SelectTopic(m_vGreatings, m_sSpeakerId);
 		if(index != -1)
@@ -494,6 +494,7 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 				}
 				else {
 					topicVerifiedConditionCount[i] = -1;
+					break;
 				}
 			}
 		}
@@ -548,7 +549,7 @@ CTopicsWindow* CTopicFrame::GetParent()
 	return (CTopicsWindow*)m_pParent;
 }
 
-void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, IObject* pData)
+void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, IBaseObject* pData)
 {
 	CTopicFrame* pTopicFrame = dynamic_cast<CTopicFrame*>(pData);
 	pTopicFrame->m_pGUIManager = static_cast<CGUIManager*>(plugin);
@@ -562,30 +563,57 @@ int CTopicFrame::GetTextHeight()
 void CTopicFrame::AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction)
 {
 	CTopicInfo topic;
+	//topic.m_sName = sTopicName;
 	topic.m_sText = sText;
 	topic.m_vConditions = conditions;
 	topic.m_vAction = vAction;
 	m_mTopics[sTopicName].push_back(topic);
 }
 
-void CTopicFrame::GetTopicText(string sTopicTitle, string& sTopicText)
+void CTopicFrame::GetTopicText(string sTopicName, string& sTopicText)
 {
-	map<CLink*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
-		[sTopicTitle](pair<CGUIWidget*, string> const& p) 
+	deque<CGUIWidget*>::iterator itTopic = std::find_if(m_vWidget.begin(), m_vWidget.end(), [sTopicName](CGUIWidget* pWidget) 
 	{
-		return p.first->m_sUserData == sTopicTitle; 
+		CTopicLink* pTopicLink = static_cast<CTopicLink*>(pWidget);
+		return pTopicLink->GetText() == sTopicName;
+	});
+
+	if (itTopic != m_vWidget.end()) {
+		CTopicLink* pLink = static_cast<CTopicLink*>(*itTopic);
+		sTopicText = pLink->GetTopicInfos().m_sText;
+		pLink->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager());
+	}
+	else {
+		map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicName);
+		if (itTopic != m_mTopics.end()) {
+			int topicIndex = AddTopicToWindow(*itTopic, GetParent()->GetSpeakerId());
+			if (topicIndex != -1) {
+				itTopic->second[topicIndex].ExecuteActions(GetParent()->GetScriptManager());
+				sTopicText = itTopic->second[topicIndex].m_sText;
+			}
+			else
+				sTopicText = string("Error, topic '") + sTopicName + "' : no condition verified";
+		}
+		else
+			sTopicText = string("Error, topic '") + sTopicName + "' not found";
+	}
+	/*
+	map<CLink*, string>::iterator itTopic = std::find_if(m_mDisplayedTopicWidgets.begin(), m_mDisplayedTopicWidgets.end(),
+		[sTopicName](pair<CGUIWidget*, string> const& p) 
+	{
+		return p.first->m_sUserData == sTopicName; 
 	});
 	if (itTopic != m_mDisplayedTopicWidgets.end())
 		sTopicText = itTopic->second;
 	else {
-		map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicTitle);
+		map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicName);
 		if (itTopic != m_mTopics.end()) {
 			AddTopicToWindow(*itTopic, GetParent()->GetSpeakerId());
 		}
 		else {
-			sTopicText = string("Error, topic '") + sTopicTitle + "' not found";
+			sTopicText = string("Error, topic '") + sTopicName + "' not found";
 		}
-	}
+	}*/
 }
 
 void CTopicFrame::GetVarValue(string sVarName, string sCharacterId, string& sValue)
@@ -622,54 +650,32 @@ void CTopicFrame::Format(string sTopicText, string sSpeakerId, string& sFormated
 	}
 }
 
-void CTopicFrame::AddTopicsToWindow()
+void CTopicFrame::UpdateTopics()
 {
 	int iLine = 0;
 	Clear();
 	for (map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.begin(); itTopic != m_mTopics.end(); itTopic++) {
-
-#if 0
-		if (IsConditionChecked(itTopic->second, GetParent()->GetSpeakerId())) {
-			int y = iLine * m_nTextHeight + m_nYTextmargin;
-			string sTopic = itTopic->first;
-			CLink* pTitle = new CLink(m_oInterface, sTopic);
-			pTitle->m_sUserData = sTopic;
-			int nIdx = GetParent()->SelectTopic(itTopic->second, GetParent()->GetSpeakerId());
-			if (nIdx < 0)
-				nIdx = 0;
-			
-			string sFormatedText;
-			Format(itTopic->second[nIdx].m_sText, GetParent()->GetSpeakerId(), sFormatedText);
-			m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
-			pTitle->SetClickedCallback(OnClickTopic);
-			AddWidget(pTitle);
-			pTitle->SetRelativePosition(m_nXTextMargin, iLine * m_nTextHeight + m_nYTextmargin);
-			pTitle->SetColorByState(CLink::TState::eNormal, IGUIManager::TFontColor::eWhite);
-			pTitle->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eYellow);
-			pTitle->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eTurquoise);
-			iLine++;
-		}
-#else
 		AddTopicToWindow(*itTopic, GetParent()->GetSpeakerId());
-#endif // 0
 	}
 }
 
-void CTopicFrame::AddTopicToWindow(const pair<string, vector<CTopicInfo>>& topic, string sSpeakerId)
+int CTopicFrame::AddTopicToWindow(const pair<string, vector<CTopicInfo>>& topic, string sSpeakerId)
 {
 	if (IsConditionChecked(topic.second, GetParent()->GetSpeakerId())) {
 		int iLine = GetWidgetCount();
 		int y = iLine * m_nTextHeight + m_nYTextmargin;
 		string sTopic = topic.first;
-		CLink* pTitle = new CLink(m_oInterface, sTopic);
-		pTitle->m_sUserData = sTopic;
+		CTopicLink* pTitle = new CTopicLink(m_oInterface, sTopic);
 		int nIdx = GetParent()->SelectTopic(topic.second, GetParent()->GetSpeakerId());
 		if (nIdx < 0)
-			nIdx = 0;
-
+			return -1;
 		string sFormatedText;
 		Format(topic.second[nIdx].m_sText, GetParent()->GetSpeakerId(), sFormatedText);
-		m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
+		//m_mDisplayedTopicWidgets[pTitle] = sFormatedText;
+		CTopicInfo ti(topic.second.at(nIdx));
+		ti.m_sText = sFormatedText;
+		pTitle->SetTopicInfos(ti);
+
 		pTitle->SetClickedCallback(OnClickTopic);
 		AddWidget(pTitle);
 		pTitle->SetRelativePosition(m_nXTextMargin, iLine * m_nTextHeight + m_nYTextmargin);
@@ -677,14 +683,17 @@ void CTopicFrame::AddTopicToWindow(const pair<string, vector<CTopicInfo>>& topic
 		pTitle->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eYellow);
 		pTitle->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eTurquoise);
 		iLine++;
+		return nIdx;
 	}
+	return -1;
 }
 
 void CTopicFrame::OnClickTopic(CLink* pLink)
 {
 	CTopicFrame* pTopicFrame = dynamic_cast<CTopicFrame*>(pLink->GetParent());
 	if (pTopicFrame) {
-		pTopicFrame->OnItemSelected(pLink);
+		CTopicLink* pTopicLink = static_cast<CTopicLink*>(pLink);
+		pTopicFrame->OnItemSelected(pTopicLink);
 	}
 }
 
@@ -692,7 +701,7 @@ void CTopicFrame::DestroyTopicsWidgets()
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
 	pTopicWindow->RemoveTopicTexts();
-	m_mDisplayedTopicWidgets.clear();
+	//m_mDisplayedTopicWidgets.clear();
 }
 
 void CTopicFrame::Display()
@@ -712,12 +721,11 @@ void CTopicFrame::SetParent(CGUIWidget* parent)
 	SetRelativePosition(m_pParent->GetDimension().GetWidth() - m_nTopicBorderWidth, m_nYmargin);
 }
 
-void CTopicFrame::OnItemSelected(CLink* pTitle)
+void CTopicFrame::OnItemSelected(CTopicLink* pTitle)
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
-	map<CLink*, string>::iterator itTopic = m_mDisplayedTopicWidgets.find(pTitle);
-	if (itTopic != m_mDisplayedTopicWidgets.end())
-		pTopicWindow->AddTopicText(itTopic->second);
+	pTopicWindow->AddTopicText(pTitle->GetTopicInfos().m_sText);
+	pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager());
 }
 
 void CTopicFrame::OnItemHover(CGUIWidget* pTitle)
@@ -768,4 +776,20 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 			return true;
 	}
 	return false;
+}
+
+void CTopicInfo::ExecuteActions(IScriptManager* pScriptManager)
+{
+	for (const string& sAction : m_vAction)
+		pScriptManager->ExecuteCommand(sAction);
+}
+
+CTopicInfo&	CTopicLink::GetTopicInfos()
+{
+	return m_oTopicInfos;
+}
+
+void CTopicLink::SetTopicInfos(const CTopicInfo& oTopicInfos)
+{
+	m_oTopicInfos = oTopicInfos;
 }

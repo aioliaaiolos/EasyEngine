@@ -49,7 +49,7 @@ m_bUseInstancing(true)
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
 }
 
-void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IObject* pData)
+void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData)
 {
 	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
 	pEntityManager->m_pEditorManager = static_cast<IEditorManager*>(pEntityManager->m_oInterface.GetPlugin("EditorManager"));
@@ -253,15 +253,16 @@ IEntity* CEntityManager::CreatePlaneEntity(int slices, int size, string heightTe
 
 void CEntityManager::AddNewCharacter(IEntity* pEntity)
 {
-	string sCharacterName;
+	string sCharacterName, sCharacterNameLow;
 	pEntity->GetEntityName(sCharacterName);
-	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterName.begin(), tolower);
+	sCharacterNameLow = sCharacterName;
+	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterNameLow.begin(), tolower);
 
-	map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sCharacterName);
+	map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sCharacterNameLow);
 	if (itCharacter != m_mCharacters.end())
-		throw CCharacterAlreadyExistsException(sCharacterName);
+		throw CCharacterAlreadyExistsException(sCharacterNameLow);
 	CMobileEntity* pCharacter = dynamic_cast<CMobileEntity*>(pEntity);
-	m_mCharacters[sCharacterName] = pCharacter;
+	m_mCharacters[sCharacterNameLow] = pCharacter;
 }
 
 ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent)
@@ -269,14 +270,15 @@ ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEnt
 	CEntity* pEntity = nullptr;
 	map<string, ILoader::CAnimatedEntityInfos>::iterator itCharacter = m_mCharacterInfos.find(sCharacterId);
 	if (itCharacter == m_mCharacterInfos.end()) {
-		ostringstream oss;
-		oss << "Erreur : CEntityManager::BuildCharacterFromDatabase() -> id " << sCharacterId << " inexistant dans la base de donneees des personnages.";
-		CEException e(oss.str());
+		string sCharacterIdLow = sCharacterId;
+		std::transform(sCharacterId.begin(), sCharacterId.end(), sCharacterIdLow.begin(), tolower);
+		itCharacter = m_mCharacterInfos.find(sCharacterIdLow);
 	}
-	else {
+	if (itCharacter != m_mCharacterInfos.end()) {
 		pEntity = CreateEntityFromType(itCharacter->second.m_sRessourceFileName, itCharacter->second.m_sTypeName, sCharacterId);
 		pEntity->BuildFromInfos(itCharacter->second, dynamic_cast<CEntity*>(pParent));
 	}
+	
 	return dynamic_cast<ICharacter*>(pEntity);
 }
 
@@ -293,8 +295,27 @@ void CEntityManager::GetCharacterInfosFromDatabase(string sCharacterId, ILoader:
 	}
 	else {
 		infos = itCharacter->second;
+	}	
+}
+
+
+void CEntityManager::NormalizeCharacterDatabase()
+{
+	//for (map<string, ILoader::CAnimatedEntityInfos>::iterator it = m_mCharacterInfos.begin();	it != m_mCharacterInfos.end(); it++) {
+	map<string, ILoader::CAnimatedEntityInfos>::iterator it = m_mCharacterInfos.begin();
+	while(it != m_mCharacterInfos.end()) {
+		string sNameLow = it->first;
+		std::transform(it->first.begin(), it->first.end(), sNameLow.begin(), tolower);
+		if (sNameLow != it->first) {
+			m_mCharacterInfos[sNameLow] = it->second;
+			m_mCharacterInfos[sNameLow].m_sObjectName = sNameLow;
+			m_mCharacterInfos.erase(it);
+			it = m_mCharacterInfos.begin();
+		}
+		else
+			it++;
 	}
-	
+	SaveCharacterInfos(m_mCharacterInfos);
 }
 
 void CEntityManager::SetPlayer(IPlayer* player)
@@ -581,14 +602,15 @@ void CEntityManager::WearArmorToDummy(int entityId, string sArmorName)
 
 void CEntityManager::SaveCharacter(string sNPCID)
 {
-	std::transform(sNPCID.begin(), sNPCID.end(), sNPCID.begin(), tolower);
-	map<string, CMobileEntity*>::iterator itNPC = m_mCharacters.find(sNPCID);
+	string sNPCIDLow = sNPCID;
+	std::transform(sNPCID.begin(), sNPCID.end(), sNPCIDLow.begin(), tolower);
+	map<string, CMobileEntity*>::iterator itNPC = m_mCharacters.find(sNPCIDLow);
 	if (itNPC != m_mCharacters.end()) {
 		ILoader::CObjectInfos* pInfos = nullptr;
 		itNPC->second->GetEntityInfos(pInfos);
 		LoadCharacterInfos();
 		ILoader::CAnimatedEntityInfos* pAnimatedEntity = static_cast<ILoader::CAnimatedEntityInfos*>(pInfos);
-		m_mCharacterInfos[sNPCID] = *pAnimatedEntity;
+		m_mCharacterInfos[sNPCIDLow] = *pAnimatedEntity;
 		SaveCharacterInfos(m_mCharacterInfos);
 		delete pAnimatedEntity;
 	}

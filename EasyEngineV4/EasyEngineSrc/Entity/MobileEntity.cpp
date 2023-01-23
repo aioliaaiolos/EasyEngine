@@ -26,7 +26,6 @@ CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
 {
 	m_pfnCollisionCallback = OnCollision;
-	
 }
 
 void CObject::Update()
@@ -409,20 +408,19 @@ void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
 	std::transform(sClothPath.begin(), sClothPath.end(), clothPathLower.begin(), tolower);
 
 	string sClothName = sClothPath.substr(sClothPath.find_last_of("/") + 1);
-	CEntity* pCloth = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity(string("Clothes/") + sClothName + ".bme", ""));
+	CEntity* pCloth = new CEntity(m_oInterface, string("Meshes/Clothes/") + sClothName + ".bme");
 	if (pCloth) {
 		IMesh* pMesh = pCloth->GetMesh();
 		if (pMesh && pMesh->IsSkinned()) {
 			pCloth->SetSkeletonRoot(m_pSkeletonRoot, m_pOrgSkeletonRoot);
-			pCloth->Link(this);
-			pCloth->SetSkinOffset(pCloth->GetMesh()->GetOrgMaxPosition()); 
+			pCloth->Link(this); 
 			m_vClothes.push_back(pCloth);
 		}
 		else {
 			pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
 			m_vClothes.push_back(pCloth->GetSkeletonRoot());
+			delete pCloth;
 		}
-		
 	}
 }
 
@@ -451,13 +449,22 @@ void CMobileEntity::AddHairs(string hairsName)
 
 	// link new hairs
 	CEntity* hairs = new CEntity(m_oInterface, string("Meshes/hairs/") + hairsName + ".bme");
-	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");	
+	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");
+	delete hairs;
 }
 
 void CMobileEntity::SetBody(string sBodyName)
 {
+	ILoader::CObjectInfos* pInfos = nullptr;
+	GetEntityInfos(pInfos);
+	int slashPos = pInfos->m_sRessourceFileName.find_last_of('/');
+	pInfos->m_sRessourceFileName = pInfos->m_sRessourceFileName.substr(0, slashPos + 1) + sBodyName;
+
 	SetRessource(string("Meshes/Bodies/") + sBodyName);
 	InitAnimations();
+
+	IEntity* pParent = dynamic_cast<IEntity*>(GetParent());
+	this->BuildFromInfos(*pInfos, pParent);
 }
 
 void CMobileEntity::RunAction( string sAction, bool bLoop )
@@ -742,7 +749,6 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 			m_vCustomSpecular = pAnimatedEntityInfos->m_vSpecular;
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
 			SetAnimationSpeed(CMobileEntity::s_mStringToAnimation[it->first], it->second);
-		//GetCurrentAnimation()->Play(true);
 		Stand();
 
 		for (const pair<string, string>& clothesInfos : pAnimatedEntityInfos->m_mClothesToNode) {

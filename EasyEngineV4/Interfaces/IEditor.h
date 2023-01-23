@@ -63,6 +63,7 @@ public:
 	virtual void	SetBody(string sBodyName) = 0;
 	virtual void	Save() = 0;
 	virtual void	SetSpecular(float r, float g, float b) = 0;
+	virtual void	SetShininess(float nValue) = 0;
 	virtual void	EditCloth(string sClothName) = 0;
 	virtual void	OffsetCloth(float x, float y, float z) = 0;
 	virtual void	SaveCurrentEditableCloth() = 0;

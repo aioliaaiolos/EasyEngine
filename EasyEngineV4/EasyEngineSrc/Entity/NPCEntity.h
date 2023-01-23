@@ -42,7 +42,7 @@ protected:
 	INode*					GetParent() override;
 
 	static void				OnCollision(CEntity* pThis, vector<INode*> entities);
-	static void				OnTopicWindowClosed(IGUIWindow*, IObject*);
+	static void				OnTopicWindowClosed(IGUIWindow*, IBaseObject*);
 
 private:
 	void					Turn(float fAngle);

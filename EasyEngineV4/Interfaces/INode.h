@@ -12,7 +12,7 @@
 
 class IGeometry;
 
-class INode : public IObject
+class INode : public IBaseObject
 {
 public:
 	virtual ~INode() {}

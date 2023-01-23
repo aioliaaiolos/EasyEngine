@@ -37,6 +37,7 @@ public:
 	void					SetBody(string sBodyName) override;
 	void					Edit(string id) override;
 	void					SetSpecular(float r, float g, float b) override;
+	void					SetShininess(float fValue) override;
 	void					EditCloth(string sClothName);
 	void					OffsetCloth(float x, float y, float z);
 	void					OffsetEyes(float x, float y, float z);
@@ -66,7 +67,7 @@ private:
 	void					Zoom(const CVector& pos, float fYaw, float fPitch, float fRoll);
 	static void				OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y);
 	static void				OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key);
-	static void				HandleEditorCreation(CPlugin* pPlugin, IObject* pDatar);
+	static void				HandleEditorCreation(CPlugin* pPlugin, IBaseObject* pDatar);
 
 	IScene*					m_pScene;
 	ICharacter*				m_pCurrentCharacter;

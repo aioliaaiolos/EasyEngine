@@ -540,3 +540,8 @@ void CLink::GetText(string& sText) const
 {
 	sText = m_sText;
 }
+
+const string& CLink::GetText() const
+{
+	return m_sText;
+}

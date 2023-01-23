@@ -4,11 +4,11 @@
 #include "EEPlugin.h"
 #include <map>
 
-class IObject;
+class IBaseObject;
 
 using namespace std;
 
-typedef void(*PluginCreationProc)(CPlugin* plugin, IObject* pData);
+typedef void(*PluginCreationProc)(CPlugin* plugin, IBaseObject* pData);
 
 class EEInterface
 {
@@ -16,7 +16,7 @@ public:
 	void RegisterPlugin(CPlugin* plugin)
 	{
 		m_mPlugins.insert(map<string, CPlugin*>::value_type(plugin->GetName(), plugin));
-		map<string, vector<pair<PluginCreationProc, IObject*>>>::iterator itCallback = s_vPluginCreationCallback.find(plugin->GetName());
+		map<string, vector<pair<PluginCreationProc, IBaseObject*>>>::iterator itCallback = s_vPluginCreationCallback.find(plugin->GetName());
 		if (itCallback != s_vPluginCreationCallback.end())
 			for (int i = 0; i < itCallback->second.size(); i++)
 				itCallback->second[i].first(plugin, itCallback->second[i].second);
@@ -30,14 +30,14 @@ public:
 		return nullptr;
 	}
 	
-	void HandlePluginCreation(string pluginName, PluginCreationProc callback, IObject* pData)
+	void HandlePluginCreation(string pluginName, PluginCreationProc callback, IBaseObject* pData)
 	{
-		s_vPluginCreationCallback[pluginName].push_back(pair<PluginCreationProc, IObject*>(callback, pData));
+		s_vPluginCreationCallback[pluginName].push_back(pair<PluginCreationProc, IBaseObject*>(callback, pData));
 	}
 
 private:
 	map<string, CPlugin*>									m_mPlugins;
-	map<string, vector<pair<PluginCreationProc, IObject*>>>	s_vPluginCreationCallback;
+	map<string, vector<pair<PluginCreationProc, IBaseObject*>>>	s_vPluginCreationCallback;
 };
 
 #endif // EE_INTERFACE_H

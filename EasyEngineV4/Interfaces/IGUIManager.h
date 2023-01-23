@@ -15,18 +15,18 @@ class ICameraManager;
 class IEntityManager;
 class IScene;
 class ITexture;
-class IObject;
+class IBaseObject;
 
 using namespace std;
 
-class IGUIWindow : public IObject
+class IGUIWindow : public IBaseObject
 {
 public:
-	typedef void(*CloseWindowCallback)(IGUIWindow*, IObject* pObject);
+	typedef void(*CloseWindowCallback)(IGUIWindow*, IBaseObject* pObject);
 
 	virtual void	Display() = 0;
 	virtual void	SetVisibility(bool bVisible) = 0;
-	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IObject* pData) = 0;
+	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) = 0;
 };
 
 class ITopicWindow : public virtual IGUIWindow

@@ -110,6 +110,7 @@ public:
 	void SetColorByState(TState s, IGUIManager::TFontColor color);
 	void SetClickedCallback(TItemSelectedCallback callback);
 	void GetText(string& sText) const;
+	const string& GetText() const;
 
 private:
 

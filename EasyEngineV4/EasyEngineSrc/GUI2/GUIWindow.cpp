@@ -100,7 +100,7 @@ void CGUIWindow::SetVisibility(bool bVisible)
 	m_bVisible = bVisible;
 }
 
-void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback, IObject* pData)
+void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData)
 {
 	m_oCloseWindowCallback.first = callback;
 	m_oCloseWindowCallback.second = pData;

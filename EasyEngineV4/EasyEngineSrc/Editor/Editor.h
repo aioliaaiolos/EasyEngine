@@ -25,7 +25,7 @@ public:
 
 protected:	
 
-	static void HandleEditorManagerCreation(CPlugin* plugin, IObject* pData);
+	static void HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData);
 
 	CEditorManager*			m_pEditorManager;
 	IEntityManager&			m_oEntityManager;

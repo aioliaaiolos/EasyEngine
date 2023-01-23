@@ -254,6 +254,11 @@ void ChangeCharacterName(IScriptState* pState)
 	m_pEntityManager->ChangeCharacterName(pOld->m_sValue, pNew->m_sValue);
 }
 
+void NormalizeCharacterDatabase(IScriptState* pState)
+{
+	m_pEntityManager->NormalizeCharacterDatabase();
+}
+
 void EditCloth(IScriptState* pState)
 {
 	CScriptFuncArgString* pClothName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
@@ -1251,6 +1256,7 @@ void CreatePlayer(IScriptState* pState)
 void SaveCharacter(IScriptState* pState)
 {
 	m_pCharacterEditor->Save();
+	m_pConsole->Println("Sauvegarde réussie");
 }
 
 void SaveCharacterInWorld(IScriptState* pState)
@@ -2467,19 +2473,30 @@ void SetSpecular(IScriptState* pState)
 		m_pCharacterEditor->SetSpecular(pr->m_fValue, pg->m_fValue, pb->m_fValue);
 }
 
+void SetShininess(IScriptState* pState)
+{
+	CScriptFuncArgFloat* pShininess = (CScriptFuncArgFloat*)pState->GetArg(0);
+	m_pCharacterEditor->SetShininess(pShininess->m_fValue);
+}
 
 void SetEntityShininess(IScriptState* pState)
 {
 	CScriptFuncArgInt* pID = (CScriptFuncArgInt*)pState->GetArg(0);
 	CScriptFuncArgFloat* pShininess = (CScriptFuncArgFloat*)pState->GetArg(1);
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
-	IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
-	if (pMesh) {
-		for (int i = 0; i < pMesh->GetMaterialCount(); i++) {
-			pMesh->GetMaterial(i)->SetShininess(pShininess->m_fValue);
+	if (pEntity) {
+		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
+		if (pMesh) {
+			for (int i = 0; i < pMesh->GetMaterialCount(); i++) {
+				pMesh->GetMaterial(i)->SetShininess(pShininess->m_fValue);
+			}
 		}
 	}
+	else {
+		m_pConsole->Println(string("Error : Entity '") + std::to_string(pID->m_nValue) + "' not found");
+	}
 }
+
 
 void ColorizeEntity(IScriptState* pState)
 {
@@ -3565,6 +3582,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("SetSpecular", SetSpecular, vType, eVoid);
 
 	vType.clear();
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetShininess", SetShininess, vType, eVoid);
+
+	vType.clear();
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	vType.push_back(eString);
@@ -3616,6 +3637,9 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eString);
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("ChangeCharacterName", ChangeCharacterName, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("NormalizeCharacterDatabase", NormalizeCharacterDatabase, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

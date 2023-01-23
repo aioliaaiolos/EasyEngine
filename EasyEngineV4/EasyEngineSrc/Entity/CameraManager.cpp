@@ -24,7 +24,7 @@ CCameraManager::~CCameraManager()
 }
 
 
-void CCameraManager::HandleEntityManagerCreated(CPlugin* plugin, IObject* pData)
+void CCameraManager::HandleEntityManagerCreated(CPlugin* plugin, IBaseObject* pData)
 {
 	CCameraManager* pCameraManager = (CCameraManager*)pData;
 	pCameraManager->m_pEntityManager = (IEntityManager*)plugin; //static_cast<IEntityManager*>(pCameraManager->m_oInterface.GetPlugin("EntityManager"));

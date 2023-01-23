@@ -79,7 +79,7 @@ function onLoadingGame()
 	//LoadWorld("testMur");
 	//EditWorld("area3");
 	//LoadWorld("area3");
-	EditWorld("");
+	//EditWorld("");
 	//LoadWorld("");
 	
 	//LoadWorld("plane");

@@ -363,17 +363,6 @@ void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path)
 	path = root + "/" + worldName;
 }
 
-/*
-void CWorldEditor::SetEntitiesWeight()
-{
-	for (IEntity* pEntity : m_vEntities) {
-		IBoxEntity* pArea = dynamic_cast<IBoxEntity*>(pEntity);
-		if (!pArea) {
-			pEntity->SetWeight(1);
-		}
-	}
-}*/
-
 void CWorldEditor::OnSceneLoaded()
 {
 	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
@@ -436,7 +425,6 @@ void CWorldEditor::HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin
 				pWorldEditor->m_pScene->OnChangeSector();
 				break;
 			case IScene::eFirstUpdateDone:
-				//pWorldEditor->SetEntitiesWeight();
 				break;
 			default:
 				break;
@@ -447,6 +435,4 @@ void CWorldEditor::HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin
 	{
 		pWorldEditor->m_oConsole.Println(e.what());
 	}
-	//pWorldEditor->m_pScene->UnhandleStateChanged();
-	
 }

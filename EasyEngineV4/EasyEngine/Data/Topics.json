@@ -8,7 +8,7 @@
 			"Title": "Que fais-je ici ?",
 			"Text": [
 				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient pres du rivage,",
-				"vous avez dériré pendant plusieurs jours mais vous etes enfin reveillé, prevenez-moi quand vous vous sentirez <link>pret à sortir</link>"
+				"vous avez déliré pendant plusieurs jours mais vous etes enfin reveillé. Prevenez-moi quand vous vous sentirez <link>pret à sortir</link>"
 			],
 			"Conditions": [
 				{
@@ -16,7 +16,8 @@
 					"Value": "Geraldine",
 					"Comp": "=="
 				}				
-			]
+			],
+			"Action": ["Mission_Infirmerie = 1;"]
 		},
 		{
 			"Title" : "Pret à sortir",
@@ -28,9 +29,13 @@
 					"VariableName": "CharacterId",
 					"Value": "Geraldine",
 					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "1",
+					"Comp": "=="
 				}
-			],
-			"Action": ["Mission_Infirmerie = 1;"]
+			]
 		},
 		{
 			"Title" : "Pret à sortir",
@@ -159,8 +164,8 @@
 		{
 			"Title": "Armée républicaine", 
 			"Text": [
-				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link> nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois, ",
-				"je passais devant chaque semaine en me rendant chez ma manucure."
+				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link>, nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois, ",
+				"je passais devant chaque semaine en allant chez ma manucure."
 			],
 			"Conditions": [
 				{

@@ -26,7 +26,7 @@ public:
 	CGUIWidget*										GetWidget(unsigned int nIndex);
 	void											Display() override;
 	void											SetVisibility(bool bVisible) override;
-	void											SetCloseWindowCallback(CloseWindowCallback callback, IObject* pData) override;
+	void											SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) override;
 	bool											IsVisible();
 	void											Clear();
 	void											SetPosition(float fPosX, float fPosY);
@@ -41,7 +41,7 @@ protected:
 	deque< CGUIWidget*>								m_vWidget;
 	bool											m_bVisible;
 	bool											m_bGUIMode;
-	pair<CloseWindowCallback, IObject*>				m_oCloseWindowCallback;
+	pair<CloseWindowCallback, IBaseObject*>				m_oCloseWindowCallback;
 };
 
 

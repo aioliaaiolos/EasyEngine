@@ -216,7 +216,7 @@ void CNPCEntity::ComputePathFind2D( const CVector& oOrigin, const CVector& oDest
 	ComputePathFind2DAStar(oOrigin, oDestination, vPoints);
 }
 
-void CNPCEntity::OnTopicWindowClosed(IGUIWindow* pWindow, IObject* pThisEntity)
+void CNPCEntity::OnTopicWindowClosed(IGUIWindow* pWindow, IBaseObject* pThisEntity)
 {
 	CNPCEntity* pThisNPCEntity = dynamic_cast<CNPCEntity*>(pThisEntity);
 	pThisNPCEntity->m_oTalkToCallback.first(pThisNPCEntity, pThisNPCEntity->m_oTalkToCallback.second);

@@ -37,6 +37,7 @@ public:
 	void													AddNewCharacter(IEntity* pEntity) override;
 	ICharacter*												BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) override;
 	void													GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos);
+	void													NormalizeCharacterDatabase();
 	void													SetPlayer(IPlayer* player);
 	IPlayer*												GetPlayer();
 	IEntity*												GetEntity( int nEntityID );
@@ -122,7 +123,7 @@ private:
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
 
-	static void												HandleEditorManagerCreation(CPlugin* plugin, IObject* pData);
+	static void												HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData);
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

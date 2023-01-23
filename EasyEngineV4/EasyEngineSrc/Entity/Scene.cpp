@@ -386,10 +386,6 @@ void  CScene::RenderScene()
 	}
 	UpdateState();
 
-	/*
-	if (IsLoadingComplete() && m_oLoadingCompleteCallback.first)
-		m_oLoadingCompleteCallback.first(m_oLoadingCompleteCallback.second);*/
-
 	CNode::Update();	
 
 	if (m_pEntityManager->IsUsingInstancing()) {
