@@ -291,31 +291,6 @@ void CTopicsWindow::ConvertTextArrayToWidgetArray(const vector<vector<pair<int, 
 
 float CTopicsWindow::PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets, CGUIWindow* pTopicWidget)
 {
-#if 0
-	m_pTopicTextFrame->AddWidget(pTopicWidget);
-	int y = 0;
-	pTopicWidget->SetRelativePosition(0, m_nTopicTextPointer * m_pGUIManager->GetCurrentFontEspacementY());
-
-	int nElemIndex = 0;
-	int nLastElemType = vTopicWidgets[0].first;
-	while (nElemIndex < vTopicWidgets.size()) {
-		int x = 0;
-		CGUIWindow* pLineWidget = new CGUIWindow;
-		while (nElemIndex < vTopicWidgets.size() && (x + vTopicWidgets[nElemIndex].second->GetDimension().GetWidth() < 700)) {
-			pair<int, CGUIWidget*>& lineWidgets = vTopicWidgets[nElemIndex];
-			pLineWidget->AddWidget(lineWidgets.second);
-			lineWidgets.second->SetRelativePosition(x, y);
-			int nAdditionalWidth = nLastElemType != lineWidgets.first ? m_pGUIManager->GetCurrentFontWidth(' ') : 0;
-			x += lineWidgets.second->GetDimension().GetWidth() + nAdditionalWidth;
-			nLastElemType = lineWidgets.first;
-			nElemIndex++;
-		}
-		pTopicWidget->AddWidget(pLineWidget);
-		m_nTopicTextPointer++;
-		y += m_pGUIManager->GetCurrentFontEspacementY();
-	}
-	return y;
-#else
 	m_pTopicTextFrame->AddWidget(pTopicWidget);
 	int y = 0;
 	pTopicWidget->SetRelativePosition(0, m_nTopicTextPointer * m_pGUIManager->GetCurrentFontEspacementY());
@@ -325,7 +300,6 @@ float CTopicsWindow::PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIW
 		for (pair<int, CGUIWidget*>& elem : line) {
 			pLineWidget->AddWidget(elem.second);
 			elem.second->SetRelativePosition(x, 0);
-			//int nAdditionalWidth = nLastElemType != lineWidgets.first ? m_pGUIManager->GetCurrentFontWidth(' ') : 0;
 			x += elem.second->GetDimension().GetWidth(); // +nAdditionalWidth;
 		}
 		pTopicWidget->AddWidget(pLineWidget);
@@ -335,8 +309,6 @@ float CTopicsWindow::PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIW
 		y += m_pGUIManager->GetCurrentFontEspacementY();
 	}
 	return y;
-
-#endif // 0
 }
 
 void CTopicsWindow::AddTopicText(const string& sTopicText)
@@ -433,21 +405,6 @@ void CTopicsWindow::AddTopicTextFromTopicName(string sName)
 		sTopicText = pLink->GetTopicInfos().m_sText;
 		pLink->GetTopicInfos().ExecuteActions(GetScriptManager());
 	}
-	/*
-	else {
-		map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sName);
-		if (itTopic != m_mTopics.end()) {
-			int topicIndex = m_pTopicFrame->AddTopicToWindow(*itTopic, GetSpeakerId());
-			if (topicIndex != -1) {
-				itTopic->second[topicIndex].ExecuteActions(GetScriptManager());
-				sTopicText = itTopic->second[topicIndex].m_sText;
-			}
-			else
-				sTopicText = string("Error, topic '") + sName + "' : no condition verified";
-		}
-		else
-			sTopicText = string("Error, topic '") + sName + "' not found";
-	}*/
 	m_sNextTopicTextToAdd = sTopicText;
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(m_oInterface.GetPlugin("EventDispatcher"));
 	pEventDispatcher->AbonneToWindowEvent(m_pGUIManager, CTopicsWindow::OnAddTopic);
@@ -459,9 +416,6 @@ void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pTopicLink);
 	pTopicWindow->GetScriptManager()->ExecuteCommand("choice=" + std::to_string(pChoice->GetChoiceNumber()) + ";");
 	pTopicWindow->m_pTopicFrame->UpdateTopics();
-	//pTopicWindow->AddTopicText(pTopicWindow->m_sCurrentTopicName);	
-	//string sTopicText;
-	//pTopicWindow->m_pTopicFrame->GetTopicText(pTopicWindow->m_sCurrentTopicName, sTopicText);
 	pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
 
 }
@@ -686,49 +640,9 @@ void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCo
 
 int CTopicsWindow::SelectTopic(string sTopicName, string sSpeakerId)
 {
-	//map<string, vector<CTopicInfo>>::iterator itTopic = m_pTopicFrame->gettop
 	map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicName);
 	const vector<CTopicInfo>& topics = itTopic->second;
-	vector<int> topicVerifiedConditionCount;
-	for (int k = 0; k < topics.size(); k++)
-		topicVerifiedConditionCount.push_back(0);
-	int i = 0;
-	for (const CTopicInfo& topic : topics) {
-		for (const CCondition& condition : topic.m_vConditions) {
-			if (condition.m_sVariableName == "CharacterId") {
-				if (condition.m_eComp == condition.eEqual) {
-					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
-						topicVerifiedConditionCount[i] = -1;
-						break;
-					}
-					else {
-						topicVerifiedConditionCount[i] += 1;
-					}
-				}
-			}
-			else {
-				float fValue = m_pScriptManager->GetVariableValue(condition.m_sVariableName);
-				int nValue = atoi(condition.m_sValue.c_str());
-				if (float(nValue) == fValue) {
-					topicVerifiedConditionCount[i] += 1;
-				}
-				else {
-					topicVerifiedConditionCount[i] = -1;
-					break;
-				}
-			}
-		}
-		i++;
-	}
-	int max = -1;
-	int higherIndex = -1;
-	for (int i = 0; i < topicVerifiedConditionCount.size(); i++) {
-		if (max < topicVerifiedConditionCount[i]) {
-			max = topicVerifiedConditionCount[i];
-			higherIndex = i;
-		}
-	}
-	return higherIndex;
+	return SelectTopic(topics, sSpeakerId);
 }
 
 int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeakerId)

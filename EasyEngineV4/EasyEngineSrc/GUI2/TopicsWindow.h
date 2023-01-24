@@ -148,7 +148,6 @@ public:
 	CTopicFrame(EEInterface& oInterface, int width, int height, map<string, vector<CTopicInfo>>& mTopics);
 	virtual ~CTopicFrame();
 	void										Display();
-	//void										AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction);
 	CTopicLink*									GetTopicLink(string sTopicTitle);
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
@@ -175,7 +174,6 @@ private:
 	const int												m_nYTextmargin;
 	const int												m_nYmargin;
 	const int												m_nTextHeight;
-	//map<string, vector<CTopicInfo>>							m_mTopics;
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
