@@ -391,6 +391,12 @@ void SetEntityName( IScriptState* pState )
 	}
 }
 
+void Choice(IScriptState* pState)
+{
+	CScriptFuncArgString* pChoice = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	m_pGUIManager->GetTopicsWindow()->OnChoiceCalled(pChoice->m_sValue);
+}
+
 void Goto( IScriptState* pState )
 {
 	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
@@ -3424,6 +3430,10 @@ void GetTime(IScriptState* pState)
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("Choice", Choice, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eInt);

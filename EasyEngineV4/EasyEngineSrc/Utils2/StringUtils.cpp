@@ -150,7 +150,7 @@ void CStringUtils::GetFileNameWithExtension(string sTexture, string sExtension, 
 		output = sTexture + "." + sExtension;
 }
 
-void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines)
+void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines, bool bSkipSpace)
 {
 	string subText = sText;
 
@@ -165,9 +165,11 @@ void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<strin
 		if (subText[nTextIndex] == ' ' || subText[nTextIndex] == '\0')
 			nLastSpaceIndex = nTextIndex;
 		string s = subText.substr(0, nLastSpaceIndex);
-		if (s[0] == ' ')
-			s = s.substr(1);
-		vLines.push_back(s);
+		if (bSkipSpace) {
+			if (s[0] == ' ')
+				s = s.substr(1);
+		}
 		subText = subText.substr(nLastSpaceIndex);
+		vLines.push_back(s);
 	} 
 }

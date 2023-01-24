@@ -21,7 +21,7 @@ public:
 	static void		GetFileNameWithExtension(string sTexture, string sExtension, string& output);
 	static void		ConvertStringToWString(const std::string& s, std::wstring& w);
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
-	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines);
+	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines, bool bSkipSpace = true);
 };
 
 

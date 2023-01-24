@@ -524,7 +524,7 @@ void CLexAnalyser::CalculLexicalArrayFromCSV( string sCSVName, IFileSystem* pFS 
 				if( s2.size() > 0 )
 					nValue = atoi( s2.c_str() );				 
 				for( unsigned int j = 0; j < sOut.size(); j++ )
-					m_vAutomate[ nCurrentState ][ sOut[ j ] ] = nValue;
+					m_vAutomate[ nCurrentState ][ (unsigned char)sOut[ j ] ] = nValue;
 				if( !bEndLine )
 					r2.NextLine();
 			}

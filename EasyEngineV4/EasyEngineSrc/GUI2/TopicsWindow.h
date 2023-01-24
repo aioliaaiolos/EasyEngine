@@ -49,13 +49,25 @@ struct CTopicInfo
 class CTopicLink : public CLink
 {
 public:
-	CTopicLink(EEInterface& oInterface, string sTitle) : CLink(oInterface, sTitle) {}
+	CTopicLink(EEInterface& oInterface, string sName) : CLink(oInterface, sName), m_nChoiceNumber(-1) 
+	{
+		m_oTopicInfos.m_sName = sName;
+	}
+
+	CTopicLink(EEInterface& oInterface, string sName, int nChoiceNumber) :
+		CLink(oInterface, sName),
+		m_nChoiceNumber(nChoiceNumber)
+	{
+		m_oTopicInfos.m_sName = sName;
+	}
 
 	CTopicInfo&	GetTopicInfos();
 	void		SetTopicInfos(const CTopicInfo& oTopicInfos);
+	int			GetChoiceNumber();
 
 private:
 	CTopicInfo	m_oTopicInfos;
+	int			m_nChoiceNumber;
 };
 
 struct CTopicInfoWidgets : public CGUIWidget
@@ -80,6 +92,8 @@ public:
 	void									RemoveTopicTexts();
 	IScriptManager*							GetScriptManager();
 	int										SelectTopic(const vector<CTopicInfo>& topics, string sSpeakerId);
+	int										SelectTopic(string sTopicName, string sSpeakerId);
+	void									SetCurrentTopicName(string sTopicName);
 
 private:
 
@@ -89,7 +103,16 @@ private:
 	void									OnShow(bool bShow) override;
 	void									DestroyTopicsWidgets();
 	int										GetTopicTextLineCount();
+	void									OnChoiceCalled(string sChoices) override;
+	void									AddTopicWidgets();
+	void									Truncate(string sText, int nMaxCharPerLine, vector<string>& output);
+	void									DecomposeTopicText(string sTopicText, vector<vector<pair<int, string>>>& vRearangedSubString);
+	void									ConvertTextArrayToWidgetArray(const vector<vector<pair<int, string>>>& vRearrangedSubString, vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets);
+	float									PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets, CGUIWindow* pTopicWidget);
+	void									AddTopicTextFromTopicName(string sName);
+	static CTopicsWindow*					GetTopicsWindowFromLink(CLink* pLink);
 	static void								OnLinkClicked(CLink* pLink);
+	static void								OnChoiceClicked(CLink* pTopicLink);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData);
 	static void								OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int);	
 	static void								OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData);
@@ -108,6 +131,8 @@ private:
 	vector<CTopicInfo>						m_vGreatings;
 	IScriptManager*							m_pScriptManager;
 	string									m_sSpeakerId;
+	string									m_sCurrentTopicName;
+	map<string, vector<CTopicInfo>>			m_mTopics;
 };
 
 class CTopicFrame : public CGUIWindow
@@ -120,11 +145,11 @@ public:
 		eReleased
 	};
 
-	CTopicFrame(EEInterface& oInterface, int width, int height);
+	CTopicFrame(EEInterface& oInterface, int width, int height, map<string, vector<CTopicInfo>>& mTopics);
 	virtual ~CTopicFrame();
 	void										Display();
-	void										AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction);
-	void										GetTopicText(string sTopicTitle, string& sTopicText);
+	//void										AddTopic(string sTopicName, string sText, const vector<CCondition>& conditions, const vector<string>& vAction);
+	CTopicLink*									GetTopicLink(string sTopicTitle);
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
 	void										UpdateTopics();
@@ -150,9 +175,10 @@ private:
 	const int												m_nYTextmargin;
 	const int												m_nYmargin;
 	const int												m_nTextHeight;
-	map<string, vector<CTopicInfo>>							m_mTopics;
+	//map<string, vector<CTopicInfo>>							m_mTopics;
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
+	map<string, vector<CTopicInfo>>&						m_mTopics;
 };
 

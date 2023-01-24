@@ -225,9 +225,6 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 		{
 			m_pRessource = pAMesh->GetMesh( 0 );
 			m_pMesh = dynamic_cast< IMesh* >(m_pRessource);
-			/*
-			if (m_pMesh->IsSkinned())
-				m_oSkinOffset = m_pMesh->GetOrgMaxPosition();*/
 			m_pBaseTexture = m_pMesh->GetTexture(0);
 			m_pRessource->GetName( m_sName );
 			m_pOrgSkeletonRoot = dynamic_cast<CBone*>(pAMesh->GetSkeleton());
@@ -808,10 +805,6 @@ void CEntity::LinkEntityToBone( IEntity* pChild, IBone* pParentBone, IEntity::TL
 		pChild->SetLocalMatrix( oIdentity );
 	}
 	pChild->Link( pParentBone );
-	/*
-	IMesh* pMesh = dynamic_cast< IMesh* >( pChild->GetRessource() );
-	if(pMesh)
-		pChild->LocalTranslate( pMesh->GetOrgMaxPosition().m_x, pMesh->GetOrgMaxPosition().m_y, pMesh->GetOrgMaxPosition().m_z);*/
 }
 
 void CEntity::LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName)

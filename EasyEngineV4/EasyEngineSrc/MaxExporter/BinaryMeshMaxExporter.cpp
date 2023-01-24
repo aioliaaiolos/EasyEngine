@@ -324,7 +324,7 @@ void CBinaryMeshMaxExporter::StoreMeshToMeshInfos( Interface* pInterface, INode*
 	mi.m_pBoundingBox->GetCenter( oBBoxCenter );
 	mi.m_oOrgMaxPosition = oBBoxCenter;
 
-#ifdef UNDERSTOOD_THAT_FUCKING_CODE
+#ifdef USE_RELATIVE_MAX_POSITION
 	CMatrix oObjLocalTM, oObjLocalTMInv;
 	oObjLocalTM.SetPosition( oBBoxCenter.m_x, oBBoxCenter.m_y, oBBoxCenter.m_z );
 	oObjLocalTM.GetInverse( oObjLocalTMInv );
@@ -336,7 +336,7 @@ void CBinaryMeshMaxExporter::StoreMeshToMeshInfos( Interface* pInterface, INode*
 		mi.m_vVertex[ 3 * iVertex + 1 ] = v.m_y;
 		mi.m_vVertex[ 3 * iVertex + 2 ] = v.m_z;
 	}
-#endif // UNDERSTOOD_THAT_FUCKING_CODE
+#endif // USE_RELATIVE_MAX_POSITION
 
 	if( m_bOpenglCoord || m_bOpenglCoord2) {
 		// index

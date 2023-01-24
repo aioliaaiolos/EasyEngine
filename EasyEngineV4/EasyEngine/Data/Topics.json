@@ -4,11 +4,30 @@
 			"Title": "Bonjour",
 			"Text": ["Bonjour, je m'appelle <var>CharacterName</var>."]
 		},
+		
+				{
+		"Title": "Que fais-je ici ?",
+			"Text": [
+				"Je n'ai pas le temps de m'occuper de vous, allez voir l'infirmiere, c'est elle qui est en charge des malades."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "ranja",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "0",
+					"Comp": "=="
+				}
+			]			
+		},
 		{
 			"Title": "Que fais-je ici ?",
 			"Text": [
-				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient pres du rivage,",
-				"vous avez déliré pendant plusieurs jours mais vous etes enfin reveillé. Prevenez-moi quand vous vous sentirez <link>pret à sortir</link>"
+				"Bonjour, je m'appelle <var>CharacterName</var>, je suis infirmiere, vous avez été retrouvé inconscient pres du rivage, ",
+				"vous avez déliré pendant plusieurs jours mais vous etes enfin reveillé. Prevenez-moi quand vous vous sentirez <link>pret à sortir</link>."
 			],
 			"Conditions": [
 				{
@@ -59,7 +78,7 @@
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Je suis certaine de l'avoir posé ici, voudriez-vous le retrouver pour moi ? Je vous promet de m'occuper de vous des que je l'aurai retrouvé."
+				"Je suis certaine de l'avoir posé ici, voudriez-vous <link>m'aider à le chercher</link> ? Je vous promet de m'occuper de vous des que j'aurai mis la main dessus."
 			],
 			"Conditions": [
 				{
@@ -74,6 +93,55 @@
 				}
 			],
 			"Action": ["Mission_Infirmerie = 3;"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Je ne sais rien à propos de ce flacon, désolée. Essayez de voir avec les autres malades, peut-etre que l'un d'entre eux est au courant."
+			],
+			"Conditions": [
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "3",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Je ne sais rien à propos de ce flacon, désolée. Essayez de voir avec les malades, peut-etre que l'un d'entre eux est au courant."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "geraldine",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "3",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title" : "M'aider à le chercher",
+			"Text" : [
+				"Je n'ai malheureusement aucun indice pour le moment, allez voir avec les autres malades si vous pouvez tirer des informations, ils seront peut-etre plus bavards avec vous qu'avec moi."
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "ranja",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "3",
+					"Comp": "=="
+				}
+			]
 		},
 		{
 			"Title" : "Flacon",
@@ -99,8 +167,8 @@
 			"Title" : "Petit service",
 			"Text" : [
 				"Depuis qu'elle est arrivée, je ne peux m'empecher d'admirer le <link>bracelet de Namia</link>. Il brille tellement que l'on pourrait presque penser qu'il est magique !",
-				"Je sais qu'il n'y a pas plus de magie dans cet endroit que de sourire sur le visage de Ranja, ",
-				"mais il irait si bien à mon teint, vous ne trouvez-pas ? Allez, faites-moi plaisir, pourriez-vous... l'emprunter pour moi ?"
+				" Je sais qu'il n'y a pas plus de magie dans cet endroit que de sourire sur le visage de Ranja, ",
+				"mais il irait si bien à mon teint, vous ne trouvez-pas ? Allez, faites-moi plaisir, pourriez-vous... <link>l'emprunter pour moi</link> ?"
 			],
 			"Conditions": [
 				{
@@ -117,9 +185,28 @@
 			"Action": ["Mission_Infirmerie = 5;"]
 		},
 		{
+			"Title" : "L'emprunter pour moi",
+			"Text" : [
+				"Oui, vous avez bien compris, vous voulez des informations sur votre flacon oui ou non ? Alors vous savez ce qu'il vous reste à faire.", 
+				"Et puis, entre nous, je ne vois pas ce qu'une fille aussi... simple que Namia ferait avec un aussi beau bijou, je saurai le mettre en valeur en ce qui me concerne !"
+			],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "Mirabelle",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "5",
+					"Comp": "=="
+				}
+			]
+		},
+		{
 			"Title" : "Bracelet de Namia",
 			"Text" : [
-				"Oui, un bracelet, et il appartient à Namia, la grosse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée,",
+				"Oui, un bracelet, et il appartient à Namia, la grosse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée, ",
 				"elle est juste à coté de son lit. Ce n'est quand meme pas tres compliqué comme mission, etes-vous décidé à m'aider ou faut-il que j'y aille à votre place ?"
 			],
 			"Conditions": [
@@ -135,6 +222,92 @@
 				}
 			],
 			"Action": ["Mission_Infirmerie = 5;"]
+		},
+		{
+			"Title": "Bracelet de Namia",
+			"Text": [
+				"Oui en effet, je possede un bracelet, comment etes-vous au courant ? Et qu'attendez-vous de moi ?"
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "5",
+					"Comp": "=="
+				}
+			],
+			"Action": [
+				"Choice(\"{1}Je viens de la part de Mirabelle, votre bracelet la fascine et elle voudrait que je vous l'emprunte {2}Oh, rien de spécial, j'aimerais simplement le voir\");"
+			]
+		},
+		{
+			"Title": "Bracelet de Namia",
+			"Text": [
+				"Ah, c'est donc elle qui vous envoie. En temps normal j'aurais refusé, mais je ne serais pas contre le fait de donner une <link>petite lecon</link> à cette écervelée."
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "5",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Bracelet de Namia",
+			"Text": [
+				"Je suis désolée, vous m'etes sympathique mais ce bracelet est trop dangereux et je ne veux pas vous faire de mal."
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "5",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Petite lecon",
+			"Text": [
+				"Je parie que c'est cette écervelée de Mirabelle qui vous envoie. "
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "6",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 6;"]
 		},
 		{
 			"Title": "République",

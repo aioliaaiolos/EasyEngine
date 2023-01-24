@@ -62,6 +62,8 @@ m_pLoaderManager(nullptr)
 	InitFontMap();
 	m_pTopicsWindow = new CTopicsWindow(oInterface, 900, 800);
 	m_pMapWindow = new CMinimapWindow(oInterface, *m_pScene, 512, 512);	
+
+	m_pCurrentFont = &GetFontWidget(IGUIManager::TFontColor::eWhite);
 }
 
 
@@ -654,6 +656,8 @@ IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, IGUIManager::TFontC
 
 CGUIWidget* CGUIManager::CreateStaticText(string sText, IGUIManager::TFontColor color)
 {
+	if (sText.empty())
+		throw CEException("Error : CGUIManager::CreateStaticText() attempt to create an empty text");
 	IAnimatableMesh* pARect = CreateTextMeshes(sText, color);
 	int nWidth = 0;
 	for (char& c : sText) {
