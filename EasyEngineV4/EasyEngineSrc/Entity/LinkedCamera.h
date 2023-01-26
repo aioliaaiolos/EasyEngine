@@ -22,7 +22,7 @@ public:
 	void				GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 
 private:
-	string				m_sEntityName;
+	string				m_sEntityID;
 	IBone*				m_pHeadNode;
 	CNode*				m_pBehindNode;
 };

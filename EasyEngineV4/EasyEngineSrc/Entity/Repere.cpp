@@ -17,10 +17,10 @@ void CRepere::Update()
 
 void CRepere::SetEntityName(string sName) 
 { 
-	m_sEntityName = sName;
+	m_sEntityID = sName;
 }
 
 void CRepere::GetEntityName(string& sName)
 {
-	sName = m_sEntityName;
+	sName = m_sEntityID;
 }

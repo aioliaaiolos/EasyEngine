@@ -31,6 +31,7 @@ protected:
 public:
 	CEntity(EEInterface& oInterface);
 	CEntity(EEInterface& oInterface, const std::string& sFileName, bool bDuplicate = false);
+	CEntity(EEInterface& oInterface, const std::string& sFileName, string sID, bool bDuplicate = false);
 	virtual							~CEntity();
 	void							Update();
 	void							DrawBoundingBox( bool bDraw );
@@ -133,7 +134,7 @@ protected:
 	map< int, IEntity* >							m_mBonesBoundingSphere;
 	bool											m_bDrawAnimationBoundingBox;
 	TCollisionCallback								m_pfnCollisionCallback;
-	string											m_sEntityName;
+	string											m_sEntityID;
 	CScene*											m_pScene;
 	ICollisionMesh*									m_pCollisionMesh;
 	IGeometry*										m_pBoundingGeometry;
@@ -188,6 +189,50 @@ class CCollisionEntity : public CEntity, public ICollisionEntity
 public:
 	CCollisionEntity(EEInterface& oInterface) : CEntity(oInterface) {}
 private:
+};
+
+class CItem : public CEntity
+{
+public:
+
+	enum Type 
+	{
+		eNone = -1,
+		eArmlet = 0
+	};
+	CItem(EEInterface& oInterface) :
+		CEntity(oInterface)
+	{
+
+	}
+
+	CItem(EEInterface& oInterface, string sID, Type type, string sModelName) : 
+		CEntity(oInterface),
+		m_eType(type),
+		m_sModelName(sModelName)
+	{
+		m_sEntityID = sID;
+	}
+
+	void operator=(const CItem& item)
+	{
+		m_eType = item.m_eType;
+		m_sModelName = item.m_sModelName;
+	}
+
+	void Load()
+	{
+		if (m_sModelName.size() > 0)
+		{
+			SetRessource(string("meshes/items/") + m_sModelName);
+		}
+	}
+
+	Type m_eType;
+	string m_sModelName;
+
+	static map<string, Type> s_mTypeString;
+	static map<Type, vector<string>> s_mBodyDummies;
 };
 
 #endif // ENTITY_H

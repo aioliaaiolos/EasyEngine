@@ -215,11 +215,11 @@ void CCharacterEditor::SetCurrentEditableNPC(ICharacter* pNPCEntity)
 	InitSpawnedCharacter();
 }
 
-void CCharacterEditor::AddHairs(string sHairsName)
+void CCharacterEditor::SetHairs(string sHairsName)
 {
 	try
 	{
-		m_pCurrentCharacter->AddHairs(sHairsName);
+		m_pCurrentCharacter->SetHairs(sHairsName);
 	}
 	catch (CEException& e) {
 		m_oConsole.Println(e.what());
@@ -406,6 +406,16 @@ void CCharacterEditor::SaveCurrentEditableBody()
 void CCharacterEditor::OnEditorExit()
 {
 	m_pCurrentCharacter = nullptr;
+}
+
+void CCharacterEditor::AddItem(string sItemName)
+{
+	m_pCurrentCharacter->AddItem(sItemName);
+}
+
+void CCharacterEditor::RemoveItem(string sItemID)
+{
+	m_pCurrentCharacter->RemoveItem(sItemID);
 }
 
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)

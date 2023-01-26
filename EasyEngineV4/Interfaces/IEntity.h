@@ -156,10 +156,13 @@ public:
 	virtual void				UnWearAllShoes() = 0;
 	virtual void				UnwearAllClothes() = 0;
 	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
-	virtual void				AddHairs(string sHairsPath) = 0;
+	virtual void				SetHairs(string sHairsPath) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
 	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) = 0;
 	virtual void				GetPosition(CVector& oPosition) const = 0;
+	virtual void				AddItem(string sItemName) = 0;
+	virtual void				RemoveItem(string sItemName) = 0;
+	virtual bool				HasItem(string sItemID) = 0;
 };
 
 class IScene : public virtual IEntity

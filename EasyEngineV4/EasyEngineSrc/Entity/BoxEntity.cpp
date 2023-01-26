@@ -29,7 +29,7 @@ IBox& CBoxEntity::GetBox()
 
 void CBoxEntity::GetEntityName(string& sName)
 {
-	sName = m_sEntityName;
+	sName = m_sEntityID;
 }
 
 IGeometry* CBoxEntity::GetBoundingGeometry()

@@ -265,7 +265,8 @@
 					"Value": "1",
 					"Comp": "=="
 				}
-			]
+			],
+			"Action": ["Mission_Infirmerie=6;"]
 		},
 		{
 			"Title": "Bracelet de Namia",
@@ -284,16 +285,39 @@
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Choice",
+					"VariableName": "choice",
 					"Value": "2",
 					"Comp": "=="
 				}
 			]
 		},
 		{
+			"Title": "Bracelet de Namia",
+			"Text": [
+				"Vous m'avez rapporté son bracelet ? Merveilleux ! Comment puis-je vous remercier ? Ah, je sais, voudriez-vous venir à ma prochaine fete privée ? ",
+				"Enfin, je veux dire, à condition que vous vous habilliez un peu mieux évidemment, ce sont des soirées entre personnes de gout..."
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"VariableType": "Item",
+					"VariableName": "Armlet_EvilSpelled",
+					"Value": "1",
+					"Comp": ">"
+				}
+			]
+		},
+		{
 			"Title": "Petite lecon",
 			"Text": [
-				"Je parie que c'est cette écervelée de Mirabelle qui vous envoie. "
+				"Ce bracelet est en effet tres joli, je l'ai trouvé il y a quelques jours, avant mon arrivée ici, mais depuis il ne m'arrive que des problemes.",
+				"Ca a commencé par de petits incidents, puis ces maux de tete qui m'ont conduite ici. ",
+				"Ca peut paraitre absurde mais je commence à croire qu'il a été enchanté par un maléfice et j'aimerais m'en débarrasser. ",
+				"Je comptais le garder avec moi jusqu'à ma sortie mais cette peste de Mirabelle m'en a fait trop voir. Si elle tient tellement à me prendre mon bracelet, soit, je lui donne avec plaisir !"
 				],
 			"Conditions": [
 				{
@@ -307,7 +331,58 @@
 					"Comp": "=="
 				}
 			],
-			"Action": ["Mission_Infirmerie = 6;"]
+			"Action": ["Choice(\"{1}Tres bien, j'accepte, ca lui fera une bonne lecon ! {2}Elle ne m'a rien fait personnellement, débrouillez-vous avec elle.\");"]
+		},
+		{
+			"Title": "Petite lecon",
+			"Text": [
+				"Au plaisir de vous rendre service."
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "6",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Action": [
+				"AddCharacterItem(\"Player\", \"Armlet_EvilSpelled\");",
+				"RemoveCharacterItem(\"namia\", \"Armlet_EvilSpelled\");",
+				"Mission_Infirmerie=7;"
+				]
+		},
+		{
+			"Title": "Petite lecon",
+			"Text": [
+				"Tres bien, votre grandeur d'ame vous honore, revenez-me voir si vous changez d'avis."
+				],
+			"Conditions": [
+				{
+					"VariableName": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "Mission_Infirmerie",
+					"Value": "6",
+					"Comp": "=="
+				},
+				{
+					"VariableName": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			]
 		},
 		{
 			"Title": "République",
@@ -338,7 +413,7 @@
 			"Title": "Armée républicaine", 
 			"Text": [
 				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link>, nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois, ",
-				"je passais devant chaque semaine en allant chez ma manucure."
+				"je passais devant chaque semaine en allant faire ma manucure."
 			],
 			"Conditions": [
 				{

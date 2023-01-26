@@ -5,7 +5,7 @@ class CLineEntity : public CShape, public ILine
 {
 	CVector			m_oFirst;
 	CVector			m_oLast;
-	string			m_sEntityName;
+	string			m_sEntityID;
 	IGeometry*		m_pBoundingGemoetry;
 
 public:

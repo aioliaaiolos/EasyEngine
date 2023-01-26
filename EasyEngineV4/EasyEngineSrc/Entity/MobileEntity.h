@@ -43,7 +43,7 @@ public:
 	void						UnWearShoes(string shoesPath) override;
 	void						UnWearAllShoes() override;
 	void						UnwearAllClothes() override;
-	void						AddHairs(string sHairsPath) override;
+	void						SetHairs(string sHairsPath) override;
 	void						SetBody(string sBodyName) override;
 	void						Yaw(float fAngle);
 	void						Pitch(float fAngle);
@@ -51,6 +51,9 @@ public:
 	IAnimation*					GetCurrentAnimation();
 	void						WearSkinnedClothFull(string sClothName);
 	void						WearCloth(string sClothPath, string sDummyName);
+	void						AddItem(string sItemName);
+	void						RemoveItem(string sItemName);
+	bool						HasItem(string sItemID);
 	void						Link(INode* pParent) override;
 	IBox*						GetBoundingBox();
 	static void					InitStatics();
@@ -84,6 +87,7 @@ protected:
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
 	vector<INode*>								m_vClothes;
+	map<string, vector<CItem*>>					m_mItems; // (item name, intem count)
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;

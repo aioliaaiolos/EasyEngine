@@ -54,10 +54,12 @@ public:
 	ICharacterEditor(EEInterface& oInterface) : IEditor(oInterface) {}
 	virtual void	SetCurrentEditablePlayer(IPlayer* pPlayer) = 0;
 	virtual void	SetCurrentEditableNPC(ICharacter* pNPCEntity) = 0;
-	virtual void	AddHairs(string sHairsName) = 0;
+	virtual void	SetHairs(string sHairsName) = 0;
 	virtual void	WearShoes(string sShoesName) = 0;
 	virtual void	WearCloth(string sClothPath, string sDummyName) = 0;
 	virtual void	UnWearShoes(string sShoesName) = 0;
+	virtual void	AddItem(string sItemName) = 0;
+	virtual void	RemoveItem(string sItemName) = 0;
 	virtual void	UnWearAllShoes() = 0;
 	virtual void	SetTexture(string sTexture) = 0;
 	virtual void	SetBody(string sBodyName) = 0;

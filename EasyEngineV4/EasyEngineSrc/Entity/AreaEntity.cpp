@@ -10,7 +10,7 @@ CAreaEntity::CAreaEntity(string areaName, EEInterface& oInterface, IBox& oBox) :
 	m_oCurrentMinPoint(m_oInitialMinPoint),
 	m_oCurrentDimension(m_oInitialDimension)
 {
-	m_sEntityName = areaName;
+	m_sEntityID = areaName;
 	GetWorldPosition(m_oLastPosition);
 	m_oBody.m_fWeight = 0.f;
 	m_bIsCollidable = false;

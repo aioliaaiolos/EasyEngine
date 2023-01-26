@@ -10,7 +10,7 @@ m_fSpeed(1.f),
 m_bDisplayViewCone(false)
 {
 	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));	
-	m_sEntityName = sCamName;
+	m_sEntityID = sCamName;
 	m_sName = sCamName;
 	pEntityManager->AddEntity(this, sCamName);
 }
@@ -51,12 +51,12 @@ void CFreeCamera::Move( float fOffsetYaw, float fOffsetPitch, float fOffsetRoll,
 
 void CFreeCamera::GetEntityName(string& sName)
 {
-	sName = m_sEntityName;
+	sName = m_sEntityID;
 }
 
 void CFreeCamera::SetEntityName(string sName)
 {
-	m_sEntityName = sName;
+	m_sEntityID = sName;
 }
 
 void CFreeCamera::Zoom(int value)

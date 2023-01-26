@@ -4,7 +4,7 @@
 class CRepere : public CShape
 {
 	CMatrix		m_oBase;
-	string		m_sEntityName;
+	string		m_sEntityID;
 public:
 	CRepere( IRenderer& oRenderer );
 	void			Update();

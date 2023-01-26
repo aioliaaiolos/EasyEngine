@@ -15,7 +15,7 @@ public:
 
 protected:
 	IBox&				m_oBox;
-	string				m_sEntityName;
+	string				m_sEntityID;
 	CVector				m_oColor;
 	IShader*			m_pShader;
 };

@@ -4,7 +4,7 @@
 CLinkedCamera::CLinkedCamera(EEInterface& oInterface, float fFov):
 CCamera(oInterface, fFov)
 {
-	m_sEntityName = "Linked camera";
+	m_sEntityID = "Linked camera";
 	m_sTypeName = "LinkedCamera";
 }
 
@@ -19,12 +19,12 @@ void CLinkedCamera::Move( float fOffsetYaw, float fOffsetPitch, float fOffsetRol
 
 void CLinkedCamera::SetEntityName(string sName)
 {
-	m_sEntityName = sName;
+	m_sEntityID = sName;
 }
 
 void CLinkedCamera::GetEntityName(string& sName)
 {
-	sName = m_sEntityName;
+	sName = m_sEntityID;
 }
 
 void CLinkedCamera::Zoom(int value)

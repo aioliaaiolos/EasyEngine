@@ -115,7 +115,7 @@ public:
 	IBaseStorage& operator<<( string );
 	IBaseStorage& operator<<(char* sz);
 	template< class T >	IBaseStorage& operator<<(const vector< T >& vData);
-	template< class T1, class T2 > const IBaseStorage& operator<<(const map< T1, T2 >& m);
+	template< class T1, class T2 > IBaseStorage& operator<<(const map< T1, T2 >& m);
 
 	IBaseStorage& operator>>(int& );
 	IBaseStorage& operator>>(bool&);
@@ -257,7 +257,7 @@ IBaseStorage& CAsciiFileStorage::operator<<( const vector< T >& vData )
 }
 
 template< class T1, class T2 > 
-const IBaseStorage& CAsciiFileStorage::operator<<(  const map< T1, T2 >& m  )
+IBaseStorage& CAsciiFileStorage::operator<<(  const map< T1, T2 >& m  )
 {
 	for( map<T1, T2>::const_iterator itMap = m.begin(); itMap != m.end(); ++itMap )
 		*this << m_sCurrentMapKeyName << " : " << itMap->first << "    " << m_sCurrentMapValueName << " : " << itMap->second << "\n";

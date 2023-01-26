@@ -28,7 +28,7 @@ public:
 	void					SpawnEntity(string sEntityFileName) override;
 	void					SetCurrentEditablePlayer(IPlayer* pPlayer) override;
 	void					SetCurrentEditableNPC(ICharacter* pNPCEntity) override;
-	void					AddHairs(string sHairsName) override;
+	void					SetHairs(string sHairsName) override;
 	void					WearShoes(string sShoesName) override;
 	void					UnWearShoes(string sShoesName) override;
 	void					UnWearAllShoes() override;
@@ -45,6 +45,8 @@ public:
 	void					SaveCurrentEditableCloth() override;
 	void					SaveCurrentEditableBody();
 	void					OnEditorExit();
+	void					AddItem(string sItemName);
+	void					RemoveItem(string sItemName);
 
 private:
 

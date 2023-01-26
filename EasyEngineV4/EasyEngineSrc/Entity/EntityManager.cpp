@@ -24,6 +24,13 @@
 
 #include <algorithm>
 
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+using namespace rapidjson;
+
 CEntityManager::CEntityManager(EEInterface& oInterface):
 IEntityManager(oInterface),
 m_oInterface(oInterface),
@@ -47,6 +54,7 @@ m_bUseInstancing(true)
 	CMobileEntity::InitStatics();
 	LoadCharacterInfos();
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
+	LoadItems();
 }
 
 void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData)
@@ -100,8 +108,64 @@ void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
 	else {
 		throw CEException(string("Error : character '") + sOldName + "' not found");
 	}
-	
-	
+}
+
+CItem* CEntityManager::GetItem(string sItem)
+{
+	map<string, CItem*>::iterator itItem = m_mItems.find(sItem);
+	if (itItem != m_mItems.end()) {
+		return itItem->second;
+	}
+	return nullptr;
+}
+
+void CEntityManager::LoadItems()
+{
+	string sFileName = "items.json";
+	FILE* pFile = m_oFileSystem.OpenFile(sFileName, "r");
+	fclose(pFile);
+	string sJsonDirectory;
+	m_oFileSystem.GetLastDirectory(sJsonDirectory);
+	string sFilePath = sJsonDirectory + "\\" + sFileName;
+
+	ifstream ifs(sFilePath);
+	IStreamWrapper isw(ifs);
+	Document doc;
+	doc.ParseStream(isw);
+	if (doc.IsObject()) {
+		if (doc.HasMember("Items")) {
+			rapidjson::Value& items = doc["Items"];
+			if (items.IsArray()) {
+				int count = items.Size();
+				for (int iItem = 0; iItem < count; iItem++) {
+					rapidjson::Value& item = items[iItem];
+					if (item.IsObject()) {
+						string sId, sModel, sType;
+						if (item.HasMember("ID")) {
+							rapidjson::Value& id = item["ID"];
+							if (id.IsString()) {
+								sId = id.GetString();
+							}
+						}
+						if (item.HasMember("Model")) {
+							rapidjson::Value& model = item["Model"];
+							if (model.IsString()) {
+								sModel = model.GetString();
+							}
+						}
+						if (item.HasMember("Type")) {
+							rapidjson::Value& type = item["Type"];
+							if (type.IsString()) {
+								sType = type.GetString();
+							}
+						}
+						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mTypeString[sType], sModel);
+						m_mItems[sId] = pItem;
+					}
+				}
+			}
+		}
+	}
 }
 
 CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTypeName, string sID, bool bDuplicate )
@@ -120,6 +184,9 @@ CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTyp
 	}
 	else if(sTypeName == "MapEntity")
 		pEntity = new CMinimapEntity(m_oInterface, sFileName);
+	else if (sTypeName == "Item") {
+		pEntity = new CEntity(m_oInterface, sFileName, sID, bDuplicate);
+	}
 
 	string sName;
 	pEntity->GetEntityName( sName );

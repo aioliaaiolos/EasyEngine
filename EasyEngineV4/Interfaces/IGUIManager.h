@@ -34,6 +34,7 @@ class ITopicWindow : public virtual IGUIWindow
 public:
 	virtual void SetSpeakerId(string sId) = 0;
 	virtual void OnChoiceCalled(string sChoices) = 0;
+	virtual void LoadTopics(string sFileName) = 0;
 };
 
 class IGUIManager : public CPlugin

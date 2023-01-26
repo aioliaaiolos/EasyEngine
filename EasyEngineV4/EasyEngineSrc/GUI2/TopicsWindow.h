@@ -11,7 +11,7 @@
 class CGUIManager;
 class CTopicFrame;
 class IScriptManager;
-
+class CTopicsWindow;
 
 struct CCondition
 {
@@ -38,7 +38,7 @@ struct CTopicInfo
 		m_vConditions(conditions),
 		m_vAction(actions)		
 	{}
-	void ExecuteActions(IScriptManager* pScriptManager);
+	void ExecuteActions(IScriptManager* pScriptManager, CTopicsWindow* pTopicsWindow);
 
 	string m_sName;
 	string m_sText;
@@ -133,6 +133,7 @@ private:
 	string									m_sSpeakerId;
 	string									m_sCurrentTopicName;
 	map<string, vector<CTopicInfo>>			m_mTopics;
+	bool									m_bChoiceSet;
 };
 
 class CTopicFrame : public CGUIWindow
@@ -145,7 +146,7 @@ public:
 		eReleased
 	};
 
-	CTopicFrame(EEInterface& oInterface, int width, int height, map<string, vector<CTopicInfo>>& mTopics);
+	CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics);
 	virtual ~CTopicFrame();
 	void										Display();
 	CTopicLink*									GetTopicLink(string sTopicTitle);
@@ -177,6 +178,6 @@ private:
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
-	map<string, vector<CTopicInfo>>&						m_mTopics;
+	const map<string, vector<CTopicInfo>>&					m_mTopics;
 };
 

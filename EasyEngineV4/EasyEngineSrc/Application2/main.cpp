@@ -35,7 +35,9 @@
 #include "IPhysic.h"
 #include "Interface.h"
 
-//#define CATCH_EXCEPTION
+#ifdef NDEBUG
+#define CATCH_EXCEPTION
+#endif // NDEBUG
 
 using namespace std;
 

@@ -31,6 +31,12 @@ using namespace std;
 
 const float g_fMaxHeight = 80;
 
+map<CItem::Type, vector<string>> CItem::s_mBodyDummies = map<CItem::Type, vector<string>>{ 
+	{CItem::eArmlet, vector<string>{"BodyDummyBrassiereG", "BodyDummyBrassiereD"} },
+};
+
+map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{ { "Armlet", CItem::eArmlet} };
+
 CEntity::CEntity(EEInterface& oInterface):
 m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"))),
 m_oRenderer(*static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"))),
@@ -89,9 +95,15 @@ CEntity(oInterface)
 		m_pEntityManager->AddEntity(this, m_sName);
 		if (m_pBoundingGeometry)
 			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
-		if (m_sEntityName.empty())
-			m_sEntityName = m_sName;
+		if (m_sEntityID.empty())
+			m_sEntityID = m_sName;
 	}
+}
+
+CEntity::CEntity(EEInterface& oInterface, const std::string& sFileName, string sID, bool bDuplicate) :
+	CEntity(oInterface, sFileName, bDuplicate)	
+{
+	m_sEntityID = sID;
 }
 
 CEntity::~CEntity()
@@ -399,7 +411,7 @@ bool CEntity::TestWorldCollision(INode* pEntity)
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
 			ostringstream oss;
-			oss << "Error : entity '" << m_sEntityName << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			oss << "Error : entity '" << m_sEntityID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
 			throw CEException(oss.str());
 		}
 		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
@@ -426,7 +438,7 @@ bool CEntity::TestCollision(INode* pEntity)
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
 			ostringstream oss;
-			oss << "Error : entity '" << m_sEntityName << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			oss << "Error : entity '" << m_sEntityID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
 			throw CEException(oss.str());
 		}
 		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
@@ -660,7 +672,7 @@ float CEntity::GetHeight()
 		static bool bAlreadyThrown = false;
 		if (!bAlreadyThrown) {
 			ostringstream oss;
-			oss << "Error in CEntity::GetHeight() : entity " << m_nID << " with name " << m_sEntityName << " has no bounding geometry";
+			oss << "Error in CEntity::GetHeight() : entity " << m_nID << " with name " << m_sEntityID << " has no bounding geometry";
 			bAlreadyThrown = true;
 			throw CEException(oss.str());
 		}
@@ -828,7 +840,7 @@ void CEntity::Link( INode* pParent )
 		pDummy->Link(pParent);
 		int id = m_pEntityManager->GetEntityID(this);
 		IEntityManager* pEntityManager = m_pEntityManager;
-		string sEntityName = m_sEntityName;
+		string sEntityName = m_sEntityID;
 		CEntity* pDummyChildEntity = dynamic_cast<CEntity*>(pDummy->GetChild(0));
 		if (!pDummyChildEntity) {
 			ostringstream oss;
@@ -1227,14 +1239,14 @@ void CEntity::Goto( const CVector& oPosition, float fSpeed )
 
 void CEntity::SetEntityName( string sName )
 {
-	m_sEntityName = sName;
+	m_sEntityID = sName;
 	if(m_sName == "")
 		SetName(sName);
 }
 
 void CEntity::GetEntityName( string& sName )
 {
-	sName = m_sEntityName;
+	sName = m_sEntityID;
 }
 
 void CEntity::Colorize(float r, float g, float b, float a)

@@ -184,7 +184,7 @@ m_fNeckRotH( 0 ),
 m_fNeckRotV( 0 ),
 m_sStandAnimation("stand-normal")
 {
-	m_sEntityName = sID;
+	m_sEntityID = sID;
 	m_sTypeName = "Human";
 	
 	for( int i = 0; i < eAnimationCount; i++ )
@@ -306,7 +306,7 @@ IGeometry* CMobileEntity::GetBoundingGeometry()
 	static bool bAlreadyThrown = false;
 	if (!bAlreadyThrown) {
 		bAlreadyThrown = true;
-		throw CEException("Warning : you don't associated current animation to bounding boxes for character '" + m_sEntityName + "', the default character box will be used");
+		throw CEException("Warning : you don't associated current animation to bounding boxes for character '" + m_sEntityID + "', the default character box will be used");
 	}
 	return m_pMesh->GetBBox();
 }
@@ -424,6 +424,36 @@ void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
 	}
 }
 
+void CMobileEntity::AddItem(string sItemID)
+{
+	CItem* pItem = new CItem(*m_pEntityManager->GetItem(sItemID));
+	if(pItem)
+		m_mItems[sItemID].push_back(pItem);
+	else
+		throw CEException(string("Error in CMobileEntity::AddItem() : item '" + sItemID + "' not found"));
+}
+
+void CMobileEntity::RemoveItem(string sItemID)
+{
+	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	if (itItem != m_mItems.end()) {
+		itItem->second.pop_back();
+		if(itItem->second.size() == 0)
+			m_mItems.erase(itItem);
+	}
+	else
+		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+}
+
+bool CMobileEntity::HasItem(string sItemID)
+{
+	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	if (itItem != m_mItems.end()) {
+		return itItem->second.size() > 0;
+	}
+	return false;
+}
+
 void CMobileEntity::Link(INode* pParent)
 {
 	CEntity::Link(pParent);
@@ -436,7 +466,7 @@ IBox* CMobileEntity::GetBoundingBox()
 	return m_pBBox;
 }
 
-void CMobileEntity::AddHairs(string hairsName)
+void CMobileEntity::SetHairs(string hairsName)
 {
 	string shoesPathLower = hairsName;
 	std::transform(hairsName.begin(), hairsName.end(), shoesPathLower.begin(), tolower);
@@ -464,7 +494,7 @@ void CMobileEntity::SetBody(string sBodyName)
 	InitAnimations();
 
 	IEntity* pParent = dynamic_cast<IEntity*>(GetParent());
-	this->BuildFromInfos(*pInfos, pParent);
+	BuildFromInfos(*pInfos, pParent);
 }
 
 void CMobileEntity::RunAction( string sAction, bool bLoop )
@@ -732,6 +762,9 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 			animatedEntityInfos.m_mClothesToNode[sClothName] = sNodeName;
 		}
 	}
+
+	for (const pair<string, vector<CItem*>>& item : m_mItems)
+		animatedEntityInfos.m_mItems[item.first]++;
 }
 
 void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
@@ -753,6 +786,11 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 
 		for (const pair<string, string>& clothesInfos : pAnimatedEntityInfos->m_mClothesToNode) {
 			WearCloth(clothesInfos.first, clothesInfos.second);
+		}
+
+		for (const pair<string, int>& item : pAnimatedEntityInfos->m_mItems) {
+			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
+			m_mItems[item.first].push_back(pItem);
 		}
 	}
 }

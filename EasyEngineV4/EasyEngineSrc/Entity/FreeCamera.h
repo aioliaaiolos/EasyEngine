@@ -23,7 +23,7 @@ public:
 private:
 	float				m_fYaw;
 	float				m_fPitch;
-	string				m_sEntityName;
+	string				m_sEntityID;
 	float				m_fSpeed;
 	bool				m_bDisplayViewCone;
 };

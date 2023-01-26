@@ -347,10 +347,10 @@ void AdaptGroundToAllEntities(IScriptState* pState)
 	}
 }
 
-void AddHairs(IScriptState* pState)
+void SetHairs(IScriptState* pState)
 {
 	CScriptFuncArgString* pHairs = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
-	m_pCharacterEditor->AddHairs(pHairs->m_sValue);
+	m_pCharacterEditor->SetHairs(pHairs->m_sValue);
 }
 
 void ShowGUICursor(IScriptState* pState)
@@ -1747,6 +1747,11 @@ void LoadShader( IScriptState* pState )
 	m_pRenderer->LoadShader( pShaderName->m_sValue );
 }
 
+void LoadTopicFile(IScriptState* pState)
+{
+	m_pGUIManager->GetTopicsWindow()->LoadTopics("Topics.json");
+}
+
 void DisplayShaderName( IScriptState* pState )
 {
 	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
@@ -2612,6 +2617,42 @@ void UnwearAllClothes(IScriptState* pState)
 	pCharacter->UnwearAllClothes();
 }
 
+void AddItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pItemName = (CScriptFuncArgString*)(pState->GetArg(0));
+	m_pCharacterEditor->AddItem(pItemName->m_sValue);
+}
+
+void AddCharacterItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
+	CScriptFuncArgString* pItemName = (CScriptFuncArgString*)(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
+	pCharacter->AddItem(pItemName->m_sValue);
+}
+
+void RemoveCharacterItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
+	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
+	pCharacter->RemoveItem(pItemID->m_sValue);
+}
+
+void RemoveItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(0));
+	m_pCharacterEditor->RemoveItem(pItemID->m_sValue);
+}
+
+void HasCharacterItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
+	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
+	pState->SetReturnValue(pCharacter->HasItem(pItemID->m_sValue) ? 1 : 0);
+}
+
 void SetBody(IScriptState* pState)
 {
 	CScriptFuncArgString* pBody = (CScriptFuncArgString*)(pState->GetArg(0));
@@ -3433,7 +3474,33 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("Choice", Choice, vType, eInt);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("HasCharacterItem", HasCharacterItem, vType, eInt);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("AddCharacterItem", AddCharacterItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("RemoveCharacterItem", RemoveCharacterItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("AddItem", AddItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("RemoveItem", RemoveItem, vType, eVoid);	
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("LoadTopicFile", LoadTopicFile, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("Choice", Choice, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
@@ -3661,7 +3728,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("AddHairs", AddHairs, vType, eVoid);
+	m_pScriptManager->RegisterFunction("SetHairs", SetHairs, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

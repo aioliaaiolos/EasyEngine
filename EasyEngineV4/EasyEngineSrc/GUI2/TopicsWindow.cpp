@@ -27,7 +27,8 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
 	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
-	m_pScriptManager(nullptr)
+	m_pScriptManager(nullptr),
+	m_bChoiceSet(false)
 {
 	SetPosition(400, 200);
 	LoadTopics("topics.json");
@@ -388,6 +389,7 @@ void CTopicsWindow::OnLinkClicked(CLink* pLink)
 	pLink->GetText(sLinkText);
 	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pLink);
 	if (pTopicWindow) {
+		pTopicWindow->SetCurrentTopicName(sLinkText);
 		pTopicWindow->m_pTopicFrame->UpdateTopics();
 		string sTopicText;
 		if (sLinkText[0] >= 'a' && sLinkText[0] <= 'z') {
@@ -403,11 +405,20 @@ void CTopicsWindow::AddTopicTextFromTopicName(string sName)
 	CTopicLink* pLink = m_pTopicFrame->GetTopicLink(sName);
 	if (pLink) {
 		sTopicText = pLink->GetTopicInfos().m_sText;
-		pLink->GetTopicInfos().ExecuteActions(GetScriptManager());
+		m_sNextTopicTextToAdd = sTopicText;
+		IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(m_oInterface.GetPlugin("EventDispatcher"));
+		//pEventDispatcher->AbonneToWindowEvent(m_pGUIManager, CTopicsWindow::OnAddTopic);
+		//CTopicsWindow::OnAddTopic(m_pGUIManager, IEventDispatcher::TWindowEvent::T_WINDOWUPDATE, 0, 0);
+		AddTopicText(sTopicText);
+		pLink->GetTopicInfos().ExecuteActions(GetScriptManager(), this);
+		if (m_bChoiceSet) {
+			m_pScriptManager->ExecuteCommand("choice=0;");
+			m_bChoiceSet = false;
+		}
 	}
-	m_sNextTopicTextToAdd = sTopicText;
-	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(m_oInterface.GetPlugin("EventDispatcher"));
-	pEventDispatcher->AbonneToWindowEvent(m_pGUIManager, CTopicsWindow::OnAddTopic);
+	else {
+		AddTopicText(string("Error : no topic found for '" + sName + "' with these conditions"));
+	}
 }
 
 void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
@@ -416,8 +427,10 @@ void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pTopicLink);
 	pTopicWindow->GetScriptManager()->ExecuteCommand("choice=" + std::to_string(pChoice->GetChoiceNumber()) + ";");
 	pTopicWindow->m_pTopicFrame->UpdateTopics();
+	pTopicWindow->m_bChoiceSet = true;
+	if (pTopicWindow->m_sCurrentTopicName[0] > 'Z')
+		pTopicWindow->m_sCurrentTopicName[0] -= 'a' - 'A';
 	pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
-
 }
 
 void CTopicsWindow::OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int)
@@ -640,7 +653,7 @@ void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCo
 
 int CTopicsWindow::SelectTopic(string sTopicName, string sSpeakerId)
 {
-	map<string, vector<CTopicInfo>>::iterator itTopic = m_mTopics.find(sTopicName);
+	map<string, vector<CTopicInfo>>::const_iterator itTopic = m_mTopics.find(sTopicName);
 	const vector<CTopicInfo>& topics = itTopic->second;
 	return SelectTopic(topics, sSpeakerId);
 }
@@ -704,7 +717,7 @@ string CTopicsWindow::GetSpeakerId()
 	return m_sSpeakerId;
 }
 
-CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, map<string, vector<CTopicInfo>>& mTopics) :
+CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics) :
 	CGUIWindow("Gui/topic-frame.bmp", oInterface, width, height),
 	m_oInterface(oInterface),
 	m_pGUIManager(nullptr),
@@ -868,7 +881,7 @@ void CTopicFrame::OnItemSelected(CTopicLink* pTitle)
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
 	pTopicWindow->SetCurrentTopicName(pTitle->GetTopicInfos().m_sName);
 	pTopicWindow->AddTopicText(pTitle->GetTopicInfos().m_sText);
-	pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager());
+	pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager(), pTopicWindow);
 }
 
 void CTopicFrame::OnItemHover(CGUIWidget* pTitle)
@@ -921,10 +934,17 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 	return false;
 }
 
-void CTopicInfo::ExecuteActions(IScriptManager* pScriptManager)
+void CTopicInfo::ExecuteActions(IScriptManager* pScriptManager, CTopicsWindow* pTopicsWindow)
 {
-	for (const string& sAction : m_vAction)
-		pScriptManager->ExecuteCommand(sAction);
+	try {
+		for (const string& sAction : m_vAction)
+			pScriptManager->ExecuteCommand(sAction + ";");
+	}
+	catch (CEException& e) {
+		string sErrorMesage;
+		e.GetErrorMessage(sErrorMesage);
+		pTopicsWindow->AddTopicText(string("Script error : ") + sErrorMesage);
+	}
 }
 
 CTopicInfo&	CTopicLink::GetTopicInfos()

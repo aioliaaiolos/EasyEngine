@@ -16,6 +16,7 @@ class CNode;
 class CNPCEntity;
 class CCollisionEntity;
 class IEditorManager;
+class CItem;
 
 class CEntityManager : public IEntityManager
 {
@@ -78,7 +79,6 @@ public:
 	void													RemoveCharacterFromDB(string sID) override;
 	void													AddRenderQueue(INode* pEntity);
 	void													ClearRenderQueue();
-
 	template<class T>
 	void													SerializeNodeInfos(INode* pNode, ostringstream& sLine, int nLevel = 0);
 	void													SerializeMobileEntities(INode* pRoot,  string& sText);
@@ -90,8 +90,12 @@ public:
 	map<IMesh*, vector<vector<CMatrix>>>&					GetInstancesBonesTM();
 	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
 	void													ChangeCharacterName(string sOldName, string sNewName);
+	CItem*													GetItem(string sItem);
 
 private:
+
+	void													LoadItems();
+
 	EEInterface&											m_oInterface;
 	map< CEntity*, int >::const_iterator					m_itCurrentParsedEntity;
 	IRessourceManager&										m_oRessourceManager;
@@ -122,6 +126,7 @@ private:
 	map<IMesh*, vector<CEntity*>>							m_mRenderQueue;
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
+	map<string, CItem*>										m_mItems;
 
 	static void												HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData);
 };
