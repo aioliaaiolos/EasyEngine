@@ -241,7 +241,6 @@ void EditCharacter(IScriptState* pState)
 	string id = pID->m_sValue;
 	try
 	{
-		//m_pCharacterEditor->SpawnEntity(id);
 		m_pCharacterEditor->Edit(id);
 	}
 	catch (CCharacterAlreadyExistsException& e) {

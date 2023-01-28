@@ -116,7 +116,6 @@ protected:
 	IBox*										m_pBBox;
 	vector<INode*>								m_vClothes;
 	map<string, vector<CItem*>>					m_mItems;
-	//map< IEntity::TAnimation, IAnimation* >		m_mAnimations;
 	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sCurrentBodyName;
 
@@ -125,7 +124,6 @@ protected:
 	static map< TAnimation, string>				s_mAnimationTypeToString;
 	static map< TAnimation, float >				s_mOrgAnimationSpeedByType;
 	static vector< CMobileEntity* >				s_vHumans;
-	//static vector < pair<vector<string>, map<string, string>>> s_mBodiesAnimations;
 	static map<string, map<string, string>>		s_mBodiesAnimations;
 
 	static void				OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );

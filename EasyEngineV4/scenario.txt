@@ -52,6 +52,8 @@ Adnakat :
 . Namia
 . Jahia
 . Ayana
+. Alania
+. Aleina
 
 
 Eran : 
@@ -74,6 +76,7 @@ Guerriers Eran :
 . Ater Vanos 
 . Beliocandos 
 . Blatoa Maruos
+. Gulat Ramansour
 
 Chefs Eran
 . Amunarya

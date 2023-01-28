@@ -118,7 +118,6 @@ protected:
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
-	//std::string										m_sCurrentAnimation;
 	bool											m_bDrawBoundingBox;
 	CBone*											m_pOrgSkeletonRoot;
 	CBone*											m_pSkeletonRoot;

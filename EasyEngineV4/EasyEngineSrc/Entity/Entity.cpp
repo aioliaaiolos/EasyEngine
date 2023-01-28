@@ -1023,7 +1023,6 @@ void CEntity::AddAnimation(string sAnimationName)
 
 void CEntity::SetCurrentAnimation(std::string sAnimation)
 {
-	//m_sCurrentAnimation = sAnimation;
 	m_pCurrentAnimation = m_mAnimation[sAnimation];
 	if (m_bUsePositionKeys)
 		m_pCurrentAnimation->AddCallback(OnAnimationCallback, this);

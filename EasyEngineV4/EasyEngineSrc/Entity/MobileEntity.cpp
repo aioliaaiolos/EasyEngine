@@ -29,7 +29,6 @@ map< string, CMobileEntity::TAction >				CMobileEntity::s_mActions;
 vector< CMobileEntity* >							CMobileEntity::s_vHumans;
 
 map<string, IEntity::TAnimation> CMobileEntity::s_mStringToAnimation;
-//vector < pair<vector<string>, map<string, string>>> CMobileEntity::s_mBodiesAnimations;
 
 map<string, map<string, string>> CMobileEntity::s_mBodiesAnimations;
 
@@ -286,8 +285,6 @@ void CMobileEntity::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 	}
 }
 
-//#define OLD_METHOD
-
 void CMobileEntity::InitAnimations()
 {
 	string sMask = "Animations/*.bke";
@@ -296,31 +293,16 @@ void CMobileEntity::InitAnimations()
 	HANDLE hFirst = pFileSystem->FindFirstFile_EE(sMask, oData);
 	if (hFirst != INVALID_HANDLE_VALUE)
 	{
-
-#ifdef OLD_METHOD
-		do
-		{
-			string sFileNameFound = oData.cFileName;
-			string sFileNameLow = oData.cFileName;
-			transform(sFileNameFound.begin(), sFileNameFound.end(), sFileNameLow.begin(), tolower);
-			AddAnimation(sFileNameLow);
-			string sAnimationType = sFileNameLow.substr(0, sFileNameLow.size() - 4);
-			m_mAnimations[s_mAnimationStringToType[sAnimationType]] = m_mAnimation[sFileNameLow];
-		} while (FindNextFileA(hFirst, &oData));
-#else
 		if (m_pCurrentAnimation) {
 			m_pCurrentAnimation->Stop();
 			m_pCurrentAnimation = nullptr;
 		}
-		m_mAnimation.clear();
-//		m_mAnimations.clear();
-		
+		m_mAnimation.clear();		
 		m_pRessource->GetFileName(m_sCurrentBodyName);
 		CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
 		CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
 		
 		bool endLoop = false;
-		//for (const pair<string, map<string, string>>& bodyAnimations : s_mBodiesAnimations) {	
 		map<string, string>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
 		for (const pair<string, string>& actionAnim : bodyAnimations) {
 			AddAnimation(actionAnim.second);
@@ -328,11 +310,6 @@ void CMobileEntity::InitAnimations()
 			if (animType == eStand)
 				m_sStandAnimation = actionAnim.second;
 		}
-			
-			
-		
-#endif // OLD_METHOD
-
 	}
 }
 
@@ -804,7 +781,6 @@ void CMobileEntity::MoveToGuard(CMobileEntity* pHuman, bool bLoop)
 
 void CMobileEntity::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
 {
-//	m_mAnimations[ eAnimationType ]->SetSpeed(fSpeed);
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]];
 	m_mAnimation[sAnimationName]->SetSpeed(fSpeed);
 	m_mAnimationSpeedByType[ eAnimationType ] = s_mOrgAnimationSpeedByType[ eAnimationType ] * fSpeed;
@@ -899,8 +875,6 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 	CEntity::BuildFromInfos(infos, pParent);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 	if (GetSkeletonRoot()) {
-		//AddAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
-		//SetCurrentAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
 		if(!pAnimatedEntityInfos->m_sTextureName.empty())
 			SetDiffuseTexture(pAnimatedEntityInfos->m_sTextureName);
 		m_bUseCustomSpecular = pAnimatedEntityInfos->m_bUseCustomSpecular;
