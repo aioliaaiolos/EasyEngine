@@ -12,6 +12,7 @@ class CGUIManager;
 class CTopicFrame;
 class IScriptManager;
 class CTopicsWindow;
+class IPlayer;
 
 struct CCondition
 {
@@ -25,9 +26,28 @@ struct CCondition
 		eIsNot
 	};
 
-	string	m_sVariableName;
+	string	m_sType;
+	string	m_sName;
 	string	m_sValue;
 	TComp	m_eComp;
+	bool Evaluate(int val) const
+	{
+		int value = atoi(m_sValue.c_str());
+		switch (m_eComp) {
+		case eEqual:
+			return val == value;
+			break;
+		case eSup:
+			return val > value;
+			break;
+		case eInf:
+			return val < value;
+			break;
+		case eDifferent:
+			return val != value;
+			break;
+		}
+	}
 };
 
 struct CTopicInfo
@@ -114,7 +134,6 @@ private:
 	static void								OnLinkClicked(CLink* pLink);
 	static void								OnChoiceClicked(CLink* pTopicLink);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData);
-	static void								OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int);	
 	static void								OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData);
 
 	EEInterface&							m_oInterface;
@@ -134,6 +153,7 @@ private:
 	string									m_sCurrentTopicName;
 	map<string, vector<CTopicInfo>>			m_mTopics;
 	bool									m_bChoiceSet;
+	IEntityManager&							m_oEntityManager;
 };
 
 class CTopicFrame : public CGUIWindow
@@ -146,7 +166,7 @@ public:
 		eReleased
 	};
 
-	CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics);
+	CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics, IEntityManager& oEntityManager);
 	virtual ~CTopicFrame();
 	void										Display();
 	CTopicLink*									GetTopicLink(string sTopicTitle);
@@ -179,5 +199,6 @@ private:
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
 	const map<string, vector<CTopicInfo>>&					m_mTopics;
+	IEntityManager&											m_oEntityManager;
 };
 

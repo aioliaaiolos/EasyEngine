@@ -11,7 +11,17 @@
 #include "IGUIManager.h"
 #include "Bone.h"
 #include "Interface.h"
+#include "IFileSystem.h"
 #include "../Utils2/StringUtils.h"
+
+map< IEntity::TAnimation, string> CMobileEntity::s_mAnimationTypeToString;
+
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+using namespace rapidjson;
 
 map< string, IEntity::TAnimation >			CMobileEntity::s_mAnimationStringToType;
 map< IEntity::TAnimation, float > 			CMobileEntity::s_mOrgAnimationSpeedByType;
@@ -19,8 +29,9 @@ map< string, CMobileEntity::TAction >				CMobileEntity::s_mActions;
 vector< CMobileEntity* >							CMobileEntity::s_vHumans;
 
 map<string, IEntity::TAnimation> CMobileEntity::s_mStringToAnimation;
+//vector < pair<vector<string>, map<string, string>>> CMobileEntity::s_mBodiesAnimations;
 
-
+map<string, map<string, string>> CMobileEntity::s_mBodiesAnimations;
 
 CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
@@ -181,8 +192,7 @@ m_fMaxNeckRotationV( 15 ),
 m_fEyesRotH( 0 ),
 m_fEyesRotV( 0 ),
 m_fNeckRotH( 0 ),
-m_fNeckRotV( 0 ),
-m_sStandAnimation("stand-normal")
+m_fNeckRotV( 0 )
 {
 	m_sEntityID = sID;
 	m_sTypeName = "Human";
@@ -218,6 +228,66 @@ CMobileEntity::~CMobileEntity()
 
 }
 
+void CMobileEntity::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
+{
+	string sFileName = "animations.json";
+	FILE* pFile = oFileSystem.OpenFile(sFileName, "r");
+	fclose(pFile);
+	string sJsonDirectory;
+	oFileSystem.GetLastDirectory(sJsonDirectory);
+	string sFilePath = sJsonDirectory + "\\" + sFileName;
+
+	ifstream ifs(sFilePath);
+	IStreamWrapper isw(ifs);
+	Document doc;
+	doc.ParseStream(isw);
+	if (doc.IsObject()) {
+		if (doc.HasMember("bodiesAnimations")) {
+			rapidjson::Value& bodiesAnimations = doc["bodiesAnimations"];
+			if (bodiesAnimations.IsArray()) {
+				for (int iAnimSet = 0; iAnimSet < bodiesAnimations.Size(); iAnimSet++) {
+					vector<string> vBodies;
+					Value& bodyAnimation = bodiesAnimations[iAnimSet];
+					if (bodyAnimation.HasMember("bodies")) {
+						Value& bodies = bodyAnimation["bodies"];
+						if (bodies.IsArray()) {
+							for (int iBody = 0; iBody < bodies.Size(); iBody++) {
+								Value& body = bodies[iBody];
+								if (body.IsString()) {
+									//s_mBodiesAnimations[body.GetString()] = map<string, string>();
+									vBodies.push_back(body.GetString());
+								}
+							}
+						}
+					}
+					if (bodyAnimation.HasMember("actionAnimations")) {
+						Value& actionAnimations = bodyAnimation["actionAnimations"];
+						if (actionAnimations.IsArray()) {
+							for (int iActionAnim = 0; iActionAnim < actionAnimations.Size(); iActionAnim++) {
+								Value& actionAnim = actionAnimations[iActionAnim];
+								if (actionAnim.IsObject()) {
+									for (const string& sBody : vBodies) {
+										for (const pair<string, TAnimation>& animType : s_mAnimationStringToType) {
+											if (actionAnim.HasMember(animType.first.c_str())) {
+												Value& action = actionAnim[animType.first.c_str()];
+												if (action.IsString()) {
+													s_mBodiesAnimations[sBody][animType.first.c_str()] = action.GetString();
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+//#define OLD_METHOD
+
 void CMobileEntity::InitAnimations()
 {
 	string sMask = "Animations/*.bke";
@@ -226,6 +296,8 @@ void CMobileEntity::InitAnimations()
 	HANDLE hFirst = pFileSystem->FindFirstFile_EE(sMask, oData);
 	if (hFirst != INVALID_HANDLE_VALUE)
 	{
+
+#ifdef OLD_METHOD
 		do
 		{
 			string sFileNameFound = oData.cFileName;
@@ -235,19 +307,55 @@ void CMobileEntity::InitAnimations()
 			string sAnimationType = sFileNameLow.substr(0, sFileNameLow.size() - 4);
 			m_mAnimations[s_mAnimationStringToType[sAnimationType]] = m_mAnimation[sFileNameLow];
 		} while (FindNextFileA(hFirst, &oData));
+#else
+		if (m_pCurrentAnimation) {
+			m_pCurrentAnimation->Stop();
+			m_pCurrentAnimation = nullptr;
+		}
+		m_mAnimation.clear();
+//		m_mAnimations.clear();
+		
+		m_pRessource->GetFileName(m_sCurrentBodyName);
+		CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
+		CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
+		
+		bool endLoop = false;
+		//for (const pair<string, map<string, string>>& bodyAnimations : s_mBodiesAnimations) {	
+		map<string, string>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
+		for (const pair<string, string>& actionAnim : bodyAnimations) {
+			AddAnimation(actionAnim.second);
+			TAnimation animType = s_mAnimationStringToType[actionAnim.first];
+			if (animType == eStand)
+				m_sStandAnimation = actionAnim.second;
+		}
+			
+			
+		
+#endif // OLD_METHOD
+
 	}
 }
 
-void CMobileEntity::InitStatics()
+void CMobileEntity::InitStatics(IFileSystem& oFileSystem)
 {
-	s_mAnimationStringToType["walk"] = eWalk;
-	s_mAnimationStringToType["run"] = eRun;
-	s_mAnimationStringToType["stand"] = eStand;
+	s_mAnimationStringToType["Walk"] = eWalk;
+	s_mAnimationStringToType["Run"] = eRun;
+	s_mAnimationStringToType["Stand"] = eStand;
 	s_mAnimationStringToType["HitLeftFoot"] = eHitLeftFoot;
 	s_mAnimationStringToType["HitRightArm"] = eHitRightArm;
-	s_mAnimationStringToType["jump"] = eJump;
-	s_mAnimationStringToType["dying"] = eDying;
+	s_mAnimationStringToType["Jump"] = eJump;
+	s_mAnimationStringToType["Dying"] = eDying;
 	s_mAnimationStringToType["MoveToGuard"] = eMoveToGuard;
+
+	s_mAnimationTypeToString[eWalk] = "Walk";
+	s_mAnimationTypeToString[eRun] = "Run";
+	s_mAnimationTypeToString[eStand] = "Stand";
+	s_mAnimationTypeToString[eHitLeftFoot] = "HitLeftFoot";
+	s_mAnimationTypeToString[eHitRightArm] = "HitRightArm";
+	s_mAnimationTypeToString[eJump] = "Jump";
+	s_mAnimationTypeToString[eDying] = "Dying";
+	s_mAnimationTypeToString[eMoveToGuard] = "MoveToGuard";
+
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
 	s_mOrgAnimationSpeedByType[eRun] = -7.f;
@@ -256,15 +364,17 @@ void CMobileEntity::InitStatics()
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
 
-	s_mActions["walk"] = Walk;
-	s_mActions["run"] = Run;
-	s_mActions["stand"] = Stand;
+	s_mActions["Walk"] = Walk;
+	s_mActions["Run"] = Run;
+	s_mActions["Stand"] = Stand;
 	s_mActions["PlayReceiveHit"] = PlayReceiveHit;
-	s_mActions["jump"] = Jump;
-	s_mActions["dying"] = Dying;
+	s_mActions["Jump"] = Jump;
+	s_mActions["Dying"] = Dying;
 	s_mActions["MoveToGuard"] = MoveToGuard;
 
-	s_mStringToAnimation["run"] = IEntity::eRun;
+	s_mStringToAnimation["Run"] = IEntity::eRun;
+
+	LoadAnimationsJsonFile(oFileSystem);
 }
 
 IGeometry* CMobileEntity::GetBoundingGeometry()
@@ -445,13 +555,29 @@ void CMobileEntity::RemoveItem(string sItemID)
 		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
 }
 
-bool CMobileEntity::HasItem(string sItemID)
+void CMobileEntity::WearItem(string sItemID)
 {
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
-		return itItem->second.size() > 0;
+		CItem* pItem = itItem->second.at(0);
+		if (!pItem->GetRessource())
+			pItem->Load();
+		const string& sDummyName = pItem->GetDummyNames().at(0);
+		IBone* pBone = GetSkeletonRoot()->GetChildBoneByName(sDummyName);
+		pItem->Link(pBone);
 	}
-	return false;
+	else {
+		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+	}
+}
+
+int CMobileEntity::GetItemCount(string sItemID)
+{
+	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	if (itItem != m_mItems.end()) {
+		return itItem->second.size();
+	}
+	return 0;
 }
 
 void CMobileEntity::Link(INode* pParent)
@@ -507,20 +633,18 @@ void CMobileEntity::RunAction( string sAction, bool bLoop )
 void CMobileEntity::SetPredefinedAnimation( string s, bool bLoop )
 {
 	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
-	string sAnimationName = s + ".bke";
-	string sAnimationNameLow = sAnimationName;
-	transform( sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower );
-	SetCurrentAnimation( sAnimationNameLow );
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s];
+	SetCurrentAnimation( sAnimationName );
 	if( !m_pCurrentAnimation )
 	{
-		string sMessage = string( "Erreur : fichier \"" ) + sAnimationNameLow + "\" manquant";
+		string sMessage = string( "Erreur : fichier \"" ) + sAnimationName + "\" manquant";
 		CFileNotFoundException e( sMessage );
-		e.m_sFileName = sAnimationNameLow;
+		e.m_sFileName = sAnimationName;
 		throw e;
 	}
 	m_pCurrentAnimation->Play( bLoop );
 	if (m_pCloth) {
-		m_pCloth->SetCurrentAnimation(sAnimationNameLow);
+		m_pCloth->SetCurrentAnimation(sAnimationName);
 		m_pCloth->PlayCurrentAnimation(bLoop);
 	}
 	m_eCurrentAnimationType = s_mAnimationStringToType[ s ];
@@ -538,7 +662,7 @@ void CMobileEntity::Walk( bool bLoop )
 
 void CMobileEntity::Stand( bool bLoop )
 {
-	SetPredefinedAnimation( m_sStandAnimation, bLoop );
+	SetPredefinedAnimation( "Stand", bLoop );
 	if( !m_bUsePositionKeys )
 		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eStand ], 0.f ) );
 }
@@ -547,7 +671,7 @@ void CMobileEntity::Run( bool bLoop )
 {
 	if( m_eCurrentAnimationType != eRun )
 	{
-		SetPredefinedAnimation( "run", bLoop );
+		SetPredefinedAnimation( "Run", bLoop );
 		if( !m_bUsePositionKeys )
 			ConstantLocalTranslate( CVector( 0.f, 0.f, -m_mAnimationSpeedByType[eRun]) );
 	}
@@ -678,15 +802,17 @@ void CMobileEntity::MoveToGuard(CMobileEntity* pHuman, bool bLoop)
 	pHuman->MoveToGuard();
 }
 
-void CMobileEntity::SetAnimationSpeed( IEntity::TAnimation eAnimationType, float fSpeed )
+void CMobileEntity::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
 {
-	m_mAnimations[ eAnimationType ]->SetSpeed(fSpeed);
+//	m_mAnimations[ eAnimationType ]->SetSpeed(fSpeed);
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]];
+	m_mAnimation[sAnimationName]->SetSpeed(fSpeed);
 	m_mAnimationSpeedByType[ eAnimationType ] = s_mOrgAnimationSpeedByType[ eAnimationType ] * fSpeed;
 }
 
 float CMobileEntity::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
 {
-	return m_mAnimations[eAnimationType]->GetSpeed();
+	return m_mAnimation[s_mAnimationTypeToString[eAnimationType]]->GetSpeed();
 }
 
 void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
@@ -773,8 +899,8 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 	CEntity::BuildFromInfos(infos, pParent);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 	if (GetSkeletonRoot()) {
-		AddAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
-		SetCurrentAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
+		//AddAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
+		//SetCurrentAnimation(pAnimatedEntityInfos->m_sAnimationFileName);
 		if(!pAnimatedEntityInfos->m_sTextureName.empty())
 			SetDiffuseTexture(pAnimatedEntityInfos->m_sTextureName);
 		m_bUseCustomSpecular = pAnimatedEntityInfos->m_bUseCustomSpecular;
@@ -850,24 +976,6 @@ IMesh* CMobileEntity::GetMesh()
 IAnimation*	CMobileEntity::GetCurrentAnimation()
 { 
 	return m_pCurrentAnimation; 
-}
-
-void CMobileEntity::WearSkinnedClothFull(string sClothName)
-{
-	IEntity* pCloth = m_pEntityManager->CreateEntity(sClothName);
-	if (pCloth) {
-		m_pCloth = dynamic_cast<CEntity*>(pCloth);
-		if (m_pCloth) {
-			m_pCloth->Link(m_pScene);
-			m_pCloth->AddAnimation("walk.bke");
-			m_pCloth->AddAnimation("run.bke");
-			m_pCloth->AddAnimation("stand.bke");
-			m_pCloth->AddAnimation("stand-normal.bke");
-			m_pCloth->AddAnimation("test3.bke");
-			m_pCloth->LocalTranslate(0, 24, -1);
-			m_pCloth->Link(this);
-		}
-	}
 }
 
 IFighterEntity* CMobileEntity::GetFirstEnemy()

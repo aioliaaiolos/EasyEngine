@@ -118,7 +118,7 @@ protected:
 	CBody											m_oBody;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
-	std::string										m_sCurrentAnimation;
+	//std::string										m_sCurrentAnimation;
 	bool											m_bDrawBoundingBox;
 	CBone*											m_pOrgSkeletonRoot;
 	CBone*											m_pSkeletonRoot;
@@ -226,6 +226,15 @@ public:
 		{
 			SetRessource(string("meshes/items/") + m_sModelName);
 		}
+	}
+
+	const vector<string>& GetDummyNames()
+	{
+		map<Type, vector<string>>::iterator itDummy = s_mBodyDummies.find(m_eType);
+		if (itDummy != s_mBodyDummies.end()) {
+			return itDummy->second;
+		}
+		throw CEException("Error in GetDummyNames() : Type '" + std::to_string((int)m_eType) + "' not found in s_mBodyDummies");
 	}
 
 	Type m_eType;

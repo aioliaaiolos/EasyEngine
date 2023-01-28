@@ -12,12 +12,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "ranja",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "0",
 					"Comp": "=="
 				}
@@ -31,8 +32,8 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Geraldine",
+					"Name": "CharacterId",
+					"Value": "geraldine",
 					"Comp": "=="
 				}				
 			],
@@ -45,12 +46,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Geraldine",
+					"Name": "CharacterId",
+					"Value": "geraldine",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "1",
 					"Comp": "=="
 				}
@@ -63,12 +65,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "ranja",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "1",
 					"Comp": "=="
 				}
@@ -82,12 +85,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "ranja",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "2",
 					"Comp": "=="
 				}
@@ -101,7 +105,8 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "3",
 					"Comp": "=="
 				}
@@ -114,12 +119,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "geraldine",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "3",
 					"Comp": "=="
 				}
@@ -132,12 +138,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "ranja",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "3",
 					"Comp": "=="
 				}
@@ -151,17 +158,107 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "3",
 					"Comp": "=="
 				}
 			],
 			"Action": ["Mission_Infirmerie = 4;"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Avez-vous récupéré le <link>bracelet de Namia</link> ? Non ? C'est bien ce qui me semblait... A l'avenir, je vous prie de ne vous adressez à moi qu'une fois que vous me l'aurez rapporté."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "3",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie = 4;"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Hein ? Quel flacon ? Ah oui, le flacon... heu... c'est idiot, j'ai oublié de vous le préciser mais comme il dégageait une odeur inhabituelle ",
+				"je l'ai finalement échangé contre le charmant collier d'Hasna. Comprenez-moi, je ne pouvais tout de meme pas souiller ma noble peau avec un parfum frelaté ! ",
+				"Vous ne m'en voulez pas j'espere ?"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "8",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Choice(\"{1}Mirabelle, vous m'aviez fait une promesse, comment vais-je récupérer ce flacon maintenant ?\");"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Oh vous savez, les promesses... Comme on dit, boule qui mousse n'amasse pas heu... Enfin bref, si vous alliez demander à <link>Hasna</link> plutot ? ", 
+				"Il doit bien y avoir un moyen de le récupérer."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "8",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Mission_Infirmerie=9"]
+		},		
+		{
+			"Title" : "Hasna",
+			"Text" : [
+				"Oui, Hasna, une fille assez vulgaire qui est arrivée récemment. Vous ne pouvez pas la rater, son lit est malheureusement juste à coté du mien, ",
+				"ses ronflements m'empechent de dormir la nuit."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "9",
+					"Comp": "=="
+				}
+			]
 		},
 		{
 			"Title" : "Petit service",
@@ -172,12 +269,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "4",
 					"Comp": "=="
 				}
@@ -192,12 +290,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "5",
 					"Comp": "=="
 				}
@@ -206,17 +305,18 @@
 		{
 			"Title" : "Bracelet de Namia",
 			"Text" : [
-				"Oui, un bracelet, et il appartient à Namia, la grosse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée, ",
+				"Oui, un bracelet, et il appartient à Namia, la fille disgracieuse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée, ",
 				"elle est juste à coté de son lit. Ce n'est quand meme pas tres compliqué comme mission, etes-vous décidé à m'aider ou faut-il que j'y aille à votre place ?"
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "5",
 					"Comp": "=="
 				}
@@ -230,12 +330,13 @@
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "namia",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "5",
 					"Comp": "=="
 				}
@@ -251,17 +352,19 @@
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "namia",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "5",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "choice",
+					"Type": "Global",
+					"Name": "choice",
 					"Value": "1",
 					"Comp": "=="
 				}
@@ -275,17 +378,19 @@
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "namia",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "5",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "choice",
+					"Type": "Global",
+					"Name": "choice",
 					"Value": "2",
 					"Comp": "=="
 				}
@@ -294,39 +399,46 @@
 		{
 			"Title": "Bracelet de Namia",
 			"Text": [
-				"Vous m'avez rapporté son bracelet ? Merveilleux ! Comment puis-je vous remercier ? Ah, je sais, voudriez-vous venir à ma prochaine fete privée ? ",
-				"Enfin, je veux dire, à condition que vous vous habilliez un peu mieux évidemment, ce sont des soirées entre personnes de gout..."
+				"Vous m'avez rapporté son bracelet ? Merveilleux ! Comment puis-je vous remercier ? Ah, je sais, voudriez-vous venir à ma prochaine soirée privée ? ",
+				"Par contre, heu... il faudra vous habiller un peu mieux évidemment, ce sont des soirées entre personnes de gout..."
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "mirabelle",
 					"Comp": "=="
 				},
 				{
-					"VariableType": "Item",
-					"VariableName": "Armlet_EvilSpelled",
-					"Value": "1",
+					"Type": "Item",
+					"Name": "Armlet_EvilSpelled",
+					"Value": "0",
 					"Comp": ">"
 				}
+			],
+			"Action": [
+				"AddCharacterItem(\"mirabelle\", \"Armlet_EvilSpelled\")",
+				"RemoveCharacterItem(\"Player\", \"Armlet_EvilSpelled\")",
+				"WearCharacterItem(\"mirabelle\", \"Armlet_EvilSpelled\")",
+				"Mission_Infirmerie=8"
 			]
 		},
 		{
 			"Title": "Petite lecon",
 			"Text": [
-				"Ce bracelet est en effet tres joli, je l'ai trouvé il y a quelques jours, avant mon arrivée ici, mais depuis il ne m'arrive que des problemes.",
+				"Ce bracelet est en effet tres joli, je l'ai trouvé il y a quelques jours, avant mon arrivée, mais depuis il ne m'arrive que des problemes.",
 				"Ca a commencé par de petits incidents, puis ces maux de tete qui m'ont conduite ici. ",
 				"Ca peut paraitre absurde mais je commence à croire qu'il a été enchanté par un maléfice et j'aimerais m'en débarrasser. ",
-				"Je comptais le garder avec moi jusqu'à ma sortie mais cette peste de Mirabelle m'en a fait trop voir. Si elle tient tellement à me prendre mon bracelet, soit, je lui donne avec plaisir !"
+				"Je comptais le garder avec moi jusqu'à ma sortie mais si cette peste de Mirabelle tient tellement à me prendre mon bracelet, soit, je lui donne avec plaisir !"
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "namia",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "6",
 					"Comp": "=="
 				}
@@ -336,21 +448,48 @@
 		{
 			"Title": "Petite lecon",
 			"Text": [
-				"Au plaisir de vous rendre service."
+				"Tres bien, votre vertu vous honore, revenez-me voir si vous changez d'avis."
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "namia",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "Mission_Infirmerie",
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
 					"Value": "6",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "choice",
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Petite lecon",
+			"Text": [
+				"Tenez, prenez le, au plaisir de vous rendre service."
+				],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "6",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
 					"Value": "1",
 					"Comp": "=="
 				}
@@ -360,30 +499,7 @@
 				"RemoveCharacterItem(\"namia\", \"Armlet_EvilSpelled\");",
 				"Mission_Infirmerie=7;"
 				]
-		},
-		{
-			"Title": "Petite lecon",
-			"Text": [
-				"Tres bien, votre grandeur d'ame vous honore, revenez-me voir si vous changez d'avis."
-				],
-			"Conditions": [
-				{
-					"VariableName": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
-					"VariableName": "Mission_Infirmerie",
-					"Value": "6",
-					"Comp": "=="
-				},
-				{
-					"VariableName": "choice",
-					"Value": "2",
-					"Comp": "=="
-				}
-			]
-		},
+		},		
 		{
 			"Title": "République",
 			"Text": [
@@ -392,8 +508,8 @@
 				],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				}
 			]
@@ -412,13 +528,13 @@
 		{
 			"Title": "Armée républicaine", 
 			"Text": [
-				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link>, nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois, ",
-				"je passais devant chaque semaine en allant faire ma manucure."
+				"L'armée républicaine ? Bah c'est l'armée qui combat pour la <link>République</link>, nan ? Ils vivent dans un endroit sinistre, on appelle ca une caverne je crois. ",
+				"Je passais devant chaque semaine en allant faire ma manucure. En revanche, je dois avouer que le spectacle de beaux jeunes hommes musclés et en armure ne me laisse pas indifférente, hihihi !"
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Mirabelle",
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				}
 			]
@@ -436,8 +552,8 @@
 			"Text": ["Vous la trouverez juste à coté de la chambre, adressez-vous à Ranja, c'est la responsable"],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
-					"Value": "Geraldine",
+					"Name": "CharacterId",
+					"Value": "geraldine",
 					"Comp": "=="
 				}
 			]
@@ -456,13 +572,14 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "garde hopital",
 					"Comp": "=="
 				}
 				,
 				{
-					"VariableName": "stateGuardHospital",
+					"Type": "Global",
+					"Name": "stateGuardHospital",
 					"Value": "0",
 					"Comp": "=="
 				}
@@ -474,12 +591,13 @@
 			],
 			"Conditions": [
 				{
-					"VariableName": "CharacterId",
+					"Name": "CharacterId",
 					"Value": "garde hopital",
 					"Comp": "=="
 				},
 				{
-					"VariableName": "stateGuardHospital",
+					"Type": "Global",
+					"Name": "stateGuardHospital",
 					"Value": "1",
 					"Comp": "=="
 				}

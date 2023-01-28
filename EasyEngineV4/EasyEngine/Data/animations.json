@@ -1,0 +1,43 @@
+{
+	"bodiesAnimations":
+	[
+		{
+			"bodies": ["body01", "body02", "body03", "body04", "body05", "body06"],
+			"actionAnimations": 
+			[
+				{"Dying": "Dying"},
+				{"Guard": "Guard"},
+				{"HitLeftFoot": "HitLeftFoot"},
+				{"HitReceived": "HitReceived"},
+				{"HitRightArm": "HitRightArm"},
+				{"MoveToGuard": "MoveToGuard"},
+				{"Original": "Original"},
+				{"Punished": "Punished"},
+				{"Run": "Run"},
+				{"Sexy": "Sexy"},
+				{"Seat": "Seat"},
+				{"Stand": "Stand-normal"},
+				{"Walk": "Walk"}
+			]
+		},
+		{
+			"bodies": ["body06b", "body06d"],
+			"actionAnimations": 
+			[
+				{"Dying": "Dying"},
+				{"Guard": "Guard"},
+				{"HitLeftFoot": "HitLeftFoot"},
+				{"HitReceived": "HitReceived"},
+				{"HitRightArm": "HitRightArm"},
+				{"MoveToGuard": "MoveToGuard"},
+				{"Original": "Original"},
+				{"Punished": "Punished"},
+				{"Run": "Run02"},
+				{"Sexy": "Sexy"},
+				{"Seat": "Seat"},
+				{"Stand": "Stand02"},
+				{"Walk": "Walk"}
+			]
+		}
+	]
+}

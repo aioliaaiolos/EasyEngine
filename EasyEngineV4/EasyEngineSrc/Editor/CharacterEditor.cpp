@@ -8,6 +8,8 @@
 #include "EditorManager.h"
 #include "../Utils2/StringUtils.h"
 
+#include <algorithm>
+
 CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCameraType type) :
 	CEditor(oInterface, type),
 	CPlugin(nullptr, ""),
@@ -292,7 +294,9 @@ void CCharacterEditor::SetBody(string sBodyName)
 void CCharacterEditor::Edit(string id)
 {
 	SetEditionMode(true);
-	SpawnEntity(id);
+	string idLow = id;
+	std::transform(id.begin(), id.end(), idLow.begin(), tolower);
+	SpawnEntity(idLow);
 }
 
 void CCharacterEditor::SetSpecular(float r, float g, float b)

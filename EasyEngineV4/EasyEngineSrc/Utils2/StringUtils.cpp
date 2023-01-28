@@ -144,10 +144,10 @@ void CStringUtils::GetShortFileName(string sPathFile, string& sFileName)
 		sFileName = sPathFile.substr(idx + 1);
 }
 
-void CStringUtils::GetFileNameWithExtension(string sTexture, string sExtension, string& output)
+void CStringUtils::GetFileNameWithExtension(string sFileName, string sExtension, string& output)
 {
-	if (sTexture.find(sExtension) == -1)
-		output = sTexture + "." + sExtension;
+	if (sFileName.find(sExtension) == -1)
+		output = sFileName + "." + sExtension;
 }
 
 void CStringUtils::Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines, bool bSkipSpace)

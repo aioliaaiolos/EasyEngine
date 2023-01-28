@@ -51,16 +51,23 @@ m_bUseInstancing(true)
 	m_sCharactersDatabaseFileName = root + "/characters.db";
 	m_itCurrentParsedEntity = m_mCollideEntities.end();
 	m_itCurrentIAEntity = m_mIAEntities.end();
-	CMobileEntity::InitStatics();
+	CMobileEntity::InitStatics(m_oFileSystem);
 	LoadCharacterInfos();
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
-	LoadItems();
+	oInterface.HandlePluginCreation("EntityManager", HandleEntityManagerCreation, this);
+	
 }
 
 void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData)
 {
 	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
 	pEntityManager->m_pEditorManager = static_cast<IEditorManager*>(pEntityManager->m_oInterface.GetPlugin("EditorManager"));
+}
+
+void CEntityManager::HandleEntityManagerCreation(CPlugin* plugin, IBaseObject* pData)
+{
+	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
+	pEntityManager->LoadItems();
 }
 
 void CEntityManager::AddEntity( IEntity* pEntity, string sName, int id )

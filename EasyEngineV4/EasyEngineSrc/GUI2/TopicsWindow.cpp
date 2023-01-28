@@ -7,8 +7,8 @@
 #include "GUIManager.h"
 #include "IRessource.h"
 #include <sstream>
-
-
+#include "IEntity.h"
+#include "Interface.h"
 
 using namespace rapidjson;
 
@@ -28,11 +28,12 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
 	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
 	m_pScriptManager(nullptr),
-	m_bChoiceSet(false)
+	m_bChoiceSet(false),
+	m_oEntityManager(static_cast<IEntityManager&>(*oInterface.GetPlugin("EntityManager")))
 {
 	SetPosition(400, 200);
 	LoadTopics("topics.json");
-	m_pTopicFrame = new CTopicFrame(oInterface, 198, 759, m_mTopics);
+	m_pTopicFrame = new CTopicFrame(oInterface, 198, 759, m_mTopics, m_oEntityManager);
 	m_pTopicTextFrame = new CGUIWindow("Gui/TopicsTextWindow.bmp", oInterface, 660, 780);
 	AddWidget(m_pTopicFrame);
 	AddWidget(m_pTopicTextFrame);
@@ -407,8 +408,6 @@ void CTopicsWindow::AddTopicTextFromTopicName(string sName)
 		sTopicText = pLink->GetTopicInfos().m_sText;
 		m_sNextTopicTextToAdd = sTopicText;
 		IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(m_oInterface.GetPlugin("EventDispatcher"));
-		//pEventDispatcher->AbonneToWindowEvent(m_pGUIManager, CTopicsWindow::OnAddTopic);
-		//CTopicsWindow::OnAddTopic(m_pGUIManager, IEventDispatcher::TWindowEvent::T_WINDOWUPDATE, 0, 0);
 		AddTopicText(sTopicText);
 		pLink->GetTopicInfos().ExecuteActions(GetScriptManager(), this);
 		if (m_bChoiceSet) {
@@ -433,17 +432,6 @@ void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 	pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
 }
 
-void CTopicsWindow::OnAddTopic(CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int, int)
-{
-	if (e == IEventDispatcher::TWindowEvent::T_WINDOWUPDATE) {
-		CGUIManager* pGUIManager = static_cast<CGUIManager*>(pPlugin);
-		CTopicsWindow* pTopicWindow = static_cast<CTopicsWindow*>(pGUIManager->GetTopicsWindow());
-		pTopicWindow->AddTopicText(pTopicWindow->m_sNextTopicTextToAdd);
-		IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(pTopicWindow->m_oInterface.GetPlugin("EventDispatcher"));
-		pEventDispatcher->DesabonneToWindowEvent(CTopicsWindow::OnAddTopic);
-	}
-}
-
 void CTopicsWindow::RemoveTopicTexts()
 {
 	m_pTopicTextFrame->Clear();
@@ -465,6 +453,7 @@ void CTopicsWindow::DecodeString(string& sIn, string& sOut)
 
 void CTopicsWindow::LoadTopics(string sFileName)
 {
+	m_mTopics.clear();
 	FILE* pFile = m_oFileSystem.OpenFile(sFileName, "r");
 	fclose(pFile);
 	string sJsonDirectory;
@@ -513,10 +502,15 @@ void CTopicsWindow::LoadTopics(string sFileName)
 									CCondition c;
 									string sTestVariableName, sTestVariableValue;
 									if (condition.IsObject()) {
-										if (condition.HasMember("VariableName")) {
-											rapidjson::Value& varName = condition["VariableName"];
-											if (varName.IsString())
-												c.m_sVariableName = varName.GetString();
+										if (condition.HasMember("Name")) {
+											if (condition.HasMember("Type")) {
+												rapidjson::Value& type = condition["Type"];
+												if (type.IsString())
+													c.m_sType = type.GetString();
+											}
+											rapidjson::Value& name = condition["Name"];
+											if (name.IsString())
+												c.m_sName = name.GetString();
 											rapidjson::Value& value = condition["Value"];
 											if (value.IsString())
 												c.m_sValue = value.GetString();
@@ -615,10 +609,16 @@ void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCo
 				CCondition c;
 				string sTestVariableName, sTestVariableValue;
 				if (condition.IsObject()) {
-					if (condition.HasMember("VariableName")) {
-						rapidjson::Value& varName = condition["VariableName"];
+					if (condition.HasMember("Name")) {
+						if (condition.HasMember("Type")) {
+							rapidjson::Value& type = condition["Type"];
+							if (type.IsString()) {
+								c.m_sType = type.GetString();
+							}
+						}
+						rapidjson::Value& varName = condition["Name"];
 						if (varName.IsString())
-							c.m_sVariableName = varName.GetString();
+							c.m_sName = varName.GetString();
 						rapidjson::Value& value = condition["Value"];
 						if (value.IsString())
 							c.m_sValue = value.GetString();
@@ -666,7 +666,7 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 	int i = 0;
 	for (const CTopicInfo& topic : topics) {
 		for (const CCondition& condition : topic.m_vConditions) {
-			if (condition.m_sVariableName == "CharacterId") {
+			if (condition.m_sName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
 					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
 						topicVerifiedConditionCount[i] = -1;
@@ -677,8 +677,8 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 					}
 				}
 			}
-			else {
-				float fValue = m_pScriptManager->GetVariableValue(condition.m_sVariableName);
+			else if(condition.m_sType == "Global"){
+				float fValue = m_pScriptManager->GetVariableValue(condition.m_sName);
 				int nValue = atoi(condition.m_sValue.c_str());
 				if (float(nValue) == fValue) {
 					topicVerifiedConditionCount[i] += 1;
@@ -687,6 +687,16 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 					topicVerifiedConditionCount[i] = -1;
 					break;
 				}
+			}
+			else if (condition.m_sType == "Item") {
+				int count = m_oEntityManager.GetPlayer()->GetItemCount(condition.m_sName);
+				if(condition.Evaluate(count))
+					topicVerifiedConditionCount[i] += 1;
+				else {
+					topicVerifiedConditionCount[i] = -1;
+					break;
+				}
+
 			}
 		}
 		i++;
@@ -717,7 +727,7 @@ string CTopicsWindow::GetSpeakerId()
 	return m_sSpeakerId;
 }
 
-CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics) :
+CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics, IEntityManager& oEntityManager) :
 	CGUIWindow("Gui/topic-frame.bmp", oInterface, width, height),
 	m_oInterface(oInterface),
 	m_pGUIManager(nullptr),
@@ -726,7 +736,8 @@ CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, const m
 	m_nYmargin(21),
 	m_nTextHeight(25),
 	m_nTopicBorderWidth(218),
-	m_mTopics(mTopics)
+	m_mTopics(mTopics),
+	m_oEntityManager(oEntityManager)
 {
 	m_mFontColorFromTopicState[eNormal] = IGUIManager::eWhite;
 	m_mFontColorFromTopicState[ePressed] = IGUIManager::eTurquoise;
@@ -901,7 +912,7 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 	int i = 0;
 	for (const CTopicInfo& topic : topics) {
 		for (const CCondition& condition : topic.m_vConditions) {
-			if (condition.m_sVariableName == "CharacterId") {
+			if (condition.m_sName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
 					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {
 						checked[i] = false;
@@ -912,8 +923,8 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 					}
 				}
 			}
-			else {
-				float fValue = GetParent()->GetScriptManager()->GetVariableValue(condition.m_sVariableName);
+			else if (condition.m_sType == "Global") {
+				float fValue = GetParent()->GetScriptManager()->GetVariableValue(condition.m_sName);
 				int nValue = ConvertValueToInt(condition.m_sValue);
 				if (float(nValue) == fValue) {
 					checked[i] = true;
@@ -922,6 +933,12 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 					checked[i] = false;
 					break;
 				}
+			}
+			else if (condition.m_sType == "Item") {
+				int count = m_oEntityManager.GetPlayer()->GetItemCount(condition.m_sName);
+				bool test = (checked[i] = condition.Evaluate(count));
+				if (!checked[i])
+					break;
 			}
 		}
 		i++;

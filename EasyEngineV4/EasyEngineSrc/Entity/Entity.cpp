@@ -1003,12 +1003,12 @@ void CEntity::PauseCurrentAnimation(bool loop)
 		m_pCloth->m_pCurrentAnimation->Pause(loop);
 }
 
-void CEntity::AddAnimation(string sAnimationFile)
+void CEntity::AddAnimation(string sAnimationName)
 {
 	if (m_pSkeletonRoot)
 	{
-		IAnimation* pAnimation = static_cast<IAnimation*>(m_oRessourceManager.GetRessource("/Animations/" + sAnimationFile, true));
-		m_mAnimation[sAnimationFile] = pAnimation;
+		IAnimation* pAnimation = static_cast<IAnimation*>(m_oRessourceManager.GetRessource("/Animations/" + sAnimationName + ".bke", true));
+		m_mAnimation[sAnimationName] = pAnimation;
 		IMesh* pMesh = static_cast<IMesh*>(m_pRessource);
 		pAnimation->SetSkeleton(m_pSkeletonRoot);
 	}
@@ -1023,7 +1023,7 @@ void CEntity::AddAnimation(string sAnimationFile)
 
 void CEntity::SetCurrentAnimation(std::string sAnimation)
 {
-	m_sCurrentAnimation = sAnimation;
+	//m_sCurrentAnimation = sAnimation;
 	m_pCurrentAnimation = m_mAnimation[sAnimation];
 	if (m_bUsePositionKeys)
 		m_pCurrentAnimation->AddCallback(OnAnimationCallback, this);

@@ -129,6 +129,7 @@ private:
 	map<string, CItem*>										m_mItems;
 
 	static void												HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData);
+	static void												HandleEntityManagerCreation(CPlugin* plugin, IBaseObject* pData);
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

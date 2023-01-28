@@ -42,6 +42,7 @@ Adnakat :
 . Mirabelle
 . Balam Akab
 . Akhenao
+. Akhanea
 . Ramsab Edao
 . Ulam Edao
 . Ranja
@@ -50,6 +51,7 @@ Adnakat :
 . Malia
 . Namia
 . Jahia
+. Ayana
 
 
 Eran : 

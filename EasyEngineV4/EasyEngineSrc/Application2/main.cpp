@@ -194,21 +194,21 @@ void UpdatePerso()
 			if( eStateWalk == IInputManager::JUST_PRESSED || eStateWalk == IInputManager::PRESSED )
 			{
 				if(m_pInputManager->GetKeyState(VK_SHIFT) == IInputManager::JUST_PRESSED || m_pInputManager->GetKeyState(VK_SHIFT) == IInputManager::PRESSED)
-					pPerso->RunAction("walk", true);
+					pPerso->RunAction("Walk", true);
 				else
-					pPerso->RunAction( "run", true );
+					pPerso->RunAction( "Run", true );
 					
 				m_pActionManager->ForceActionState( "AvancerPerso", IInputManager::PRESSED );
 			}
 			else if( eStateWalk == IInputManager::JUST_RELEASED )
 			{
-				pPerso->RunAction( "stand", true );
+				pPerso->RunAction( "Stand", true );
 				m_pActionManager->ForceActionState( "AvancerPerso", IInputManager::RELEASED );
 			}
 			IInputManager::KEY_STATE eStateJump = m_pActionManager->GetKeyActionState("SautPerso");
 			if (eStateJump == IInputManager::JUST_PRESSED)
 			{
-				pPerso->RunAction("jump", true);
+				pPerso->RunAction("Jump", true);
 				m_pActionManager->ForceActionState("SautPerso", IInputManager::PRESSED);
 			}
 

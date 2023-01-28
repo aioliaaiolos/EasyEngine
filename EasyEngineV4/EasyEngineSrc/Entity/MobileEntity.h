@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "FighterEntity.h"
 
+class IFileSystem;
 
 class CObject : public CEntity
 {
@@ -49,19 +50,48 @@ public:
 	void						Pitch(float fAngle);
 	void						Roll(float fAngle);
 	IAnimation*					GetCurrentAnimation();
-	void						WearSkinnedClothFull(string sClothName);
 	void						WearCloth(string sClothPath, string sDummyName);
 	void						AddItem(string sItemName);
 	void						RemoveItem(string sItemName);
-	bool						HasItem(string sItemID);
+	void						WearItem(string sItemID);
+	int							GetItemCount(string sItemID);
 	void						Link(INode* pParent) override;
 	IBox*						GetBoundingBox();
-	static void					InitStatics();
+	static void					InitStatics(IFileSystem& oFileSystem);
 
 	static map<string, IEntity::TAnimation>	s_mStringToAnimation;
 
 protected:
 	typedef void (*TAction)( CMobileEntity*, bool );
+
+	void										InitAnimations();
+	void										SetPredefinedAnimation(string s, bool bLoop);
+	void 										Walk(bool bLoop);
+	void 										Stand(bool bLoop);
+	void 										Run(bool bLoop);
+	void 										Jump(bool bLoop);
+	void										PlayReceiveHit(bool bLoop);
+	void										Stand();
+	void										PlayReceiveHit();
+	void										PlayHitAnimation();
+	void										PlaySecondaryHitAnimation();
+	void										MoveToGuard();
+	void										Guard();
+	void										TurnEyesH(float fValue);
+	void										TurnNeckH(float f);
+	IBone*										GetPreloadedBone(string sName);
+	void										GetPosition(CVector& oPosition) const;
+	IMesh*										GetMesh();
+	IFighterEntity*								GetFirstEnemy();
+	IFighterEntity*								GetNextEnemy();
+	CMatrix&									GetWorldTM();
+	float										GetBoundingSphereRadius();
+	ICollisionManager&							GetCollisionManager() { return m_oCollisionManager; }
+	ISphere*									GetBoneSphere(string sBoneName);
+	void										AddSpeed(float x, float y, float z);
+	const string&								GetAttackBoneName();
+	const string&								GetSecondaryAttackBoneName();
+	IGeometry*									GetBoundingGeometry() override;	
 
 	string										m_sFileNameWithoutExt;
 	bool										m_bInitSkeletonOffset;
@@ -79,49 +109,24 @@ protected:
 	const float									m_fMaxEyeRotationV;
 	const float									m_fMaxNeckRotationH;
 	const float									m_fMaxNeckRotationV;
-	map< IEntity::TAnimation, IAnimation* >		m_mAnimations;
-	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sAttackBoneName;
 	string										m_sSecondaryAttackBoneName;
 	CVector										m_vNextLocalTranslate;
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
 	vector<INode*>								m_vClothes;
-	map<string, vector<CItem*>>					m_mItems; // (item name, intem count)
+	map<string, vector<CItem*>>					m_mItems;
+	//map< IEntity::TAnimation, IAnimation* >		m_mAnimations;
+	map< TAnimation, float >					m_mAnimationSpeedByType;
+	string										m_sCurrentBodyName;
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;
+	static map< TAnimation, string>				s_mAnimationTypeToString;
 	static map< TAnimation, float >				s_mOrgAnimationSpeedByType;
 	static vector< CMobileEntity* >				s_vHumans;
-
-	void					InitAnimations();
-	void					SetPredefinedAnimation( string s, bool bLoop );
-	void 					Walk( bool bLoop );
-	void 					Stand( bool bLoop );
-	void 					Run( bool bLoop );
-	void 					Jump(bool bLoop);
-	void					PlayReceiveHit( bool bLoop );
-	void					Stand();
-	void					PlayReceiveHit();
-	void					PlayHitAnimation();
-	void					PlaySecondaryHitAnimation();
-	void					MoveToGuard();
-	void					Guard();
-	void					TurnEyesH( float fValue );
-	void					TurnNeckH( float f );
-	IBone*					GetPreloadedBone( string sName );
-	void					GetPosition( CVector& oPosition ) const;
-	IMesh*					GetMesh();
-	IFighterEntity*			GetFirstEnemy();
-	IFighterEntity*			GetNextEnemy();
-	CMatrix&				GetWorldTM();
-	float					GetBoundingSphereRadius();	
-	ICollisionManager&		GetCollisionManager(){ return m_oCollisionManager; }
-	ISphere*				GetBoneSphere( string sBoneName );
-	void					AddSpeed(float x, float y, float z);
-	const string&			GetAttackBoneName();
-	const string&			GetSecondaryAttackBoneName();
-	IGeometry*				GetBoundingGeometry() override;
+	//static vector < pair<vector<string>, map<string, string>>> s_mBodiesAnimations;
+	static map<string, map<string, string>>		s_mBodiesAnimations;
 
 	static void				OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );
 	static void 			Walk( CMobileEntity*, bool bLoop );
@@ -132,6 +137,7 @@ protected:
 	static void				MoveToGuard(CMobileEntity* pHuman, bool bLoop);
 	static void 			PlayReceiveHit( CMobileEntity* pHuman, bool bLoop );
 	static void				OnDyingCallback(IAnimation::TEvent e, void* data);
+	static void				LoadAnimationsJsonFile(IFileSystem& oFileSystem);
 };
 
 #endif // MOBILEENTITY_H

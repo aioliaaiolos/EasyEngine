@@ -20,8 +20,8 @@ public:
 
 	IEditor(EEInterface& oInterface) : CPlugin(nullptr, "") {}
 	virtual			~IEditor() = 0 {}
-	virtual void	Edit(string fileName) = 0;
-	virtual void	Load(string fileName) = 0;
+	virtual void	Edit(string sID) = 0;
+	virtual void	Load(string sID) = 0;
 	virtual void	HandleEditorManagerCreation(IEditorManager* pEditor) = 0;
 	virtual bool	IsEnabled() = 0;
 	virtual void	SpawnEntity(string sEntityFileName) = 0;

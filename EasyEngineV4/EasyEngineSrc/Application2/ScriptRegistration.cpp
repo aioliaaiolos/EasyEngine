@@ -217,6 +217,11 @@ void SpawnCharacter(IScriptState* pState)
 		oss << "Erreur : Il existe deja une instance de " << e.what() << " dans le monde";
 		m_pConsole->Println(oss.str());
 	}
+	catch (CNodeNotFoundException& e) {
+		string sMessage;
+		e.GetErrorMessage(sMessage);
+		m_pConsole->Println(sMessage);
+	}
 	catch (CEException& e)
 	{
 		m_pConsole->Println(e.what());
@@ -236,7 +241,8 @@ void EditCharacter(IScriptState* pState)
 	string id = pID->m_sValue;
 	try
 	{
-		m_pCharacterEditor->SpawnEntity(id);
+		//m_pCharacterEditor->SpawnEntity(id);
+		m_pCharacterEditor->Edit(id);
 	}
 	catch (CCharacterAlreadyExistsException& e) {
 		m_pConsole->Println(string("Erreur, le personnage ") + e.what() + " existe deja");
@@ -990,7 +996,7 @@ void Walk( IScriptState* pState )
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	//pEntity->Walk();
 	if(pEntity)
-		pEntity->RunAction( "walk", true );
+		pEntity->RunAction( "Walk", true );
 	else {
 		ostringstream oss;
 		oss << "Error : entity " << pEntityID->m_nValue << " not found";
@@ -1003,7 +1009,7 @@ void Run( IScriptState* pState )
 	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if (pEntity)
-		pEntity->RunAction("run", true);
+		pEntity->RunAction("Run", true);
 	else
 	{
 		ostringstream oss;
@@ -1018,7 +1024,7 @@ void Stand( IScriptState* pState )
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 		//pEntity->Stand();
-		pEntity->RunAction( "stand", true );
+		pEntity->RunAction( "Stand", true );
 	else
 	{
 		ostringstream oss;
@@ -2610,6 +2616,19 @@ void WearCloth(IScriptState* pState)
 	m_pCharacterEditor->WearCloth(pClothPath->m_sValue, pDummyName->m_sValue);
 }
 
+void WearCharacterItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pCharacterID = (CScriptFuncArgString*)(pState->GetArg(0));
+	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter) {
+		pCharacter->WearItem(pItemID->m_sValue);
+	}
+	else {
+		throw CEException(string("Error in WearCharacterItem() : character '") + pCharacterID->m_sValue + "' does not exists");
+	}
+}
+
 void UnwearAllClothes(IScriptState* pState)
 {
 	CScriptFuncArgInt* pEntityId = (CScriptFuncArgInt*)(pState->GetArg(0));
@@ -2645,12 +2664,12 @@ void RemoveItem(IScriptState* pState)
 	m_pCharacterEditor->RemoveItem(pItemID->m_sValue);
 }
 
-void HasCharacterItem(IScriptState* pState)
+void GetItemCount(IScriptState* pState)
 {
 	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
 	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
-	pState->SetReturnValue(pCharacter->HasItem(pItemID->m_sValue) ? 1 : 0);
+	pState->SetReturnValue(pCharacter->GetItemCount(pItemID->m_sValue));
 }
 
 void SetBody(IScriptState* pState)
@@ -3475,7 +3494,12 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("HasCharacterItem", HasCharacterItem, vType, eInt);
+	m_pScriptManager->RegisterFunction("WearCharacterItem", WearCharacterItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("GetItemCount", GetItemCount, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eString);

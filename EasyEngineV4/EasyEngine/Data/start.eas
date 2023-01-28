@@ -65,8 +65,9 @@ function OnGuardTopicClosed()
 
 function onLoadingGame()
 {
-	OpenConsole(0);
-	SetBkgColor(0, 100, 255);
+	OpenConsole(1);
+	//SetBkgColor(50, 180, 255);
+	SetBkgColor(0, 0, 0);
 	r=CreateRepere();
 
 	l=CreateLightw("omni", 1.0)
@@ -80,7 +81,7 @@ function onLoadingGame()
 	//EditWorld("area3");
 	//LoadWorld("area3");
 	//EditWorld("");
-	LoadWorld("");
+	//LoadWorld("");
 	
 	//LoadWorld("plane");
 	//EditWorld("plane");
@@ -88,7 +89,6 @@ function onLoadingGame()
 	//EditWorld("TestHopital");
 	//LoadWorld("TestHopital");
 	
-	//SetAnimationSpeed(Player, "run", 4.0);
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
 	//SetSceneMap("HM_terrain02.bmp", "stone001b.bmp", 20000, 1000);
 	

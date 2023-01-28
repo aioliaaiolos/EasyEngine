@@ -239,7 +239,7 @@ void CConsole::OnPressEnter()
 	catch (CFileNotFoundException& e) {
 		string msg;
 		e.GetErrorMessage(msg);
-		Println(string("Erreur : '") + msg + "' introuvable");
+		Println(string("Erreur : fichier '") + e.m_sFileName + "' introuvable");
 	}
 	catch (CFileException& e) {
 		string msg;
