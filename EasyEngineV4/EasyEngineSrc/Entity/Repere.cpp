@@ -20,7 +20,12 @@ void CRepere::SetEntityName(string sName)
 	m_sEntityID = sName;
 }
 
-void CRepere::GetEntityName(string& sName)
+void CRepere::GetEntityID(string& sName)
 {
 	sName = m_sEntityID;
+}
+
+const string& CRepere::GetEntityID() const
+{
+	return m_sEntityID;
 }

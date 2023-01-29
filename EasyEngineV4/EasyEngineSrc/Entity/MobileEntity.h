@@ -5,6 +5,7 @@
 #include "FighterEntity.h"
 
 class IFileSystem;
+class CItem;
 
 class CObject : public CEntity
 {
@@ -34,7 +35,7 @@ public:
 
 	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	void						BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) override;
+	void						BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
 	void						SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
 	TAnimation					GetCurrentAnimationType() const;
 	void						RunAction(string sAction, bool bLoop);
@@ -43,18 +44,18 @@ public:
 	void						WearShoes(string shoesName) override;
 	void						UnWearShoes(string shoesPath) override;
 	void						UnWearAllShoes() override;
-	void						UnwearAllClothes() override;
 	void						SetHairs(string sHairsPath) override;
 	void						SetBody(string sBodyName) override;
 	void						Yaw(float fAngle);
 	void						Pitch(float fAngle);
 	void						Roll(float fAngle);
 	IAnimation*					GetCurrentAnimation();
-	void						WearCloth(string sClothPath, string sDummyName);
 	void						AddItem(string sItemName);
 	void						RemoveItem(string sItemName);
 	void						WearItem(string sItemID);
+	void						UnWearItem(string sItemID);
 	int							GetItemCount(string sItemID);
+	void						GetItems(map<string, vector<IEntity*>>& vItems) const;
 	void						Link(INode* pParent) override;
 	IBox*						GetBoundingBox();
 	static void					InitStatics(IFileSystem& oFileSystem);
@@ -91,7 +92,10 @@ protected:
 	void										AddSpeed(float x, float y, float z);
 	const string&								GetAttackBoneName();
 	const string&								GetSecondaryAttackBoneName();
-	IGeometry*									GetBoundingGeometry() override;	
+	IGeometry*									GetBoundingGeometry() override;
+	void										Wear(string sClothPath, string sDummyName);
+	void										Wear(CEntity* pEntity, string sDummyName);
+	void										UnWear(CEntity* pCloth);
 
 	string										m_sFileNameWithoutExt;
 	bool										m_bInitSkeletonOffset;
@@ -114,7 +118,6 @@ protected:
 	CVector										m_vNextLocalTranslate;
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
-	vector<INode*>								m_vClothes;
 	map<string, vector<CItem*>>					m_mItems;
 	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sCurrentBodyName;

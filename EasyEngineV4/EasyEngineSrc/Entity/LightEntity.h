@@ -20,7 +20,9 @@ public:
 	IRessource::TLight	GetType();
 	void				Unlink();
 	void				GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) override;
+	void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
+	void				GetEntityID(string& sID) {};
+	const string&		GetEntityID() const { return ""; };
 
 };
 

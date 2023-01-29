@@ -97,11 +97,11 @@ public:
 	//static void		  SlerpInvariantAxis( const CMatrix& oInitial, const CMatrix& oFinal, float t, CMatrix& oResult );
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
-	IPersistantObject& operator << (CBinaryFileStorage& store);
+	IPersistantObject& operator << (const CBinaryFileStorage& store);
 	const IPersistantObject& operator >> (CAsciiFileStorage& store) const;
-	IPersistantObject& operator << (CAsciiFileStorage& store);
+	IPersistantObject& operator << (const CAsciiFileStorage& store);
 	const IPersistantObject& operator >> (CStringStorage& store) const;
-	IPersistantObject& operator << (CStringStorage& store);
+	IPersistantObject& operator << (const CStringStorage& store);
 
 	void Afficher() const;
 };	

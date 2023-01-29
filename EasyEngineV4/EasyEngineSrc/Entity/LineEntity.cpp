@@ -31,9 +31,14 @@ void CLineEntity::Set( const CVector& first, const CVector& last )
 	m_oLast = last;
 }
 
-void CLineEntity::GetEntityName(string& sName)
+void CLineEntity::GetEntityID(string& sName)
 {
 	sName = m_sEntityID;
+}
+
+const string& CLineEntity::GetEntityID() const
+{
+	return m_sEntityID;
 }
 
 void CLineEntity::GetPoints(CVector& first, CVector& last) const

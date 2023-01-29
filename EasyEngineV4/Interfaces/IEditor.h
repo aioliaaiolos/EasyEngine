@@ -56,7 +56,6 @@ public:
 	virtual void	SetCurrentEditableNPC(ICharacter* pNPCEntity) = 0;
 	virtual void	SetHairs(string sHairsName) = 0;
 	virtual void	WearShoes(string sShoesName) = 0;
-	virtual void	WearCloth(string sClothPath, string sDummyName) = 0;
 	virtual void	UnWearShoes(string sShoesName) = 0;
 	virtual void	AddItem(string sItemName) = 0;
 	virtual void	RemoveItem(string sItemName) = 0;
@@ -72,6 +71,8 @@ public:
 	virtual void	OffsetEyes(float x, float y, float z) = 0;
 	virtual void	SaveCurrentEditableBody() = 0;
 	virtual void	TurnEyes(float fYaw, float fPitch, float fRoll) = 0;
+	virtual void	WearItem(string sItemID) = 0;
+	virtual ICharacter*	GetCurrentCharacter() = 0;
 };
 
 class IWorldEditor : virtual public ISpawnableEditor

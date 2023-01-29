@@ -47,7 +47,7 @@ public:
 	void			DrawAnimationBoundingBox( bool bDraw ) override{}
 	float			GetBoundingSphereRadius() const override{ return 0.f; }
 	void			Goto( const CVector& oPosition, float fSpeed ) override{ throw 1; }
-	void			SetEntityName( string sName ) override{ throw 1; }
+	void			SetEntityID( string sName ) override{ throw 1; }
 	void			ReloadShader();
 	void			AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}

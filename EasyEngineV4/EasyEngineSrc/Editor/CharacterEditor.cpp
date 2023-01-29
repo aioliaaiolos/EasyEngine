@@ -120,7 +120,7 @@ void CCharacterEditor::Save()
 {
 	if (m_bEditionMode && m_pCurrentCharacter) {
 		string sId;
-		m_pCurrentCharacter->GetEntityName(sId);
+		m_pCurrentCharacter->GetEntityID(sId);
 		m_oEntityManager.SaveCharacter(sId);
 	}
 }
@@ -201,7 +201,7 @@ void CCharacterEditor::InitSpawnedCharacter()
 	if (m_pCurrentCharacter) {
 		m_pCurrentCharacter->SetWeight(0);
 		m_pCurrentCharacter->SetWorldPosition(0, m_pCurrentCharacter->GetHeight() / 2.f, 0);
-		m_pCurrentCharacter->RunAction("stand", true);
+		m_pCurrentCharacter->RunAction("Stand", true);
 	}
 }
 
@@ -255,20 +255,6 @@ void CCharacterEditor::UnWearAllShoes()
 	try
 	{
 		m_pCurrentCharacter->UnWearAllShoes();
-	}
-	catch (CEException& e) {
-		m_oConsole.Println(e.what());
-	}
-}
-
-void CCharacterEditor::WearCloth(string sClothName, string sDummyName)
-{
-	try
-	{
-		m_pCurrentCharacter->WearCloth(sClothName, sDummyName);
-	}
-	catch (CNodeNotFoundException & e) {
-		m_oConsole.Println(string("Error : Node '") + e.what() + "' not found");
 	}
 	catch (CEException& e) {
 		m_oConsole.Println(e.what());
@@ -420,6 +406,16 @@ void CCharacterEditor::AddItem(string sItemName)
 void CCharacterEditor::RemoveItem(string sItemID)
 {
 	m_pCurrentCharacter->RemoveItem(sItemID);
+}
+
+void CCharacterEditor::WearItem(string sItemID)
+{
+	m_pCurrentCharacter->WearItem(sItemID);
+}
+
+ICharacter* CCharacterEditor::GetCurrentCharacter()
+{
+	return m_pCurrentCharacter;
 }
 
 void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)

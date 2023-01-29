@@ -43,9 +43,9 @@ public:
 	virtual             		~CNode();
 	unsigned int        		GetChildCount() const;
 	INode*              		GetChild( unsigned int nIdx ) const;
-  	virtual void	    		Update();
-  	virtual void                Link( INode* pNode );
-	virtual void				Unlink();
+  	void	    				Update() override;
+  	void						Link( INode* pNode ) override;
+	void						Unlink() override;
   	void                		AddChild(INode* pNode);
 	void						RemoveChild(int index);
 	void						ClearChildren() override;

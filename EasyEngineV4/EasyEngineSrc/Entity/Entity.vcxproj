@@ -164,6 +164,7 @@
     <ClInclude Include="FightSystem.h" />
     <ClInclude Include="FreeCamera.h" />
     <ClInclude Include="IAEntity.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="LightEntity.h" />
     <ClInclude Include="LineEntity.h" />
     <ClInclude Include="LinkedCamera.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="FreeCamera.cpp" />
     <ClCompile Include="IAEntity.cpp" />
     <ClCompile Include="IEntity.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="LightEntity.cpp" />
     <ClCompile Include="LineEntity.cpp" />
     <ClCompile Include="LinkedCamera.cpp" />

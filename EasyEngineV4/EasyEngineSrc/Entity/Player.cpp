@@ -43,7 +43,7 @@ void CPlayer::Action()
 		}
 		if (pSpeaker) {
 			string sId;
-			pSpeaker->GetEntityName(sId);
+			pSpeaker->GetEntityID(sId);
 			m_oGUIManager.GetTopicsWindow()->SetSpeakerId(sId);
 			m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 		}

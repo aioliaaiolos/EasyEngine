@@ -32,7 +32,6 @@ public:
 	void					WearShoes(string sShoesName) override;
 	void					UnWearShoes(string sShoesName) override;
 	void					UnWearAllShoes() override;
-	void					WearCloth(string sClothName, string sDummyName) override;
 	void					SetTexture(string sTexture) override;
 	void					SetBody(string sBodyName) override;
 	void					Edit(string id) override;
@@ -47,6 +46,8 @@ public:
 	void					OnEditorExit();
 	void					AddItem(string sItemName);
 	void					RemoveItem(string sItemName);
+	void					WearItem(string sItemID);
+	ICharacter*				GetCurrentCharacter() override;
 
 private:
 

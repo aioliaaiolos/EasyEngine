@@ -115,7 +115,7 @@ const IPersistantObject& CSegment::operator >> (CBinaryFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CSegment::operator << (CBinaryFileStorage& store)
+IPersistantObject& CSegment::operator << (const CBinaryFileStorage& store)
 {
 	return *this;
 }
@@ -125,7 +125,7 @@ const IPersistantObject& CSegment::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CSegment::operator << (CAsciiFileStorage& store)
+IPersistantObject& CSegment::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -135,7 +135,7 @@ const IPersistantObject& CSegment::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CSegment::operator << (CStringStorage& store)
+IPersistantObject& CSegment::operator << (const CStringStorage& store)
 {
 	return *this;
 }

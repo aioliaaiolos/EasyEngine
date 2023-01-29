@@ -28,9 +28,14 @@ void CPlaneEntity::Update()
 	
 	m_oRenderer.CullFace(1);
 }
-void CPlaneEntity::GetEntityName(string& sName)
+void CPlaneEntity::GetEntityID(string& sName)
 {
 	sName = "CPlaneEntity";
+}
+
+const string& CPlaneEntity::GetEntityID() const
+{
+	return m_sName;
 }
 
 void CPlaneEntity::Colorize(float r, float g, float b, float a)

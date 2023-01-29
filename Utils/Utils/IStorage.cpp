@@ -45,6 +45,11 @@ bool CBinaryFileStorage::OpenFile( string sFileName, TOpenMode mode )
 	return m_pFile != NULL;
 }
 
+void CBinaryFileStorage::Seek(int offset)
+{
+	fseek(m_pFile, offset, SEEK_CUR);
+}
+
 IBaseStorage& CBinaryFileStorage::operator<<( int i )
 {
 	fwrite( &i, sizeof( int ), 1, m_pFile );
@@ -86,13 +91,19 @@ IBaseStorage& CBinaryFileStorage::operator<<(char* sz)
 	return *this;
 }
 
-IBaseStorage& CBinaryFileStorage::operator>>( int& i ) 
+const IBaseStorage& CBinaryFileStorage::operator >> (char& c) const
+{
+	fread(&c, sizeof(char), 1, m_pFile);
+	return *this;
+}
+
+const IBaseStorage& CBinaryFileStorage::operator>>( int& i ) const
 {
 	fread( &i, sizeof( int ), 1, m_pFile );
 	return *this;
 }
 
-IBaseStorage& CBinaryFileStorage::operator >> (bool& b)
+const IBaseStorage& CBinaryFileStorage::operator >> (bool& b) const
 {
 	int i = 0;
 	fread(&i, sizeof(int), 1, m_pFile);
@@ -106,13 +117,13 @@ IBaseStorage& CBinaryFileStorage::operator>>( unsigned int& i )
 	return *this;
 }
 
-IBaseStorage& CBinaryFileStorage::operator>>( float& f )
+const IBaseStorage& CBinaryFileStorage::operator>>( float& f ) const
 {
 	fread( &f, sizeof( float ), 1, m_pFile );
 	return *this;
 }
 
-IBaseStorage& CBinaryFileStorage::operator>>( string& s )
+const IBaseStorage& CBinaryFileStorage::operator>>( string& s ) const
 {
 	int nSize;
 	fread( &nSize, sizeof( int ), 1, m_pFile );
@@ -137,7 +148,7 @@ IBaseStorage& CBinaryFileStorage::operator<<( const IPersistantObject& object )
 	return *this;
 }
 
-IBaseStorage& CBinaryFileStorage::operator>>( IPersistantObject& object )
+const IBaseStorage& CBinaryFileStorage::operator>>( IPersistantObject& object ) const
 {
 	object << *this;
 	return *this;
@@ -275,13 +286,17 @@ IBaseStorage& CAsciiFileStorage::operator<<(char* sz)
 	return *this;
 }
 
-
-IBaseStorage& CAsciiFileStorage::operator>>( int& )
+const IBaseStorage& CAsciiFileStorage::operator >> (char& c) const
 {
 	return *this;
 }
 
-IBaseStorage& CAsciiFileStorage::operator >> (bool&)
+const IBaseStorage& CAsciiFileStorage::operator>>( int& ) const
+{
+	return *this;
+}
+
+const IBaseStorage& CAsciiFileStorage::operator >> (bool&) const
 {
 	return *this;
 }
@@ -291,12 +306,12 @@ IBaseStorage& CAsciiFileStorage::operator>>( unsigned int& )
 	return *this;
 }
 	
-IBaseStorage& CAsciiFileStorage::operator>>( float& )
+const IBaseStorage& CAsciiFileStorage::operator>>( float& ) const
 {
 	return *this;
 }
 	
-IBaseStorage& CAsciiFileStorage::operator>>( string& )
+const IBaseStorage& CAsciiFileStorage::operator>>( string& ) const
 {
 	return *this;
 }
@@ -313,7 +328,7 @@ IBaseStorage& CAsciiFileStorage::operator<<( const IPersistantObject& object )
 	return *this;
 }
 
-IBaseStorage& CAsciiFileStorage::operator>>( IPersistantObject& object )
+const IBaseStorage& CAsciiFileStorage::operator>>(IPersistantObject& object) const
 {
 	object << *this;
 	return *this;
@@ -403,12 +418,17 @@ IBaseStorage& CStringStorage::operator<<(char* sz)
 	return *this;
 }
 
-IBaseStorage& CStringStorage::operator>>( int& )
+const IBaseStorage& CStringStorage::operator >> (char& c) const
 {
 	return *this;
 }
 
-IBaseStorage& CStringStorage::operator >> (bool&)
+const IBaseStorage& CStringStorage::operator>>( int& ) const
+{
+	return *this;
+}
+
+const IBaseStorage& CStringStorage::operator >> (bool&) const
 {
 	return *this;
 }
@@ -418,12 +438,12 @@ IBaseStorage& CStringStorage::operator>>( unsigned int& )
 	return *this;
 }
 
-IBaseStorage& CStringStorage::operator>>( float& )
+const IBaseStorage& CStringStorage::operator>>( float& ) const
 {
 	return *this;
 }
 
-IBaseStorage& CStringStorage::operator>>( string& sValue )
+const IBaseStorage& CStringStorage::operator>>( string& sValue ) const
 {
 	sValue = m_sValue;
 	return *this;
@@ -441,7 +461,7 @@ IBaseStorage& CStringStorage::operator<<( const IPersistantObject& object )
 	return *this;
 }
 
-IBaseStorage& CStringStorage::operator>>( IPersistantObject& object )
+const IBaseStorage& CStringStorage::operator>>(IPersistantObject& object) const
 {
 	object << *this;
 	return *this;

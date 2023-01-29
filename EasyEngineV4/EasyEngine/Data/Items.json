@@ -3,8 +3,68 @@
 	"Items": [
 		{
 			"ID": "Armlet_EvilSpelled",
-			"Model": "armlet.bme",
+			"Model": "items/armlet.bme",
 			"Type": "Armlet"
+		},
+		{
+			"ID": "Tunique_Hospital",
+			"Model": "clothes/tunique5.bme",
+			"Type": "Cloth"
+		},
+		{
+			"ID": "Dress_LongueWide",
+			"Model": "clothes/robe5.bme",
+			"Type": "Cloth"
+		},
+		{
+			"ID": "Underpants",
+			"Model": "clothes/slip.bme",
+			"Type": "BottomCloth"
+		},
+		{
+			"ID": "Bra",
+			"Model": "clothes/soutif.bme",
+			"Type": "TopCloth"
+		},
+		{
+			"ID": "Base_Gauntlet_Left",
+			"Model": "armors/2/BrassiereG.bme",
+			"Type": "Armor_Gauntlet_Left"
+		},
+		{
+			"ID": "Base_Gauntlet_Right",
+			"Model": "armors/2/BrassiereD.bme",
+			"Type": "Armor_Gauntlet_Right"
+		},
+		{
+			"ID": "Base_Cuirass",
+			"Model": "armors/2/cuirasse.bme",
+			"Type": "Armor_Cuirass"
+		},
+		{
+			"ID": "Base_Pauldron_Left",
+			"Model": "armors/2/epauletteG.bme",
+			"Type": "Armor_Pauldron_Left"
+		},
+		{
+			"ID": "Base_Pauldron_Right",
+			"Model": "armors/2/epauletteD.bme",
+			"Type": "Armor_Pauldron_Right"
+		},
+		{
+			"ID": "Base_Boot_Right",
+			"Model": "armors/2/jambiereD.bme",
+			"Type": "Armor_Boot_Right"
+		},
+		{
+			"ID": "Base_Boot_Left",
+			"Model": "armors/2/jambiereG.bme",
+			"Type": "Armor_Boot_Left"
+		},
+		{
+			"ID": "Base_Greave",
+			"Model": "armors/2/jupe.bme",
+			"Type": "Armor_Greave"
 		}
 	]
 }

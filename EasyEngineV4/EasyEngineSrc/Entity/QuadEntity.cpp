@@ -24,9 +24,14 @@ void CQuadEntity::Update()
 	}
 }
 
-void CQuadEntity::GetEntityName(string& sName)
+void CQuadEntity::GetEntityID(string& sID)
 {
-	sName = m_sName;
+	sID = m_sName;
+}
+
+const string& CQuadEntity::GetEntityID() const
+{
+	return m_sName;
 }
 
 void CQuadEntity::Colorize(float r, float g, float b, float a)

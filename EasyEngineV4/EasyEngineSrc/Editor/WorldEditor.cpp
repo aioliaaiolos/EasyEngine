@@ -93,7 +93,7 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 
 		}
 		else {
-			pEntity->GetEntityName(entityName);
+			pEntity->GetEntityID(entityName);
 			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
 			if (itCharacter != m_mCharacterMatrices.end())
 				m_mCharacterMatrices.erase(itCharacter);
@@ -105,7 +105,7 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 		}
 	}
 	else {
-		pEntity->GetEntityName(entityName);
+		pEntity->GetEntityID(entityName);
 		map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
 		if (itArea != m_mAreaMatrices.end())
 			m_mAreaMatrices.erase(itArea);
@@ -206,7 +206,7 @@ void CWorldEditor::SaveGame(string fileName)
 		map<string, pair<CMatrix, string>> mBackupCharacterMatrices = m_mCharacterMatrices;
 		for (IEntity* pEntity : entities) {
 			string entityName;
-			pEntity->GetEntityName(entityName);
+			pEntity->GetEntityID(entityName);
 			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
 			itCharacter->second.first = pEntity->GetWorldMatrix();
 		}

@@ -53,7 +53,7 @@ public:
 	IBone*							GetOrgSkeletonRoot();
 	void							SetSkeletonRoot(CBone* pBone, CBone* pOrgBone);
 	void							GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	virtual void					BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent);
+	virtual void					BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false);
 	bool							HasAnimation( string sAnimationName );
 	void							DetachCurrentAnimation();
 	void							Hide( bool bHide );
@@ -62,6 +62,7 @@ public:
 	void							LocalTranslate( const CVector& vTranslate );
 	void							LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM );
 	virtual void					LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName);
+	void							UnLinkDummyParentToDummyEntity();
 	void							SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
 	TAnimation						GetCurrentAnimationType() const{return eNone;}
 	void							GetTypeName( string& sName );
@@ -74,8 +75,9 @@ public:
 	float							GetBoundingSphereRadius() const;
 	void							Link( INode* pNode ) override;
 	void							Goto( const CVector& oPosition, float fSpeed );
-	void							SetEntityName( string sName );
-	void							GetEntityName( string& sName );
+	void							SetEntityID(string sName);
+	void							GetEntityID(string& sName);
+	const string&					GetEntityID() const;
 	void							Colorize(float r, float g, float b, float a) override;
 	ICollisionMesh*					GetCollisionMesh();
 	void							ForceAssignBoundingGeometry(IGeometry* pBoundingGeometry);
@@ -190,57 +192,5 @@ public:
 private:
 };
 
-class CItem : public CEntity
-{
-public:
-
-	enum Type 
-	{
-		eNone = -1,
-		eArmlet = 0
-	};
-	CItem(EEInterface& oInterface) :
-		CEntity(oInterface)
-	{
-
-	}
-
-	CItem(EEInterface& oInterface, string sID, Type type, string sModelName) : 
-		CEntity(oInterface),
-		m_eType(type),
-		m_sModelName(sModelName)
-	{
-		m_sEntityID = sID;
-	}
-
-	void operator=(const CItem& item)
-	{
-		m_eType = item.m_eType;
-		m_sModelName = item.m_sModelName;
-	}
-
-	void Load()
-	{
-		if (m_sModelName.size() > 0)
-		{
-			SetRessource(string("meshes/items/") + m_sModelName);
-		}
-	}
-
-	const vector<string>& GetDummyNames()
-	{
-		map<Type, vector<string>>::iterator itDummy = s_mBodyDummies.find(m_eType);
-		if (itDummy != s_mBodyDummies.end()) {
-			return itDummy->second;
-		}
-		throw CEException("Error in GetDummyNames() : Type '" + std::to_string((int)m_eType) + "' not found in s_mBodyDummies");
-	}
-
-	Type m_eType;
-	string m_sModelName;
-
-	static map<string, Type> s_mTypeString;
-	static map<Type, vector<string>> s_mBodyDummies;
-};
 
 #endif // ENTITY_H

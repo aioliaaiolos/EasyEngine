@@ -41,11 +41,11 @@ public:
 	void	Fill( float x, float y, float z, float w );	
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
-	IPersistantObject& operator << (CBinaryFileStorage& store);
+	IPersistantObject& operator << (const CBinaryFileStorage& store);
 	const IPersistantObject& operator >> (CAsciiFileStorage& store) const;
-	IPersistantObject& operator << (CAsciiFileStorage& store);
+	IPersistantObject& operator << (const CAsciiFileStorage& store);
 	const IPersistantObject& operator >> (CStringStorage& store) const;
-	IPersistantObject& operator << (CStringStorage& store);
+	IPersistantObject& operator << (const CStringStorage& store);
 
 
 	static void		Lerp( const CVector& v1, const CVector& v2, float t, CVector& vOut );
@@ -85,11 +85,11 @@ public:
 	float		Norm() const;
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
-	IPersistantObject& operator << (CBinaryFileStorage& store);
+	IPersistantObject& operator << (const CBinaryFileStorage& store);
 	const IPersistantObject& operator >> (CAsciiFileStorage& store) const;
-	IPersistantObject& operator << (CAsciiFileStorage& store);
+	IPersistantObject& operator << (const CAsciiFileStorage& store);
 	const IPersistantObject& operator >> (CStringStorage& store) const;
-	IPersistantObject& operator << (CStringStorage& store);
+	IPersistantObject& operator << (const CStringStorage& store);
 
 };
 

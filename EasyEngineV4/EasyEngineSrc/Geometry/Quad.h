@@ -26,12 +26,12 @@ public :
 	const CVector&		GetBBoxDimension() const override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 
-	const IPersistantObject& operator >> (CBinaryFileStorage& store) const;
-	IPersistantObject& operator << (CBinaryFileStorage& store);
-	const IPersistantObject& operator >> (CAsciiFileStorage& store) const;
-	IPersistantObject& operator << (CAsciiFileStorage& store);
-	const IPersistantObject& operator >> (CStringStorage& store) const;
-	IPersistantObject& operator << (CStringStorage& store);
+	const IPersistantObject& operator >> (CBinaryFileStorage& store) const override;
+	IPersistantObject& operator << (const CBinaryFileStorage& store) override;
+	const IPersistantObject& operator >> (CAsciiFileStorage& store) const override;
+	IPersistantObject& operator << (const CAsciiFileStorage& store) override;
+	const IPersistantObject& operator >> (CStringStorage& store) const override;
+	IPersistantObject& operator << (const CStringStorage& store) override;
 
 
 private:

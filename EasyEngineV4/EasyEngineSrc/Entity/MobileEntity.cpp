@@ -12,6 +12,7 @@
 #include "Bone.h"
 #include "Interface.h"
 #include "IFileSystem.h"
+#include "Item.h"
 #include "../Utils2/StringUtils.h"
 
 map< IEntity::TAnimation, string> CMobileEntity::s_mAnimationTypeToString;
@@ -452,12 +453,6 @@ void CMobileEntity::UnWearAllShoes()
 	pBodyDummyRShoes->ClearChildren();
 }
 
-void CMobileEntity::UnwearAllClothes()
-{
-	for (INode*& pNode : m_vClothes) {
-		pNode->Unlink();
-	}
-}
 
 void CMobileEntity::WearShoes(string shoesPath)
 {
@@ -489,25 +484,39 @@ void CMobileEntity::WearShoes(string shoesPath)
 	Rshoes->LinkDummyParentToDummyEntity(this, "BodyDummyRFoot");
 }
 
-void CMobileEntity::WearCloth(string sClothPath, string sDummyName)
+void CMobileEntity::Wear(string sClothPath, string sDummyName)
 {
 	string clothPathLower = sClothPath;
 	std::transform(sClothPath.begin(), sClothPath.end(), clothPathLower.begin(), tolower);
 
 	string sClothName = sClothPath.substr(sClothPath.find_last_of("/") + 1);
-	CEntity* pCloth = new CEntity(m_oInterface, string("Meshes/Clothes/") + sClothName + ".bme");
+	CEntity* pCloth = new CEntity(m_oInterface, string("Meshes/") + sClothName + ".bme");
+	Wear(pCloth, sDummyName);
+}
+
+void CMobileEntity::Wear(CEntity* pCloth, string sDummyName)
+{
 	if (pCloth) {
 		IMesh* pMesh = pCloth->GetMesh();
 		if (pMesh && pMesh->IsSkinned()) {
 			pCloth->SetSkeletonRoot(m_pSkeletonRoot, m_pOrgSkeletonRoot);
-			pCloth->Link(this); 
-			m_vClothes.push_back(pCloth);
+			pCloth->Link(this);
 		}
 		else {
 			pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
-			m_vClothes.push_back(pCloth->GetSkeletonRoot());
 			delete pCloth;
 		}
+	}
+}
+
+void CMobileEntity::UnWear(CEntity* pCloth)
+{
+	if (pCloth) {
+		IMesh* pMesh = pCloth->GetMesh();
+		if (pMesh && pMesh->IsSkinned())
+			pCloth->Unlink();
+		else
+			pCloth->UnLinkDummyParentToDummyEntity();
 	}
 }
 
@@ -537,11 +546,24 @@ void CMobileEntity::WearItem(string sItemID)
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
 		CItem* pItem = itItem->second.at(0);
-		if (!pItem->GetRessource())
+		if (!pItem->GetMesh())
 			pItem->Load();
+		pItem->m_bIsWear = true;
 		const string& sDummyName = pItem->GetDummyNames().at(0);
-		IBone* pBone = GetSkeletonRoot()->GetChildBoneByName(sDummyName);
-		pItem->Link(pBone);
+		Wear(pItem, sDummyName);
+	}
+	else {
+		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+	}
+}
+
+void CMobileEntity::UnWearItem(string sItemID)
+{
+	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	if (itItem != m_mItems.end()) {
+		CItem* pItem = itItem->second.at(0);		
+		pItem->m_bIsWear = false;
+		pItem->SetMesh(nullptr);
 	}
 	else {
 		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
@@ -569,10 +591,20 @@ IBox* CMobileEntity::GetBoundingBox()
 	return m_pBBox;
 }
 
+void CMobileEntity::GetItems(map<string, vector<IEntity*>>& mItems) const
+{
+	for (const pair<string, vector<CItem*>>& items : m_mItems) {
+		for (CItem* pItem : items.second) {
+			mItems[items.first].push_back(pItem);
+		}
+	}
+	
+}
+
 void CMobileEntity::SetHairs(string hairsName)
 {
-	string shoesPathLower = hairsName;
-	std::transform(hairsName.begin(), hairsName.end(), shoesPathLower.begin(), tolower);
+	string hairsPathLower = hairsName;
+	std::transform(hairsName.begin(), hairsName.end(), hairsPathLower.begin(), tolower);
 
 	// unlink old hairs if exists
 	IBone* pDummyHairs = m_pSkeletonRoot->GetChildBoneByName("DummyHairs");
@@ -583,6 +615,11 @@ void CMobileEntity::SetHairs(string hairsName)
 	// link new hairs
 	CEntity* hairs = new CEntity(m_oInterface, string("Meshes/hairs/") + hairsName + ".bme");
 	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");
+	if (hairs->GetSkeletonRoot() && hairs->GetSkeletonRoot()->GetChildCount() > 0) {
+		IEntity* pEntity = dynamic_cast<IEntity*>(hairs->GetSkeletonRoot()->GetChild(0));
+		if (pEntity)
+			pEntity->SetEntityID(hairsName);
+	}
 	delete hairs;
 }
 
@@ -597,7 +634,7 @@ void CMobileEntity::SetBody(string sBodyName)
 	InitAnimations();
 
 	IEntity* pParent = dynamic_cast<IEntity*>(GetParent());
-	BuildFromInfos(*pInfos, pParent);
+	BuildFromInfos(*pInfos, pParent, true);
 }
 
 void CMobileEntity::RunAction( string sAction, bool bLoop )
@@ -782,13 +819,27 @@ void CMobileEntity::MoveToGuard(CMobileEntity* pHuman, bool bLoop)
 void CMobileEntity::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
 {
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]];
-	m_mAnimation[sAnimationName]->SetSpeed(fSpeed);
-	m_mAnimationSpeedByType[ eAnimationType ] = s_mOrgAnimationSpeedByType[ eAnimationType ] * fSpeed;
+	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
+	if (itAnimation != m_mAnimation.end()) {
+		itAnimation->second->SetSpeed(fSpeed);
+		m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
+	}
+	else {
+		throw CEException("Error : animation '" + sAnimationName + "' not defined for body '" + m_sCurrentBodyName + "'");
+	}
 }
 
 float CMobileEntity::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
 {
-	return m_mAnimation[s_mAnimationTypeToString[eAnimationType]]->GetSpeed();
+	string sType = s_mAnimationTypeToString[eAnimationType];
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sType];
+	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
+	IAnimation* pAnimation = nullptr;
+	if (itAnimation != m_mAnimation.end())
+		pAnimation = itAnimation->second;
+	if(pAnimation)
+		return pAnimation->GetSpeed();
+	return 1.f;
 }
 
 void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
@@ -822,7 +873,7 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 			animatedEntityInfos.m_vSubEntityInfos.push_back(pSubEntityInfo);
 		}
 	}
-	GetEntityName(animatedEntityInfos.m_sObjectName);
+	GetEntityID(animatedEntityInfos.m_sObjectName);
 	string sTypeName;
 	GetTypeName(sTypeName);
 	animatedEntityInfos.m_sTypeName = sTypeName;
@@ -836,43 +887,26 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		animatedEntityInfos.m_vSpecular = m_vCustomSpecular;
 		animatedEntityInfos.m_bUseCustomSpecular = m_bUseCustomSpecular;
 	}
-	for (INode*& pNode : m_vClothes) {
-		string sClothName, sNodeName;
 
-		IEntity* pEntity = dynamic_cast<IEntity*>(pNode);
-		if (!pEntity) {
-			IBone* pBone = dynamic_cast<IBone*>(pNode);
-			if (pBone && pBone->GetChildCount() == 1) {
-				pEntity = dynamic_cast<IEntity*>(pBone->GetChild(0));
-			}
+
+	for (const pair<string, vector<CItem*>>& item : m_mItems) {
+		for (CItem* pItem : item.second) {
+			animatedEntityInfos.m_mItems[item.first].push_back(pItem->m_bIsWear ? 1 : 0);
 		}
-
-		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
-		pMesh->GetFileName(sClothName);
-
-		if (pEntity) {
-			for (int i = 0; i < animatedEntityInfos.m_vSubEntityInfos.size(); i++) {
-				ILoader::CObjectInfos* pSubEntity = animatedEntityInfos.m_vSubEntityInfos[i];
-				if (pSubEntity->m_sRessourceFileName == sClothName)
-					animatedEntityInfos.m_vSubEntityInfos.erase(animatedEntityInfos.m_vSubEntityInfos.begin() + i);
-			}
-			CStringUtils::GetShortFileName(sClothName, sClothName);
-			CStringUtils::GetFileNameWithoutExtension(sClothName, sClothName);
-			if ((pEntity->GetParent() != this) && pEntity->GetParent()->GetParent()) {
-				sNodeName = pEntity->GetParent()->GetParent()->GetName();
-			}
-			animatedEntityInfos.m_mClothesToNode[sClothName] = sNodeName;
+	}
+	IBone* pDummyHairs = m_pSkeletonRoot->GetChildBoneByName("DummyHairs");
+	if (pDummyHairs) {
+		if (pDummyHairs->GetChildCount() > 0) {
+			IEntity* pHairs = dynamic_cast<IEntity*>(pDummyHairs->GetChild(0));
+			animatedEntityInfos.m_sHairs = pHairs->GetEntityID();
 		}
 	}
 
-	for (const pair<string, vector<CItem*>>& item : m_mItems)
-		animatedEntityInfos.m_mItems[item.first]++;
 }
 
-void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
+void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
 {
-	m_vClothes.clear();
-	CEntity::BuildFromInfos(infos, pParent);
+	CEntity::BuildFromInfos(infos, pParent, true);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 	if (GetSkeletonRoot()) {
 		if(!pAnimatedEntityInfos->m_sTextureName.empty())
@@ -883,15 +917,15 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
 			SetAnimationSpeed(CMobileEntity::s_mStringToAnimation[it->first], it->second);
 		Stand();
-
-		for (const pair<string, string>& clothesInfos : pAnimatedEntityInfos->m_mClothesToNode) {
-			WearCloth(clothesInfos.first, clothesInfos.second);
-		}
-
-		for (const pair<string, int>& item : pAnimatedEntityInfos->m_mItems) {
+		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
 			m_mItems[item.first].push_back(pItem);
+			pItem->m_bIsWear = item.second[0] == 1;
+			if (pItem->m_bIsWear)
+				WearItem(pItem->GetEntityID());
 		}
+		if (!pAnimatedEntityInfos->m_sHairs.empty())
+			SetHairs(pAnimatedEntityInfos->m_sHairs);
 	}
 }
 

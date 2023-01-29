@@ -120,8 +120,9 @@ public:
 	virtual void						DrawAnimationBoundingBox( bool bDraw ) = 0;
 	virtual float						GetBoundingSphereRadius() const = 0;
 	virtual void						Goto( const CVector& oPosition, float fSpeed ) = 0;
-	virtual void						GetEntityName(string& sName) = 0;
-	virtual void						SetEntityName( string sName ) = 0;
+	virtual void						GetEntityID(string& sID) = 0;
+	virtual const string&				GetEntityID() const = 0;
+	virtual void						SetEntityID( string sName ) = 0;
 	virtual void						Colorize(float r, float g, float b, float a) = 0;
 	virtual void						AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void						DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
@@ -154,16 +155,15 @@ public:
 	virtual void				WearShoes(string shoesName)  = 0;
 	virtual void				UnWearShoes(string shoesPath) = 0;
 	virtual void				UnWearAllShoes() = 0;
-	virtual void				UnwearAllClothes() = 0;
-	virtual void				WearCloth(string sClothName, string sDummyName) = 0;
-	virtual void				WearItem(string sItemName) = 0;
 	virtual void				SetHairs(string sHairsPath) = 0;
 	virtual void				SetBody(string sBodyName) = 0;
-	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent) = 0;
+	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) = 0;
 	virtual void				GetPosition(CVector& oPosition) const = 0;
 	virtual void				AddItem(string sItemName) = 0;
 	virtual void				RemoveItem(string sItemName) = 0;
+	virtual void				WearItem(string sItemName) = 0;
 	virtual int					GetItemCount(string sItemID) = 0;
+	virtual void				GetItems(map<string, vector<IEntity*>>& mItems) const = 0;
 };
 
 class IScene : public virtual IEntity

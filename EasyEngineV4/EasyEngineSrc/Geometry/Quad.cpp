@@ -126,7 +126,7 @@ const IPersistantObject& CQuad::operator >> (CBinaryFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CQuad::operator << (CBinaryFileStorage& store)
+IPersistantObject& CQuad::operator << (const CBinaryFileStorage& store)
 {
 	store >> m_fLenght >> m_fWidth;
 	return *this;
@@ -138,7 +138,7 @@ const IPersistantObject& CQuad::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CQuad::operator << (CAsciiFileStorage& store)
+IPersistantObject& CQuad::operator << (const CAsciiFileStorage& store)
 {
 	//store >> "Type = Quad, lenght = " << m_fLenght << ", width = " << m_fWidth;
 	throw 1;
@@ -151,7 +151,7 @@ const IPersistantObject& CQuad::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CQuad::operator << (CStringStorage& store)
+IPersistantObject& CQuad::operator << (const CStringStorage& store)
 {
 	throw 1;
 	return *this;

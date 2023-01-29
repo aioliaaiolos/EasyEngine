@@ -21,6 +21,7 @@
 #include "IEditor.h"
 #include "PlaneEntity.h"
 #include "Bone.h"
+#include "Item.h"
 
 // Utils
 #include "Utils2/TimeManager.h"
@@ -30,12 +31,6 @@
 using namespace std;
 
 const float g_fMaxHeight = 80;
-
-map<CItem::Type, vector<string>> CItem::s_mBodyDummies = map<CItem::Type, vector<string>>{ 
-	{CItem::eArmlet, vector<string>{"BodyDummyBrassiereG", "BodyDummyBrassiereD"} },
-};
-
-map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{ { "Armlet", CItem::eArmlet} };
 
 CEntity::CEntity(EEInterface& oInterface):
 m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"))),
@@ -320,7 +315,7 @@ void CEntity::CreateAndLinkCollisionChildren(string sFileName)
 			pChild->ForceAssignBoundingGeometry(pGeometry);
 			pChild->m_fBoundingSphereRadius = pGeometry->ComputeBoundingSphereRadius();
 			pChild->Link(this);
-			pChild->SetEntityName(sName);
+			pChild->SetEntityID(sName);
 			if (sName.find("Door") != -1)
 				doors.push_back(pChild);
 			else if (sName.find("Wall") != -1)
@@ -833,6 +828,11 @@ void CEntity::LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName)
 	m_pSkeletonRoot->Link(pEntityDummy);
 }
 
+void CEntity::UnLinkDummyParentToDummyEntity()
+{
+	m_pSkeletonRoot->Unlink();
+}
+
 void CEntity::Link( INode* pParent )
 {
 	if (m_bEmptyEntity) {
@@ -1060,7 +1060,7 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		pInfos = new ILoader::CEntityInfos;
 	ILoader::CEntityInfos* pEntityInfos = dynamic_cast<ILoader::CEntityInfos*>(pInfos);
 	if (pEntityInfos) {
-		GetEntityName(pEntityInfos->m_sObjectName);
+		GetEntityID(pEntityInfos->m_sObjectName);
 		pEntityInfos->m_fWeight = GetWeight();
 		for (unsigned int iChild = 0; iChild < GetChildCount(); iChild++) {
 			CEntity* pChild = dynamic_cast<CEntity*>(GetChild(iChild));
@@ -1105,7 +1105,7 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	}
 }
 
-void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
+void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
 {	
 	SetLocalMatrix(infos.m_oXForm);
 	const ILoader::CEntityInfos* pEntityInfos = dynamic_cast<const ILoader::CEntityInfos*>(&infos);
@@ -1139,11 +1139,13 @@ void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParen
 		Link(pParent);
 	if (pEntityInfos) {
 		SetWeight(pEntityInfos->m_fWeight);
-		for (unsigned int iChild = 0; iChild < pEntityInfos->m_vSubEntityInfos.size(); iChild++) {
-			ILoader::CEntityInfos* pChildInfos = dynamic_cast<ILoader::CEntityInfos*>(pEntityInfos->m_vSubEntityInfos[iChild]);
-			if (pChildInfos) {
-				CEntity* pChild = m_pEntityManager->CreateEntityFromType(pChildInfos->m_sRessourceFileName, pChildInfos->m_sTypeName, pChildInfos->m_sObjectName);
-				pChild->BuildFromInfos(*pChildInfos, this);
+		if (!bExcludeChildren) {
+			for (unsigned int iChild = 0; iChild < pEntityInfos->m_vSubEntityInfos.size(); iChild++) {
+				ILoader::CEntityInfos* pChildInfos = dynamic_cast<ILoader::CEntityInfos*>(pEntityInfos->m_vSubEntityInfos[iChild]);
+				if (pChildInfos) {
+					CEntity* pChild = m_pEntityManager->CreateEntityFromType(pChildInfos->m_sRessourceFileName, pChildInfos->m_sTypeName, pChildInfos->m_sObjectName);
+					pChild->BuildFromInfos(*pChildInfos, this, bExcludeChildren);
+				}
 			}
 		}
 	}
@@ -1236,16 +1238,21 @@ void CEntity::Goto( const CVector& oPosition, float fSpeed )
 	throw e;
 }
 
-void CEntity::SetEntityName( string sName )
+void CEntity::SetEntityID( string sName )
 {
 	m_sEntityID = sName;
 	if(m_sName == "")
 		SetName(sName);
 }
 
-void CEntity::GetEntityName( string& sName )
+void CEntity::GetEntityID( string& sName )
 {
 	sName = m_sEntityID;
+}
+
+const string& CEntity::GetEntityID() const
+{
+	return m_sEntityID;
 }
 
 void CEntity::Colorize(float r, float g, float b, float a)

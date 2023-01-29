@@ -15,7 +15,8 @@ public:
 	void				Set( const CVector& first, const CVector& last );
 	void				Update();
 	void				Colorize(float r, float g, float b, float a) {}
-	void				GetEntityName(string& sName);
+	void				GetEntityID(string& sID);
+	const string&		GetEntityID() const;
 	void				GetPoints(CVector& first, CVector& last) const;
 	int					GetCellSize() { throw 1; return -1.f; };
 };

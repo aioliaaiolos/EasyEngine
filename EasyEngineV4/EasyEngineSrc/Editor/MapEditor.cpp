@@ -152,7 +152,7 @@ void CMapEditor::UpdateGround()
 		HANDLE hLevelFolder = m_oFileSystem.FindFirstFile_EE(tmpPath, wfd);
 		bool folderCreated = hLevelFolder != INVALID_HANDLE_VALUE;
 		if ((!folderCreated) || !(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			folderCreated = CreateDirectoryA(tmpPath.c_str(), nullptr);
+			folderCreated = (bool)CreateDirectoryA(tmpPath.c_str(), nullptr);
 		}
 		if (!folderCreated) {
 			m_oHud.Print(string("Erreur, impossible de creer le dossier '") + tmpPath + "'", m_nHudX, m_nHudY + m_oHud.GetLineCount() * m_nHudLineHeight);

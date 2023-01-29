@@ -162,7 +162,7 @@ const IPersistantObject& CCylinder::operator >> (CBinaryFileStorage& store) cons
 	return *this;
 }
 
-IPersistantObject& CCylinder::operator << (CBinaryFileStorage& store)
+IPersistantObject& CCylinder::operator << (const CBinaryFileStorage& store)
 {
 	store >> m_oTM >> m_fRadius >> m_fHeight;
 	return *this;
@@ -173,7 +173,7 @@ const IPersistantObject& CCylinder::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CCylinder::operator << (CAsciiFileStorage& store)
+IPersistantObject& CCylinder::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -183,7 +183,7 @@ const IPersistantObject& CCylinder::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CCylinder::operator << (CStringStorage& store)
+IPersistantObject& CCylinder::operator << (const CStringStorage& store)
 {
 	return *this;
 }

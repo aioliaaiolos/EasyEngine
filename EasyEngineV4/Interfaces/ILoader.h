@@ -45,11 +45,11 @@ public:
 		vector<string> m_vMessages;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const { return *this; }
-		IPersistantObject& operator << (CBinaryFileStorage& store) { return *this; }
+		IPersistantObject& operator << (const CBinaryFileStorage& store) { return *this; }
 		const IPersistantObject& operator >> (CAsciiFileStorage& store) const { return *this; }
-		IPersistantObject& operator << (CAsciiFileStorage& store) { return *this; }
+		IPersistantObject& operator << (const CAsciiFileStorage& store) { return *this; }
 		const IPersistantObject& operator >> (CStringStorage& store) const { return *this; }
-		IPersistantObject& operator << (CStringStorage& store) { return *this; }
+		IPersistantObject& operator << (const CStringStorage& store) { return *this; }
 	};
 
 	struct CMaterialInfos : public IRessourceInfos
@@ -173,9 +173,10 @@ public:
 			return *this;
 		}
 
-		IPersistantObject& operator << (CBinaryFileStorage& store) override 
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override 
 		{
-			store >> m_sObjectName >> m_sRessourceName >> m_sRessourceFileName >> m_oXForm >> m_sParentName >> m_nParentBoneID;
+			store >> m_sObjectName >> m_sRessourceName >> m_sRessourceFileName >> m_oXForm;
+			store >> m_sParentName >> m_nParentBoneID;
 			return *this; 
 		}
 
@@ -189,9 +190,9 @@ public:
 				<< "\nParent bone id : " << m_nParentBoneID;
 			return *this; 
 		}
-		IPersistantObject& operator << (CAsciiFileStorage& store) override { return *this; }
+		IPersistantObject& operator << (const CAsciiFileStorage& store) override { return *this; }
 		const IPersistantObject& operator >> (CStringStorage& store) const override { return *this; }
-		IPersistantObject& operator << (CStringStorage& store) override { return *this; }
+		IPersistantObject& operator << (const CStringStorage& store) override { return *this; }
 	};
 
 	struct CSceneInfos : public IRessourceInfos
@@ -215,7 +216,7 @@ public:
 			return *this;
 		}
 
-		IPersistantObject& operator << (CBinaryFileStorage& store) override
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override
 		{
 			int nObjectCount = 0;
 			store >> m_sSceneFileName >> m_sOriginalSceneFileName >> m_sName >> m_oBackgroundColor >> m_bUseDisplacementMap >> m_sDiffuseFileName >> nObjectCount >> m_nMapLength >> m_fMapHeight;
@@ -285,7 +286,7 @@ public:
 			return *this;
 		}
 
-		IPersistantObject& operator << (CBinaryFileStorage& store)
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override
 		{
 			ILoader::CObjectInfos::operator << (store);
 			store >> m_sTypeName;
@@ -316,13 +317,14 @@ public:
 
 	struct CAnimatedEntityInfos : public CEntityInfos
 	{
-		string								m_sAnimationFileName;
-		string								m_sTextureName;
-		bool								m_bUseCustomSpecular;
-		CVector								m_vSpecular;
-		map< string, float>					m_mAnimationSpeed;
-		map<string, string>					m_mClothesToNode;
-		map<string, int>					m_mItems;
+		string									m_sAnimationFileName;
+		string									m_sTextureName;
+		bool									m_bUseCustomSpecular;
+		CVector									m_vSpecular;
+		map< string, float>						m_mAnimationSpeed;
+		map<string, string>						m_mClothesToNode;
+		map<string, vector<int>>				m_mItems;
+		string									m_sHairs;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{
@@ -332,6 +334,7 @@ public:
 			store << m_mAnimationSpeed;
 			store << m_mClothesToNode;
 			store << m_mItems;
+			store << m_sHairs;
 			return *this;
 		}
 
@@ -349,10 +352,11 @@ public:
 			store << m_mClothesToNode;
 			store << "\nItems :";
 			store << m_mItems;
+			store << m_sHairs;
 			return *this;
 		}
 
-		IPersistantObject& operator << (CBinaryFileStorage& store)
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override
 		{
 			int nType;
 			store >> nType;
@@ -361,6 +365,9 @@ public:
 			store >> m_mAnimationSpeed;
 			store >> m_mClothesToNode;
 			store >> m_mItems;
+			static bool load = true;
+			if(load)
+				store >> m_sHairs;
 			return *this;
 		}
 	};
@@ -386,7 +393,7 @@ public:
 			return *this;
 		}
 
-		IPersistantObject& operator << (CBinaryFileStorage& store) override
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override
 		{
 			ILoader::CObjectInfos::operator << (store);
 			int type = 0;
@@ -403,7 +410,7 @@ public:
 		map<string, CMatrix>			m_mCharacterMatrices;
 		map<string, vector<CMatrix>>	m_mEntityMatrices;
 
-		IPersistantObject& operator << (CBinaryFileStorage& store) override
+		IPersistantObject& operator << (const CBinaryFileStorage& store) override
 		{
 			int mapCount = 0;
 			store >> mapCount;

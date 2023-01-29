@@ -864,7 +864,7 @@ const IPersistantObject& CMatrix::operator >> (CBinaryFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CMatrix::operator << (CBinaryFileStorage& store)
+IPersistantObject& CMatrix::operator << (const CBinaryFileStorage& store)
 {
 	vector< float > vData;
 	store >> vData;
@@ -886,7 +886,7 @@ const IPersistantObject& CMatrix::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CMatrix::operator << (CAsciiFileStorage& store)
+IPersistantObject& CMatrix::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -896,7 +896,7 @@ const IPersistantObject& CMatrix::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CMatrix::operator << (CStringStorage& store)
+IPersistantObject& CMatrix::operator << (const CStringStorage& store)
 {
 	return *this;
 }

@@ -262,7 +262,7 @@ const IPersistantObject& CBox::operator >> (CBinaryFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CBox::operator << (CBinaryFileStorage& store)
+IPersistantObject& CBox::operator << (const CBinaryFileStorage& store)
 {
 	store >> m_oTM >> m_oMinPoint >> m_oDimension >> m_fBoundingSphereRadius >> m_sName;
 	return *this;
@@ -274,7 +274,7 @@ const IPersistantObject& CBox::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CBox::operator << (CAsciiFileStorage& store)
+IPersistantObject& CBox::operator << (const CAsciiFileStorage& store)
 {
 
 	return *this;
@@ -285,7 +285,7 @@ const IPersistantObject& CBox::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CBox::operator << (CStringStorage& store)
+IPersistantObject& CBox::operator << (const CStringStorage& store)
 {
 	return *this;
 }

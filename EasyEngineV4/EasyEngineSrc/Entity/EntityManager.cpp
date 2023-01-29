@@ -21,6 +21,7 @@
 #include "Bone.h"
 #include "IEditor.h"
 #include "AreaEntity.h"
+#include "Item.h"
 
 #include <algorithm>
 
@@ -194,10 +195,7 @@ CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTyp
 	else if (sTypeName == "Item") {
 		pEntity = new CEntity(m_oInterface, sFileName, sID, bDuplicate);
 	}
-
-	string sName;
-	pEntity->GetEntityName( sName );
-	AddEntity( pEntity, sName );
+	AddEntity( pEntity, pEntity->GetEntityID());
 	return pEntity;
 }
 
@@ -328,7 +326,7 @@ IEntity* CEntityManager::CreatePlaneEntity(int slices, int size, string heightTe
 void CEntityManager::AddNewCharacter(IEntity* pEntity)
 {
 	string sCharacterName, sCharacterNameLow;
-	pEntity->GetEntityName(sCharacterName);
+	pEntity->GetEntityID(sCharacterName);
 	sCharacterNameLow = sCharacterName;
 	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterNameLow.begin(), tolower);
 
@@ -782,7 +780,7 @@ void CEntityManager::SerializeNodeInfos(INode* pNode, ostringstream& oss, int nL
 		for (int j = 0; j < nLevel; j++)
 			oss << "\t";
 		string sEntityName;
-		pEntity->GetEntityName(sEntityName);
+		pEntity->GetEntityID(sEntityName);
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		oss << "Entity name = " << sEntityName << ", ID = " << GetEntityID(pEntity) << "\n";

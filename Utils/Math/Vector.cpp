@@ -188,7 +188,7 @@ const IPersistantObject& CVector::operator >> (CBinaryFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CVector::operator << (CBinaryFileStorage& store)
+IPersistantObject& CVector::operator << (const CBinaryFileStorage& store)
 {
 	store >> m_x >> m_y >> m_z >> m_w;
 	return *this;
@@ -203,7 +203,7 @@ const IPersistantObject& CVector::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CVector::operator << (CAsciiFileStorage& store)
+IPersistantObject& CVector::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -214,7 +214,7 @@ const IPersistantObject& CVector::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CVector::operator << (CStringStorage& store)
+IPersistantObject& CVector::operator << (const CStringStorage& store)
 {
 	return *this;
 }
@@ -436,7 +436,7 @@ const IPersistantObject& CVector2D::operator >> (CBinaryFileStorage& store) cons
 	return *this;
 }
 
-IPersistantObject& CVector2D::operator << (CBinaryFileStorage& store)
+IPersistantObject& CVector2D::operator << (const CBinaryFileStorage& store)
 {
 	store >> m_x >> m_y >> m_w;
 	return *this;
@@ -451,7 +451,7 @@ const IPersistantObject& CVector2D::operator >> (CAsciiFileStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CVector2D::operator << (CAsciiFileStorage& store)
+IPersistantObject& CVector2D::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -462,7 +462,7 @@ const IPersistantObject& CVector2D::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CVector2D::operator << (CStringStorage& store)
+IPersistantObject& CVector2D::operator << (const CStringStorage& store)
 {
 	return *this;
 }

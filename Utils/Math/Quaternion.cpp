@@ -181,9 +181,10 @@ const IPersistantObject& CQuaternion::operator >> (CBinaryFileStorage& store) co
 	return *this;
 }
 
-IPersistantObject& CQuaternion::operator << (CBinaryFileStorage& store)
+IPersistantObject& CQuaternion::operator << (const CBinaryFileStorage& store)
 {
-	store >> m_x >> m_y >> m_z >> m_w >> m_vPosition;
+	store >> m_x >> m_y >> m_z >> m_w;
+	store >> m_vPosition;
 	return *this;
 }
 
@@ -195,7 +196,7 @@ const IPersistantObject& CQuaternion::operator >> (CAsciiFileStorage& store) con
 	return *this;
 }
 
-IPersistantObject& CQuaternion::operator << (CAsciiFileStorage& store)
+IPersistantObject& CQuaternion::operator << (const CAsciiFileStorage& store)
 {
 	return *this;
 }
@@ -207,7 +208,7 @@ const IPersistantObject& CQuaternion::operator >> (CStringStorage& store) const
 	return *this;
 }
 
-IPersistantObject& CQuaternion::operator << (CStringStorage& store)
+IPersistantObject& CQuaternion::operator << (const CStringStorage& store)
 {
 	return *this;
 }

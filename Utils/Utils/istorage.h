@@ -20,14 +20,21 @@ public:
 	virtual IBaseStorage& operator<<( string ) = 0;
 	virtual IBaseStorage& operator<<(char*) = 0;
 	virtual IBaseStorage& operator<<( const IPersistantObject& object ) = 0;
+	//template< class T >	IBaseStorage& operator<<(const vector< T >& vData) = 0;
+	//template< class T1, class T2 > IBaseStorage& operator<<(map< T1, T2 >& m) = 0;
+	//template< class T1, class T2 > IBaseStorage& operator<<(pair< T1, T2 >& p) { return *this; }
 
-	virtual IBaseStorage& operator>>( int& ) = 0;
-	virtual IBaseStorage& operator>> (bool&) = 0;
+	virtual const IBaseStorage& operator >> (char&) const = 0;
+	virtual const IBaseStorage& operator>>( int& ) const = 0;
+	virtual const IBaseStorage& operator>> (bool&) const = 0;
 	virtual IBaseStorage& operator>>( unsigned int& ) = 0;
-	virtual IBaseStorage& operator>>( float& ) = 0;
-	virtual IBaseStorage& operator>>( string& ) = 0;
+	virtual const IBaseStorage& operator>>( float& ) const = 0;
+	virtual const IBaseStorage& operator>>( string& ) const = 0;
 	virtual IBaseStorage& operator>> (char*) = 0;
-	virtual IBaseStorage& operator>>( IPersistantObject& object ) = 0;
+	virtual const IBaseStorage& operator>>( IPersistantObject& object ) const = 0;
+	//template< class T > IBaseStorage& operator >> (vector< T >& vData);
+	//template< class T1, class T2 > const IBaseStorage& operator >> (map< T1, T2 >& m);
+	template< class T1, class T2 > const IBaseStorage& operator >> (pair< T1, T2 >& p) = 0;
 	
 };
 
@@ -55,28 +62,32 @@ class CBinaryFileStorage : public IFileStorage
 public:
 
 	bool	OpenFile( string sFileName, TOpenMode mode);
-	IBaseStorage& operator<<( int );
-	IBaseStorage& operator << (bool b);
-	IBaseStorage& operator<<( unsigned int );
-	IBaseStorage& operator<<( float );
-	IBaseStorage& operator<<( string );
-	IBaseStorage& operator<<(char*);
+	void Seek(int position);
+	IBaseStorage& operator<<( int ) override;
+	IBaseStorage& operator << (bool b) override;
+	IBaseStorage& operator<<( unsigned int ) override;
+	IBaseStorage& operator<<( float ) override;
+	IBaseStorage& operator<<( string ) override;
+	IBaseStorage& operator<<(char*) override;
 	template< class T >	CBinaryFileStorage& operator<<( const vector< T >& vData );
 	template< class T1, class T2 > const CBinaryFileStorage& operator<<( const map< T1, T2 >& m );
+	template< class T1, class T2 > CBinaryFileStorage& operator<<(const pair< T1, T2 >& p);
 
-	IBaseStorage& operator>>( int& );
-	IBaseStorage& operator>> (bool&);
-	IBaseStorage& operator>>( unsigned int& );
-	IBaseStorage& operator>>( float& );
-	IBaseStorage& operator>>( string& );
-	IBaseStorage& operator >>(char*);
-	template< class T > CBinaryFileStorage& operator>>( vector< T >& vData );
-	template< class T1, class T2 > const CBinaryFileStorage& operator>>(  map< T1, T2 >& m  );
+	const IBaseStorage& operator >> (char&) const override;
+	const IBaseStorage& operator>>( int& ) const override;
+	const IBaseStorage& operator>> (bool&) const override;
+	IBaseStorage& operator>>( unsigned int& ) override;
+	const IBaseStorage& operator>>( float& ) const override;
+	const IBaseStorage& operator>>( string& ) const override;
+	IBaseStorage& operator >>(char*) override;
+	template< class T > const CBinaryFileStorage& operator>>( vector< T >& vData ) const;
+	template< class T1, class T2 > const CBinaryFileStorage& operator>>(  map< T1, T2 >& m  ) const;
+	template< class T1, class T2 > const CBinaryFileStorage& operator >> (pair< T1, T2 >& p) const;
 
-	template< class T >	void Load( vector< T >& vData, int nCount )const;	
+	template< class T >	void Load( vector< T >& vData, int nCount ) const;
 
-	IBaseStorage&	operator<<( const IPersistantObject& object );
-	IBaseStorage& 	operator>>( IPersistantObject& object );
+	IBaseStorage&	operator<<( const IPersistantObject& object ) override;
+	const IBaseStorage& operator>>( IPersistantObject& object ) const override;
 };
 
 class CAsciiFileStorage : public IFileStorage
@@ -108,25 +119,27 @@ public:
 	int		GetPrecision();
 	double	GetCap();
 	
-	IBaseStorage& operator<<(int);
-	IBaseStorage& operator<<(bool b);
-	IBaseStorage& operator<<(unsigned int);
-	IBaseStorage& operator<<(float);
-	IBaseStorage& operator<<( string );
-	IBaseStorage& operator<<(char* sz);
-	template< class T >	IBaseStorage& operator<<(const vector< T >& vData);
-	template< class T1, class T2 > IBaseStorage& operator<<(const map< T1, T2 >& m);
+	IBaseStorage& operator<<(int) override;
+	IBaseStorage& operator<<(bool b) override;
+	IBaseStorage& operator<<(unsigned int) override;
+	IBaseStorage& operator<<(float) override;
+	IBaseStorage& operator<<( string ) override;
+	IBaseStorage& operator<<(char* sz) override;
+	template< class T >	CAsciiFileStorage& operator<<(const vector< T >& vData);
+	template< class T1, class T2 > CAsciiFileStorage& operator<<(const map< T1, T2 >& m);
+	template< class T1, class T2 > CAsciiFileStorage& operator<<(const pair< T1, T2 >& p);
 
-	IBaseStorage& operator>>(int& );
-	IBaseStorage& operator>>(bool&);
-	IBaseStorage& operator>>(unsigned int&);
-	IBaseStorage& operator>>(float&);
-	IBaseStorage& operator>>(string&);
-	IBaseStorage& operator>>(char* sz);
+	const IBaseStorage& operator >> (char&) const override;
+	const IBaseStorage& operator>>(int& ) const override;
+	const IBaseStorage& operator>>(bool&) const override;
+	IBaseStorage& operator>>(unsigned int&) override;
+	const IBaseStorage& operator>>(float&) const override;
+	const IBaseStorage& operator>>(string&) const override;
+	IBaseStorage& operator>>(char* sz) override;
 	template< class T >	IBaseStorage& operator>>( vector< T >& vData );
 
-	IBaseStorage&	operator<<( const IPersistantObject& object );
-	IBaseStorage& 	operator>>( IPersistantObject& object );
+	IBaseStorage&	operator<<( const IPersistantObject& object ) override;
+	const IBaseStorage& operator>>( IPersistantObject& object ) const override;
 };
 
 
@@ -145,7 +158,7 @@ public:
 	void	SetWidth( int nWidth );
 	void	SetPrecision( int nPrecision );
 	void	SetCap( double dCap );
-	string& GetValue();
+	string& GetValue();	
 
 	CStringStorage();
 	IBaseStorage& operator<<( int );
@@ -155,15 +168,16 @@ public:
 	IBaseStorage& operator<<( string );
 	IBaseStorage& operator<<(char*);
 
-	IBaseStorage& operator>>( int& );
-	IBaseStorage& operator>>(bool&);
+	const IBaseStorage& operator >> (char&) const override;
+	const IBaseStorage& operator>>( int& ) const;
+	const IBaseStorage& operator>>(bool&) const;
 	IBaseStorage& operator>>( unsigned int& );
-	IBaseStorage& operator>>( float& );
-	IBaseStorage& operator>>( string& );
+	const IBaseStorage& operator>>( float& ) const;
+	const IBaseStorage& operator>>( string& ) const;
 	IBaseStorage& operator>>(char*);
 
 	IBaseStorage&	operator<<( const IPersistantObject& object );
-	IBaseStorage& 	operator>>( IPersistantObject& object );
+	const IBaseStorage& 	operator>>( IPersistantObject& object ) const;
 
 	template< class T >	CStringStorage& operator>>( vector< T >& vData );
 	template< class T >	CStringStorage& operator<<( const vector< T >& vData );
@@ -176,8 +190,10 @@ CBinaryFileStorage& CBinaryFileStorage::operator<<( const vector< T >& vData )
 {
 	int nCount = (int)vData.size();
 	*this << nCount;
-	if( nCount > 0 )
-		fwrite( &vData[ 0 ], sizeof( T ), nCount, m_pFile );
+	if (nCount > 0) {
+		const T& pData = vData.operator[](0);
+		fwrite(&pData, sizeof(T), nCount, m_pFile);
+	}
 	return *this;
 }
 
@@ -187,15 +203,25 @@ const CBinaryFileStorage& CBinaryFileStorage::operator<<(  const map< T1, T2 >& 
 	*this << (int)m.size();
 	if( m.size() > 0 )
 	{
-		for( map<T1, T2>::const_iterator itMap = m.begin(); itMap != m.end(); ++itMap )
-			*this << itMap->first << itMap->second;
+		for (map<T1, T2>::const_iterator itMap = m.begin(); itMap != m.end(); ++itMap) {
+			*this << itMap->first;
+			*this << itMap->second;
+		}
 	}
 	return *this;
 }
 
 
+template< class T1, class T2 > 
+CBinaryFileStorage& CBinaryFileStorage::operator<<(const pair< T1, T2 >& p)
+{
+	*this << p.first;
+	*this << p.second;
+	return *this;
+}
+
 template< class T >
-CBinaryFileStorage& CBinaryFileStorage::operator>>( vector< T >& vData )
+const CBinaryFileStorage& CBinaryFileStorage::operator>>( vector< T >& vData ) const
 {
 	int nCount;
 	*this >> nCount;
@@ -205,7 +231,7 @@ CBinaryFileStorage& CBinaryFileStorage::operator>>( vector< T >& vData )
 }
 
 template< class T1, class T2 > 
-const CBinaryFileStorage& CBinaryFileStorage::operator>>(  map< T1, T2 >& m  )
+const CBinaryFileStorage& CBinaryFileStorage::operator>>(  map< T1, T2 >& m  ) const
 {
 	int nSize = 0;
 	*this >> nSize;
@@ -219,6 +245,16 @@ const CBinaryFileStorage& CBinaryFileStorage::operator>>(  map< T1, T2 >& m  )
 	}
 	return *this;
 }
+
+
+template< class T1, class T2 > 
+const CBinaryFileStorage& CBinaryFileStorage::operator>>(pair< T1, T2 >& p) const
+{
+	*this >> p.first;
+	*this >> p.second;
+	return *this;
+}
+
 
 template< class T >
 void CBinaryFileStorage::Load( vector< T >& vData, int nCount ) const
@@ -235,7 +271,7 @@ IBaseStorage& CAsciiFileStorage::operator>>( vector< T >& vData )
 }
 
 template< class T >
-IBaseStorage& CAsciiFileStorage::operator<<( const vector< T >& vData )
+CAsciiFileStorage& CAsciiFileStorage::operator<<( const vector< T >& vData )
 {
 	CStringStorage s;
 	if( m_bDisplayVectorInLine )
@@ -257,14 +293,21 @@ IBaseStorage& CAsciiFileStorage::operator<<( const vector< T >& vData )
 }
 
 template< class T1, class T2 > 
-IBaseStorage& CAsciiFileStorage::operator<<(  const map< T1, T2 >& m  )
+CAsciiFileStorage& CAsciiFileStorage::operator<<(  const map< T1, T2 >& m  )
 {
-	for( map<T1, T2>::const_iterator itMap = m.begin(); itMap != m.end(); ++itMap )
-		*this << m_sCurrentMapKeyName << " : " << itMap->first << "    " << m_sCurrentMapValueName << " : " << itMap->second << "\n";
+	for (map<T1, T2>::const_iterator itMap = m.begin(); itMap != m.end(); ++itMap) {
+		*this << m_sCurrentMapKeyName << " : " << itMap->first << "    " << m_sCurrentMapValueName << " : ";
+		*this << itMap->second << "\n";
+	}
 
 	return *this;
 }
 
+template< class T1, class T2 > 
+CAsciiFileStorage& CAsciiFileStorage::operator<<(const pair< T1, T2 >& p)
+{
+	return *this;
+}
 
 template< class T >	
 CStringStorage& CStringStorage::operator<<( const vector< T >& vData )
@@ -278,11 +321,11 @@ class IPersistantObject
 {
 public:
 	virtual const IPersistantObject& operator >> (CBinaryFileStorage& store) const = 0;
-	virtual IPersistantObject& operator << (CBinaryFileStorage& store) = 0;
+	virtual IPersistantObject& operator << (const CBinaryFileStorage& store) = 0;
 	virtual const IPersistantObject& operator >> (CAsciiFileStorage& store) const = 0;
-	virtual IPersistantObject& operator << (CAsciiFileStorage& store) = 0;
+	virtual IPersistantObject& operator << (const CAsciiFileStorage& store) = 0;
 	virtual const IPersistantObject& operator >> (CStringStorage& store) const = 0;
-	virtual IPersistantObject& operator << (CStringStorage& store) = 0;
+	virtual IPersistantObject& operator << (const CStringStorage& store) = 0;
 };
 
 #endif // ISTORAGE_H

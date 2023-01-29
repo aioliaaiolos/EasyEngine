@@ -65,7 +65,7 @@ function OnGuardTopicClosed()
 
 function onLoadingGame()
 {
-	OpenConsole(0);
+	OpenConsole(1);
 	//SetBkgColor(50, 180, 255);
 	SetBkgColor(0, 0, 0);
 	r=CreateRepere();
@@ -81,7 +81,7 @@ function onLoadingGame()
 	//EditWorld("area3");
 	//LoadWorld("area3");
 	//EditWorld("");
-	LoadWorld("");
+	//LoadWorld("");
 	
 	//LoadWorld("plane");
 	//EditWorld("plane");

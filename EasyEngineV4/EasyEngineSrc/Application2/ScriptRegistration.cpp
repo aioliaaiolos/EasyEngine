@@ -250,6 +250,8 @@ void EditCharacter(IScriptState* pState)
 	{
 		m_pConsole->Println(e.what());
 	}
+	int nCharacterId = m_pEntityManager->GetEntityID(m_pCharacterEditor->GetCurrentCharacter());
+	pState->SetReturnValue(nCharacterId);
 }
 
 void ChangeCharacterName(IScriptState* pState)
@@ -387,7 +389,7 @@ void SetEntityName( IScriptState* pState )
 	CScriptFuncArgString* pEntityName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
-		pEntity->SetEntityName( pEntityName->m_sValue );
+		pEntity->SetEntityID( pEntityName->m_sValue );
 	else
 	{
 		ostringstream oss;
@@ -2537,7 +2539,7 @@ void GetNodeInfos( INode* pNode, int nLevel = 0 )
 		for( int j = 0; j < nLevel; j++ )
 			sLine << "\t";
 		string sEntityName;
-		pEntity->GetEntityName(sEntityName);
+		pEntity->GetEntityID(sEntityName);
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		if (sEntityName.find("CollisionPrimitive") == -1) {
@@ -2559,7 +2561,7 @@ void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
 			for (int j = 0; j < nLevel; j++)
 				sLine << "\t";
 			string sEntityName;
-			pEntity->GetEntityName(sEntityName);
+			pEntity->GetEntityID(sEntityName);
 			if (sEntityName.empty())
 				pEntity->GetName(sEntityName);
 			sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
@@ -2608,13 +2610,6 @@ void UnWearAllShoes(IScriptState* pState)
 	m_pCharacterEditor->UnWearAllShoes();
 }
 
-void WearCloth(IScriptState* pState)
-{
-	CScriptFuncArgString* pClothPath = (CScriptFuncArgString*)(pState->GetArg(0));
-	CScriptFuncArgString* pDummyName = (CScriptFuncArgString*)(pState->GetArg(1));
-	m_pCharacterEditor->WearCloth(pClothPath->m_sValue, pDummyName->m_sValue);
-}
-
 void WearCharacterItem(IScriptState* pState)
 {
 	CScriptFuncArgString* pCharacterID = (CScriptFuncArgString*)(pState->GetArg(0));
@@ -2628,12 +2623,12 @@ void WearCharacterItem(IScriptState* pState)
 	}
 }
 
-void UnwearAllClothes(IScriptState* pState)
+void WearItem(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntityId = (CScriptFuncArgInt*)(pState->GetArg(0));
-	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityId->m_nValue));
-	pCharacter->UnwearAllClothes();
+	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(0));
+	m_pCharacterEditor->WearItem(pItemID->m_sValue);
 }
+
 
 void AddItem(IScriptState* pState)
 {
@@ -2755,6 +2750,21 @@ void DisplayMobileEntities(IScriptState* pState)
 	m_pConsole->Println(sText);
 }
 
+void DisplayInventory(IScriptState* pState)
+{
+	CScriptFuncArgString* pEntityID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityID->m_sValue));
+	if (pCharacter) {
+		map<string, vector<IEntity*>> mItems;
+		pCharacter->GetItems(mItems);
+		for (const pair<string, vector<IEntity*>>& items : mItems) {
+			for (IEntity* pItem : items.second) {
+				m_pConsole->Println(pItem->GetEntityID());
+			}
+		}
+	}
+}
+
 void GetEntityID( IScriptState* pState )
 {
 	ostringstream oss;
@@ -2779,7 +2789,7 @@ void GetCharacterID(IScriptState* pState)
 	for (IEntity* entity : characters)
 	{
 		string name;
-		entity->GetEntityName(name);
+		entity->GetEntityID(name);
 		if (name == pName->m_sValue) {
 			pState->SetReturnValue(entity->GetID());
 			return;
@@ -3492,6 +3502,14 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DisplayInventory", DisplayInventory, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("WearItem", WearItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("WearCharacterItem", WearCharacterItem, vType, eVoid);
 
@@ -3731,7 +3749,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("EditCharacter", EditCharacter, vType, eVoid);
+	m_pScriptManager->RegisterFunction("EditCharacter", EditCharacter, vType, eInt);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4452,14 +4470,6 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	m_pScriptManager->RegisterFunction("UnWearAllShoes", UnWearAllShoes, vType, eVoid);
 
-	vType.clear();
-	vType.push_back(eString);
-	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("WearCloth", WearCloth, vType, eVoid);
-
-	vType.clear();
-	vType.push_back(eInt);
-	m_pScriptManager->RegisterFunction("UnwearAllClothes", UnwearAllClothes, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

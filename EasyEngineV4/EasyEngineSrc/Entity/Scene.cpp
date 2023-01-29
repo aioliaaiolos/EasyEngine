@@ -57,17 +57,17 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_pGroundShader(NULL),
 	m_pHeightMaptexture(NULL),
 	m_bUseDisplacementMap(false),
-	m_fDisplacementRatioHeightSize(0.04),
+	m_fDisplacementRatioHeightSize(0.04f),
 	m_fTiling(200.f),
 	m_sDiffuseFileName(diffuseFileName),
 	m_nMapLength(1000),
-	m_fMapHeight(10),
+	m_fMapHeight(10.f),
 	m_oStateChangedCallback(nullptr, nullptr),
 	m_eSceneState(eStart)
 {
 	m_nID = 0;
 	SetName("Scene");
-	SetEntityName("Scene");
+	SetEntityID("Scene");
 	m_pRessource = NULL;
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 

@@ -5,7 +5,7 @@ CLightEntity::CLightEntity(EEInterface& oInterface, IRessource* pLight):
 CEntity(oInterface)
 {	
 	m_pRessource = pLight;
-	SetEntityName("Light");
+	SetEntityID("Light");
 }
 
 CLightEntity::~CLightEntity()
@@ -77,7 +77,7 @@ void CLightEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	lightInfos.m_eType = type;
 }
 
-void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent)
+void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
 {
 	CEntity::BuildFromInfos(infos, pParent);
 	const ILoader::CLightEntityInfos* pLightEntityInfos = static_cast< const ILoader::CLightEntityInfos* >(&infos);
