@@ -41,16 +41,16 @@ void CCharacterEditor::SetEditionMode(bool bEditionMode)
 {
 	if (m_bEditionMode != bEditionMode) {
 		CEditor::SetEditionMode(bEditionMode);
-		if (m_bEditionMode) {
-			m_pScene->Clear();
-			ZoomCameraBody();
-			IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.1f);
-			CVector pos(230, 150, -35);
-			pLight->SetLocalPosition(pos);
-			pLight->Link(m_pScene);
-			m_oInputManager.ShowMouseCursor(true);
-			m_pScene->Update();
-		}
+	}
+	if (bEditionMode) {
+		m_pScene->Clear();
+		ZoomCameraBody();
+		IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.1f);
+		CVector pos(230, 150, -35);
+		pLight->SetLocalPosition(pos);
+		pLight->Link(m_pScene);
+		m_oInputManager.ShowMouseCursor(true);
+		m_pScene->Update();
 	}
 }
 
@@ -119,9 +119,8 @@ void CCharacterEditor::Load(string sCharacterId)
 void CCharacterEditor::Save()
 {
 	if (m_bEditionMode && m_pCurrentCharacter) {
-		string sId;
-		m_pCurrentCharacter->GetEntityID(sId);
-		m_oEntityManager.SaveCharacter(sId);
+		m_pCurrentCharacter->Save();
+		m_oEntityManager.LoadCharacterInfos();
 	}
 }
 
@@ -381,7 +380,7 @@ void CCharacterEditor::SaveCurrentEditableCloth()
 	m_oLoaderManager.Export(sFileName, ami);
 }
 
-void CCharacterEditor::SaveCurrentEditableBody()
+void CCharacterEditor::SaveModifiedMesh()
 {
 	string sFileName;
 	m_pCurrentCharacter->GetRessource()->GetFileName(sFileName);

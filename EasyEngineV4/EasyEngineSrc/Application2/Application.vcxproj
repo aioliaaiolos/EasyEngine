@@ -162,6 +162,7 @@
     <ClInclude Include="..\..\Interfaces\ICollisionManager.h" />
     <ClInclude Include="..\..\Interfaces\IConsole.h" />
     <ClInclude Include="..\..\Interfaces\IDrawTool.h" />
+    <ClInclude Include="..\..\Interfaces\IEditor.h" />
     <ClInclude Include="..\..\Interfaces\Interface.h" />
     <ClInclude Include="..\..\Interfaces\IEntity.h" />
     <ClInclude Include="..\..\Interfaces\IEventDispatcher.h" />
@@ -185,7 +186,6 @@
     <ClInclude Include="..\..\Interfaces\IWindow.h" />
     <ClInclude Include="..\..\Interfaces\IXMLParser.h" />
     <ClInclude Include="Editor.h" />
-    <ClInclude Include="IEditor.h" />
     <ClInclude Include="PluginCreation.h" />
     <ClInclude Include="ScriptRegistration.h" />
   </ItemGroup>

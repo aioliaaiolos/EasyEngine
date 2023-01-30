@@ -26,13 +26,17 @@ private:
 	void																OnEntityRemoved(IEntity* pEntity) override;
 	string																GetName() override;
 	void																Save(string sFileName) override;
+	void																LoadFromDB(string fileName);
+	void																SaveToDB(string fileName);
+	void																LoadFromJson(string sFileName);
+	void																SaveToJson(string fileName);
 	void																Save();
-	void																SaveGame(string fileName) override;
+	void																SaveGame(string fileName) override;	
 	void																SpawnEntity(string sFileName) override;
 	void																RemoveCharacter(string sID) override;
 	void																SetEditionMode(bool bEditionMode) override;
 	void																CollectSelectableEntity(vector<IEntity*>& entities) override;
-	void																GetRelativeDatabasePath(string worldName, string& path);
+	void																GetRelativeDatabasePath(string worldName, string& path, string sExtension);
 	void																OnSceneLoaded();
 	static void															HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin* pWorldEditor);
 
@@ -44,5 +48,5 @@ private:
 	map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>				m_mAreaMatrices;
 	vector<IEntity*>													m_vEntities;
 	string																m_sCurrentWorldName;
-	const string														m_sDatabaseFileName = "world.db";
+	const string														m_sDatabaseFileName = "world";
 };

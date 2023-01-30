@@ -29,6 +29,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
 #include "rapidjson/filereadstream.h"
+#include <rapidjson/prettywriter.h>
 #include <fstream>
 using namespace rapidjson;
 
@@ -111,7 +112,7 @@ void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
 			m_mCharacters[sNewName] = pCharacter;
 		}
 
-		SaveCharacterInfos(m_mCharacterInfos);
+		SaveCharacterInfosToDB(m_mCharacterInfos);
 	}
 	else {
 		throw CEException(string("Error : character '") + sOldName + "' not found");
@@ -387,7 +388,7 @@ void CEntityManager::NormalizeCharacterDatabase()
 		else
 			it++;
 	}
-	SaveCharacterInfos(m_mCharacterInfos);
+	SaveCharacterInfosToDB(m_mCharacterInfos);
 }
 
 void CEntityManager::SetPlayer(IPlayer* player)
@@ -672,7 +673,7 @@ void CEntityManager::WearArmorToDummy(int entityId, string sArmorName)
 	}
 }
 
-void CEntityManager::SaveCharacter(string sNPCID)
+void CEntityManager::SaveCharacterToDB(string sNPCID)
 {
 	string sNPCIDLow = sNPCID;
 	std::transform(sNPCID.begin(), sNPCID.end(), sNPCIDLow.begin(), tolower);
@@ -683,16 +684,78 @@ void CEntityManager::SaveCharacter(string sNPCID)
 		LoadCharacterInfos();
 		ILoader::CAnimatedEntityInfos* pAnimatedEntity = static_cast<ILoader::CAnimatedEntityInfos*>(pInfos);
 		m_mCharacterInfos[sNPCIDLow] = *pAnimatedEntity;
-		SaveCharacterInfos(m_mCharacterInfos);
+		SaveCharacterInfosToDB(m_mCharacterInfos);
 		delete pAnimatedEntity;
 	}
 	else {
-		throw CEException("CEntityManager::SaveCharacter : Unable to save character because it's not loaded");
+		throw CEException("CEntityManager::SaveCharacterToDB : Unable to save character because it's not loaded");
 	}
 }
 
+void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos)
+{
+	string sFileName = "characters.json";
+	string root;
+	IFileSystem* pFileSystem = static_cast<IFileSystem*>(m_oInterface.GetPlugin("FileSystem"));
+	pFileSystem->GetLastDirectory(root);
+	string sFilePath = root + "/" + sFileName;
+
+	std::ifstream ifs(sFilePath);
+	IStreamWrapper isw(ifs);
+	Document doc;
+	doc.ParseStream(isw);
+	if (doc.IsObject() && doc.HasMember("Characters")) {
+		Value characters;
+		characters = doc["Characters"];
+		if (characters.IsArray()) {
+			for (int i = 0; i < characters.GetArray().Size(); i++) {
+				Value character;
+				character = characters[i];
+				if (character.IsObject()) {
+					if (character.HasMember("Name")) {
+						ILoader::CAnimatedEntityInfos infos;
+						infos.m_sObjectName = character["Name"].GetString();
+						infos.m_sRessourceFileName = character["RessourceFileName"].GetString();
+						infos.m_sParentName = character["ParentName"].GetString();
+						infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
+						infos.m_sTypeName = character["TypeName"].GetString();
+						infos.m_fWeight = character["Weight"].GetFloat();
+						infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();
+						infos.m_sTextureName = character["DiffuseTextureName"].GetString();
+						Value& specular = character["Specular"].GetArray();
+						infos.m_vSpecular = CVector(specular[0].GetFloat(), specular[1].GetFloat(), specular[2].GetFloat());
+						Value& animationSpeeds = character["AnimationSpeeds"];
+						for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
+							infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
+						Value& items = character["Items"];
+						for (int iItem = 0; iItem < items.Size(); iItem++) {
+							Value& item = items[iItem];
+							string itemName = item["ItemName"].GetString();
+							Value& isWearArray = item["IsWearArray"];							
+							for (int j = 0; j < isWearArray.Size(); j++) {
+								int isWear = isWearArray[j].GetInt();
+								infos.m_mItems[itemName].push_back(isWear);
+							}
+						}
+						infos.m_sHairs = character["Hairs"].GetString();
+						mCharacterInfos[infos.m_sObjectName] = infos;
+					}
+				}
+			}
+		}
+	}
+}
+
+
 void CEntityManager::LoadCharacterInfos()
 {
+	m_mCharacterInfos.clear();
+	LoadCharacterInfoFromJson(m_mCharacterInfos);
+}
+
+void CEntityManager::LoadCharacterInfoFromDB()
+{
+	m_mCharacterInfos.clear();
 	CBinaryFileStorage fs;
 	if (!fs.OpenFile(m_sCharactersDatabaseFileName, IFileStorage::eRead)) {
 		fs.OpenFile(m_sCharactersDatabaseFileName, IFileStorage::eWrite);
@@ -712,7 +775,7 @@ void CEntityManager::LoadCharacterInfos()
 	fs.CloseFile();
 }
 
-void CEntityManager::SaveCharacterInfos(const map<string, ILoader::CAnimatedEntityInfos>& characterInfos)
+void CEntityManager::SaveCharacterInfosToDB(const map<string, ILoader::CAnimatedEntityInfos>& characterInfos)
 {
 	CBinaryFileStorage fs;
 	if (fs.OpenFile(m_sCharactersDatabaseFileName, IFileStorage::eWrite)) {

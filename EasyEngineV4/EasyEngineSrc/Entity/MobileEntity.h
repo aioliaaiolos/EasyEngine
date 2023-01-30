@@ -36,6 +36,7 @@ public:
 	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 	void						BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
+	void						Save();
 	void						SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
 	TAnimation					GetCurrentAnimationType() const;
 	void						RunAction(string sAction, bool bLoop);
@@ -96,6 +97,7 @@ protected:
 	void										Wear(string sClothPath, string sDummyName);
 	void										Wear(CEntity* pEntity, string sDummyName);
 	void										UnWear(CEntity* pCloth);
+	void										SaveToJson();
 
 	string										m_sFileNameWithoutExt;
 	bool										m_bInitSkeletonOffset;

@@ -42,7 +42,7 @@ public:
 	void					OffsetEyes(float x, float y, float z);
 	void					TurnEyes(float fYaw, float fPitch, float fRoll);
 	void					SaveCurrentEditableCloth() override;
-	void					SaveCurrentEditableBody();
+	void					SaveModifiedMesh();
 	void					OnEditorExit();
 	void					AddItem(string sItemName);
 	void					RemoveItem(string sItemName);

@@ -8,8 +8,15 @@
 #include "EditorManager.h"
 #include "CharacterEditor.h"
 #include "../Utils2/StringUtils.h"
-
 #include <algorithm>
+
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+#include <rapidjson/prettywriter.h>
+using namespace rapidjson;
 
 CWorldEditor::CWorldEditor(EEInterface& oInterface, ICameraManager::TCameraType cameraType) :
 	CPlugin(nullptr, ""),
@@ -124,8 +131,13 @@ string CWorldEditor::GetName()
 
 void CWorldEditor::Load(string fileName)
 {
+	LoadFromJson(fileName);
+}
+
+void CWorldEditor::LoadFromDB(string fileName)
+{
 	m_sCurrentWorldName = fileName;
-	GetRelativeDatabasePath(fileName, fileName);
+	GetRelativeDatabasePath(fileName, fileName, "db");
 
 	m_pEditorManager->CloseAllEditorButThis(this);
 	ClearWorld();
@@ -217,7 +229,12 @@ void CWorldEditor::SaveGame(string fileName)
 
 void CWorldEditor::Save(string fileName)
 {
-	GetRelativeDatabasePath(fileName, fileName);
+	SaveToJson(fileName);
+}
+
+void CWorldEditor::SaveToDB(string fileName)
+{
+	GetRelativeDatabasePath(fileName, fileName, "db");
 	CopyFile(fileName.c_str(), (fileName + ".bak").c_str(), FALSE);
 
 	CBinaryFileStorage fs;
@@ -242,8 +259,8 @@ void CWorldEditor::Save(string fileName)
 		for (map<string, vector<pair<IEntity*, CMatrix>>>::iterator it = m_mEntityMatrices.begin(); it != m_mEntityMatrices.end(); it++) {
 			fs << it->first;
 			fs << (int)it->second.size();
-			for(int iMatrix = 0; iMatrix < it->second.size(); iMatrix++) {
-				if(it->second[iMatrix].first)
+			for (int iMatrix = 0; iMatrix < it->second.size(); iMatrix++) {
+				if (it->second[iMatrix].first)
 					fs << it->second[iMatrix].first->GetWorldMatrix();
 			}
 		}
@@ -257,6 +274,212 @@ void CWorldEditor::Save(string fileName)
 				fs << pBoxEntity->GetBox().GetDimension();
 			}
 		}
+	}
+}
+
+void ConvertVectorToJsonArray(rapidjson::Document& doc, const CVector& v, rapidjson::Value& vector)
+{
+	vector.SetArray();
+	Value x, y, z;
+	x.SetFloat(v.m_x);
+	y.SetFloat(v.m_y);
+	z.SetFloat(v.m_z);
+	vector.PushBack(x, doc.GetAllocator());
+	vector.PushBack(y, doc.GetAllocator());
+	vector.PushBack(z, doc.GetAllocator());
+}
+
+void ConvertMatrixToJsonObject(rapidjson::Document& doc, const CMatrix& m, rapidjson::Value& matrix)
+{
+	matrix.SetArray();
+	float pData[16];
+	m.Get(pData);
+	for (int i = 0; i < 16; i++) {
+		Value val;
+		val.SetFloat(pData[i]);
+		matrix.PushBack(val, doc.GetAllocator());
+	}
+}
+
+void CWorldEditor::LoadFromJson(string sFileName)
+{
+	m_sCurrentWorldName = sFileName;
+	GetRelativeDatabasePath(sFileName, sFileName, "json");
+
+	m_pEditorManager->CloseAllEditorButThis(this);
+	ClearWorld();
+
+	std::ifstream ifs(sFileName);
+	IStreamWrapper isw(ifs);
+	Document doc;
+	doc.ParseStream(isw);
+	if (doc.IsObject() && doc.HasMember("World")) {
+		Value& world = doc["World"];
+		Value& maps = world["Maps"];
+		for (int iMap = 0; iMap < maps.Size(); iMap++) {
+			Value& map = maps[iMap];
+			CVector vPosition;
+			Value& position = map["Position"];			
+			vPosition = CVector(position[0].GetFloat(), position[1].GetFloat(), position[2].GetFloat());
+			m_mMaps[map["Name"].GetString()] = vPosition;
+		}
+
+		if (m_mMaps.size() > 0) {
+			string root;
+			m_oFileSystem.GetLastDirectory(root);
+			IMapEditor* pMapEditor = dynamic_cast<IMapEditor*>(m_pEditorManager->GetEditor(IEditor::Type::eMap));
+			m_pScene->HandleStateChanged(HandleSceneLoadingComplete, this);
+			pMapEditor->Load(m_mMaps.begin()->first);
+		}
+
+		Value& characters = world["Characters"];
+		for (int iCharacter = 0; iCharacter < characters.Size(); iCharacter++) {
+			Value& character = characters[iCharacter];
+			CMatrix oTM;
+			Value& worldTM = character["WorldTM"];
+			vector<float> vTM;
+			for (int iTM = 0; iTM < worldTM.Size(); iTM++)
+				vTM.push_back(worldTM[iTM].GetFloat());
+			oTM.Set(vTM);
+			m_mCharacterMatrices[character["Name"].GetString()] = pair<CMatrix, string>(oTM, character["Script"].GetString());
+		}
+
+		Value& staticEntities = world["StaticEntities"];
+		for (int iEntity = 0; iEntity < staticEntities.Size(); iEntity++) {
+			Value& entity = staticEntities[iEntity];
+			string sEntityName = entity["Name"].GetString();
+			Value& worldTMs = entity["WorldTMs"];
+			for (int iTM = 0; iTM < worldTMs.Size(); iTM++) {
+				Value& tm = worldTMs[iTM];
+				vector<float> vMatrix;
+				for (int i = 0; i < tm.Size(); i++)
+					vMatrix.push_back(tm[i].GetFloat());
+				CMatrix oTM;
+				oTM.Set(vMatrix);
+				m_mEntityMatrices[sEntityName].push_back(pair<IEntity*, CMatrix>(nullptr, oTM));
+			}
+		}
+
+		Value& areas = world["Areas"];
+		for (int iArea = 0; iArea < areas.Size(); iArea++) {
+			Value& area = areas[iArea];
+			string sName = area["Name"].GetString();
+			Value& worldTM = area["WorldTM"];
+			vector<float> vMatrix;
+			for (int iTM = 0; iTM < worldTM.Size(); iTM++)
+				vMatrix.push_back(worldTM[iTM].GetFloat());
+			CMatrix oWorldTM;
+			oWorldTM.Set(vMatrix);
+			vector<float> vDim;
+			Value& dimension = area["Dimension"];
+			CVector oDimension = CVector(dimension[0].GetFloat(), dimension[1].GetFloat(), dimension[2].GetFloat());
+			m_mAreaMatrices[sName] = pair<IBoxEntity*, pair<CMatrix, CVector>>{ nullptr, {oWorldTM, oDimension} };
+		}
+	}
+
+	m_pEditorCamera->Link(m_pScene);
+
+	if (m_bEditionMode)
+		InitCamera();
+}
+
+void CWorldEditor::SaveToJson(string sFileName)
+{
+	GetRelativeDatabasePath(sFileName, sFileName, "json");
+	CopyFile(sFileName.c_str(), (sFileName + ".bak").c_str(), FALSE);
+	rapidjson::Document doc;	
+
+	std::ifstream ifs(sFileName);
+
+	if (!ifs.eof())
+	{
+		rapidjson::IStreamWrapper isw(ifs);
+		doc.ParseStream(isw);
+
+		if (!doc.IsObject())
+		{
+			doc.SetObject();
+		}
+		Value world(kObjectType);
+
+		Value maps(kArrayType);
+		for (map<string, CVector>::iterator itMap = m_mMaps.begin(); itMap != m_mMaps.end(); itMap++) {
+			rapidjson::Value map(kObjectType), mapName(kStringType), mapPosition(kArrayType), x, y, z;
+			mapName.SetString(itMap->first.c_str(), doc.GetAllocator());
+			x.SetFloat(itMap->second.m_x);
+			y.SetFloat(itMap->second.m_y);
+			z.SetFloat(itMap->second.m_z);
+			mapPosition.PushBack(x, doc.GetAllocator());
+			mapPosition.PushBack(y, doc.GetAllocator());
+			mapPosition.PushBack(z, doc.GetAllocator());
+			map.AddMember("Name", mapName, doc.GetAllocator());
+			map.AddMember("Position", mapPosition, doc.GetAllocator());
+			maps.PushBack(map, doc.GetAllocator());
+		}
+
+		Value characters(kArrayType);
+		for (map<string, pair<CMatrix, string>>::iterator it = m_mCharacterMatrices.begin(); it != m_mCharacterMatrices.end(); it++) {
+			IEntity* pEntity = m_oEntityManager.GetEntity(it->first);
+			if (pEntity) {
+				Value name(kStringType), tm, script, character(kObjectType);
+				name.SetString(it->first.c_str(), doc.GetAllocator());
+				ConvertMatrixToJsonObject(doc, pEntity->GetWorldMatrix(), tm);
+				script.SetString(pEntity->GetAttachedScript().c_str(), doc.GetAllocator());
+				character.AddMember("Name", name, doc.GetAllocator());
+				character.AddMember("WorldTM", tm, doc.GetAllocator());
+				character.AddMember("Script", script, doc.GetAllocator());
+				characters.PushBack(character, doc.GetAllocator());
+			}
+		}	
+
+		Value entities(kArrayType);
+		for (map<string, vector<pair<IEntity*, CMatrix>>>::iterator it = m_mEntityMatrices.begin(); it != m_mEntityMatrices.end(); it++) {
+			Value entity(kObjectType), name(kStringType), tms(kArrayType);
+			name.SetString(it->first.c_str(), doc.GetAllocator());
+			
+			for (int iMatrix = 0; iMatrix < it->second.size(); iMatrix++) {
+				if (it->second[iMatrix].first) {
+					Value tm;
+					ConvertMatrixToJsonObject(doc, it->second[iMatrix].first->GetWorldMatrix(), tm);
+					tms.PushBack(tm, doc.GetAllocator());
+				}
+			}
+			entity.AddMember("Name", name, doc.GetAllocator());
+			entity.AddMember("WorldTMs", tms, doc.GetAllocator());
+			entities.PushBack(entity, doc.GetAllocator());
+		}
+
+		Value areas(kArrayType);
+		for (map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator it = m_mAreaMatrices.begin(); it != m_mAreaMatrices.end(); it++) {			
+			IBoxEntity* pBoxEntity = it->second.first;
+			Value name, tm, dim;
+			name.SetString(it->first.c_str(), doc.GetAllocator());
+			ConvertMatrixToJsonObject(doc, pBoxEntity->GetWorldMatrix(), tm);
+			ConvertVectorToJsonArray(doc, pBoxEntity->GetBox().GetDimension(), dim);
+			Value area(kObjectType);
+			area.AddMember("Name", name, doc.GetAllocator());
+			area.AddMember("WorldTM", tm, doc.GetAllocator());
+			area.AddMember("Dimension", dim, doc.GetAllocator());
+			areas.PushBack(area, doc.GetAllocator());
+		}
+
+		world.AddMember("Maps", maps, doc.GetAllocator());
+		world.AddMember("Characters", characters, doc.GetAllocator());
+		world.AddMember("StaticEntities", entities, doc.GetAllocator());
+		world.AddMember("Areas", areas, doc.GetAllocator());
+
+		if (doc.HasMember("World"))
+			doc["World"] = world;
+		else
+			doc.AddMember("World", world, doc.GetAllocator());
+
+		rapidjson::StringBuffer buffer;
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+		writer.SetIndent('\t', 1);
+		doc.Accept(writer);
+		std::ofstream ofs(sFileName);
+		ofs << buffer.GetString();
+		ofs.close();
 	}
 }
 
@@ -351,12 +574,12 @@ void CWorldEditor::Edit(string worldName)
 	SetEditionMode(true);
 }
 
-void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path)
+void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path, string sExtension)
 {
-	if (!worldName.empty() && worldName.find(".db") == -1)
-		worldName += ".db";
+	if (!worldName.empty() && worldName.find("." + sExtension) == -1)
+		worldName += "." + sExtension;
 	if (worldName.empty())
-		worldName = m_sDatabaseFileName;
+		worldName = m_sDatabaseFileName + "." + sExtension;
 
 	string root;
 	m_oFileSystem.GetLastDirectory(root);

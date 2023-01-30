@@ -69,7 +69,7 @@ public:
 	virtual void	OffsetCloth(float x, float y, float z) = 0;
 	virtual void	SaveCurrentEditableCloth() = 0;
 	virtual void	OffsetEyes(float x, float y, float z) = 0;
-	virtual void	SaveCurrentEditableBody() = 0;
+	virtual void	SaveModifiedMesh() = 0;
 	virtual void	TurnEyes(float fYaw, float fPitch, float fRoll) = 0;
 	virtual void	WearItem(string sItemID) = 0;
 	virtual ICharacter*	GetCurrentCharacter() = 0;

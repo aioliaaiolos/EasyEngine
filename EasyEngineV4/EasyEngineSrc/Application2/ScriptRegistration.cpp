@@ -311,9 +311,9 @@ void TurnEyes(IScriptState* pState)
 	m_pCharacterEditor->TurnEyes(pYaw->m_fValue, pPitch->m_fValue, pRoll->m_fValue);
 }
 
-void SaveCurrentEditableBody(IScriptState* pState)
+void SaveModifiedMesh(IScriptState* pState)
 {
-	m_pCharacterEditor->SaveCurrentEditableBody();
+	m_pCharacterEditor->SaveModifiedMesh();
 }
 
 void EditWorld(IScriptState* pState)
@@ -1275,7 +1275,8 @@ void SaveCharacter(IScriptState* pState)
 void SaveCharacterInWorld(IScriptState* pState)
 {
 	CScriptFuncArgString* pID = (CScriptFuncArgString*)(pState->GetArg(0));
-	m_pEntityManager->SaveCharacter(pID->m_sValue);
+	//m_pEntityManager->SaveCharacterToDB(pID->m_sValue);
+	m_pCharacterEditor->Save();
 }
 
 void RemoveCharacterFromWorld(IScriptState* pState)
@@ -3646,7 +3647,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("TurnEyes", TurnEyes, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("SaveCurrentEditableBody", SaveCurrentEditableBody, vType, eVoid);
+	m_pScriptManager->RegisterFunction("SaveModifiedMesh", SaveModifiedMesh, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

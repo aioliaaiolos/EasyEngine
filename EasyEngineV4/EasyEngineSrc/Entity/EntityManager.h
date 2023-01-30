@@ -73,9 +73,11 @@ public:
 	IGUIManager* 											GetGUIManager();
 	void													Kill(int entityId);
 	void													WearArmorToDummy(int entityId, string armorName) override;
-	void													SaveCharacter(string sNPCID) override;
+	void													SaveCharacterToDB(string sNPCID);
 	void													LoadCharacterInfos();
-	void													SaveCharacterInfos(const map<string, ILoader::CAnimatedEntityInfos>& characterInfos);
+	void													LoadCharacterInfoFromDB();
+	void													LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos);
+	void													SaveCharacterInfosToDB(const map<string, ILoader::CAnimatedEntityInfos>& characterInfos);
 	void													RemoveCharacterFromDB(string sID) override;
 	void													AddRenderQueue(INode* pEntity);
 	void													ClearRenderQueue();

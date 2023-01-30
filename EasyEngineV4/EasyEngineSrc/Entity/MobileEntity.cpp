@@ -22,6 +22,10 @@ map< IEntity::TAnimation, string> CMobileEntity::s_mAnimationTypeToString;
 #include "rapidjson/istreamwrapper.h"
 #include "rapidjson/filereadstream.h"
 #include <fstream>
+#include <rapidjson/prettywriter.h>
+using namespace rapidjson;
+
+
 using namespace rapidjson;
 
 map< string, IEntity::TAnimation >			CMobileEntity::s_mAnimationStringToType;
@@ -504,7 +508,7 @@ void CMobileEntity::Wear(CEntity* pCloth, string sDummyName)
 		}
 		else {
 			pCloth->LinkDummyParentToDummyEntity(this, sDummyName);
-			delete pCloth;
+			//delete pCloth;
 		}
 	}
 }
@@ -927,6 +931,149 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 		if (!pAnimatedEntityInfos->m_sHairs.empty())
 			SetHairs(pAnimatedEntityInfos->m_sHairs);
 	}
+}
+
+void CMobileEntity::Save()
+{
+	SaveToJson();
+}
+
+void CMobileEntity::SaveToJson()
+{
+	ILoader::CObjectInfos* pInfos = nullptr;
+	GetEntityInfos(pInfos);
+	ILoader::CAnimatedEntityInfos* pCharacterInfos = static_cast<ILoader::CAnimatedEntityInfos*>(pInfos);
+
+	rapidjson::Document doc;
+
+	string sFileName = "characters.json";
+	string root;
+	IFileSystem* pFileSystem = static_cast<IFileSystem*>(m_oInterface.GetPlugin("FileSystem"));
+	pFileSystem->GetLastDirectory(root);
+	string sFilePath = root + "/" + sFileName;
+
+	std::ifstream ifs(sFilePath);
+
+	if (!ifs.eof())
+	{
+		rapidjson::IStreamWrapper isw(ifs);
+		doc.ParseStream(isw);
+
+		if (!doc.IsObject())
+		{
+			doc.SetObject();
+		}
+		bool characterExixts = false;
+		int characterIndex = 0;
+		rapidjson::Value characterName(rapidjson::kStringType);
+		characterName.SetString(m_sEntityID.c_str(), doc.GetAllocator());
+
+		rapidjson::Value characters(rapidjson::kArrayType);
+		if (doc.HasMember("Characters"))
+		{
+			characters = doc["Characters"];
+			for (rapidjson::Value::ConstValueIterator itCharacter = characters.Begin(); itCharacter != characters.End(); itCharacter++)
+			{
+				const rapidjson::Value& character = *itCharacter;
+				if (character.IsObject() && character["Name"] == characterName.GetString())
+				{
+					characterExixts = true;
+					break;
+				}
+				characterIndex++;
+			}
+		}
+
+		rapidjson::Value character(rapidjson::kObjectType);
+		rapidjson::Value name(rapidjson::kStringType);
+		character.AddMember("Name", characterName, doc.GetAllocator());		
+
+		rapidjson::Value objectName(kStringType), ressourceName(kStringType), ressourceFileName(kStringType), parentName(kStringType), parentBoneID(kNumberType), typeName(kStringType),
+			weight(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
+			items(kArrayType), hairs(kStringType);
+
+		objectName.SetString(pInfos->m_sObjectName.c_str(), doc.GetAllocator());
+		ressourceName.SetString(pInfos->m_sRessourceName.c_str(), doc.GetAllocator());
+		ressourceFileName.SetString(pInfos->m_sRessourceFileName.c_str(), doc.GetAllocator());
+		parentName.SetString(pInfos->m_sParentName.c_str(), doc.GetAllocator());
+		parentBoneID.SetInt(pInfos->m_nParentBoneID);
+		typeName.SetString(pCharacterInfos-> m_sTypeName.c_str(), doc.GetAllocator());
+		weight.SetFloat(pCharacterInfos->m_fWeight);
+		grandParentDummyRootID.SetInt(pCharacterInfos->m_nGrandParentDummyRootID);
+		diffuseTextureName.SetString(pCharacterInfos->m_sTextureName.c_str(), doc.GetAllocator());
+		specular.SetArray();		
+		rapidjson::Value specX(rapidjson::kNumberType), specY(rapidjson::kNumberType), specZ(rapidjson::kNumberType);
+		specX.SetFloat(pCharacterInfos->m_vSpecular.m_x);
+		specY.SetFloat(pCharacterInfos->m_vSpecular.m_y);
+		specZ.SetFloat(pCharacterInfos->m_vSpecular.m_y);
+		specular.PushBack(specX, doc.GetAllocator());
+		specular.PushBack(specY, doc.GetAllocator());
+		specular.PushBack(specZ, doc.GetAllocator());
+
+		rapidjson::Value animations(rapidjson::kArrayType);
+		for (map<string, float>::const_iterator it = pCharacterInfos->m_mAnimationSpeed.begin(); it != pCharacterInfos->m_mAnimationSpeed.end(); it++) {
+			Value animation{kObjectType};
+			rapidjson::Value animationName(rapidjson::kStringType), animationSpeed(rapidjson::kNumberType);
+			animationName.SetString(it->first.c_str(), doc.GetAllocator());
+			animationSpeed.SetFloat(it->second);
+			animation.AddMember("Name", animationName, doc.GetAllocator());
+			animation.AddMember("Speed", animationSpeed, doc.GetAllocator());
+			animations.PushBack(animation, doc.GetAllocator());
+		}
+		items.SetArray();
+		for (const pair<string, vector<int>>& oItems : pCharacterInfos->m_mItems) {
+			rapidjson::Value item(kObjectType), itemName(kStringType);
+			item.SetObject();
+			itemName.SetString(oItems.first.c_str(), doc.GetAllocator());
+			rapidjson::Value isWearArray(rapidjson::kArrayType);
+			for (int isWear : oItems.second) {
+				isWearArray.PushBack(isWear, doc.GetAllocator());
+			}
+			item.AddMember("ItemName", itemName, doc.GetAllocator());
+			item.AddMember("IsWearArray", isWearArray, doc.GetAllocator());
+			items.PushBack(item, doc.GetAllocator());
+		}
+		hairs.SetString(pCharacterInfos->m_sHairs.c_str(), doc.GetAllocator());
+		
+		character.AddMember("ObjectName", objectName, doc.GetAllocator());
+		character.AddMember("RessourceName", ressourceName, doc.GetAllocator());
+		character.AddMember("RessourceFileName", ressourceFileName, doc.GetAllocator());
+		character.AddMember("ParentName", parentName, doc.GetAllocator());
+		character.AddMember("ParentBoneID", parentBoneID, doc.GetAllocator());
+		character.AddMember("TypeName", typeName, doc.GetAllocator());
+		character.AddMember("Weight", weight, doc.GetAllocator());
+		character.AddMember("GrandParentDummyRootID", grandParentDummyRootID, doc.GetAllocator());
+		character.AddMember("DiffuseTextureName", diffuseTextureName, doc.GetAllocator());
+		character.AddMember("Specular", specular, doc.GetAllocator());
+		character.AddMember("AnimationSpeeds", animations, doc.GetAllocator());
+		character.AddMember("Items", items, doc.GetAllocator());
+		character.AddMember("Hairs", hairs, doc.GetAllocator());
+
+		if (!characterExixts)
+		{
+			characters.PushBack(character, doc.GetAllocator());
+			if (!doc.HasMember("Characters"))
+			{
+				doc.AddMember("Characters", characters, doc.GetAllocator());
+			}
+			else
+			{
+				doc["Characters"] = characters;
+			}
+		}
+		else {
+			characters[characterIndex] = character;
+			doc["Characters"] = characters;
+		}
+	}
+
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	writer.SetIndent('\t', 1);
+	doc.Accept(writer);
+	std::ofstream ofs(sFilePath);
+	ofs << buffer.GetString();
+	ofs.close();
 }
 
 IEntity::TAnimation CMobileEntity::GetCurrentAnimationType() const
