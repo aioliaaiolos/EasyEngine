@@ -6,7 +6,7 @@
 #include "ICamera.h"
 
 CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
-	CMobileEntity(oInterface, sFileName, "Player"),
+	CCharacter(oInterface, sFileName, "Player"),
 	m_oGUIManager(static_cast<IGUIManager&>(*oInterface.GetPlugin("GUIManager"))),
 	m_pPlayerWindow(NULL)
 {
@@ -61,5 +61,5 @@ void CPlayer::ToggleDisplayPlayerWindow()
 
 void CPlayer::Update()
 {
-	CMobileEntity::Update();
+	CCharacter::Update();
 }

@@ -6,7 +6,7 @@
 
 class IGUIWindow;
 
-class CNPCEntity : public CMobileEntity, public IAEntity
+class CNPCEntity : public CCharacter, public IAEntity
 {
 public:
 

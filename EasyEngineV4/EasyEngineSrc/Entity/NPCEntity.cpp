@@ -11,7 +11,7 @@
 #include "Utils2/Logger.h"
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
-CMobileEntity(oInterface, sFileName, sID),
+CCharacter(oInterface, sFileName, sID),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
 m_oGUIManager(static_cast<IGUIManager&>(*oInterface.GetPlugin("GUIManager"))),
 m_pGotoBox(nullptr),
@@ -28,17 +28,17 @@ m_pBackupBoundingGeometry(nullptr)
 
 int CNPCEntity::GetLife()
 { 
-	return CMobileEntity::GetLife(); 
+	return CCharacter::GetLife(); 
 }
 
 void CNPCEntity::SetLife( int nLife )
 { 
-	CMobileEntity::SetLife( nLife ); 
+	CCharacter::SetLife( nLife ); 
 }
 
 void CNPCEntity::IncreaseLife( int nLife )
 { 
-	CMobileEntity::IncreaseLife( nLife ); 
+	CCharacter::IncreaseLife( nLife ); 
 }
 
 float CNPCEntity::GetDistanceTo2dPoint( const CVector& oPosition )
@@ -52,17 +52,17 @@ float CNPCEntity::GetDistanceTo2dPoint( const CVector& oPosition )
 
 void CNPCEntity::Run()
 { 
-	CMobileEntity::Run( true ); 
+	CCharacter::Run( true ); 
 }
 
 void CNPCEntity::MoveToGuard()
 {
-	CMobileEntity::MoveToGuard();
+	CCharacter::MoveToGuard();
 }
 
 void CNPCEntity::Guard()
 {
-	CMobileEntity::Guard();
+	CCharacter::Guard();
 }
 
 void CNPCEntity::LookAt( float alpha )
@@ -95,53 +95,53 @@ void CNPCEntity::LookAt( float alpha )
 
 void CNPCEntity::ReceiveHit( IAEntity* pEnemy )
 {
-	CMobileEntity::ReceiveHit( pEnemy );
+	CCharacter::ReceiveHit( pEnemy );
 }
 
 void CNPCEntity::Update()
 {
-	CMobileEntity::Update();
+	CCharacter::Update();
 	IAEntity::Update();	
 }
 
 IAnimation* CNPCEntity::GetCurrentAnimation()
 {
-	return CMobileEntity::GetCurrentAnimation();
+	return CCharacter::GetCurrentAnimation();
 }
 
 CMatrix& CNPCEntity::GetWorldTM()
 {
-	return CMobileEntity::GetWorldTM();
+	return CCharacter::GetWorldTM();
 }
 
 IFighterEntity* CNPCEntity::GetFirstEnemy()
 {
-	return CMobileEntity::GetFirstEnemy();
+	return CCharacter::GetFirstEnemy();
 }
 
 IFighterEntity* CNPCEntity::GetNextEnemy()
 {
-	return CMobileEntity::GetNextEnemy();
+	return CCharacter::GetNextEnemy();
 }
 
 void CNPCEntity::GetPosition( CVector& v )
 {
-	CMobileEntity::GetPosition( v );
+	CCharacter::GetPosition( v );
 }
 
 void CNPCEntity::ReceiveHit( IFighterEntity* pEnemy )
 {
-	CMobileEntity::ReceiveHit(pEnemy);
+	CCharacter::ReceiveHit(pEnemy);
 }
 
 void CNPCEntity::Stand()
 {
-	CMobileEntity::Stand();
+	CCharacter::Stand();
 }
 
 void CNPCEntity::Die()
 {
-	CMobileEntity::Die();
+	CCharacter::Die();
 }
 
 void CNPCEntity::Turn( float fAngle )

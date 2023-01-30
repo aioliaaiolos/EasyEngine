@@ -26,12 +26,12 @@ private:
 	
 };
 
-class CMobileEntity : public CObject, public virtual IFighterEntity, public virtual ICharacter
+class CCharacter : public CObject, public virtual IFighterEntity, public virtual ICharacter
 {
 
 public:
-	CMobileEntity(EEInterface& oInterface, string sFileName, string sID);
-	virtual ~CMobileEntity();
+	CCharacter(EEInterface& oInterface, string sFileName, string sID);
+	virtual ~CCharacter();
 
 	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
@@ -64,7 +64,7 @@ public:
 	static map<string, IEntity::TAnimation>	s_mStringToAnimation;
 
 protected:
-	typedef void (*TAction)( CMobileEntity*, bool );
+	typedef void (*TAction)( CCharacter*, bool );
 
 	void										InitAnimations();
 	void										SetPredefinedAnimation(string s, bool bLoop);
@@ -128,17 +128,17 @@ protected:
 	static map< string, TAnimation >			s_mAnimationStringToType;
 	static map< TAnimation, string>				s_mAnimationTypeToString;
 	static map< TAnimation, float >				s_mOrgAnimationSpeedByType;
-	static vector< CMobileEntity* >				s_vHumans;
+	static vector< CCharacter* >				s_vHumans;
 	static map<string, map<string, string>>		s_mBodiesAnimations;
 
 	static void				OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );
-	static void 			Walk( CMobileEntity*, bool bLoop );
-	static void 			Stand( CMobileEntity*, bool bLoop );
-	static void 			Run( CMobileEntity*, bool bLoop );
-	static void				Jump(CMobileEntity* pHuman, bool bLoop);
-	static void				Dying(CMobileEntity* pHuman, bool bLoop);
-	static void				MoveToGuard(CMobileEntity* pHuman, bool bLoop);
-	static void 			PlayReceiveHit( CMobileEntity* pHuman, bool bLoop );
+	static void 			Walk( CCharacter*, bool bLoop );
+	static void 			Stand( CCharacter*, bool bLoop );
+	static void 			Run( CCharacter*, bool bLoop );
+	static void				Jump(CCharacter* pHuman, bool bLoop);
+	static void				Dying(CCharacter* pHuman, bool bLoop);
+	static void				MoveToGuard(CCharacter* pHuman, bool bLoop);
+	static void 			PlayReceiveHit( CCharacter* pHuman, bool bLoop );
 	static void				OnDyingCallback(IAnimation::TEvent e, void* data);
 	static void				LoadAnimationsJsonFile(IFileSystem& oFileSystem);
 };

@@ -35,7 +35,7 @@ void CLinkedCamera::Zoom(int value)
 
 void CLinkedCamera::Link(INode* pNode)
 {
-	CMobileEntity* pPerso = dynamic_cast<CMobileEntity*>(pNode);
+	CCharacter* pPerso = dynamic_cast<CCharacter*>(pNode);
 	if (pPerso) {
 		CNode::Link(pPerso);
 		m_pHeadNode = pPerso->GetSkeletonRoot()->GetChildBoneByName("Tete");

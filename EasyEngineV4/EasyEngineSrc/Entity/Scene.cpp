@@ -394,7 +394,7 @@ void  CScene::RenderScene()
 	}
 
 	m_oRenderer.SetModelMatrix(m_oWorldMatrix);
-	if (m_pRessource) {
+	if (m_pRessource && !m_bHidden) {
 		if (m_pHeightMaptexture) {
 			m_pHeightMaptexture->SetShader(m_pGroundShader);
 			m_pGroundShader->SendUniformValues("groundHeight", m_fMapHeight);
@@ -421,7 +421,7 @@ void CScene::CollectMinimapEntities(vector<IEntity*>& entities)
 				IPlayer* pPlayer = dynamic_cast<IPlayer*>(pEntity);
 				if (pPlayer)
 					m_pPlayer = pEntity;
-				CMobileEntity* pMobile = dynamic_cast<CMobileEntity*>(pEntity);
+				CCharacter* pMobile = dynamic_cast<CCharacter*>(pEntity);
 				if (!pMobile) {
 					CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pEntity);
 					if (!pLightEntity) {
@@ -574,7 +574,7 @@ void CScene::GetCharactersInfos(vector<IEntity*>& si, INode* pRoot)
 		pRoot = this;
 	for (unsigned int i = 0; i < pRoot->GetChildCount(); i++) {
 		ILoader::CObjectInfos* pInfos = nullptr;
-		CMobileEntity* pEntity = dynamic_cast< CMobileEntity* >(pRoot->GetChild(i));
+		CCharacter* pEntity = dynamic_cast< CCharacter* >(pRoot->GetChild(i));
 		if (pEntity)
 			si.push_back(pEntity);
 		GetCharactersInfos(si, pRoot->GetChild(i));

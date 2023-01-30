@@ -332,48 +332,54 @@ void CWorldEditor::LoadFromJson(string sFileName)
 			pMapEditor->Load(m_mMaps.begin()->first);
 		}
 
-		Value& characters = world["Characters"];
-		for (int iCharacter = 0; iCharacter < characters.Size(); iCharacter++) {
-			Value& character = characters[iCharacter];
-			CMatrix oTM;
-			Value& worldTM = character["WorldTM"];
-			vector<float> vTM;
-			for (int iTM = 0; iTM < worldTM.Size(); iTM++)
-				vTM.push_back(worldTM[iTM].GetFloat());
-			oTM.Set(vTM);
-			m_mCharacterMatrices[character["Name"].GetString()] = pair<CMatrix, string>(oTM, character["Script"].GetString());
-		}
-
-		Value& staticEntities = world["StaticEntities"];
-		for (int iEntity = 0; iEntity < staticEntities.Size(); iEntity++) {
-			Value& entity = staticEntities[iEntity];
-			string sEntityName = entity["Name"].GetString();
-			Value& worldTMs = entity["WorldTMs"];
-			for (int iTM = 0; iTM < worldTMs.Size(); iTM++) {
-				Value& tm = worldTMs[iTM];
-				vector<float> vMatrix;
-				for (int i = 0; i < tm.Size(); i++)
-					vMatrix.push_back(tm[i].GetFloat());
+		if (world.HasMember("Characters")) {
+			Value& characters = world["Characters"];
+			for (int iCharacter = 0; iCharacter < characters.Size(); iCharacter++) {
+				Value& character = characters[iCharacter];
 				CMatrix oTM;
-				oTM.Set(vMatrix);
-				m_mEntityMatrices[sEntityName].push_back(pair<IEntity*, CMatrix>(nullptr, oTM));
+				Value& worldTM = character["WorldTM"];
+				vector<float> vTM;
+				for (int iTM = 0; iTM < worldTM.Size(); iTM++)
+					vTM.push_back(worldTM[iTM].GetFloat());
+				oTM.Set(vTM);
+				m_mCharacterMatrices[character["Name"].GetString()] = pair<CMatrix, string>(oTM, character["Script"].GetString());
 			}
 		}
 
-		Value& areas = world["Areas"];
-		for (int iArea = 0; iArea < areas.Size(); iArea++) {
-			Value& area = areas[iArea];
-			string sName = area["Name"].GetString();
-			Value& worldTM = area["WorldTM"];
-			vector<float> vMatrix;
-			for (int iTM = 0; iTM < worldTM.Size(); iTM++)
-				vMatrix.push_back(worldTM[iTM].GetFloat());
-			CMatrix oWorldTM;
-			oWorldTM.Set(vMatrix);
-			vector<float> vDim;
-			Value& dimension = area["Dimension"];
-			CVector oDimension = CVector(dimension[0].GetFloat(), dimension[1].GetFloat(), dimension[2].GetFloat());
-			m_mAreaMatrices[sName] = pair<IBoxEntity*, pair<CMatrix, CVector>>{ nullptr, {oWorldTM, oDimension} };
+		if (world.HasMember("StaticEntities")) {
+			Value& staticEntities = world["StaticEntities"];
+			for (int iEntity = 0; iEntity < staticEntities.Size(); iEntity++) {
+				Value& entity = staticEntities[iEntity];
+				string sEntityName = entity["Name"].GetString();
+				Value& worldTMs = entity["WorldTMs"];
+				for (int iTM = 0; iTM < worldTMs.Size(); iTM++) {
+					Value& tm = worldTMs[iTM];
+					vector<float> vMatrix;
+					for (int i = 0; i < tm.Size(); i++)
+						vMatrix.push_back(tm[i].GetFloat());
+					CMatrix oTM;
+					oTM.Set(vMatrix);
+					m_mEntityMatrices[sEntityName].push_back(pair<IEntity*, CMatrix>(nullptr, oTM));
+				}
+			}
+		}
+
+		if (world.HasMember("Areas")) {
+			Value& areas = world["Areas"];
+			for (int iArea = 0; iArea < areas.Size(); iArea++) {
+				Value& area = areas[iArea];
+				string sName = area["Name"].GetString();
+				Value& worldTM = area["WorldTM"];
+				vector<float> vMatrix;
+				for (int iTM = 0; iTM < worldTM.Size(); iTM++)
+					vMatrix.push_back(worldTM[iTM].GetFloat());
+				CMatrix oWorldTM;
+				oWorldTM.Set(vMatrix);
+				vector<float> vDim;
+				Value& dimension = area["Dimension"];
+				CVector oDimension = CVector(dimension[0].GetFloat(), dimension[1].GetFloat(), dimension[2].GetFloat());
+				m_mAreaMatrices[sName] = pair<IBoxEntity*, pair<CMatrix, CVector>>{ nullptr, {oWorldTM, oDimension} };
+			}
 		}
 	}
 

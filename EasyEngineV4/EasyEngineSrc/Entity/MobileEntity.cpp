@@ -15,7 +15,7 @@
 #include "Item.h"
 #include "../Utils2/StringUtils.h"
 
-map< IEntity::TAnimation, string> CMobileEntity::s_mAnimationTypeToString;
+map< IEntity::TAnimation, string> CCharacter::s_mAnimationTypeToString;
 
 // rapidjson
 #include "rapidjson/document.h"
@@ -28,14 +28,14 @@ using namespace rapidjson;
 
 using namespace rapidjson;
 
-map< string, IEntity::TAnimation >			CMobileEntity::s_mAnimationStringToType;
-map< IEntity::TAnimation, float > 			CMobileEntity::s_mOrgAnimationSpeedByType;
-map< string, CMobileEntity::TAction >				CMobileEntity::s_mActions;
-vector< CMobileEntity* >							CMobileEntity::s_vHumans;
+map< string, IEntity::TAnimation >			CCharacter::s_mAnimationStringToType;
+map< IEntity::TAnimation, float > 			CCharacter::s_mOrgAnimationSpeedByType;
+map< string, CCharacter::TAction >				CCharacter::s_mActions;
+vector< CCharacter* >							CCharacter::s_vHumans;
 
-map<string, IEntity::TAnimation> CMobileEntity::s_mStringToAnimation;
+map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
 
-map<string, map<string, string>> CMobileEntity::s_mBodiesAnimations;
+map<string, map<string, string>> CCharacter::s_mBodiesAnimations;
 
 CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
@@ -186,7 +186,7 @@ void CObject::UpdateCollision()
 }
 
 
-CMobileEntity::CMobileEntity(EEInterface& oInterface, string sFileName, string sID):
+CCharacter::CCharacter(EEInterface& oInterface, string sFileName, string sID):
 CObject(oInterface, sFileName),
 m_bInitSkeletonOffset( false ),
 m_fMaxEyeRotationH( 15 ),
@@ -227,12 +227,12 @@ m_fNeckRotV( 0 )
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 }
 
-CMobileEntity::~CMobileEntity()
+CCharacter::~CCharacter()
 {
 
 }
 
-void CMobileEntity::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
+void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 {
 	string sFileName = "animations.json";
 	FILE* pFile = oFileSystem.OpenFile(sFileName, "r");
@@ -290,7 +290,7 @@ void CMobileEntity::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 	}
 }
 
-void CMobileEntity::InitAnimations()
+void CCharacter::InitAnimations()
 {
 	string sMask = "Animations/*.bke";
 	WIN32_FIND_DATAA oData;
@@ -318,7 +318,7 @@ void CMobileEntity::InitAnimations()
 	}
 }
 
-void CMobileEntity::InitStatics(IFileSystem& oFileSystem)
+void CCharacter::InitStatics(IFileSystem& oFileSystem)
 {
 	s_mAnimationStringToType["Walk"] = eWalk;
 	s_mAnimationStringToType["Run"] = eRun;
@@ -359,7 +359,7 @@ void CMobileEntity::InitStatics(IFileSystem& oFileSystem)
 	LoadAnimationsJsonFile(oFileSystem);
 }
 
-IGeometry* CMobileEntity::GetBoundingGeometry()
+IGeometry* CCharacter::GetBoundingGeometry()
 {
 	return m_pBoundingGeometry;
 	if (m_pCurrentAnimation) {
@@ -403,17 +403,17 @@ IGeometry* CMobileEntity::GetBoundingGeometry()
 	return m_pMesh->GetBBox();
 }
 
-const string& CMobileEntity::GetAttackBoneName()
+const string& CCharacter::GetAttackBoneName()
 {
 	return m_sAttackBoneName;
 }
 
-const string& CMobileEntity::GetSecondaryAttackBoneName()
+const string& CCharacter::GetSecondaryAttackBoneName()
 {
 	return m_sSecondaryAttackBoneName;
 }
 
-void CMobileEntity::WearArmorToDummy(string armorName)
+void CCharacter::WearArmorToDummy(string armorName)
 {
 	string path = "Meshes/Armors/" + armorName + "/";
 	const int count = 8;
@@ -435,7 +435,7 @@ void CMobileEntity::WearArmorToDummy(string armorName)
 	}
 }
 
-void CMobileEntity::UnWearShoes(string shoesPath)
+void CCharacter::UnWearShoes(string shoesPath)
 {
 	IBone* pDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyLFoot");
 	IBone* pDummyRShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyRFoot");
@@ -449,7 +449,7 @@ void CMobileEntity::UnWearShoes(string shoesPath)
 	}
 }
 
-void CMobileEntity::UnWearAllShoes()
+void CCharacter::UnWearAllShoes()
 {
 	IBone* pBodyDummyLShoes = m_pSkeletonRoot->GetChildBoneByName("BodyDummyLFoot");
 	pBodyDummyLShoes->ClearChildren();
@@ -458,7 +458,7 @@ void CMobileEntity::UnWearAllShoes()
 }
 
 
-void CMobileEntity::WearShoes(string shoesPath)
+void CCharacter::WearShoes(string shoesPath)
 {
 	string shoesPathLower = shoesPath;
 	std::transform(shoesPath.begin(), shoesPath.end(), shoesPathLower.begin(), tolower);
@@ -488,7 +488,7 @@ void CMobileEntity::WearShoes(string shoesPath)
 	Rshoes->LinkDummyParentToDummyEntity(this, "BodyDummyRFoot");
 }
 
-void CMobileEntity::Wear(string sClothPath, string sDummyName)
+void CCharacter::Wear(string sClothPath, string sDummyName)
 {
 	string clothPathLower = sClothPath;
 	std::transform(sClothPath.begin(), sClothPath.end(), clothPathLower.begin(), tolower);
@@ -498,7 +498,7 @@ void CMobileEntity::Wear(string sClothPath, string sDummyName)
 	Wear(pCloth, sDummyName);
 }
 
-void CMobileEntity::Wear(CEntity* pCloth, string sDummyName)
+void CCharacter::Wear(CEntity* pCloth, string sDummyName)
 {
 	if (pCloth) {
 		IMesh* pMesh = pCloth->GetMesh();
@@ -513,7 +513,7 @@ void CMobileEntity::Wear(CEntity* pCloth, string sDummyName)
 	}
 }
 
-void CMobileEntity::UnWear(CEntity* pCloth)
+void CCharacter::UnWear(CEntity* pCloth)
 {
 	if (pCloth) {
 		IMesh* pMesh = pCloth->GetMesh();
@@ -524,16 +524,16 @@ void CMobileEntity::UnWear(CEntity* pCloth)
 	}
 }
 
-void CMobileEntity::AddItem(string sItemID)
+void CCharacter::AddItem(string sItemID)
 {
 	CItem* pItem = new CItem(*m_pEntityManager->GetItem(sItemID));
 	if(pItem)
 		m_mItems[sItemID].push_back(pItem);
 	else
-		throw CEException(string("Error in CMobileEntity::AddItem() : item '" + sItemID + "' not found"));
+		throw CEException(string("Error in CCharacter::AddItem() : item '" + sItemID + "' not found"));
 }
 
-void CMobileEntity::RemoveItem(string sItemID)
+void CCharacter::RemoveItem(string sItemID)
 {
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
@@ -542,10 +542,10 @@ void CMobileEntity::RemoveItem(string sItemID)
 			m_mItems.erase(itItem);
 	}
 	else
-		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
 }
 
-void CMobileEntity::WearItem(string sItemID)
+void CCharacter::WearItem(string sItemID)
 {
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
@@ -557,11 +557,11 @@ void CMobileEntity::WearItem(string sItemID)
 		Wear(pItem, sDummyName);
 	}
 	else {
-		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
 	}
 }
 
-void CMobileEntity::UnWearItem(string sItemID)
+void CCharacter::UnWearItem(string sItemID)
 {
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
@@ -570,11 +570,11 @@ void CMobileEntity::UnWearItem(string sItemID)
 		pItem->SetMesh(nullptr);
 	}
 	else {
-		throw CEException(string("Error in CMobileEntity::RemoveItem() : item '") + sItemID + "' not exists");
+		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
 	}
 }
 
-int CMobileEntity::GetItemCount(string sItemID)
+int CCharacter::GetItemCount(string sItemID)
 {
 	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
@@ -583,19 +583,19 @@ int CMobileEntity::GetItemCount(string sItemID)
 	return 0;
 }
 
-void CMobileEntity::Link(INode* pParent)
+void CCharacter::Link(INode* pParent)
 {
 	CEntity::Link(pParent);
 	CEntity* pParentEntity = dynamic_cast<CEntity*>(m_pParent);
 	m_pCollisionMap = pParentEntity->GetCollisionMap();
 }
 
-IBox* CMobileEntity::GetBoundingBox()
+IBox* CCharacter::GetBoundingBox()
 {
 	return m_pBBox;
 }
 
-void CMobileEntity::GetItems(map<string, vector<IEntity*>>& mItems) const
+void CCharacter::GetItems(map<string, vector<IEntity*>>& mItems) const
 {
 	for (const pair<string, vector<CItem*>>& items : m_mItems) {
 		for (CItem* pItem : items.second) {
@@ -605,7 +605,7 @@ void CMobileEntity::GetItems(map<string, vector<IEntity*>>& mItems) const
 	
 }
 
-void CMobileEntity::SetHairs(string hairsName)
+void CCharacter::SetHairs(string hairsName)
 {
 	string hairsPathLower = hairsName;
 	std::transform(hairsName.begin(), hairsName.end(), hairsPathLower.begin(), tolower);
@@ -627,7 +627,7 @@ void CMobileEntity::SetHairs(string hairsName)
 	delete hairs;
 }
 
-void CMobileEntity::SetBody(string sBodyName)
+void CCharacter::SetBody(string sBodyName)
 {
 	ILoader::CObjectInfos* pInfos = nullptr;
 	GetEntityInfos(pInfos);
@@ -641,14 +641,14 @@ void CMobileEntity::SetBody(string sBodyName)
 	BuildFromInfos(*pInfos, pParent, true);
 }
 
-void CMobileEntity::RunAction( string sAction, bool bLoop )
+void CCharacter::RunAction( string sAction, bool bLoop )
 {
-	map<string, CMobileEntity::TAction>::iterator itAction = s_mActions.find(sAction);
+	map<string, CCharacter::TAction>::iterator itAction = s_mActions.find(sAction);
 	if (itAction != s_mActions.end())
 		itAction->second(this, bLoop);
 }
 
-void CMobileEntity::SetPredefinedAnimation( string s, bool bLoop )
+void CCharacter::SetPredefinedAnimation( string s, bool bLoop )
 {
 	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s];
@@ -668,7 +668,7 @@ void CMobileEntity::SetPredefinedAnimation( string s, bool bLoop )
 	m_eCurrentAnimationType = s_mAnimationStringToType[ s ];
 }
 
-void CMobileEntity::Walk( bool bLoop )
+void CCharacter::Walk( bool bLoop )
 {
 	if (m_eCurrentAnimationType != eWalk)
 	{
@@ -678,14 +678,14 @@ void CMobileEntity::Walk( bool bLoop )
 	}
 }
 
-void CMobileEntity::Stand( bool bLoop )
+void CCharacter::Stand( bool bLoop )
 {
 	SetPredefinedAnimation( "Stand", bLoop );
 	if( !m_bUsePositionKeys )
 		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eStand ], 0.f ) );
 }
 
-void CMobileEntity::Run( bool bLoop )
+void CCharacter::Run( bool bLoop )
 {
 	if( m_eCurrentAnimationType != eRun )
 	{
@@ -695,7 +695,7 @@ void CMobileEntity::Run( bool bLoop )
 	}
 }
 
-void CMobileEntity::Jump(bool bLoop)
+void CCharacter::Jump(bool bLoop)
 {
 	if (m_eCurrentAnimationType != eJump)
 	{
@@ -706,7 +706,7 @@ void CMobileEntity::Jump(bool bLoop)
 	}
 }
 
-void CMobileEntity::Die()
+void CCharacter::Die()
 {
 	if (m_eCurrentAnimationType != eDying) {
 		SetPredefinedAnimation("dying", false);
@@ -714,58 +714,58 @@ void CMobileEntity::Die()
 	}
 }
 
-void CMobileEntity::Yaw(float fAngle)
+void CCharacter::Yaw(float fAngle)
 {
 	if(GetLife() > 0)
 		CNode::Yaw(fAngle);
 }
 
-void CMobileEntity::Pitch(float fAngle)
+void CCharacter::Pitch(float fAngle)
 {
 	if (GetLife() > 0)
 		CNode::Pitch(fAngle);
 }
 
-void CMobileEntity::Roll(float fAngle)
+void CCharacter::Roll(float fAngle)
 {
 	if (GetLife() > 0)
 		CNode::Roll(fAngle);
 }
 
-void CMobileEntity::OnDyingCallback(IAnimation::TEvent e, void* pEntity)
+void CCharacter::OnDyingCallback(IAnimation::TEvent e, void* pEntity)
 {
-	CMobileEntity* pMobileEntity = (CMobileEntity*)pEntity;
+	CCharacter* pMobileEntity = (CCharacter*)pEntity;
 	pMobileEntity->m_eCurrentAnimationType = eNone;
 }
 
-void CMobileEntity::PlayHitAnimation()
+void CCharacter::PlayHitAnimation()
 {
 	SetPredefinedAnimation("HitRightArm", false);
 }
 
-void CMobileEntity::PlaySecondaryHitAnimation()
+void CCharacter::PlaySecondaryHitAnimation()
 {
 	SetPredefinedAnimation("HitLeftFoot", false);
 }
 
-void CMobileEntity::PlayReceiveHit( bool bLoop )
+void CCharacter::PlayReceiveHit( bool bLoop )
 {
 	SetPredefinedAnimation( "HitReceived", bLoop );
 	if( !m_bUsePositionKeys )
 		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eHitReceived ], 0.f ) );
 }
 
-void CMobileEntity::PlayReceiveHit( CMobileEntity* pEntity, bool bLoop )
+void CCharacter::PlayReceiveHit( CCharacter* pEntity, bool bLoop )
 {
 	pEntity->PlayReceiveHit( bLoop );
 }
 
-void CMobileEntity::PlayReceiveHit()
+void CCharacter::PlayReceiveHit()
 {
 	RunAction("PlayReceiveHit", false);
 }
 
-void CMobileEntity::MoveToGuard()
+void CCharacter::MoveToGuard()
 {
 	//RunAction("guard", false);
 	if (m_eCurrentAnimationType != eMoveToGuard) {
@@ -773,7 +773,7 @@ void CMobileEntity::MoveToGuard()
 	}
 }
 
-void CMobileEntity::Guard()
+void CCharacter::Guard()
 {
 	//RunAction("guard", false);
 	if (m_eCurrentAnimationType != eMoveToGuard) {
@@ -781,46 +781,46 @@ void CMobileEntity::Guard()
 	}
 }
 
-void CMobileEntity::OnWalkAnimationCallback( IAnimation::TEvent e, void* pData )
+void CCharacter::OnWalkAnimationCallback( IAnimation::TEvent e, void* pData )
 {
 	if( e == IAnimation::eBeginRewind )
 	{
-		CMobileEntity* pHuman = reinterpret_cast< CMobileEntity* >( pData );
+		CCharacter* pHuman = reinterpret_cast< CCharacter* >( pData );
 		pHuman->LocalTranslate( 0, -pHuman->m_oSkeletonOffset.m_23, 0 );
 	}
 }
 
-void CMobileEntity::Walk( CMobileEntity* pHuman, bool bLoop  )
+void CCharacter::Walk( CCharacter* pHuman, bool bLoop  )
 {
 	pHuman->Walk( bLoop );
 }
 
-void CMobileEntity::Stand( CMobileEntity* pHuman, bool bLoop  )
+void CCharacter::Stand( CCharacter* pHuman, bool bLoop  )
 {
 	pHuman->Stand( bLoop );
 }
 
-void CMobileEntity::Run( CMobileEntity* pHuman, bool bLoop  )
+void CCharacter::Run( CCharacter* pHuman, bool bLoop  )
 {
 	pHuman->Run( bLoop );
 }
 
-void CMobileEntity::Jump(CMobileEntity* pHuman, bool bLoop)
+void CCharacter::Jump(CCharacter* pHuman, bool bLoop)
 {
 	pHuman->Jump(bLoop);
 }
 
-void CMobileEntity::Dying(CMobileEntity* pHuman, bool bLoop)
+void CCharacter::Dying(CCharacter* pHuman, bool bLoop)
 {
 	pHuman->Die();
 }
 
-void CMobileEntity::MoveToGuard(CMobileEntity* pHuman, bool bLoop)
+void CCharacter::MoveToGuard(CCharacter* pHuman, bool bLoop)
 {
 	pHuman->MoveToGuard();
 }
 
-void CMobileEntity::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
+void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
 {
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]];
 	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
@@ -833,7 +833,7 @@ void CMobileEntity::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
 	}
 }
 
-float CMobileEntity::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
+float CCharacter::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
 {
 	string sType = s_mAnimationTypeToString[eAnimationType];
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sType];
@@ -846,7 +846,7 @@ float CMobileEntity::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
 	return 1.f;
 }
 
-void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
+void CCharacter::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 {
 	if(!pInfos)
 		pInfos = new ILoader::CAnimatedEntityInfos;
@@ -858,7 +858,7 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		pAnimation->GetFileName(animFile);
 		animFile = animFile.substr(animFile.find_last_of("/") + 1);
 		animatedEntityInfos.m_sAnimationFileName = animFile;
-		for (map<string, IEntity::TAnimation>::iterator it = CMobileEntity::s_mStringToAnimation.begin(); it != CMobileEntity::s_mStringToAnimation.end(); it++) {
+		for (map<string, IEntity::TAnimation>::iterator it = CCharacter::s_mStringToAnimation.begin(); it != CCharacter::s_mStringToAnimation.end(); it++) {
 			float as = GetAnimationSpeed(it->second);
 			animatedEntityInfos.m_mAnimationSpeed[it->first] = as;
 		}
@@ -908,7 +908,7 @@ void CMobileEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 
 }
 
-void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
+void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
 {
 	CEntity::BuildFromInfos(infos, pParent, true);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
@@ -919,7 +919,7 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 		for (int i = 0; i < m_pMesh->GetMaterialCount(); i++)
 			m_vCustomSpecular = pAnimatedEntityInfos->m_vSpecular;
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
-			SetAnimationSpeed(CMobileEntity::s_mStringToAnimation[it->first], it->second);
+			SetAnimationSpeed(CCharacter::s_mStringToAnimation[it->first], it->second);
 		Stand();
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
@@ -933,12 +933,12 @@ void CMobileEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* 
 	}
 }
 
-void CMobileEntity::Save()
+void CCharacter::Save()
 {
 	SaveToJson();
 }
 
-void CMobileEntity::SaveToJson()
+void CCharacter::SaveToJson()
 {
 	ILoader::CObjectInfos* pInfos = nullptr;
 	GetEntityInfos(pInfos);
@@ -1076,23 +1076,23 @@ void CMobileEntity::SaveToJson()
 	ofs.close();
 }
 
-IEntity::TAnimation CMobileEntity::GetCurrentAnimationType() const
+IEntity::TAnimation CCharacter::GetCurrentAnimationType() const
 {
 	return m_eCurrentAnimationType;
 }
 
-void CMobileEntity::TurnEyesH( float fValue )
+void CCharacter::TurnEyesH( float fValue )
 {
 	m_pRightEye->Roll( fValue );
 	m_pLeftEye->Roll( fValue );
 }
 
-void CMobileEntity::TurnNeckH( float fNeckRotH )
+void CCharacter::TurnNeckH( float fNeckRotH )
 {
 	m_pNeck->Pitch( fNeckRotH );
 }
 
-ISphere* CMobileEntity::GetBoneSphere( string sBoneName )
+ISphere* CCharacter::GetBoneSphere( string sBoneName )
 {
 	IBone* pBone = GetPreloadedBone ( sBoneName );
 	float fBoneRadius = pBone->GetBoundingBox()->GetBoundingSphereRadius();
@@ -1101,14 +1101,14 @@ ISphere* CMobileEntity::GetBoneSphere( string sBoneName )
 	return m_oGeometryManager.CreateSphere( oBoneWorldPosition, fBoneRadius / 2.f );
 }
 
-void CMobileEntity::AddSpeed(float x, float y, float z)
+void CCharacter::AddSpeed(float x, float y, float z)
 {
 	m_oBody.m_oSpeed.m_x += x;
 	m_oBody.m_oSpeed.m_y += y;
 	m_oBody.m_oSpeed.m_z += z;
 }
 
-IBone* CMobileEntity::GetPreloadedBone( string sName )
+IBone* CCharacter::GetPreloadedBone( string sName )
 {
 	IBone* pBone = m_mPreloadedBones[ sName ];
 	if( pBone )
@@ -1118,22 +1118,22 @@ IBone* CMobileEntity::GetPreloadedBone( string sName )
 }
 
 
-void CMobileEntity::GetPosition( CVector& oPosition ) const
+void CCharacter::GetPosition( CVector& oPosition ) const
 { 
 	GetWorldPosition( oPosition ); 
 }
 
-IMesh* CMobileEntity::GetMesh()
+IMesh* CCharacter::GetMesh()
 { 
 	return dynamic_cast< IMesh* >( m_pRessource ); 
 }
 
-IAnimation*	CMobileEntity::GetCurrentAnimation()
+IAnimation*	CCharacter::GetCurrentAnimation()
 { 
 	return m_pCurrentAnimation; 
 }
 
-IFighterEntity* CMobileEntity::GetFirstEnemy()
+IFighterEntity* CCharacter::GetFirstEnemy()
 {
 	IFighterEntity* pEntity = m_pEntityManager->GetFirstFighterEntity();
 	if( pEntity == this )
@@ -1141,7 +1141,7 @@ IFighterEntity* CMobileEntity::GetFirstEnemy()
 	return pEntity;
 }
 
-IFighterEntity* CMobileEntity::GetNextEnemy()
+IFighterEntity* CCharacter::GetNextEnemy()
 {
 	IFighterEntity* pEntity = static_cast< IFighterEntity* >( m_pEntityManager->GetNextFighterEntity() );
 	if( pEntity == this )
@@ -1149,17 +1149,17 @@ IFighterEntity* CMobileEntity::GetNextEnemy()
 	return pEntity;
 }
 
-void CMobileEntity::Stand()
+void CCharacter::Stand()
 { 
 	Stand( true ); 
 }
 
-CMatrix& CMobileEntity::GetWorldTM()
+CMatrix& CCharacter::GetWorldTM()
 { 
 	return m_oWorldMatrix; 
 }
 
-float CMobileEntity::GetBoundingSphereRadius() 
+float CCharacter::GetBoundingSphereRadius() 
 { 
 	return m_fBoundingSphereRadius; 
 }

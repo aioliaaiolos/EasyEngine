@@ -4,7 +4,7 @@
 class IGUIWindow;
 class ICamera;
 
-class CPlayer :	public CMobileEntity, public IPlayer
+class CPlayer :	public CCharacter, public IPlayer
 {
 public:
 	CPlayer(EEInterface& oInterface, string sFileName);

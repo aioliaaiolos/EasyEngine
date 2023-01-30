@@ -8,7 +8,7 @@
 
 class IRenderer;
 class IGeometryManager;
-class CMobileEntity;
+class CCharacter;
 class IAEntity;
 class CEntity;
 class CPlayer;
@@ -122,7 +122,7 @@ private:
 	map< IFighterEntity*, int >::iterator					m_itCurrentFighterEntity;
 	IGUIManager*											m_pGUIManager;
 	CPlayer*												m_pPlayer;
-	map<string, CMobileEntity*>								m_mCharacters;
+	map<string, CCharacter*>								m_mCharacters;
 	string													m_sCharactersDatabaseFileName;
 	map<string, ILoader::CAnimatedEntityInfos>				m_mCharacterInfos;
 	map<IMesh*, vector<CEntity*>>							m_mRenderQueue;

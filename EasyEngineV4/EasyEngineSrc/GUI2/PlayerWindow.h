@@ -20,7 +20,7 @@ public:
 
 
 private:
-	CGUIWidget*				m_pInventory;
+	CGUIWindow*				m_pInventory;
 	CGUIWidget*				m_pArmorWindow;
 	CGUIWidget*				m_pWindowBackground;
 	CGUIManager*			m_pGUIManager;

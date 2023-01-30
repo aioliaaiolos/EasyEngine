@@ -1,0 +1,370 @@
+{
+	"Characters": [
+		{
+			"Name": "garde hopital",
+			"ObjectName": "garde hopital",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Base_Boot_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Boot_Right",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Cuirass",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Gauntlet_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Gauntlet_Right",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Greave",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Pauldron_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Base_Pauldron_Right",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs02"
+		},
+		{
+			"Name": "geraldine",
+			"ObjectName": "geraldine",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body03.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Bra",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Underpants",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs02"
+		},
+		{
+			"Name": "mirabelle",
+			"ObjectName": "mirabelle",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Specular": [
+				0.30000001192092896,
+				0.30000001192092896,
+				0.30000001192092896
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Tunique_Hospital",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs01"
+		},
+		{
+			"Name": "namia",
+			"ObjectName": "namia",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
+			"Specular": [
+				0.20000000298023224,
+				0.20000000298023224,
+				0.20000000298023224
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Armlet_EvilSpelled",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Tunique_Hospital",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs02"
+		},
+		{
+			"Name": "Player",
+			"ObjectName": "Player",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body04.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "Player",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.30000001192092896,
+				0.30000001192092896,
+				0.30000001192092896
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": ""
+		},
+		{
+			"Name": "ranja",
+			"ObjectName": "ranja",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body04.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-moyenne.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Dress_LongueWide",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs01"
+		},
+		{
+			"Name": "charlotte",
+			"ObjectName": "charlotte",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body03.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin02-blanc.bmp",
+			"Specular": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Bra",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Underpants",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs05"
+		},
+		{
+			"Name": "christine",
+			"ObjectName": "christine",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin02-blanc.bmp",
+			"Specular": [
+				0.800000011920929,
+				0.800000011920929,
+				0.800000011920929
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Tunique_Hospital",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs01"
+		},
+		{
+			"Name": "christina",
+			"ObjectName": "christina",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body04.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "textures/skin01-moyenne.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": "hairs05"
+		},
+		{
+			"Name": "curvy",
+			"ObjectName": "curvy",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Specular": [
+				0.5,
+				0.5,
+				0.5
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Tunique_Hospital",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs05"
+		}
+	]
+}

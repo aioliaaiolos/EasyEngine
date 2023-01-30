@@ -53,7 +53,7 @@ m_bUseInstancing(true)
 	m_sCharactersDatabaseFileName = root + "/characters.db";
 	m_itCurrentParsedEntity = m_mCollideEntities.end();
 	m_itCurrentIAEntity = m_mIAEntities.end();
-	CMobileEntity::InitStatics(m_oFileSystem);
+	CCharacter::InitStatics(m_oFileSystem);
 	LoadCharacterInfos();
 	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
 	oInterface.HandlePluginCreation("EntityManager", HandleEntityManagerCreation, this);
@@ -105,9 +105,9 @@ void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
 		oCharacterInfos.m_sObjectName = sNewName;
 		m_mCharacterInfos[sNewName] = oCharacterInfos;
 
-		map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sOldName);
+		map<string, CCharacter*>::iterator itCharacter = m_mCharacters.find(sOldName);
 		if (itCharacter != m_mCharacters.end()) {
-			CMobileEntity* pCharacter = itCharacter->second;
+			CCharacter* pCharacter = itCharacter->second;
 			m_mCharacters.erase(itCharacter);
 			m_mCharacters[sNewName] = pCharacter;
 		}
@@ -183,7 +183,7 @@ CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTyp
 	if( sTypeName == "Entity" )
 		pEntity = new CEntity(m_oInterface, sFileName, bDuplicate );
 	else if( sTypeName == "Human" )
-		pEntity = new CMobileEntity(m_oInterface, sFileName, sID);
+		pEntity = new CCharacter(m_oInterface, sFileName, sID);
 	else if (sTypeName == "NPC")
 		pEntity = new CNPCEntity(m_oInterface, sFileName, sID);
 	else if (sTypeName == "Player") {
@@ -312,7 +312,7 @@ IBoxEntity* CEntityManager::CreateAreaEntity(string sAreaName, const CVector& oD
 
 IEntity* CEntityManager::CreateMobileEntity( string sFileName, IFileSystem* pFileSystem, string sID )
 {
-	IEntity* pEntity = new CMobileEntity(m_oInterface, sFileName, sID);
+	IEntity* pEntity = new CCharacter(m_oInterface, sFileName, sID);
 	AddEntity( pEntity );
 	return pEntity;
 }
@@ -331,10 +331,10 @@ void CEntityManager::AddNewCharacter(IEntity* pEntity)
 	sCharacterNameLow = sCharacterName;
 	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterNameLow.begin(), tolower);
 
-	map<string, CMobileEntity*>::iterator itCharacter = m_mCharacters.find(sCharacterNameLow);
+	map<string, CCharacter*>::iterator itCharacter = m_mCharacters.find(sCharacterNameLow);
 	if (itCharacter != m_mCharacters.end())
 		throw CCharacterAlreadyExistsException(sCharacterNameLow);
-	CMobileEntity* pCharacter = dynamic_cast<CMobileEntity*>(pEntity);
+	CCharacter* pCharacter = dynamic_cast<CCharacter*>(pEntity);
 	m_mCharacters[sCharacterNameLow] = pCharacter;
 }
 
@@ -652,7 +652,7 @@ IGUIManager* CEntityManager::GetGUIManager()
 
 void CEntityManager::Kill(int entityId)
 {
-	CMobileEntity* pEntity = dynamic_cast<CMobileEntity*>(GetEntity(entityId));
+	CCharacter* pEntity = dynamic_cast<CCharacter*>(GetEntity(entityId));
 	if (pEntity) {
 		pEntity->SetLife(0);
 		pEntity->Die();
@@ -662,7 +662,7 @@ void CEntityManager::Kill(int entityId)
 
 void CEntityManager::WearArmorToDummy(int entityId, string sArmorName)
 {
-	CMobileEntity* pEntity = dynamic_cast<CMobileEntity*>(GetEntity(entityId));
+	CCharacter* pEntity = dynamic_cast<CCharacter*>(GetEntity(entityId));
 	if (pEntity)
 		pEntity->WearArmorToDummy(sArmorName);
 	else {
@@ -677,7 +677,7 @@ void CEntityManager::SaveCharacterToDB(string sNPCID)
 {
 	string sNPCIDLow = sNPCID;
 	std::transform(sNPCID.begin(), sNPCID.end(), sNPCIDLow.begin(), tolower);
-	map<string, CMobileEntity*>::iterator itNPC = m_mCharacters.find(sNPCIDLow);
+	map<string, CCharacter*>::iterator itNPC = m_mCharacters.find(sNPCIDLow);
 	if (itNPC != m_mCharacters.end()) {
 		ILoader::CObjectInfos* pInfos = nullptr;
 		itNPC->second->GetEntityInfos(pInfos);
@@ -858,7 +858,7 @@ void CEntityManager::SerializeNodeInfos(INode* pNode, ostringstream& oss, int nL
 void CEntityManager::SerializeMobileEntities(INode* pRoot, string& sText)
 {
 	ostringstream oss;
-	SerializeNodeInfos<CMobileEntity>(pRoot, oss, 0);
+	SerializeNodeInfos<CCharacter>(pRoot, oss, 0);
 	sText = oss.str();
 }
 
