@@ -46,7 +46,7 @@ public:
 	int														GetEntityID( IEntity* pEntity );
 	int														GetEntityCount();
 	CEntity*												CreateLightEntity();
-	IEntity*												CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity );
+	ILightEntity*											CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity );
 	float													GetLightIntensity(int nID) override;
 	void													SetLightIntensity( int nID, float fIntensity ) override;
 	void													DestroyEntity( IEntity* pEntity );

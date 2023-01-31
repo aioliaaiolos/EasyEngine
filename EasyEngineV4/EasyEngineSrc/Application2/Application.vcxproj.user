@@ -10,5 +10,6 @@
     <LocalDebuggerCommand>$(MSBuildProjectDirectory)\..\..\EasyEngine\$(Configuration)\$(MSBuildProjectName).exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>-fullscreen=true</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

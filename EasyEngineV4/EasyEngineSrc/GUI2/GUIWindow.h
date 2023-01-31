@@ -16,16 +16,17 @@ class CGUIWindow  : public CGUIWidget, public virtual IGUIWindow
 {
 public:
 													CGUIWindow();
+													CGUIWindow(EEInterface& oInterface, string fileName);
 													CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize);
 													CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight);
+													CGUIWindow(const CDimension& windowSize);
 													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual											~CGUIWindow();
 	void											AddWidget(CGUIWidget* pWidget);
-	deque<CGUIWidget*>::iterator					RemoveWidget(CGUIWidget* pWidget);
+	deque<CGUIWidget*>::iterator					RemoveWidget(CGUIWidget* pWidget, bool bDelete = true);
 	size_t											GetWidgetCount()const;
 	CGUIWidget*										GetWidget(unsigned int nIndex);
 	void											Display() override;
-	void											SetVisibility(bool bVisible) override;
 	void											SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) override;
 	bool											IsVisible();
 	void											Clear();
@@ -39,7 +40,6 @@ public:
 
 protected:
 	deque< CGUIWidget*>								m_vWidget;
-	bool											m_bVisible;
 	bool											m_bGUIMode;
 	pair<CloseWindowCallback, IBaseObject*>				m_oCloseWindowCallback;
 };

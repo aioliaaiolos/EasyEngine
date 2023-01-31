@@ -27,14 +27,20 @@ void CGUIWidget::Init( int nResX, int nResY, IShader* pShader )
 CGUIWidget::CGUIWidget() :
 	CGUIWidget(0, 0)
 {
-
+	if (s_pShader == NULL)
+	{
+		CWidgetNotInitialized e("");
+		throw e;
+	}
+	m_pShader = s_pShader;
 }
 
 CGUIWidget::CGUIWidget( int nWidth, int nHeight ):
 _pListener(NULL),
 _bIsCursorInWidget( NULL ),
 m_pMesh( NULL ),
-m_pParent(NULL)
+m_pParent(NULL),
+m_bVisible(true)
 {
 	if( s_pShader == NULL )
 	{
@@ -49,7 +55,8 @@ CGUIWidget::CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& 
 _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
-m_pParent(NULL)
+m_pParent(NULL),
+m_bVisible(true)
 {
 	InitManagers(oInterface);
 	ILoader::CMeshInfos mi;
@@ -82,7 +89,9 @@ CGUIWidget::CGUIWidget(
 _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
-m_pParent(NULL)
+m_pParent(NULL),
+m_pInterface(&oInterface),
+m_bVisible(true)
 {
 	InitManagers(oInterface);
 
@@ -106,13 +115,28 @@ m_pParent(NULL)
 	SetQuad(pRect);
 }
 
+
+CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName) : 
+	CGUIWidget()
+{
+	InitManagers(oInterface);
+	ITexture* pTexture = static_cast< ITexture* > (m_pRessourceManager->GetRessource(sFileName));
+	int width, height;
+	pTexture->GetDimension(width, height);
+	m_oDimension.SetDimension(width, height);
+	CRectangle oSkin;
+	oSkin.SetDimension(width, height);
+	IMesh* pQuad = CreateQuadFromTexture(*m_pRenderer, *m_pRessourceManager, pTexture, oSkin);
+	SetQuad(pQuad);
+}
+
 CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height):
 CGUIWidget(width, height)
 {
 	InitManagers(oInterface);
 	CRectangle oSkin;
 	oSkin.SetDimension(width, height);
-	IMesh* pQuad = CreateQuadFromFile(*m_pRenderer, *m_pRessourceManager, sFileName, oSkin, oSkin.m_oDim);
+	IMesh* pQuad = CreateQuadFromFile(*m_pRenderer, *m_pRessourceManager, sFileName, oSkin);
 	SetQuad(pQuad);
 }
 
@@ -146,10 +170,13 @@ void CGUIWidget::SetParent(CGUIWidget* parent)
 	m_pParent = parent;
 }
 
-deque<CGUIWidget*>::iterator CGUIWidget::Unlink()
+deque<CGUIWidget*>::iterator CGUIWidget::Unlink(bool bDelete)
 {
 	CGUIWindow* pParent = static_cast<CGUIWindow*>(m_pParent);
-	return pParent->RemoveWidget(this);
+	if(pParent)
+		return pParent->RemoveWidget(this, bDelete);
+	deque<CGUIWidget*> d;
+	return d.end();		
 }
 
 bool CGUIWidget::operator==( const CGUIWidget& w )
@@ -169,7 +196,7 @@ IMesh* CGUIWidget::GetQuad()
 
 void CGUIWidget::Display()
 {
-	if (m_pMesh) {
+	if (m_pMesh && m_bVisible) {
 		float fWidgetLogicalPosx, fWidgetLogicalPosy;
 		GetLogicalPosition(fWidgetLogicalPosx, fWidgetLogicalPosy, s_nScreenResWidth, s_nScreenResHeight);
 		vector< float > vPos;
@@ -181,10 +208,20 @@ void CGUIWidget::Display()
 }
 
 
+void CGUIWidget::SetVisibility(bool bVisible)
+{
+	m_bVisible = bVisible;
+}
+
 void CGUIWidget::SetPosition(float fPosX, float fPosY)
 {
 	m_oPosition.SetX(fPosX);
 	m_oPosition.SetY(fPosY);
+}
+
+void CGUIWidget::SetRelativePosition(const CPosition& oPosition)
+{
+	SetRelativePosition(oPosition.GetX(), oPosition.GetY());
 }
 
 void CGUIWidget::SetRelativePosition( float fPosX, float fPosY )
@@ -424,7 +461,7 @@ void CGUIWidget::CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& qua
 	mi.m_bCanBeIndexed = false;
 }
 
-IMesh* CGUIWidget::CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin, const CDimension& oImageSize) const
+IMesh* CGUIWidget::CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin) const
 {
 	CRectangle oFinalSkin;
 	ILoader::CMeshInfos mi;
@@ -455,10 +492,10 @@ IMesh* CGUIWidget::CreateQuad(IRenderer& oRenderer, IRessourceManager& oRessourc
 }
 
 
-IMesh* CGUIWidget::CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sTextureName, const CRectangle& skin, const CDimension& oImageSize) const
+IMesh* CGUIWidget::CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sTextureName, const CRectangle& skin) const
 {
 	ITexture* pTexture = static_cast< ITexture* > (oRessourceManager.GetRessource(sTextureName));
-	return CreateQuadFromTexture(oRenderer, oRessourceManager, pTexture, skin, oImageSize);
+	return CreateQuadFromTexture(oRenderer, oRessourceManager, pTexture, skin);
 }
 
 CLink::CLink(EEInterface& oInterface, string sText) :
@@ -477,7 +514,7 @@ CLink::CLink(EEInterface& oInterface, string sText) :
 	SetQuad(pARect->GetMesh(0));
 
 	m_pListener = new CListener;
-	this->SetListener(m_pListener);
+	SetListener(m_pListener);
 	m_pListener->SetEventCallBack(OnLinkEvent);
 	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eRed;	
 	m_mColorByState[TState::eHover] = IGUIManager::TFontColor::eTurquoise;

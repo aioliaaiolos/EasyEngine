@@ -26,6 +26,7 @@ class IAEntity;
 class IFighterEntity;
 class IGUIManager;
 class IPhysic;
+class ICharacter;
 
 using namespace std;
 
@@ -136,6 +137,16 @@ public:
 	virtual const string&				GetAttachedScript() const = 0;
 };
 
+class IItem : public virtual IEntity
+{
+public:
+	virtual string&	GetPreviewPath() = 0;
+	virtual bool IsWear() = 0;
+	virtual void Wear() = 0;
+	virtual void UnWear() = 0;
+	virtual void SetOwner(ICharacter* pCharacter) = 0;	
+};
+
 class IBoxEntity : public virtual IEntity
 {
 public:
@@ -152,19 +163,22 @@ public:
 class ICharacter : public virtual IEntity
 {
 public:
-	virtual void				WearShoes(string shoesName)  = 0;
-	virtual void				UnWearShoes(string shoesPath) = 0;
-	virtual void				UnWearAllShoes() = 0;
-	virtual void				SetHairs(string sHairsPath) = 0;
-	virtual void				SetBody(string sBodyName) = 0;
-	virtual void				BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) = 0;
-	virtual void				GetPosition(CVector& oPosition) const = 0;
-	virtual void				AddItem(string sItemName) = 0;
-	virtual void				RemoveItem(string sItemName) = 0;
-	virtual void				WearItem(string sItemName) = 0;
-	virtual int					GetItemCount(string sItemID) = 0;
-	virtual void				GetItems(map<string, vector<IEntity*>>& mItems) const = 0;
-	virtual void				Save() = 0;
+	virtual void									WearShoes(string shoesName)  = 0;
+	virtual void									UnWearShoes(string shoesPath) = 0;
+	virtual void									UnWearAllShoes() = 0;
+	virtual void									SetHairs(string sHairsPath) = 0;
+	virtual void									SetBody(string sBodyName) = 0;
+	virtual void									BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) = 0;
+	virtual void									GetPosition(CVector& oPosition) const = 0;
+	virtual void									AddItem(string sItemName) = 0;
+	virtual void									RemoveItem(string sItemName) = 0;
+	virtual void									WearItem(string sItemName) = 0;
+	virtual void									WearItem(IItem* pItem) = 0;
+	virtual void									UnWearItem(string sItemID) = 0;	
+	virtual void									UnWearItem(IItem* pItem) = 0;
+	virtual int										GetItemCount(string sItemID) = 0;
+	virtual const map<string, vector<IItem*>>&		GetItems() const = 0;
+	virtual void									Save() = 0;
 };
 
 class IScene : public virtual IEntity
@@ -258,7 +272,7 @@ public:
 	virtual IEntity*			GetEntity( string sEntityName ) = 0;
 	virtual int					GetEntityID( IEntity* pEntity ) = 0;
 	virtual int					GetEntityCount() = 0;
-	virtual IEntity*			CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity ) = 0;
+	virtual ILightEntity*		CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity ) = 0;
 	virtual float				GetLightIntensity(int nID) = 0;
 	virtual void				SetLightIntensity( int nID, float fIntensity ) = 0;
 	virtual void				DestroyEntity( IEntity* pEntity ) = 0;

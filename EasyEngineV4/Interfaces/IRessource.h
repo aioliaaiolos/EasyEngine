@@ -75,6 +75,7 @@ public:
 	ILight(const IRessource::Desc& oDesc) : IRessource(oDesc) {}
 	virtual void SetIntensity(float fIntensity) = 0;
 	virtual void SetAmbient(float fAmbient) = 0;
+	virtual void Enable(bool enable) = 0;
 };
 
 class ITexture : public IRessource
@@ -214,7 +215,6 @@ public:
 	virtual float				GetLightIntensity( IRessource* pRessource ) = 0;
 	virtual CVector				GetLightColor( IRessource* pRessource ) = 0;
 	virtual IRessource::TLight	GetLightType( IRessource* pRessource ) = 0;
-	virtual void				DisableLight( IRessource* pRessource ) = 0;
 	virtual void				EnableCatchingException( bool bEnable ) = 0;
 	virtual bool				IsCatchingExceptionEnabled() = 0;
 	virtual void				PopErrorMessage( string& sMessage ) = 0;

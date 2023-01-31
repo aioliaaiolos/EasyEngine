@@ -79,17 +79,15 @@ void CLight::Update()
 	}
 }
 
-void CLight::Disable()
+void CLight::Enable(bool enable)
 {
-	m_bIsEnabled = false;	
-	GetRenderer().DisableLight(m_ID);
-	SetIntensity( 0.f );
-}
-
-void CLight::Enable()
-{
-	m_bIsEnabled = true;	
-	GetRenderer().EnableLight(m_ID);
+	m_bIsEnabled = enable;
+	if (!enable) {
+		GetRenderer().DisableLight(m_ID);
+		SetIntensity(0.f);
+	}
+	else
+		GetRenderer().EnableLight(m_ID);
 }
 
 CLight::TLight CLight::GetType()

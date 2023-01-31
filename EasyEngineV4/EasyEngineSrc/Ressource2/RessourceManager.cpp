@@ -677,11 +677,6 @@ IRessource::TLight	CRessourceManager::GetLightType( IRessource* pRessource )
 	return pLight->GetType();
 }
 
-void CRessourceManager::DisableLight( IRessource* pRessource )
-{
-	CLight* pLight = dynamic_cast< CLight* >( pRessource );
-	pLight->Disable();
-}
 
 void CRessourceManager::SetCurrentRenderer( IRenderer* pRenderer )
 {

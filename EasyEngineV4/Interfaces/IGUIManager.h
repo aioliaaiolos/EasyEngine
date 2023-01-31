@@ -25,7 +25,6 @@ public:
 	typedef void(*CloseWindowCallback)(IGUIWindow*, IBaseObject* pObject);
 
 	virtual void	Display() = 0;
-	virtual void	SetVisibility(bool bVisible) = 0;
 	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) = 0;
 };
 

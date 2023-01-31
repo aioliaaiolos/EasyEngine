@@ -149,7 +149,7 @@ void CEntityManager::LoadItems()
 				for (int iItem = 0; iItem < count; iItem++) {
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
-						string sId, sModel, sType;
+						string sId, sModel, sType, sPreview;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
 							if (id.IsString()) {
@@ -168,7 +168,13 @@ void CEntityManager::LoadItems()
 								sType = type.GetString();
 							}
 						}
-						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mTypeString[sType], sModel);
+						if (item.HasMember("Preview")) {
+							Value& type = item["Preview"];
+							if (type.IsString()) {
+								sPreview = type.GetString();
+							}
+						}
+						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mTypeString[sType], sModel, sPreview);
 						m_mItems[sId] = pItem;
 					}
 				}
@@ -484,7 +490,7 @@ CEntity* CEntityManager::CreateLightEntity()
 	return pLightEntity;
 }
 
-IEntity* CEntityManager::CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity )
+ILightEntity* CEntityManager::CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity )
 {
 	IRessource* pLight = m_oRessourceManager.CreateLight(Color, type, fIntensity);
 	CLightEntity* pLightEntity = new CLightEntity(m_oInterface, pLight);

@@ -5,12 +5,14 @@ CLightEntity::CLightEntity(EEInterface& oInterface, IRessource* pLight):
 CEntity(oInterface)
 {	
 	m_pRessource = pLight;
+	m_pLight = static_cast<ILight*>(m_pRessource);
 	SetEntityID("Light");
 }
 
 CLightEntity::~CLightEntity()
 {
-	m_oRessourceManager.DisableLight( m_pRessource );
+	if(m_pLight)
+		m_pLight->Enable(false);
 }
 
 void CLightEntity::Update()
@@ -49,7 +51,8 @@ IRessource::TLight CLightEntity::GetType()
 
 void CLightEntity::Unlink()
 {
-	m_oRessourceManager.DisableLight( m_pRessource );
+	if(m_pLight)
+		m_pLight->Enable(false);
 	CEntity::Unlink();
 }
 

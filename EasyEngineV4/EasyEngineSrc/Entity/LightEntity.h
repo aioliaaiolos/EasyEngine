@@ -24,6 +24,9 @@ public:
 	void				GetEntityID(string& sID) {};
 	const string&		GetEntityID() const { return ""; };
 
+private:
+	ILight*				m_pLight;
+
 };
 
 #endif // LIGHTENTITY_H

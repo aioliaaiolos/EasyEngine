@@ -34,9 +34,8 @@ public:
 	virtual 					~CLight();
 	void 						Update();
 	TLight						GetType();
-	bool						IsEnabled();	
-	void						Disable();
-	void						Enable();
+	bool						IsEnabled();
+	void						Enable(bool enable);
 	void						SetShader( IShader* pShader );
 	void						SetIntensity( float fIntensity ) override;
 	void						SetAmbient(float fAmbient) override;

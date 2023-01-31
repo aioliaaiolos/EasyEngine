@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <regex>
 
-extern EEInterface*			pInterface;
+extern EEInterface*			m_pInterface;
 extern IScene*				m_pScene;
 extern IScriptManager*		m_pScriptManager;
 extern IConsole*			m_pConsole;
@@ -2276,7 +2276,7 @@ void ScreenCapture( IScriptState* pState )
 	FILE* pFile = NULL;
 	do
 	{
-		ossFile << "Capture_" << i << ".bmp";
+		ossFile << "../Data/Capture_" << i << ".bmp";
 		fopen_s( &pFile, ossFile.str().c_str(), "r" );
 		if( pFile )
 		{
@@ -2286,7 +2286,31 @@ void ScreenCapture( IScriptState* pState )
 		}
 	}
 	while( pFile );
-	CRenderUtils::ScreenCapture( ossFile.str(), m_pRenderer, m_pLoaderManager, m_pSceneManager->GetScene( "Game" ) );
+	CRenderUtils::ScreenCapture( ossFile.str(), m_pInterface);
+}
+
+void ScreenCaptureFine(IScriptState* pState)
+{
+	CScriptFuncArgInt* x = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CScriptFuncArgInt* y = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
+	CScriptFuncArgInt* w = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
+	CScriptFuncArgInt* h = static_cast<CScriptFuncArgInt*>(pState->GetArg(3));
+
+	ostringstream ossFile;
+	int i = 0;
+	FILE* pFile = NULL;
+	do
+	{
+		ossFile << "../Data/Capture_" << i << ".bmp";
+		fopen_s(&pFile, ossFile.str().c_str(), "r");
+		if (pFile)
+		{
+			fclose(pFile);
+			i++;
+			ossFile.str("");
+		}
+	} while (pFile);
+	CRenderUtils::ScreenCapture(ossFile.str(), m_pInterface, x->m_nValue, y->m_nValue, w->m_nValue, h->m_nValue);
 }
 
 void SetLightIntensity( IScriptState* pState )
@@ -2756,9 +2780,7 @@ void DisplayInventory(IScriptState* pState)
 	CScriptFuncArgString* pEntityID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityID->m_sValue));
 	if (pCharacter) {
-		map<string, vector<IEntity*>> mItems;
-		pCharacter->GetItems(mItems);
-		for (const pair<string, vector<IEntity*>>& items : mItems) {
+		for (const pair<string, vector<IItem*>>& items : pCharacter->GetItems()) {
 			for (IEntity* pItem : items.second) {
 				m_pConsole->Println(pItem->GetEntityID());
 			}
@@ -3959,6 +3981,13 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction( "ScreenCapture", ScreenCapture, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("ScreenCaptureFine", ScreenCaptureFine, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eString );

@@ -535,7 +535,7 @@ void CCharacter::AddItem(string sItemID)
 
 void CCharacter::RemoveItem(string sItemID)
 {
-	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	map<string, vector<IItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
 		itItem->second.pop_back();
 		if(itItem->second.size() == 0)
@@ -547,36 +547,46 @@ void CCharacter::RemoveItem(string sItemID)
 
 void CCharacter::WearItem(string sItemID)
 {
-	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	map<string, vector<IItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
-		CItem* pItem = itItem->second.at(0);
-		if (!pItem->GetMesh())
-			pItem->Load();
-		pItem->m_bIsWear = true;
-		const string& sDummyName = pItem->GetDummyNames().at(0);
-		Wear(pItem, sDummyName);
+		CItem* pItem = dynamic_cast<CItem*>(itItem->second.at(0));
+		WearItem(pItem);
 	}
 	else {
-		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
+		throw CEException(string("Error in CCharacter::WearItem() : item '") + sItemID + "' not exists");
 	}
+}
+
+void CCharacter::WearItem(IItem* pBaseItem)
+{
+	CItem* pItem = dynamic_cast<CItem*>(pBaseItem);
+	if (!pItem->GetMesh())
+		pItem->Load();
+	pItem->m_bIsWear = true;
+	const string& sDummyName = pItem->GetDummyNames().at(0);
+	Wear(pItem, sDummyName);
 }
 
 void CCharacter::UnWearItem(string sItemID)
 {
-	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
-	if (itItem != m_mItems.end()) {
-		CItem* pItem = itItem->second.at(0);		
-		pItem->m_bIsWear = false;
-		pItem->SetMesh(nullptr);
-	}
-	else {
+	map<string, vector<IItem*>>::iterator itItem = m_mItems.find(sItemID);
+	if (itItem != m_mItems.end())
+		UnWearItem(itItem->second.at(0));
+	else
 		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
-	}
+}
+
+void CCharacter::UnWearItem(IItem* pBaseItem)
+{
+	CItem* pItem = dynamic_cast<CItem*>(pBaseItem);
+	pItem->m_bIsWear = false;
+	pItem->SetMesh(nullptr);
+	UnWear(pItem);
 }
 
 int CCharacter::GetItemCount(string sItemID)
 {
-	map<string, vector<CItem*>>::iterator itItem = m_mItems.find(sItemID);
+	map<string, vector<IItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
 		return itItem->second.size();
 	}
@@ -595,14 +605,9 @@ IBox* CCharacter::GetBoundingBox()
 	return m_pBBox;
 }
 
-void CCharacter::GetItems(map<string, vector<IEntity*>>& mItems) const
+const map<string, vector<IItem*>>& CCharacter::GetItems() const
 {
-	for (const pair<string, vector<CItem*>>& items : m_mItems) {
-		for (CItem* pItem : items.second) {
-			mItems[items.first].push_back(pItem);
-		}
-	}
-	
+	return m_mItems;
 }
 
 void CCharacter::SetHairs(string hairsName)
@@ -893,9 +898,9 @@ void CCharacter::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	}
 
 
-	for (const pair<string, vector<CItem*>>& item : m_mItems) {
-		for (CItem* pItem : item.second) {
-			animatedEntityInfos.m_mItems[item.first].push_back(pItem->m_bIsWear ? 1 : 0);
+	for (const pair<string, vector<IItem*>>& item : m_mItems) {
+		for (IItem* pItem : item.second) {
+			animatedEntityInfos.m_mItems[item.first].push_back(pItem->IsWear() ? 1 : 0);
 		}
 	}
 	IBone* pDummyHairs = m_pSkeletonRoot->GetChildBoneByName("DummyHairs");

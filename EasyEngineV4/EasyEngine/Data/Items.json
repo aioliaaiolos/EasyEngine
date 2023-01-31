@@ -4,67 +4,80 @@
 		{
 			"ID": "Armlet_EvilSpelled",
 			"Model": "items/armlet.bme",
-			"Type": "Armlet"
+			"Type": "Armlet",
+			"Preview": "Armlet_EvilSpelled.bmp"
 		},
 		{
 			"ID": "Tunique_Hospital",
 			"Model": "clothes/tunique5.bme",
-			"Type": "Cloth"
+			"Type": "Cloth",
+			"Preview": "Tunique_Hospital.bmp"
 		},
 		{
 			"ID": "Dress_LongueWide",
 			"Model": "clothes/robe5.bme",
-			"Type": "Cloth"
+			"Type": "Cloth",
+			"Preview": "Dress_LongueWide.bmp"
 		},
 		{
 			"ID": "Underpants",
 			"Model": "clothes/slip.bme",
-			"Type": "BottomCloth"
+			"Type": "BottomCloth",
+			"Preview": "Underpants.bmp"
 		},
 		{
 			"ID": "Bra",
 			"Model": "clothes/soutif.bme",
-			"Type": "TopCloth"
+			"Type": "TopCloth",
+			"Preview": "Bra.bmp"
 		},
 		{
 			"ID": "Base_Gauntlet_Left",
 			"Model": "armors/2/BrassiereG.bme",
-			"Type": "Armor_Gauntlet_Left"
+			"Type": "Armor_Gauntlet_Left",
+			"Preview": "Base_Gauntlet_Left.bmp"
 		},
 		{
 			"ID": "Base_Gauntlet_Right",
 			"Model": "armors/2/BrassiereD.bme",
-			"Type": "Armor_Gauntlet_Right"
+			"Type": "Armor_Gauntlet_Right",
+			"Preview": "Base_Gauntlet_Right.bmp"
 		},
 		{
 			"ID": "Base_Cuirass",
 			"Model": "armors/2/cuirasse.bme",
-			"Type": "Armor_Cuirass"
+			"Type": "Armor_Cuirass",
+			"Preview": "Base_Cuirass.bmp"
 		},
 		{
 			"ID": "Base_Pauldron_Left",
 			"Model": "armors/2/epauletteG.bme",
-			"Type": "Armor_Pauldron_Left"
+			"Type": "Armor_Pauldron_Left",
+			"Preview": "Base_Pauldron_Left.bmp"
 		},
 		{
 			"ID": "Base_Pauldron_Right",
 			"Model": "armors/2/epauletteD.bme",
-			"Type": "Armor_Pauldron_Right"
+			"Type": "Armor_Pauldron_Right",
+			"Preview": "Base_Pauldron_Right.bmp"
 		},
 		{
 			"ID": "Base_Boot_Right",
 			"Model": "armors/2/jambiereD.bme",
-			"Type": "Armor_Boot_Right"
+			"Type": "Armor_Boot_Right",
+			"Preview": "Base_Boot_Right.bmp"
 		},
 		{
 			"ID": "Base_Boot_Left",
 			"Model": "armors/2/jambiereG.bme",
-			"Type": "Armor_Boot_Left"
+			"Type": "Armor_Boot_Left",
+			"Preview": "Base_Boot_Left.bmp"
 		},
 		{
 			"ID": "Base_Greave",
 			"Model": "armors/2/jupe.bme",
-			"Type": "Armor_Greave"
+			"Type": "Armor_Greave",
+			"Preview": "base-greaves.bmp"
 		}
 	]
 }

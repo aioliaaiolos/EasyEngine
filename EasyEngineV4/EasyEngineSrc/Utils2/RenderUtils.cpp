@@ -4,6 +4,7 @@
 #include "ILoader.h"
 #include "IEntity.h"
 #include "IGUIManager.h"
+#include "Interface.h"
 #include <algorithm>
 
 void CRenderUtils::DrawBox( const CVector& oMinPoint, const CVector& oDimension, IRenderer& oRenderer )
@@ -13,23 +14,36 @@ void CRenderUtils::DrawBox( const CVector& oMinPoint, const CVector& oDimension,
 	oRenderer.DrawBox( oMinPoint, oDimension );
 }
 
-void CRenderUtils::ScreenCapture( string sFileName, IRenderer* pRenderer, ILoaderManager* pLoaderManager, IEntity* pScene, IGUIManager* pGUIManager )
+void CRenderUtils::ScreenCapture( string sFileName, EEInterface* pInterface, int x, int y, unsigned int w, unsigned int h )
 {
 	vector< unsigned char > vPixels;
 
+	IRenderer* pRenderer = static_cast<IRenderer*>(pInterface->GetPlugin("Renderer"));
+	ISceneManager* pSceneManager = static_cast<ISceneManager*>(pInterface->GetPlugin("SceneManager"));
 	pRenderer->BeginRender();
-	pScene->Update();
+	pSceneManager->GetScene("Game")->Update();
+	IGUIManager* pGUIManager = static_cast<IGUIManager*>(pInterface->GetPlugin("GUIManager"));
+	ILoaderManager* pLoaderManager = static_cast<ILoaderManager*>(pInterface->GetPlugin("LoaderManager"));
+
+	int width = w; 
+	int height = h;
 	if( pGUIManager )
-		pGUIManager->OnRender();
-	unsigned int w, h;
+		pGUIManager->OnRender();	
 	pRenderer->GetResolution( w, h );
-	pRenderer->ReadPixels( 0, 0, w, h, vPixels, IRenderer::T_BGR );
+
+	if (width == -1)
+		width = w;
+	if (height == -1)
+		height = h;
+
+	pRenderer->ReadPixels( x, y, width, height, vPixels, IRenderer::T_BGR );
 	pRenderer->EndRender();
 
 	ILoader::CTextureInfos ti;
 	ti.m_ePixelFormat = ILoader::eRGB;
 	ti.m_vTexels.swap( vPixels );
-	pRenderer->GetResolution( ti.m_nWidth , ti.m_nHeight );
+	ti.m_nWidth = width;
+	ti.m_nHeight = height;
 	if( sFileName.find( ".bmp" ) == -1 )
 		sFileName += ".bmp";
 	ti.m_sFileName = sFileName;

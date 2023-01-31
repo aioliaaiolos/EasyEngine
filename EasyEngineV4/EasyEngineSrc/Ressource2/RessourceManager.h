@@ -65,7 +65,6 @@ public:
 	float				GetLightIntensity( IRessource* pRessource );
 	CVector				GetLightColor( IRessource* pRessource );
 	IRessource::TLight	GetLightType( IRessource* pRessource );
-	void				DisableLight( IRessource* pRessource );
 	void				PopErrorMessage( string& sMessage );
 	void				DestroyAllRessources();
 	ITexture*			CreateRenderTexture(int width, int height, string sShaderName);

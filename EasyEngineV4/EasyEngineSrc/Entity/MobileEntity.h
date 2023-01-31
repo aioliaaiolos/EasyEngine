@@ -33,35 +33,37 @@ public:
 	CCharacter(EEInterface& oInterface, string sFileName, string sID);
 	virtual ~CCharacter();
 
-	float						GetAnimationSpeed(IEntity::TAnimation eAnimationType);
-	void						GetEntityInfos(ILoader::CObjectInfos*& pInfos);
-	void						BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
-	void						Save();
-	void						SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
-	TAnimation					GetCurrentAnimationType() const;
-	void						RunAction(string sAction, bool bLoop);
-	void						Die();
-	void						WearArmorToDummy(string armorName);
-	void						WearShoes(string shoesName) override;
-	void						UnWearShoes(string shoesPath) override;
-	void						UnWearAllShoes() override;
-	void						SetHairs(string sHairsPath) override;
-	void						SetBody(string sBodyName) override;
-	void						Yaw(float fAngle);
-	void						Pitch(float fAngle);
-	void						Roll(float fAngle);
-	IAnimation*					GetCurrentAnimation();
-	void						AddItem(string sItemName);
-	void						RemoveItem(string sItemName);
-	void						WearItem(string sItemID);
-	void						UnWearItem(string sItemID);
-	int							GetItemCount(string sItemID);
-	void						GetItems(map<string, vector<IEntity*>>& vItems) const;
-	void						Link(INode* pParent) override;
-	IBox*						GetBoundingBox();
-	static void					InitStatics(IFileSystem& oFileSystem);
+	float										GetAnimationSpeed(IEntity::TAnimation eAnimationType);
+	void										GetEntityInfos(ILoader::CObjectInfos*& pInfos);
+	void										BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
+	void										Save();
+	void										SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
+	TAnimation									GetCurrentAnimationType() const;
+	void										RunAction(string sAction, bool bLoop);
+	void										Die();
+	void										WearArmorToDummy(string armorName);
+	void										WearShoes(string shoesName) override;
+	void										UnWearShoes(string shoesPath) override;
+	void										UnWearAllShoes() override;
+	void										SetHairs(string sHairsPath) override;
+	void										SetBody(string sBodyName) override;
+	void										Yaw(float fAngle);
+	void										Pitch(float fAngle);
+	void										Roll(float fAngle);
+	IAnimation*									GetCurrentAnimation();
+	void										AddItem(string sItemName);
+	void										RemoveItem(string sItemName);
+	void										WearItem(string sItemID);
+	void										WearItem(IItem* pItem);
+	void										UnWearItem(string sItemID);
+	void										UnWearItem(IItem* pItem);
+	int											GetItemCount(string sItemID);
+	const map<string, vector<IItem*>>&			GetItems() const override;
+	void										Link(INode* pParent) override;
+	IBox*										GetBoundingBox();
+	static void									InitStatics(IFileSystem& oFileSystem);
 
-	static map<string, IEntity::TAnimation>	s_mStringToAnimation;
+	static map<string, IEntity::TAnimation>		s_mStringToAnimation;
 
 protected:
 	typedef void (*TAction)( CCharacter*, bool );
@@ -120,7 +122,7 @@ protected:
 	CVector										m_vNextLocalTranslate;
 	string										m_sStandAnimation;
 	IBox*										m_pBBox;
-	map<string, vector<CItem*>>					m_mItems;
+	map<string, vector<IItem*>>					m_mItems;
 	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sCurrentBodyName;
 

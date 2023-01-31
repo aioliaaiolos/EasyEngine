@@ -89,9 +89,13 @@ function onLoadingGame()
 	//EditWorld("TestHopital");
 	//LoadWorld("TestHopital");
 	
+	LoadWorld("empty");
+	
+	
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
 	//SetSceneMap("HM_terrain02.bmp", "stone001b.bmp", 20000, 1000);
 	
 	//g=GetCharacterID("garde hopital");
 	//Goto(g, -23698, 0, -185424);`
+	//AddCharacterItem("Player", "Base_Greave");
 }

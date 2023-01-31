@@ -30,6 +30,7 @@ public:
 							CGUIWidget( int nWidth, int nHeight );
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin);
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial);
+							CGUIWidget(EEInterface& oInterface, string sFileNam);
 							CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height);
 							CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual					~CGUIWidget(void);
@@ -47,6 +48,7 @@ public:
 	CDimension				GetDimension() const;
 
 	virtual void			SetPosition(float fPosX, float fPosY);
+	void					SetRelativePosition(const CPosition& oPosition);
 	virtual void			SetRelativePosition(float fPosX, float fPosY);
 	void					SetPosition(CPosition p);
 	void					SetY(float fY);
@@ -57,19 +59,20 @@ public:
 	std::string				GetSkinName();
 	CGUIWidget*				GetParent();
 	virtual void			SetParent(CGUIWidget* parent);
-	deque<CGUIWidget*>::iterator	Unlink();
+	deque<CGUIWidget*>::iterator	Unlink(bool bDelete = true);
 	void					UpdatePosition();
+	void					SetVisibility(bool bVisible);
 
 	string					m_sUserData;
 
 	static void				Init( int nResX, int nResY, IShader* pShader );
 
 protected:
-	IMesh*					CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sTextureName, const CRectangle& skin, const CDimension& oImageSize) const;
+	IMesh*					CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& oRessourceManager, string sTextureName, const CRectangle& skin) const;
 	void					CreateQuadMeshInfosFromTexture(IRenderer& oRenderer, ITexture* pTexture, const CRectangle& oSkin, ILoader::CMeshInfos& mi, CRectangle& oFinalSkin) const;
 	void					GetScreenCoordFromTexCoord(const CRectangle& oTexture, const CDimension& oScreenDim, CRectangle& oScreen) const;
 	void					CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& dimQuad, const CRectangle& oSkin, ILoader::CMeshInfos& mi) const;
-	IMesh*					CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin, const CDimension& oImageSize) const;
+	IMesh*					CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin) const;
 	IMesh*					CreateQuad(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& quadSize, const CRectangle& skin) const;
 	void					InitManagers(EEInterface& oInterface);	
 
@@ -85,6 +88,8 @@ protected:
 	std::string				_strSkinName;
 	IRenderer*				m_pRenderer;
 	IRessourceManager*		m_pRessourceManager;
+	EEInterface*			m_pInterface;
+	bool					m_bVisible;
 	static int				s_nScreenResWidth;
 	static int				s_nScreenResHeight;
 	static IShader*			s_pShader;

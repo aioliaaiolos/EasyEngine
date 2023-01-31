@@ -6,6 +6,7 @@ CCamera(oInterface, fFov)
 {
 	m_sEntityID = "Linked camera";
 	m_sTypeName = "LinkedCamera";
+	m_sName = "Linked camera";
 }
 
 CLinkedCamera::~CLinkedCamera()

@@ -53,29 +53,30 @@ void UpdateCamera();
 void GetOptionsByCommandLine( string sCommandArguments, CGFXOption& oOption );
 void DestroyPlugins();
 
-IDrawTool*				m_pDrawTool = NULL;
-IWindow*				m_pWindow = NULL;
-ILoaderManager*			m_pLoaderManager = NULL;
-IRessourceManager*		m_pRessourceManager = NULL;
-IRenderer*				m_pRenderer = NULL;
-IRenderer*				m_pSoftRenderer = NULL;
-ICameraManager* 		m_pCameraManager = NULL;
-IEntityManager* 		m_pEntityManager = NULL;
-IInputManager*			m_pInputManager = NULL;
-IScriptManager* 		m_pScriptManager = NULL;
-IGUIManager*			m_pGUIManager = NULL;
-IHud*					m_pHud = NULL;
-IFileSystem*			m_pFileSystem = NULL;
-IConsole*				m_pConsole = NULL;
-ISceneManager*			m_pSceneManager  = NULL;
-IActionManager*			m_pActionManager = NULL;
-ICollisionManager*		m_pCollisionManager= NULL;
-IEventDispatcher*		m_pEventDispatcher = NULL;
-IXMLParser*				m_pXMLParser = NULL;
-IGeometryManager*		m_pGeometryManager = NULL;
-IPathFinder*			m_pPathFinder = NULL;
+IDrawTool*				m_pDrawTool = nullptr;
+IWindow*				m_pWindow = nullptr;
+ILoaderManager*			m_pLoaderManager = nullptr;
+IRessourceManager*		m_pRessourceManager = nullptr;
+IRenderer*				m_pRenderer = nullptr;
+IRenderer*				m_pSoftRenderer = nullptr;
+ICameraManager* 		m_pCameraManager = nullptr;
+IEntityManager* 		m_pEntityManager = nullptr;
+IInputManager*			m_pInputManager = nullptr;
+IScriptManager* 		m_pScriptManager = nullptr;
+IGUIManager*			m_pGUIManager = nullptr;
+IHud*					m_pHud = nullptr;
+IFileSystem*			m_pFileSystem = nullptr;
+IConsole*				m_pConsole = nullptr;
+ISceneManager*			m_pSceneManager  = nullptr;
+IActionManager*			m_pActionManager = nullptr;
+ICollisionManager*		m_pCollisionManager= nullptr;
+IEventDispatcher*		m_pEventDispatcher = nullptr;
+IXMLParser*				m_pXMLParser = nullptr;
+IGeometryManager*		m_pGeometryManager = nullptr;
+IPathFinder*			m_pPathFinder = nullptr;
 IPhysic*				m_pPhysic = nullptr;
 IEditorManager*			m_pEditorManager = nullptr;
+EEInterface*			m_pInterface = nullptr;
 
 vector< IEntity* > m_vLight;
 bool	m_bFirstTimeOpenFile = true;
@@ -402,7 +403,7 @@ int WINAPI WinMain( HINSTANCE hIstance, HINSTANCE hPrevInstance, LPSTR plCmdLine
 	try
 	{
 #endif // CATCH_EXCEPTION
-		EEInterface* pInterface = InitPlugins( plCmdLine );
+		m_pInterface = InitPlugins( plCmdLine );
 		InitKeyActions();
 		m_pEventDispatcher->AbonneToWindowEvent( NULL, OnWindowEvent );
 		m_pInputManager->AbonneToKeyEvent( NULL, OnKeyAction );
