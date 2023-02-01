@@ -102,3 +102,13 @@ Missions :
 
 Un garde nous interdit de sortir de l'hopital tant qu'on a pas obtenu d'autorisation. En s'adressant à Geraldine, elle nous informe qu'elle est infirmiere et que l'on doit aller voir Ranja, l'administratrice, quand on se sentira pret à sortir. En allant voir Ranja, elle nous dit qu'elle est occupée, elle a perdu un flacon important, et ne sera pas disponible tant qu'elle ne l'a pas retrouvé. En discutant avec les autres patientes on découvre que l'une d'entre elles, Mirabelle, a volé un flacon d'opium, utilisé par les médecins pour soulager les patients. Elle nous propose de l'échanger contre un bracelet qu'elle trouve tres joli détenu par une autre patiente, Namia. En allant discuter avec elle, Namia nous explique qu'il est probablement maudit car lorsqu'elle le porte elle a des visions maléfique et fait des caumemars la nuit. On lui propose de nous le donner et elle accepte.
 
+Etats :
+3. Ranja nous a informé qu'elle cherchait son flacon
+4. Mirabelle est au courant qu'on cherche le flacon de Ranja
+5. Mirabelle nous a demandé d'emprunter le bracelet de Namia
+6. On a informé Namia du fait que Mirabelle voulait son bracelet
+7. Namia nous a donné son bracelet
+8. Mirabelle a pris possession du bracelet et nous a avoué qu'elle avait donné le flacon a Hasna et nous a suggéré d'aller le lui demander
+9. Mirabelle nous a suggéré d'aller demander le flacon à Hasna
+10. Mirabelle nous a informé de l'endroit ou se trouvait Hasna
+11. 

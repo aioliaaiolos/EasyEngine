@@ -149,7 +149,7 @@ void CEntityManager::LoadItems()
 				for (int iItem = 0; iItem < count; iItem++) {
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
-						string sId, sModel, sType, sPreview;
+						string sId, sModel, sClass, sType, sPreview;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
 							if (id.IsString()) {
@@ -160,6 +160,12 @@ void CEntityManager::LoadItems()
 							rapidjson::Value& model = item["Model"];
 							if (model.IsString()) {
 								sModel = model.GetString();
+							}
+						}
+						if (item.HasMember("Class")) {
+							rapidjson::Value& tclass = item["Class"];
+							if (tclass.IsString()) {
+								sClass = tclass.GetString();
 							}
 						}
 						if (item.HasMember("Type")) {
@@ -174,7 +180,7 @@ void CEntityManager::LoadItems()
 								sPreview = type.GetString();
 							}
 						}
-						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mTypeString[sType], sModel, sPreview);
+						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
 						m_mItems[sId] = pItem;
 					}
 				}
@@ -380,7 +386,6 @@ void CEntityManager::GetCharacterInfosFromDatabase(string sCharacterId, ILoader:
 
 void CEntityManager::NormalizeCharacterDatabase()
 {
-	//for (map<string, ILoader::CAnimatedEntityInfos>::iterator it = m_mCharacterInfos.begin();	it != m_mCharacterInfos.end(); it++) {
 	map<string, ILoader::CAnimatedEntityInfos>::iterator it = m_mCharacterInfos.begin();
 	while(it != m_mCharacterInfos.end()) {
 		string sNameLow = it->first;

@@ -580,7 +580,6 @@ void CCharacter::UnWearItem(IItem* pBaseItem)
 {
 	CItem* pItem = dynamic_cast<CItem*>(pBaseItem);
 	pItem->m_bIsWear = false;
-	pItem->SetMesh(nullptr);
 	UnWear(pItem);
 }
 

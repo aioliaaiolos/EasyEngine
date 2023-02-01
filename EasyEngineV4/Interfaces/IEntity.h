@@ -215,7 +215,7 @@ public:
 	virtual void				SetHMFile(string sHMFile) = 0;
 	virtual void				DeleteTempDirectories() = 0;
 	virtual void				HandleStateChanged(StateChangedCallback callback, CPlugin* pData) = 0;
-	virtual void				UnhandleStateChanged() = 0;
+	virtual void				UnhandleStateChanged(StateChangedCallback callback) = 0;
 	virtual void				OnChangeSector() = 0;
 	virtual void				SetRessourceFileName(string sNewFileName) = 0;
 };

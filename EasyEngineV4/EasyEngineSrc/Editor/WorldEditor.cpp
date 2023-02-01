@@ -328,8 +328,8 @@ void CWorldEditor::LoadFromJson(string sFileName)
 			string root;
 			m_oFileSystem.GetLastDirectory(root);
 			IMapEditor* pMapEditor = dynamic_cast<IMapEditor*>(m_pEditorManager->GetEditor(IEditor::Type::eMap));
-			m_pScene->HandleStateChanged(HandleSceneLoadingComplete, this);
 			pMapEditor->Load(m_mMaps.begin()->first);
+			m_pScene->HandleStateChanged(HandleSceneLoadingComplete, this);
 		}
 
 		if (world.HasMember("Characters")) {
@@ -520,16 +520,18 @@ IEntity* CWorldEditor::SpawnCharacter(string sID)
 	if (!m_bEditionMode)
 		SetEditionMode(true);
 
-	m_pEditingEntity = m_oEntityManager.BuildCharacterFromDatabase(sID, m_pScene);
+	string sIDLow = sID;
+	std::transform(sID.begin(), sID.end(), sIDLow.begin(), tolower);
+	m_pEditingEntity = m_oEntityManager.BuildCharacterFromDatabase(sIDLow, m_pScene);
 	if (!m_pEditingEntity) {
 		ostringstream oss;
-		oss << "Erreur : Personnage " << sID << " introuvable dans la base de donnees des personnages.";
+		oss << "Erreur : Personnage " << sIDLow << " introuvable dans la base de donnees des personnages.";
 		throw CEException(oss.str());
 	}
-	m_oEntityManager.AddEntity(m_pEditingEntity, sID);
+	m_oEntityManager.AddEntity(m_pEditingEntity, sIDLow);
 	InitSpawnedEntity();
 	CMatrix m;
-	m_mCharacterMatrices[sID].first = m;
+	m_mCharacterMatrices[sIDLow].first = m;
 	m_vEntities.push_back(m_pEditingEntity);
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 	m_eEditorMode = TEditorMode::eAdding;

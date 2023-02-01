@@ -105,7 +105,7 @@ public:
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, const vector<CCondition>& vConditions, const vector<string>& vAction);
 	void									AddGreating(string sText, vector<CCondition>& conditions);
-	void									AddTopicText(const string& sTopicText);
+	void									AddTopicText(const string& sTopicText, bool bNewParagraph = true);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
 	string									GetSpeakerId();

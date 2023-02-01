@@ -918,7 +918,8 @@ void CEntity::GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& pa
 
 void CEntity::SetNewBonesMatrixArray( std::vector< CMatrix >& vMatBones )
 {
-	m_pRessource->GetShader()->SendUniformMatrix4Array( "matBones", vMatBones, true );
+	if(m_pRessource)
+		m_pRessource->GetShader()->SendUniformMatrix4Array( "matBones", vMatBones, true );
 }
 
 float CEntity::GetWeight()

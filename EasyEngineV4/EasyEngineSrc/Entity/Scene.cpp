@@ -62,7 +62,6 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_sDiffuseFileName(diffuseFileName),
 	m_nMapLength(1000),
 	m_fMapHeight(10.f),
-	m_oStateChangedCallback(nullptr, nullptr),
 	m_eSceneState(eStart)
 {
 	m_nID = 0;
@@ -331,14 +330,19 @@ void CScene::DeleteTempDirectories()
 
 void CScene::HandleStateChanged(StateChangedCallback callback, CPlugin* pData)
 {
-	m_oStateChangedCallback.first = callback;
-	m_oStateChangedCallback.second = pData;
+	m_vStateChangedCallback.push_back(pair<StateChangedCallback, CPlugin*>(callback, pData));
 }
 
-void CScene::UnhandleStateChanged()
+void CScene::UnhandleStateChanged(StateChangedCallback callback)
 {
-	m_oStateChangedCallback.first = nullptr;
-	m_oStateChangedCallback.second = nullptr;
+	vector<pair<StateChangedCallback, CPlugin*>>::iterator itCallback = std::find_if(m_vStateChangedCallback.begin(), m_vStateChangedCallback.end(),
+		[callback](pair<StateChangedCallback, CPlugin*>& p)
+	{
+		return p.first == callback; 
+	});
+	
+	if (itCallback != m_vStateChangedCallback.end())
+		m_vStateChangedCallback.erase(itCallback);
 }
 
 void CScene::SetRessourceFileName(string sNewFileName)
@@ -355,15 +359,19 @@ void CScene::UpdateState()
 	switch (m_eSceneState) {
 
 	case eStart:
-		if (IsLoadingComplete() && m_oStateChangedCallback.first) {
+		if (IsLoadingComplete()) {
 			m_eSceneState = eLoadingComplete;
-			m_oStateChangedCallback.first(m_eSceneState, m_oStateChangedCallback.second);
+			for (pair<StateChangedCallback, CPlugin*>& p : m_vStateChangedCallback)
+				if (p.first)
+					p.first(m_eSceneState, p.second);
 			m_oPhysic.SetGravity(0);
 		}
 		break;
 	case eLoadingComplete:
 		m_eSceneState = eFirstUpdateDone;
-		m_oStateChangedCallback.first(m_eSceneState, m_oStateChangedCallback.second);
+		for (pair<StateChangedCallback, CPlugin*>& p : m_vStateChangedCallback)
+			if (p.first)
+				p.first(m_eSceneState, p.second);
 		break;
 	case eFirstUpdateDone:
 		m_oPhysic.RestoreGravity();
@@ -651,6 +659,7 @@ void CScene::Clear()
 		pMapCamera = m_oCameraManager.CreateCamera(ICameraManager::TFree, 40.f);
 	pMapCamera->Link(this);
 	m_eSceneState = eStart;
+	m_vStateChangedCallback.clear();
 }
 
 void CScene::ClearCharacters()

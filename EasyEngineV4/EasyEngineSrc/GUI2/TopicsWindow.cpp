@@ -241,8 +241,11 @@ void CTopicsWindow::OnChoiceCalled(string sChoices)
 			break;
 	}
 
-	for (const pair<int, string>& choice : choices)
-		AddTopicText(string("<choice=") + std::to_string(choice.first) + ">" + choice.second + "</choice>");
+	int nChoiceNumber = 0;
+	for (const pair<int, string>& choice : choices) {
+		AddTopicText(string("<choice=") + std::to_string(choice.first) + ">" + choice.second + "</choice>", nChoiceNumber < choices.size() - 1 ? false : true);
+		nChoiceNumber++;
+	}
 }
 
 
@@ -255,7 +258,7 @@ void CTopicsWindow::DecomposeTopicText(string sTopicText, vector<vector<pair<int
 	for (pair<int, string>& oText : vSubString) {
 		if (oText.first == 0) {
 			vector<string> vLines;
-			CStringUtils::Truncate(oText.second, m_nMaxCharPerLine, vLines);
+			CStringUtils::Truncate(oText.second, m_nMaxCharPerLine, vLines, false);
 			for (string s : vLines) {
 				vRearrangedSubString.back().push_back(pair<int, string>(0, s));
 			}
@@ -313,7 +316,7 @@ float CTopicsWindow::PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIW
 	return y;
 }
 
-void CTopicsWindow::AddTopicText(const string& sTopicText)
+void CTopicsWindow::AddTopicText(const string& sTopicText, bool bNewParagraph)
 {
 	int y = 0;
 	vector<string> vTopicLines;
@@ -326,10 +329,12 @@ void CTopicsWindow::AddTopicText(const string& sTopicText)
 	CGUIWindow* pTopicWidget = new CGUIWindow;
 	y = PutWidgetArrayIntoTopicWidget(vTopicWidgets, pTopicWidget);
 
-	CGUIWidget* pBlank = m_pGUIManager->CreateStaticText("      ");
-	m_pTopicTextFrame->AddWidget(pBlank);
-	pBlank->SetRelativePosition(0, y);
-	m_nTopicTextPointer++;
+	if (bNewParagraph) {
+		CGUIWidget* pBlank = m_pGUIManager->CreateStaticText("      ");
+		m_pTopicTextFrame->AddWidget(pBlank);
+		pBlank->SetRelativePosition(0, y);
+		m_nTopicTextPointer++;
+	}
 
 	y = 0;
 	int maxLineCount = (GetDimension().GetHeight() / m_pGUIManager->GetCurrentFontEspacementY()) - 1;
@@ -893,6 +898,7 @@ void CTopicFrame::OnItemSelected(CTopicLink* pTitle)
 	pTopicWindow->SetCurrentTopicName(pTitle->GetTopicInfos().m_sName);
 	pTopicWindow->AddTopicText(pTitle->GetTopicInfos().m_sText);
 	pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager(), pTopicWindow);
+	UpdateTopics();
 }
 
 void CTopicFrame::OnItemHover(CGUIWidget* pTitle)

@@ -74,7 +74,7 @@ public:
 	void														SetHMFile(string sHMFile) override;
 	void														DeleteTempDirectories() override;
 	void														HandleStateChanged(StateChangedCallback callback, CPlugin* pPlugin) override;
-	void														UnhandleStateChanged() override;
+	void														UnhandleStateChanged(IScene::StateChangedCallback callback) override;
 	void														SetRessourceFileName(string sNewFileName) override;
 
 private:
@@ -122,7 +122,7 @@ private:
 	int															m_nMapLength;
 	float														m_fMapHeight;
 	vector<CEntity*>											m_vCollideEntities;
-	pair<StateChangedCallback, CPlugin*>						m_oStateChangedCallback;
+	vector<pair<StateChangedCallback, CPlugin*>>				m_vStateChangedCallback;
 	string														m_sCurrentLevelName;
 	TSceneState													m_eSceneState;
 };

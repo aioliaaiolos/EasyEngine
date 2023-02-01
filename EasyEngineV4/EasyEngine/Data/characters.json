@@ -183,31 +183,6 @@
 			"Hairs": "hairs02"
 		},
 		{
-			"Name": "Player",
-			"ObjectName": "Player",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body04.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "Player",
-			"Weight": 0.0,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.30000001192092896,
-				0.30000001192092896,
-				0.30000001192092896
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"Speed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": ""
-		},
-		{
 			"Name": "ranja",
 			"ObjectName": "ranja",
 			"RessourceName": "Perso",
@@ -310,8 +285,8 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"Name": "christina",
-			"ObjectName": "christina",
+			"Name": "hasna",
+			"ObjectName": "hasna",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body04.bme",
 			"ParentName": "Scene",
@@ -321,9 +296,9 @@
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "textures/skin01-moyenne.bmp",
 			"Specular": [
-				0.0,
-				0.0,
-				0.0
+				0.5,
+				0.5,
+				0.5
 			],
 			"AnimationSpeeds": [
 				{
@@ -331,7 +306,20 @@
 					"Speed": 1.0
 				}
 			],
-			"Items": [],
+			"Items": [
+				{
+					"ItemName": "Bra",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Underpants",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
 			"Hairs": "hairs05"
 		},
 		{
@@ -365,6 +353,31 @@
 				}
 			],
 			"Hairs": "hairs05"
+		},
+		{
+			"Name": "player",
+			"ObjectName": "player",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "Player",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-tres-claire.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": "hairs01"
 		}
 	]
 }

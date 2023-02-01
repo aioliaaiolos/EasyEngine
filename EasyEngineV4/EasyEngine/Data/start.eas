@@ -89,7 +89,7 @@ function onLoadingGame()
 	//EditWorld("TestHopital");
 	//LoadWorld("TestHopital");
 	
-	LoadWorld("empty");
+	LoadWorld("", "OnWorldLoaded");
 	
 	
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
@@ -98,4 +98,23 @@ function onLoadingGame()
 	//g=GetCharacterID("garde hopital");
 	//Goto(g, -23698, 0, -185424);`
 	//AddCharacterItem("Player", "Base_Greave");
+}
+
+function OnWorldLoaded()
+{
+	SetAnimationSpeed(GetEntityID("Player"), "run", 1.0);
+	/*
+	AddCharacterItem("Player", "Armlet_EvilSpelled");
+	AddCharacterItem("Player", "Tunique_Hospital");
+	AddCharacterItem("Player", "Underpants");
+	AddCharacterItem("Player", "Bra");
+	AddCharacterItem("Player", "Base_Gauntlet_Left");
+	AddCharacterItem("Player", "Base_Gauntlet_Right");	
+	AddCharacterItem("Player", "Base_Cuirass");
+	AddCharacterItem("Player", "Base_Pauldron_Left");
+	AddCharacterItem("Player", "Base_Pauldron_Right");
+	AddCharacterItem("Player", "Base_Boot_Left");
+	AddCharacterItem("Player", "Base_Boot_Right");
+	AddCharacterItem("Player", "Base_Greave");
+	AddCharacterItem("Player", "Dress_LongueWide");*/
 }

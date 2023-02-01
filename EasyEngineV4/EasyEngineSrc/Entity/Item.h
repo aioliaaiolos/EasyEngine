@@ -7,22 +7,33 @@ public:
 
 	enum Type
 	{
-		eNone = -1,
-		eArmlet = 0,
-		eCloth,
-		eTopCloth,
-		eBottomCloth,
-		eArmorGauntletLeft,
-		eArmorGauntletRight,
-		eArmorCuirass,
-		eArmorPauldronLeft,
-		eArmorPauldronRight,
-		eArmorBootLeft,
-		eArmorBootRight,
-		eArmorGreaves
+		eTypeNone = -1,
+		eArm = 0,
+		eRightArm,
+		eLeftArm,
+		eSkin,
+		eChest,
+		eBelt,
+		eForearm,
+		eShoulder,
+		eCalf,
+		eLeftForearm,
+		eRightForearm,
+		eLeftShoulder,
+		eRightShoulder,
+		eLeftCalf,
+		eRightCalf		
 	};
 
-	CItem(EEInterface& oInterface, string sID, Type type, string sModelName, string sPreviewPath);
+	enum TClass
+	{
+		eClassNone = -1,
+		eCloth = 0,
+		eArmor,
+		eJewel
+	};
+
+	CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath);
 	void operator=(const CItem& item);
 	void SetOwner(ICharacter* pCharacter);
 	void Wear() override;
@@ -32,14 +43,18 @@ public:
 	string&	GetPreviewPath() override;
 	bool IsWear() override;
 
+	TClass m_eClass;
 	Type m_eType;
 	string m_sModelName;
 	
-	static map<string, Type> s_mTypeString;
+	static Type GetTypeFromString(string sType);
+	static map<string, TClass> s_mClassString;
+	
 	static map<Type, vector<string>> s_mBodyDummies;
 
 	bool	m_bIsWear;
 private:
+	static map<string, Type> s_mTypeString;
 	string	m_sPreviewPath;
 	ICharacter*	m_pOwner = nullptr;
 	

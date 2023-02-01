@@ -284,6 +284,9 @@ void OnUpdateWindow()
 	catch (CRenderException& e) {
 		MessageBoxA(NULL, e.what(), "RenderException", MB_ICONERROR);
 	}
+	catch (CCompilationErrorException& e) {
+		m_pConsole->Println(string("Compilation error line ") + std::to_string(e.GetErrorLine()) + " column " + std::to_string(e.GetErrorColumn()));
+	}
 	catch (CEException& e) {
 		m_pConsole->Println(e.what());
 	}

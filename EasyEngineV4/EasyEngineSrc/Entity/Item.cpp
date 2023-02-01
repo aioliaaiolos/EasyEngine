@@ -2,45 +2,62 @@
 
 
 map<CItem::Type, vector<string>> CItem::s_mBodyDummies = map<CItem::Type, vector<string>>{
-	{ CItem::eArmlet, vector<string>{"BodyDummyBrassiereG", "BodyDummyBrassiereD"} },
-	{ CItem::eCloth, vector<string>{""} },
-	{ CItem::eTopCloth, vector<string>{"BodyDummyCuirasse"} },
-	{ CItem::eBottomCloth, vector<string>{"BodyDummyJupe"} },
-	{ CItem::eArmorGauntletLeft, vector<string>{"BodyDummyBrassiereG"} },
-	{ CItem::eArmorGauntletRight, vector<string>{"BodyDummyBrassiereD"} },
-	{ CItem::eArmorCuirass, vector<string>{"BodyDummyCuirasse"} },
-	{ CItem::eArmorPauldronLeft, vector<string>{"BodyDummyEpauletteG"} },
-	{ CItem::eArmorPauldronRight, vector<string>{"BodyDummyEpauletteD"} },
-	{ CItem::eArmorBootLeft, vector<string>{"BodyDummyJambiereG"} },
-	{ CItem::eArmorBootRight, vector<string>{"BodyDummyJambiereD"} },
-	{ CItem::eArmorGreaves, vector<string>{"BodyDummyJupe"} }
+	{ CItem::Type::eArm, vector<string>{"BodyDummyBrassiereG", "BodyDummyBrassiereD"} },
+	{ CItem::Type::eSkin, vector<string>{""} },
+	{ CItem::Type::eChest, vector<string>{"BodyDummyCuirasse"} },
+	{ CItem::Type::eBelt, vector<string>{"BodyDummyJupe"} },
+	{ CItem::Type::eLeftForearm, vector<string>{"BodyDummyBrassiereG"} },
+	{ CItem::Type::eRightForearm, vector<string>{"BodyDummyBrassiereD"} },
+	{ CItem::Type::eChest, vector<string>{"BodyDummyCuirasse"} },
+	{ CItem::Type::eLeftShoulder, vector<string>{"BodyDummyEpauletteG"} },
+	{ CItem::Type::eRightShoulder, vector<string>{"BodyDummyEpauletteD"} },
+	{ CItem::Type::eLeftCalf, vector<string>{"BodyDummyJambiereG"} },
+	{ CItem::Type::eRightCalf, vector<string>{"BodyDummyJambiereD"} },
+	{ CItem::Type::eBelt, vector<string>{"BodyDummyJupe"} }
 };
 
 map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
-	{ "", CItem::eNone },
-	{ "Cloth", CItem::eCloth },
-	{ "Armlet", CItem::eArmlet },
-	{ "TopCloth", CItem::eTopCloth },
-	{ "BottomCloth", CItem::eBottomCloth },
-	{ "Armor_Gauntlet_Left", CItem::eArmorGauntletLeft },
-	{ "Armor_Gauntlet_Right", CItem::eArmorGauntletRight },
-	{ "Armor_Cuirass", CItem::eArmorCuirass },
-	{ "Armor_Pauldron_Left", CItem::eArmorPauldronLeft },
-	{ "Armor_Pauldron_Right", CItem::eArmorPauldronRight },
-	{ "Armor_Boot_Right", CItem::eArmorBootRight },
-	{ "Armor_Boot_Left", CItem::eArmorBootLeft },
-	{ "Armor_Greave", CItem::eArmorGreaves }
+	{ "", CItem::eTypeNone },
+	{ "Skin", CItem::eSkin },
+	{ "Arm", CItem::eArm },
+	{ "Right-Arm", CItem::eRightArm },
+	{ "Left-Arm", CItem::eLeftArm },
+	{ "Chest", CItem::eChest },
+	{ "Belt", CItem::eBelt },
+	{ "Left-Forearm", CItem::eLeftForearm },
+	{ "Right-Forearm", CItem::eRightForearm },
+	{ "Chest", CItem::eChest},
+	{ "Left-Shoulder", CItem::eLeftShoulder },
+	{ "Right-Shoulder", CItem::eRightShoulder },
+	{ "Right-Calf", CItem::eRightCalf },
+	{ "Left-Calf", CItem::eLeftCalf },
+	{ "Belt", CItem::eBelt }
 };
 
+map<string, CItem::TClass> CItem::s_mClassString = map<string, CItem::TClass>{ 
+	{"Cloth", CItem::TClass::eCloth},
+	{"Armor", CItem::TClass::eArmor},
+	{"Jewel", CItem::TClass::eJewel}
+};
 
-CItem::CItem(EEInterface& oInterface, string sID, Type type, string sModelName, string sPreviewPath) :
+CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath) :
 	CEntity(oInterface),
+	m_eClass(tclass),
 	m_eType(type),
 	m_sModelName(sModelName),
 	m_bIsWear(false),
 	m_sPreviewPath(sPreviewPath)
 {
 	m_sEntityID = sID;
+}
+
+CItem::Type CItem::GetTypeFromString(string sType)
+{
+	map<string, CItem::Type>::iterator itType = s_mTypeString.find(sType);
+	if (itType != s_mTypeString.end()) {
+		return itType->second;
+	}
+	return eTypeNone;
 }
 
 void CItem::operator=(const CItem& item)

@@ -43,6 +43,7 @@ void CCharacterEditor::SetEditionMode(bool bEditionMode)
 		CEditor::SetEditionMode(bEditionMode);
 	}
 	if (bEditionMode) {
+		m_oEntityManager.Clear();
 		m_pScene->Clear();
 		ZoomCameraBody();
 		IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.1f);
@@ -50,7 +51,7 @@ void CCharacterEditor::SetEditionMode(bool bEditionMode)
 		pLight->SetLocalPosition(pos);
 		pLight->Link(m_pScene);
 		m_oInputManager.ShowMouseCursor(true);
-		m_pScene->Update();
+		//m_pScene->Update();
 	}
 }
 
@@ -167,19 +168,22 @@ void CCharacterEditor::InitHeadNode(INode* pParent)
 
 void CCharacterEditor::SpawnEntity(string sCharacterId)
 {
+	string sCharacterIdLow = sCharacterId;
+	std::transform(sCharacterId.begin(), sCharacterId.end(), sCharacterIdLow.begin(), tolower);
+
 	if(!m_bEditionMode)
 		SetEditionMode(true);
 	if (m_pCurrentCharacter)
 		m_pCurrentCharacter->Unlink();
-	m_pCurrentCharacter = dynamic_cast<ICharacter*>(m_oEntityManager.GetEntity(sCharacterId));
+	m_pCurrentCharacter = dynamic_cast<ICharacter*>(m_oEntityManager.GetEntity(sCharacterIdLow));
 	if (!m_pCurrentCharacter) {
-		m_pCurrentCharacter = m_oEntityManager.BuildCharacterFromDatabase(sCharacterId, m_pScene);
+		m_pCurrentCharacter = m_oEntityManager.BuildCharacterFromDatabase(sCharacterIdLow, m_pScene);
 		if (!m_pCurrentCharacter) {
-			if (!sCharacterId.empty()) {
-				if (sCharacterId == "Player")				
+			if (!sCharacterIdLow.empty()) {
+				if (sCharacterIdLow == "Player")
 					m_pCurrentCharacter = m_oEntityManager.CreatePlayer("body03");
 				else
-					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03", sCharacterId);
+					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03", sCharacterIdLow);
 				m_pCurrentCharacter->Link(m_pScene);
 			}
 			else

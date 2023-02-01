@@ -107,8 +107,8 @@
 				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
-					"Value": "3",
-					"Comp": "=="
+					"Value": "2",
+					"Comp": ">"
 				}
 			]
 		},
@@ -239,7 +239,77 @@
 				}
 			],
 			"Action": ["Mission_Infirmerie=9"]
-		},		
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Un flacon ? Quel flacon ?"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "10",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Choice(\"{1}Ne faites pas l'innocente Hasna, Mirabelle m'a tout raconté à propos du flacon et je m'apprete à mon tour à en informer Ranja, sauf si vous coopérez évidemment {2}Oh rien, je demandais ca comme ca\");"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Non mais pour qui vos prenez-vous, vous venez à peine d'arriver et vous me menacez déjà ? Allez voir Ranja si ca vous amuse, vous n'avez aucune preuve et vous ne trouverez aucun flacon dans mes affaires."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "10",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Hmm... oui c'est ca, je vous ai vu discuter avec Mirabelle tout à l'heure. Qu'est que vous mijotez tous les deux ? "
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "10",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			]
+		},
 		{
 			"Title" : "Hasna",
 			"Text" : [
@@ -258,7 +328,8 @@
 					"Value": "9",
 					"Comp": "=="
 				}
-			]
+			],
+			"Action": ["Mission_Infirmerie=10"]
 		},
 		{
 			"Title" : "Petit service",
@@ -428,7 +499,7 @@
 				"Ce bracelet est en effet tres joli, je l'ai trouvé il y a quelques jours, avant mon arrivée, mais depuis il ne m'arrive que des problemes.",
 				"Ca a commencé par de petits incidents, puis ces maux de tete qui m'ont conduite ici. ",
 				"Ca peut paraitre absurde mais je commence à croire qu'il a été enchanté par un maléfice et j'aimerais m'en débarrasser. ",
-				"Je comptais le garder avec moi jusqu'à ma sortie mais si cette peste de Mirabelle tient tellement à me prendre mon bracelet, soit, je lui donne avec plaisir !"
+				"Je comptais le garder avec moi jusqu'à ma sortie mais si cette peste de Mirabelle tient tellement à me le prendre, soit, je lui donne avec grand plaisir !"
 				],
 			"Conditions": [
 				{
@@ -448,7 +519,7 @@
 		{
 			"Title": "Petite lecon",
 			"Text": [
-				"Tres bien, votre vertu vous honore, revenez-me voir si vous changez d'avis."
+				"Tres bien, votre droiture vous honore, revenez-me voir si vous changez d'avis."
 				],
 			"Conditions": [
 				{
@@ -599,6 +670,18 @@
 					"Type": "Global",
 					"Name": "stateGuardHospital",
 					"Value": "1",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Text": [
+				"Quoi ?"				
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
 					"Comp": "=="
 				}
 			]

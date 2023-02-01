@@ -2666,7 +2666,8 @@ void AddCharacterItem(IScriptState* pState)
 	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
 	CScriptFuncArgString* pItemName = (CScriptFuncArgString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
-	pCharacter->AddItem(pItemName->m_sValue);
+	if(pCharacter)
+		pCharacter->AddItem(pItemName->m_sValue);
 }
 
 void RemoveCharacterItem(IScriptState* pState)
@@ -3163,13 +3164,25 @@ void Advertise(IScriptState* pState)
 
 }
 
+string g_sScriptCallback;
+
+void OnSceneStateChangedCallback(IScene::TSceneState state, CPlugin*)
+{
+	if (state == IScene::eLoadingComplete)
+		m_pScriptManager->ExecuteCommand(g_sScriptCallback + "();");
+}
+
 void LoadWorld(IScriptState* pState)
 {
 	try
 	{
 		CScriptFuncArgString* pWorldName = (CScriptFuncArgString*)pState->GetArg(0);
+		CScriptFuncArgString* pCallback = (CScriptFuncArgString*)pState->GetArg(1);
+		g_sScriptCallback = pCallback->m_sValue;
 		m_pWorldEditor->SetEditionMode(false);
 		m_pWorldEditor->Load(pWorldName->m_sValue);
+		if(!g_sScriptCallback.empty())
+			m_pScene->HandleStateChanged(OnSceneStateChangedCallback, nullptr);
 	}
 	catch (CFileException& e)
 	{
@@ -3866,6 +3879,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction( "SaveMap", SaveMap, vType, eVoid);
 
 	vType.clear();
+	vType.push_back(eString);
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("LoadWorld", LoadWorld, vType, eVoid);
 
