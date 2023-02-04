@@ -1,8 +1,7 @@
 {
 	"Characters": [
 		{
-			"Name": "garde hopital",
-			"ObjectName": "garde hopital",
+			"EntityID": "garde hopital",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body01.bme",
 			"ParentName": "Scene",
@@ -75,8 +74,7 @@
 			"Hairs": "hairs02"
 		},
 		{
-			"Name": "geraldine",
-			"ObjectName": "geraldine",
+			"EntityID": "geraldine",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body03.bme",
 			"ParentName": "Scene",
@@ -113,8 +111,7 @@
 			"Hairs": "hairs02"
 		},
 		{
-			"Name": "mirabelle",
-			"ObjectName": "mirabelle",
+			"EntityID": "mirabelle",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
@@ -145,8 +142,7 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"Name": "namia",
-			"ObjectName": "namia",
+			"EntityID": "namia",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
@@ -183,8 +179,7 @@
 			"Hairs": "hairs02"
 		},
 		{
-			"Name": "ranja",
-			"ObjectName": "ranja",
+			"EntityID": "ranja",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body04.bme",
 			"ParentName": "Scene",
@@ -215,8 +210,7 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"Name": "charlotte",
-			"ObjectName": "charlotte",
+			"EntityID": "charlotte",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body03.bme",
 			"ParentName": "Scene",
@@ -253,8 +247,7 @@
 			"Hairs": "hairs05"
 		},
 		{
-			"Name": "christine",
-			"ObjectName": "christine",
+			"EntityID": "christine",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
@@ -285,8 +278,7 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"Name": "hasna",
-			"ObjectName": "hasna",
+			"EntityID": "hasna",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body04.bme",
 			"ParentName": "Scene",
@@ -323,8 +315,7 @@
 			"Hairs": "hairs05"
 		},
 		{
-			"Name": "curvy",
-			"ObjectName": "curvy",
+			"EntityID": "curvy",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
@@ -355,8 +346,7 @@
 			"Hairs": "hairs05"
 		},
 		{
-			"Name": "player",
-			"ObjectName": "player",
+			"EntityID": "player",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
@@ -365,6 +355,30 @@
 			"Weight": 0.0,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-claire.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": "hairs01"
+		},
+		{
+			"EntityID": "Player",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "Player",
+			"Weight": 0.0,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-tres-blanche.bmp",
 			"Specular": [
 				0.0,
 				0.0,

@@ -194,7 +194,7 @@
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Hein ? Quel flacon ? Ah oui, le flacon... heu... c'est idiot, j'ai oublié de vous le préciser mais comme il dégageait une odeur inhabituelle ",
+				"Hein ? Quel flacon ? Ah oui, le flacon... heu... c'est idiot, j'ai oublié de vous le préciser mais comme il dégageait une odeur bizarre ",
 				"je l'ai finalement échangé contre le charmant collier d'Hasna. Comprenez-moi, je ne pouvais tout de meme pas souiller ma noble peau avec un parfum frelaté ! ",
 				"Vous ne m'en voulez pas j'espere ?"
 			],
@@ -258,12 +258,12 @@
 					"Comp": "=="
 				}
 			],
-			"Action": ["Choice(\"{1}Ne faites pas l'innocente Hasna, Mirabelle m'a tout raconté à propos du flacon et je m'apprete à mon tour à en informer Ranja, sauf si vous coopérez évidemment {2}Oh rien, je demandais ca comme ca\");"]
+			"Action": ["Choice(\"{1}Ne faites pas l'innocente Hasna, Mirabelle m'a tout raconté à propos du flacon et je m'apprete à mon tour à en informer Ranja, sauf si vous coopérez évidemment{2}Oh rien, je demandais ca comme ca\");"]
 		},
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Non mais pour qui vos prenez-vous, vous venez à peine d'arriver et vous me menacez déjà ? Allez voir Ranja si ca vous amuse, vous n'avez aucune preuve et vous ne trouverez aucun flacon dans mes affaires."
+				"Non mais pour qui vos prenez-vous, vous venez à peine d'arriver et vous me menacez déjà ? Allez voir Ranja si ca vous amuse, vous n'avez aucune preuve et vous ne trouverez aucun flacon dans mes affaires !"
 			],
 			"Conditions": [
 				{
@@ -283,12 +283,16 @@
 					"Value": "1",
 					"Comp": "=="
 				}
+			],
+			"Action": [
+				"Mission_Infirmerie=11;",
+				"Goodbye();"
 			]
 		},
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Hmm... oui c'est ca, je vous ai vu discuter avec Mirabelle tout à l'heure. Qu'est que vous mijotez tous les deux ? "
+				"C'est ca, c'est ca... Je vous ai vu discuter avec Mirabelle tout à l'heure, qu'est que vous mijotez tous les deux ? "
 			],
 			"Conditions": [
 				{
@@ -308,7 +312,153 @@
 					"Value": "2",
 					"Comp": "=="
 				}
+			],
+			"Action" : [
+				"Mission_Infirmerie=12;",
+				"Choice(\"{1}Mirabelle m'a dit qu'elle vous avait donné un flacon, pourrais-je le voir ?\")"
 			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Hein ? Pourquoi faire ?"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "12",
+					"Comp": "=="
+				}
+			],
+			"Action" : [
+				"Choice(\"{1}Heu... j'ai un faible pour Géraldine et j'aimerais me mettre un peu de parfum pour ne pas sentir le bouc la prochaine fois que j'irai lui parler {2} Hmmm, avec votre charme naturel et l'odeur de rose qui se dégage de votre peau, vous n'avez nul besoin de vous parfumer.{3}Il me faut absolument ce flacon, je dois le donner à Ranja pour sortir d'ici\")",
+				"Mission_Infirmerie=13"
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Un faible ? Pour Géraldine ? Ce n'est pas un parfum qu'il vous faut mais un onguent pour les yeux."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "13",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Action" : ["Mission_Infirmerie=12", "Goodbye()"
+				]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Ai-je l'air d'etre née de la derniere pluie ? Ce n'est pas avec des flatteries que vous obtiendrez quelque chose de moi."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "13",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Action" : ["Mission_Infirmerie=12", "Goodbye()"]
+		},		
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Bien, je vois. En effet, j'ai donné mon collier à Mirabelle l'autre jour en échange de son flacon d'opium, cette idiote pensait que c'était du parfum...", 
+				"Ce produit divin m'a fait passer de bons moments, mais je sors bientot et je ne peux pas prendre le risque de me faire attraper par un garde. ",
+				"C'est pourquoi je l'ai donné à <link>Aluyn</link>."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "13",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "3",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Je vous ai dit tout ce que je savais, allez voir <link>Aluyn</link> et ne me melez plus à vos affaires."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "12",
+					"Comp": ">"
+				}
+			]
+		},
+		{
+			"Title": "Aluyn",
+			"Text": [
+				"Une Erane un peu étrange, mais sympathique malgré tout. Un conseil, n'essayez pas de la contrarier si vous voulez obtenir quelque chose. Son lit est à coté de celui de Namia."
+			],
+			"Conditions:" : [
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "14",
+					"Comp": "=="
+				}			
+			],
+			"Action": ["Mission_Infirmerie=15"]
 		},
 		{
 			"Title" : "Hasna",

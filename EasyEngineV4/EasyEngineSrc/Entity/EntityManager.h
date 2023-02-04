@@ -56,6 +56,7 @@ public:
 	IEntity*												CreateQuad(float lenght, float width);
 	IEntity*												CreateBox(const CVector& oDimension ) override;
 	IBoxEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;
+	IItem*													CreateItemEntity(string sItemID) override;
 	void													AddCollideEntity( CEntity* pEntity );
 	void													RemoveCollideEntity( CEntity* pEntity );
 	CEntity*												GetFirstCollideEntity();
@@ -92,7 +93,7 @@ public:
 	map<IMesh*, vector<vector<CMatrix>>>&					GetInstancesBonesTM();
 	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
 	void													ChangeCharacterName(string sOldName, string sNewName);
-	CItem*													GetItem(string sItem);
+	CItem*													GetItem(string sItemID);
 
 private:
 

@@ -198,7 +198,7 @@ m_fEyesRotV( 0 ),
 m_fNeckRotH( 0 ),
 m_fNeckRotV( 0 )
 {
-	m_sEntityID = sID;
+	m_sID = sID;
 	m_sTypeName = "Human";
 	
 	for( int i = 0; i < eAnimationCount; i++ )
@@ -398,7 +398,7 @@ IGeometry* CCharacter::GetBoundingGeometry()
 	static bool bAlreadyThrown = false;
 	if (!bAlreadyThrown) {
 		bAlreadyThrown = true;
-		throw CEException("Warning : you don't associated current animation to bounding boxes for character '" + m_sEntityID + "', the default character box will be used");
+		throw CEException("Warning : you don't associated current animation to bounding boxes for character '" + m_sID + "', the default character box will be used");
 	}
 	return m_pMesh->GetBBox();
 }
@@ -527,8 +527,10 @@ void CCharacter::UnWear(CEntity* pCloth)
 void CCharacter::AddItem(string sItemID)
 {
 	CItem* pItem = new CItem(*m_pEntityManager->GetItem(sItemID));
-	if(pItem)
+	if (pItem) {
 		m_mItems[sItemID].push_back(pItem);
+		pItem->SetOwner(this);
+	}
 	else
 		throw CEException(string("Error in CCharacter::AddItem() : item '" + sItemID + "' not found"));
 }
@@ -537,6 +539,8 @@ void CCharacter::RemoveItem(string sItemID)
 {
 	map<string, vector<IItem*>>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
+		itItem->second.back()->UnWear();
+		itItem->second.back()->SetOwner(nullptr);
 		itItem->second.pop_back();
 		if(itItem->second.size() == 0)
 			m_mItems.erase(itItem);
@@ -579,8 +583,10 @@ void CCharacter::UnWearItem(string sItemID)
 void CCharacter::UnWearItem(IItem* pBaseItem)
 {
 	CItem* pItem = dynamic_cast<CItem*>(pBaseItem);
-	pItem->m_bIsWear = false;
-	UnWear(pItem);
+	if (pItem->m_bIsWear) {
+		pItem->m_bIsWear = false;
+		UnWear(pItem);
+	}
 }
 
 int CCharacter::GetItemCount(string sItemID)
@@ -881,7 +887,6 @@ void CCharacter::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 			animatedEntityInfos.m_vSubEntityInfos.push_back(pSubEntityInfo);
 		}
 	}
-	GetEntityID(animatedEntityInfos.m_sObjectName);
 	string sTypeName;
 	GetTypeName(sTypeName);
 	animatedEntityInfos.m_sTypeName = sTypeName;
@@ -906,7 +911,7 @@ void CCharacter::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 	if (pDummyHairs) {
 		if (pDummyHairs->GetChildCount() > 0) {
 			IEntity* pHairs = dynamic_cast<IEntity*>(pDummyHairs->GetChild(0));
-			animatedEntityInfos.m_sHairs = pHairs->GetEntityID();
+			animatedEntityInfos.m_sHairs = pHairs->GetIDStr();
 		}
 	}
 
@@ -928,9 +933,10 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
 			m_mItems[item.first].push_back(pItem);
+			pItem->SetOwner(this);
 			pItem->m_bIsWear = item.second[0] == 1;
 			if (pItem->m_bIsWear)
-				WearItem(pItem->GetEntityID());
+				WearItem(pItem->GetIDStr());
 		}
 		if (!pAnimatedEntityInfos->m_sHairs.empty())
 			SetHairs(pAnimatedEntityInfos->m_sHairs);
@@ -969,8 +975,8 @@ void CCharacter::SaveToJson()
 		}
 		bool characterExixts = false;
 		int characterIndex = 0;
-		rapidjson::Value characterName(rapidjson::kStringType);
-		characterName.SetString(m_sEntityID.c_str(), doc.GetAllocator());
+		rapidjson::Value entityID(rapidjson::kStringType);
+		entityID.SetString(m_sID.c_str(), doc.GetAllocator());
 
 		rapidjson::Value characters(rapidjson::kArrayType);
 		if (doc.HasMember("Characters"))
@@ -979,7 +985,7 @@ void CCharacter::SaveToJson()
 			for (rapidjson::Value::ConstValueIterator itCharacter = characters.Begin(); itCharacter != characters.End(); itCharacter++)
 			{
 				const rapidjson::Value& character = *itCharacter;
-				if (character.IsObject() && character["Name"] == characterName.GetString())
+				if (character.IsObject() && character["Name"] == entityID.GetString())
 				{
 					characterExixts = true;
 					break;
@@ -990,13 +996,12 @@ void CCharacter::SaveToJson()
 
 		rapidjson::Value character(rapidjson::kObjectType);
 		rapidjson::Value name(rapidjson::kStringType);
-		character.AddMember("Name", characterName, doc.GetAllocator());		
+		character.AddMember("EntityID", entityID, doc.GetAllocator());		
 
-		rapidjson::Value objectName(kStringType), ressourceName(kStringType), ressourceFileName(kStringType), parentName(kStringType), parentBoneID(kNumberType), typeName(kStringType),
+		rapidjson::Value ressourceName(kStringType), ressourceFileName(kStringType), parentName(kStringType), parentBoneID(kNumberType), typeName(kStringType),
 			weight(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
 			items(kArrayType), hairs(kStringType);
 
-		objectName.SetString(pInfos->m_sObjectName.c_str(), doc.GetAllocator());
 		ressourceName.SetString(pInfos->m_sRessourceName.c_str(), doc.GetAllocator());
 		ressourceFileName.SetString(pInfos->m_sRessourceFileName.c_str(), doc.GetAllocator());
 		parentName.SetString(pInfos->m_sParentName.c_str(), doc.GetAllocator());
@@ -1039,7 +1044,6 @@ void CCharacter::SaveToJson()
 		}
 		hairs.SetString(pCharacterInfos->m_sHairs.c_str(), doc.GetAllocator());
 		
-		character.AddMember("ObjectName", objectName, doc.GetAllocator());
 		character.AddMember("RessourceName", ressourceName, doc.GetAllocator());
 		character.AddMember("RessourceFileName", ressourceFileName, doc.GetAllocator());
 		character.AddMember("ParentName", parentName, doc.GetAllocator());

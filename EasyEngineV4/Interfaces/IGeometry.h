@@ -183,6 +183,8 @@ public:
 	virtual IQuad*			CreateQuad(float lenght, float width) = 0;
 	virtual int				GetLastCreateBoxID() = 0;
 	virtual IBox*			GetBox( int nID ) const = 0;
+	virtual void			RayCast(int x, int y, const CMatrix& oWorldMatrix, const CMatrix& projectionMatrix, int nScreenWidth, int nScreenHeight, CVector& origin, CVector& ray) = 0;
+	virtual bool			IsIntersect(const CVector& linePt1, const CVector& linePt2, const CVector& M, float radius) = 0;
 };
 
 #endif // IGEOMETRY_H

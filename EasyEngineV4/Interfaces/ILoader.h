@@ -162,27 +162,27 @@ public:
 		CMatrix		m_oXForm;
 		string		m_sRessourceFileName;
 		string		m_sRessourceName;
-		string		m_sObjectName;
+		string		m_sObjectID;
 		string		m_sParentName;
 		int			m_nParentBoneID;
 		virtual		~CObjectInfos() = 0 {}
 
 		virtual const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{
-			store << m_sObjectName << m_sRessourceName << m_sRessourceFileName << m_oXForm << m_sParentName << m_nParentBoneID;
+			store << m_sObjectID << m_sRessourceName << m_sRessourceFileName << m_oXForm << m_sParentName << m_nParentBoneID;
 			return *this;
 		}
 
 		IPersistantObject& operator << (const CBinaryFileStorage& store) override 
 		{
-			store >> m_sObjectName >> m_sRessourceName >> m_sRessourceFileName >> m_oXForm;
+			store >> m_sObjectID >> m_sRessourceName >> m_sRessourceFileName >> m_oXForm;
 			store >> m_sParentName >> m_nParentBoneID;
 			return *this; 
 		}
 
 		const IPersistantObject& operator >> (CAsciiFileStorage& store) const override 
 		{
-			store << "\nObject name : " << m_sObjectName
+			store << "\nObject name : " << m_sObjectID
 				<< "\nRessource name : " << m_sRessourceName 
 				<< "\nRessource file name : " << m_sRessourceFileName 
 				<< "\nXForm : \n" << m_oXForm 

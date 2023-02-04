@@ -100,7 +100,7 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 
 		}
 		else {
-			pEntity->GetEntityID(entityName);
+			entityName = pEntity->GetIDStr();
 			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
 			if (itCharacter != m_mCharacterMatrices.end())
 				m_mCharacterMatrices.erase(itCharacter);
@@ -112,7 +112,7 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 		}
 	}
 	else {
-		pEntity->GetEntityID(entityName);
+		entityName = pEntity->GetIDStr();
 		map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
 		if (itArea != m_mAreaMatrices.end())
 			m_mAreaMatrices.erase(itArea);
@@ -217,8 +217,7 @@ void CWorldEditor::SaveGame(string fileName)
 		m_pScene->GetCharactersInfos(entities);
 		map<string, pair<CMatrix, string>> mBackupCharacterMatrices = m_mCharacterMatrices;
 		for (IEntity* pEntity : entities) {
-			string entityName;
-			pEntity->GetEntityID(entityName);
+			string entityName = pEntity->GetIDStr();
 			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
 			itCharacter->second.first = pEntity->GetWorldMatrix();
 		}
@@ -551,6 +550,22 @@ int CWorldEditor::SpawnArea(string areaName)
 	CVector dim;
 	IBoxEntity* pAreaEntity = dynamic_cast<IBoxEntity*>(m_pEditingEntity);
 	m_mAreaMatrices[areaName] = pair<IBoxEntity*, pair<CMatrix, CVector>>(pAreaEntity, pair<CMatrix, CVector>(m, dim));
+	return -1;
+}
+
+int CWorldEditor::SpawnItem(string sItemName)
+{
+	if (!m_bEditionMode)
+		SetEditionMode(true);
+	IItem* pItem = m_oEntityManager.CreateItemEntity(sItemName);
+	pItem->Load();
+	m_pEditingEntity = pItem;
+	InitSpawnedEntity();
+	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
+	m_eEditorMode = TEditorMode::eAdding;
+	m_vEntities.push_back(m_pEditingEntity);
+	CMatrix m;
+	m_mItemMatrices[sItemName] = pair<IItem*, CMatrix>(pItem, m);
 	return -1;
 }
 

@@ -80,7 +80,7 @@ function onLoadingGame()
 	//LoadWorld("testMur");
 	//EditWorld("area3");
 	//LoadWorld("area3");
-	//EditWorld("");
+	EditWorld("");
 	//LoadWorld("");
 	
 	//LoadWorld("plane");
@@ -89,7 +89,7 @@ function onLoadingGame()
 	//EditWorld("TestHopital");
 	//LoadWorld("TestHopital");
 	
-	LoadWorld("", "OnWorldLoaded");
+	//LoadWorld("", "OnWorldLoaded");
 	
 	
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
@@ -102,7 +102,7 @@ function onLoadingGame()
 
 function OnWorldLoaded()
 {
-	SetAnimationSpeed(GetEntityID("Player"), "run", 1.0);
+	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
 	/*
 	AddCharacterItem("Player", "Armlet_EvilSpelled");
 	AddCharacterItem("Player", "Tunique_Hospital");

@@ -24,8 +24,8 @@ void CGUIWidget::Init( int nResX, int nResY, IShader* pShader )
 	s_pShader = pShader;
 }
 
-CGUIWidget::CGUIWidget() :
-	CGUIWidget(0, 0)
+CGUIWidget::CGUIWidget(EEInterface& oInterface) :
+	CGUIWidget(oInterface, 0, 0)
 {
 	if (s_pShader == NULL)
 	{
@@ -35,12 +35,13 @@ CGUIWidget::CGUIWidget() :
 	m_pShader = s_pShader;
 }
 
-CGUIWidget::CGUIWidget( int nWidth, int nHeight ):
+CGUIWidget::CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight ):
 _pListener(NULL),
 _bIsCursorInWidget( NULL ),
 m_pMesh( NULL ),
 m_pParent(NULL),
-m_bVisible(true)
+m_bVisible(true),
+m_oInterface(oInterface)
 {
 	if( s_pShader == NULL )
 	{
@@ -56,7 +57,8 @@ _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
 m_pParent(NULL),
-m_bVisible(true)
+m_bVisible(true),
+m_oInterface(oInterface)
 {
 	InitManagers(oInterface);
 	ILoader::CMeshInfos mi;
@@ -90,7 +92,7 @@ _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
 m_pParent(NULL),
-m_pInterface(&oInterface),
+m_oInterface(oInterface),
 m_bVisible(true)
 {
 	InitManagers(oInterface);
@@ -117,7 +119,7 @@ m_bVisible(true)
 
 
 CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName) : 
-	CGUIWidget()
+	CGUIWidget(oInterface)
 {
 	InitManagers(oInterface);
 	ITexture* pTexture = static_cast< ITexture* > (m_pRessourceManager->GetRessource(sFileName));
@@ -131,7 +133,7 @@ CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName) :
 }
 
 CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height):
-CGUIWidget(width, height)
+CGUIWidget(oInterface, width, height)
 {
 	InitManagers(oInterface);
 	CRectangle oSkin;
@@ -141,7 +143,7 @@ CGUIWidget(width, height)
 }
 
 CGUIWidget::CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
-	CGUIWidget(windowSize.GetWidth(), windowSize.GetHeight())
+	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight())
 {
 	InitManagers(oInterface);
 	IMesh* pRect = CreateQuad(*m_pRenderer, *m_pRessourceManager, windowSize, skin);
@@ -182,6 +184,24 @@ deque<CGUIWidget*>::iterator CGUIWidget::Unlink(bool bDelete)
 bool CGUIWidget::operator==( const CGUIWidget& w )
 {
 	return *m_pMesh == *w.m_pMesh;
+}
+
+void CGUIWidget::operator=(const CGUIWidget& w)
+{
+	m_oNextCursorPos = w.m_oNextCursorPos;
+	m_pParent = w.m_pParent;
+	m_pShader = w.m_pShader;
+	m_pMesh = w.m_pMesh;
+	m_oDimension = w.m_oDimension;
+	m_oPosition = w.m_oPosition;
+	m_oRelativePosition = w.m_oRelativePosition;
+	_pListener = w._pListener;
+	_bIsCursorInWidget = w._bIsCursorInWidget;
+	_strSkinName = w._strSkinName;
+	m_pRenderer = w.m_pRenderer;
+	m_pRessourceManager = w.m_pRessourceManager;
+	m_bVisible = w.m_bVisible;
+	m_sUserData = w.m_sUserData;
 }
 
 void CGUIWidget::SetQuad( IRessource* pMesh )
@@ -498,8 +518,8 @@ IMesh* CGUIWidget::CreateQuadFromFile(IRenderer& oRenderer, IRessourceManager& o
 	return CreateQuadFromTexture(oRenderer, oRessourceManager, pTexture, skin);
 }
 
-CLink::CLink(EEInterface& oInterface, string sText) :
-	CGUIWidget(0, 0),
+CLink::CLink(EEInterface& oInterface, string sText, int nMaxWidth) :
+	CGUIWidget(oInterface, 0, 0),
 	m_oGUIManager(static_cast<CGUIManager&>(*oInterface.GetPlugin("GUIManager")))
 {
 	m_sText = sText;
@@ -508,17 +528,19 @@ CLink::CLink(EEInterface& oInterface, string sText) :
 		nWidth += m_oGUIManager.GetLetterEspacementX(c) + 1;
 	}
 	
-	m_oDimension.SetWidth(nWidth);
-	m_oDimension.SetHeight(m_oGUIManager.GetCurrentFontEspacementY());
-	IAnimatableMesh* pARect = m_oGUIManager.CreateTextMeshes(m_sText, IGUIManager::TFontColor::eRed);
+	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eTurquoise;
+	m_mColorByState[TState::eHover] = IGUIManager::TFontColor::eWhite;
+	m_mColorByState[TState::eClick] = IGUIManager::TFontColor::eYellow;
+
+	IAnimatableMesh* pARect = m_oGUIManager.CreateTextMeshes(m_sText, m_nLineCount, m_mColorByState[TState::eNormal], nMaxWidth);
 	SetQuad(pARect->GetMesh(0));
+	int maxWidth = nMaxWidth > 0 ? nMaxWidth : 9999999999;
+	m_oDimension.SetWidth(min(nWidth, maxWidth));
+	m_oDimension.SetHeight(m_nLineCount * m_oGUIManager.GetCurrentFontEspacementY());
 
 	m_pListener = new CListener;
 	SetListener(m_pListener);
 	m_pListener->SetEventCallBack(OnLinkEvent);
-	m_mColorByState[TState::eNormal] = IGUIManager::TFontColor::eRed;	
-	m_mColorByState[TState::eHover] = IGUIManager::TFontColor::eTurquoise;
-	m_mColorByState[TState::eClick] = IGUIManager::TFontColor::eYellow;
 }
 
 CLink::~CLink()
@@ -576,6 +598,11 @@ void CLink::SetClickedCallback(TItemSelectedCallback callback)
 void CLink::GetText(string& sText) const
 {
 	sText = m_sText;
+}
+
+int CLink::GetLineCount() const
+{
+	return m_nLineCount;
 }
 
 const string& CLink::GetText() const

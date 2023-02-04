@@ -13,12 +13,6 @@
 using namespace rapidjson;
 
 
-CTopicInfoWidgets::CTopicInfoWidgets(int nWidth, int nHeight) :
-	CGUIWidget(nWidth, nHeight)
-{
-
-}
-
 CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	CGUIWindow("Gui/TopicsWindow.bmp", oInterface, CDimension(width, height)),
 	m_oInterface(oInterface),
@@ -29,7 +23,8 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
 	m_pScriptManager(nullptr),
 	m_bChoiceSet(false),
-	m_oEntityManager(static_cast<IEntityManager&>(*oInterface.GetPlugin("EntityManager")))
+	m_oEntityManager(static_cast<IEntityManager&>(*oInterface.GetPlugin("EntityManager"))),
+	m_bGoodbye(false)
 {
 	SetPosition(400, 200);
 	LoadTopics("topics.json");
@@ -69,6 +64,7 @@ void CTopicsWindow::OnShow(bool bShow)
 		m_nTopicTextPointer = 0;
 	}
 	else {
+		m_bGoodbye = false;
 		m_pTopicFrame->UpdateTopics();
 
 		int index = SelectTopic(m_vGreatings, m_sSpeakerId);
@@ -130,13 +126,25 @@ void ExtractLink(string sText, vector<pair<int, string>>& vText)
 				int closeTagIndex = sRemainingString.find(sCloseTag, openTagIndex + 1);
 				string text = sRemainingString.substr(0, openTagIndex);
 				string choiceText = sRemainingString.substr(openTagIndexEnd + 1, closeTagIndex - openTagIndexEnd - 1);
-				vText.push_back(pair<int, string>(0, text));
+				if(!text.empty())
+					vText.push_back(pair<int, string>(0, text));
 				vText.push_back(pair<int, string>(nChoiceNumer, choiceText));
 				sRemainingString = sRemainingString.substr(closeTagIndex + sCloseTag.size());
 			}
 			else {
-				vText.push_back(pair<bool, string>(false, sRemainingString));
-				sRemainingString.clear();
+				string sOpenGoodbyeTag = "<goodbye>";
+				string sCloseGoodbye = "</goodbye>";
+				int openTagIndex = sRemainingString.find(sOpenGoodbyeTag);
+				if (openTagIndex != -1) {
+					int closeTagIndex = sRemainingString.find(sCloseGoodbye, openTagIndex + sOpenGoodbyeTag.size());
+					string link = sRemainingString.substr(openTagIndex + sOpenGoodbyeTag.size(), closeTagIndex - openTagIndex - sCloseGoodbye.size() + 1);
+					vText.push_back(pair<int, string>(256, link));
+					sRemainingString = "";
+				}
+				else {
+					vText.push_back(pair<bool, string>(false, sRemainingString));
+					sRemainingString.clear();
+				}
 			}
 		}
 	}
@@ -248,6 +256,11 @@ void CTopicsWindow::OnChoiceCalled(string sChoices)
 	}
 }
 
+void CTopicsWindow::OnGoodbyeCalled()
+{
+	AddTopicText("<goodbye>Au revoir</goodbye>");
+	m_bGoodbye = true;
+}
 
 void CTopicsWindow::DecomposeTopicText(string sTopicText, vector<vector<pair<int, string>>>& vRearrangedSubString)
 {
@@ -269,25 +282,40 @@ void CTopicsWindow::DecomposeTopicText(string sTopicText, vector<vector<pair<int
 	}
 }
 
-void CTopicsWindow::ConvertTextArrayToWidgetArray(const vector<vector<pair<int, string>>>& vRearrangedSubString, vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets)
+void CTopicsWindow::ConvertTextArrayToWidgetArray(const vector<vector<pair<int, string>>>& vRearrangedSubString, vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets, int& nLineCount)
 {
+	nLineCount = 0;
 	for (const vector<pair<int, string>>& topicLine : vRearrangedSubString) {
 		vTopicWidgets.resize(vTopicWidgets.size() + 1);
 		for (const pair<int, string>& elem : topicLine) {
-			//vTopicWidgets.push_back(vector<pair<int, CGUIWidget*>>());
 			CGUIWidget* pTextWidget = nullptr;
 			if (elem.first == -1) {
 				pTextWidget = new CLink(m_oInterface, elem.second);
 				CLink* pLink = static_cast<CLink*>(pTextWidget);
 				pLink->SetClickedCallback(OnLinkClicked);
+				nLineCount = pLink->GetLineCount();
 			}
 			else if (elem.first == 0)
-				pTextWidget = m_pGUIManager->CreateStaticText(elem.second);
-			else if (elem.first > 0) {
-				pTextWidget = new CTopicLink(m_oInterface, elem.second, elem.first);
+				pTextWidget = m_pGUIManager->CreateStaticText(elem.second, nLineCount);
+			else if (elem.first > 0 && elem.first < 255) {
+				pTextWidget = new CTopicLink(m_oInterface, elem.second, elem.first, m_pTopicTextFrame->GetDimension().GetWidth());
 				CTopicLink* pLink = static_cast<CTopicLink*>(pTextWidget);
 				pLink->SetClickedCallback(OnChoiceClicked);
+				nLineCount = pLink->GetLineCount();
+				pLink->SetColorByState(CLink::TState::eNormal, IGUIManager::TFontColor::eRed);
+				pLink->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eTurquoise);
+				pLink->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eYellow);
 			}
+			else if (elem.first > 255) {
+				pTextWidget = new CTopicLink(m_oInterface, elem.second, elem.first, m_pTopicTextFrame->GetDimension().GetWidth());
+				CTopicLink* pLink = static_cast<CTopicLink*>(pTextWidget);
+				pLink->SetClickedCallback(OnGoodbyeClicked);
+				nLineCount = pLink->GetLineCount();
+				pLink->SetColorByState(CLink::TState::eNormal, IGUIManager::TFontColor::eRed);
+				pLink->SetColorByState(CLink::TState::eHover, IGUIManager::TFontColor::eTurquoise);
+				pLink->SetColorByState(CLink::TState::eClick, IGUIManager::TFontColor::eYellow);
+			}
+
 			pTextWidget->m_sUserData = elem.second;
 			vTopicWidgets.back().push_back(pair<int, CGUIWidget*>(elem.first, pTextWidget));
 		}
@@ -301,11 +329,11 @@ float CTopicsWindow::PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIW
 	pTopicWidget->SetRelativePosition(0, m_nTopicTextPointer * m_pGUIManager->GetCurrentFontEspacementY());
 	for (vector<pair<int, CGUIWidget*>>& line : vTopicWidgets) {
 		int x = 0;
-		CGUIWindow* pLineWidget = new CGUIWindow;
+		CGUIWindow* pLineWidget = new CGUIWindow(m_oInterface);
 		for (pair<int, CGUIWidget*>& elem : line) {
 			pLineWidget->AddWidget(elem.second);
 			elem.second->SetRelativePosition(x, 0);
-			x += elem.second->GetDimension().GetWidth(); // +nAdditionalWidth;
+			x += elem.second->GetDimension().GetWidth();
 		}
 		pTopicWidget->AddWidget(pLineWidget);
 		pLineWidget->SetRelativePosition(0, y);
@@ -325,14 +353,17 @@ void CTopicsWindow::AddTopicText(const string& sTopicText, bool bNewParagraph)
 	for (string sLine : vTopicLines)
 		DecomposeTopicText(sLine, vSubString);
 	vector<vector<pair<int, CGUIWidget*>>> vTopicWidgets;
-	ConvertTextArrayToWidgetArray(vSubString, vTopicWidgets);
-	CGUIWindow* pTopicWidget = new CGUIWindow;
+	int nLineCount;
+	ConvertTextArrayToWidgetArray(vSubString, vTopicWidgets, nLineCount);
+	CGUIWindow* pTopicWidget = new CGUIWindow(m_oInterface);
 	y = PutWidgetArrayIntoTopicWidget(vTopicWidgets, pTopicWidget);
 
-	if (bNewParagraph) {
-		CGUIWidget* pBlank = m_pGUIManager->CreateStaticText("      ");
+	int nAdditionalParagraphes = nLineCount + bNewParagraph ? 1 : 0;
+	for (int i = 0; i < nAdditionalParagraphes; i++) {
+		int nLineCount;
+		CGUIWidget* pBlank = m_pGUIManager->CreateStaticText("      ", nLineCount);
 		m_pTopicTextFrame->AddWidget(pBlank);
-		pBlank->SetRelativePosition(0, y);
+		pBlank->SetRelativePosition(0, y + i * m_pGUIManager->GetCurrentFontEspacementY());
 		m_nTopicTextPointer++;
 	}
 
@@ -391,18 +422,20 @@ CTopicsWindow* CTopicsWindow::GetTopicsWindowFromLink(CLink* pLink)
 
 void CTopicsWindow::OnLinkClicked(CLink* pLink)
 {
-	string sLinkText;
-	pLink->GetText(sLinkText);
 	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pLink);
 	if (pTopicWindow) {
-		pTopicWindow->SetCurrentTopicName(sLinkText);
-		pTopicWindow->m_pTopicFrame->UpdateTopics();
-		string sTopicText;
-		if (sLinkText[0] >= 'a' && sLinkText[0] <= 'z') {
-			sLinkText[0] += 'A' - 'a';
+		if (!pTopicWindow->m_bGoodbye) {
+			string sLinkText;
+			pLink->GetText(sLinkText);
+			pTopicWindow->SetCurrentTopicName(sLinkText);
+			pTopicWindow->m_pTopicFrame->UpdateTopics();
+			string sTopicText;
+			if (sLinkText[0] >= 'a' && sLinkText[0] <= 'z') {
+				sLinkText[0] += 'A' - 'a';
+			}
+			pTopicWindow->AddTopicTextFromTopicName(sLinkText);
 		}
-		pTopicWindow->AddTopicTextFromTopicName(sLinkText);
-	}			
+	}
 }
 
 void CTopicsWindow::AddTopicTextFromTopicName(string sName)
@@ -427,14 +460,23 @@ void CTopicsWindow::AddTopicTextFromTopicName(string sName)
 
 void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 {
-	CTopicLink* pChoice = dynamic_cast<CTopicLink*>(pTopicLink);
 	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pTopicLink);
-	pTopicWindow->GetScriptManager()->ExecuteCommand("choice=" + std::to_string(pChoice->GetChoiceNumber()) + ";");
-	pTopicWindow->m_pTopicFrame->UpdateTopics();
-	pTopicWindow->m_bChoiceSet = true;
-	if (pTopicWindow->m_sCurrentTopicName[0] > 'Z')
-		pTopicWindow->m_sCurrentTopicName[0] -= 'a' - 'A';
-	pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
+	if (!pTopicWindow->m_bGoodbye) {
+		CTopicLink* pChoice = dynamic_cast<CTopicLink*>(pTopicLink);
+		pTopicWindow->GetScriptManager()->ExecuteCommand("choice=" + std::to_string(pChoice->GetChoiceNumber()) + ";");
+		pTopicWindow->m_pTopicFrame->UpdateTopics();
+		pTopicWindow->m_bChoiceSet = true;
+		if (pTopicWindow->m_sCurrentTopicName[0] > 'Z')
+			pTopicWindow->m_sCurrentTopicName[0] -= 'a' - 'A';
+		pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
+	}
+}
+
+void CTopicsWindow::OnGoodbyeClicked(CLink* pTopicLink)
+{
+	CTopicsWindow* pTopicWindow = GetTopicsWindowFromLink(pTopicLink);
+	pTopicWindow->Close();
+	pTopicWindow->m_bGoodbye = false;
 }
 
 void CTopicsWindow::RemoveTopicTexts()
@@ -684,8 +726,7 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 			}
 			else if(condition.m_sType == "Global"){
 				float fValue = m_pScriptManager->GetVariableValue(condition.m_sName);
-				int nValue = atoi(condition.m_sValue.c_str());
-				if (float(nValue) == fValue) {
+				if(condition.Evaluate(fValue)) {
 					topicVerifiedConditionCount[i] += 1;
 				}
 				else {
@@ -720,6 +761,11 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 void CTopicsWindow::SetCurrentTopicName(string sTopicName)
 {
 	m_sCurrentTopicName = sTopicName;
+}
+
+bool CTopicsWindow::IsGoodbye()
+{
+	return m_bGoodbye;
 }
 
 void CTopicsWindow::SetSpeakerId(string sId)
@@ -872,7 +918,6 @@ void CTopicFrame::DestroyTopicsWidgets()
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
 	pTopicWindow->RemoveTopicTexts();
-	//m_mDisplayedTopicWidgets.clear();
 }
 
 void CTopicFrame::Display()
@@ -895,14 +940,12 @@ void CTopicFrame::SetParent(CGUIWidget* parent)
 void CTopicFrame::OnItemSelected(CTopicLink* pTitle)
 {
 	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(GetParent());
-	pTopicWindow->SetCurrentTopicName(pTitle->GetTopicInfos().m_sName);
-	pTopicWindow->AddTopicText(pTitle->GetTopicInfos().m_sText);
-	pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager(), pTopicWindow);
-	UpdateTopics();
-}
-
-void CTopicFrame::OnItemHover(CGUIWidget* pTitle)
-{
+	if (!pTopicWindow->IsGoodbye()) {
+		pTopicWindow->SetCurrentTopicName(pTitle->GetTopicInfos().m_sName);
+		pTopicWindow->AddTopicText(pTitle->GetTopicInfos().m_sText);
+		pTitle->GetTopicInfos().ExecuteActions(GetParent()->GetScriptManager(), pTopicWindow);
+		UpdateTopics();
+	}
 }
 
 int CTopicFrame::ConvertValueToInt(string sValue)
@@ -931,8 +974,7 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 			}
 			else if (condition.m_sType == "Global") {
 				float fValue = GetParent()->GetScriptManager()->GetVariableValue(condition.m_sName);
-				int nValue = ConvertValueToInt(condition.m_sValue);
-				if (float(nValue) == fValue) {
+				if(condition.Evaluate(fValue)) {
 					checked[i] = true;
 				}
 				else {

@@ -26,8 +26,8 @@ class CGUIWidget
 {
 
 public:
-							CGUIWidget();
-							CGUIWidget( int nWidth, int nHeight );
+							CGUIWidget(EEInterface& oInterface);
+							CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight );
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin);
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial);
 							CGUIWidget(EEInterface& oInterface, string sFileNam);
@@ -36,6 +36,7 @@ public:
 	virtual					~CGUIWidget(void);
 
 	bool					operator==( const CGUIWidget& w );
+	void					operator=(const CGUIWidget& w);
 
 	void					SetQuad(IRessource* pMesh );
 	IMesh*					GetQuad();
@@ -88,7 +89,7 @@ protected:
 	std::string				_strSkinName;
 	IRenderer*				m_pRenderer;
 	IRessourceManager*		m_pRessourceManager;
-	EEInterface*			m_pInterface;
+	EEInterface&			m_oInterface;
 	bool					m_bVisible;
 	static int				s_nScreenResWidth;
 	static int				s_nScreenResHeight;
@@ -108,13 +109,14 @@ public:
 
 	typedef void(*TItemSelectedCallback)(CLink*);
 
-	CLink(EEInterface& oInterface, string sText);
+	CLink(EEInterface& oInterface, string sText, int nMaxWidth = -1);
 	virtual ~CLink();
 	void SetText(string sText);
 	void Display();
 	void SetColorByState(TState s, IGUIManager::TFontColor color);
 	void SetClickedCallback(TItemSelectedCallback callback);
 	void GetText(string& sText) const;
+	int GetLineCount() const;
 	const string& GetText() const;
 
 private:
@@ -128,6 +130,7 @@ private:
 	TState									m_eCurrentState = eNormal;
 	TItemSelectedCallback					m_pClickCallback = nullptr;
 	CListener*								m_pListener = nullptr;
+	int										m_nLineCount = 0;
 };
 
 

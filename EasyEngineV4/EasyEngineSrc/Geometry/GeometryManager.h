@@ -22,6 +22,8 @@ public:
 	ISegment2D*		CreateSegment2D( const CVector2D& first, const CVector2D& last );
 	IQuad*			CreateQuad(float lenght, float width);
 	string			GetName() override;
+	void			RayCast(int x, int y, const CMatrix& oWorldMatrix, const CMatrix& projectionMatrix, int nScreenWidth, int nScreenHeight, CVector& origin, CVector& ray);
+	bool			IsIntersect(const CVector& linePt1, const CVector& linePt2, const CVector& M, float radius);
 };
 
 extern "C" _declspec(dllexport) IGeometryManager* CreateGeometryManager( IGeometryManager::Desc& oDesc );

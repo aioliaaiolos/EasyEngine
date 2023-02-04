@@ -90,15 +90,15 @@ CEntity(oInterface)
 		m_pEntityManager->AddEntity(this, m_sName);
 		if (m_pBoundingGeometry)
 			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
-		if (m_sEntityID.empty())
-			m_sEntityID = m_sName;
+		if (m_sID.empty())
+			m_sID = m_sName;
 	}
 }
 
 CEntity::CEntity(EEInterface& oInterface, const std::string& sFileName, string sID, bool bDuplicate) :
 	CEntity(oInterface, sFileName, bDuplicate)	
 {
-	m_sEntityID = sID;
+	m_sID = sID;
 }
 
 CEntity::~CEntity()
@@ -406,7 +406,7 @@ bool CEntity::TestWorldCollision(INode* pEntity)
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
 			ostringstream oss;
-			oss << "Error : entity '" << m_sEntityID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			oss << "Error : entity '" << m_sID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
 			throw CEException(oss.str());
 		}
 		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
@@ -433,7 +433,7 @@ bool CEntity::TestCollision(INode* pEntity)
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
 			ostringstream oss;
-			oss << "Error : entity '" << m_sEntityID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			oss << "Error : entity '" << m_sID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
 			throw CEException(oss.str());
 		}
 		IGeometry* pCurrentGeometry = pGeometry->Duplicate();
@@ -652,6 +652,11 @@ const string& CEntity::GetAttachedScript() const
 	return m_sAttachedScript;
 }
 
+const string& CEntity::GetTypeName() const
+{
+	return m_sTypeName;
+}
+
 void CEntity::UpdateBoundingBox()
 {
 	IBox* pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
@@ -667,7 +672,7 @@ float CEntity::GetHeight()
 		static bool bAlreadyThrown = false;
 		if (!bAlreadyThrown) {
 			ostringstream oss;
-			oss << "Error in CEntity::GetHeight() : entity " << m_nID << " with name " << m_sEntityID << " has no bounding geometry";
+			oss << "Error in CEntity::GetHeight() : entity " << m_nID << " with name " << m_sID << " has no bounding geometry";
 			bAlreadyThrown = true;
 			throw CEException(oss.str());
 		}
@@ -840,7 +845,7 @@ void CEntity::Link( INode* pParent )
 		pDummy->Link(pParent);
 		int id = m_pEntityManager->GetEntityID(this);
 		IEntityManager* pEntityManager = m_pEntityManager;
-		string sEntityName = m_sEntityID;
+		string sEntityName = m_sID;
 		CEntity* pDummyChildEntity = dynamic_cast<CEntity*>(pDummy->GetChild(0));
 		if (!pDummyChildEntity) {
 			ostringstream oss;
@@ -1061,7 +1066,7 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 		pInfos = new ILoader::CEntityInfos;
 	ILoader::CEntityInfos* pEntityInfos = dynamic_cast<ILoader::CEntityInfos*>(pInfos);
 	if (pEntityInfos) {
-		GetEntityID(pEntityInfos->m_sObjectName);
+		pEntityInfos->m_sObjectID = GetIDStr();
 		pEntityInfos->m_fWeight = GetWeight();
 		for (unsigned int iChild = 0; iChild < GetChildCount(); iChild++) {
 			CEntity* pChild = dynamic_cast<CEntity*>(GetChild(iChild));
@@ -1095,10 +1100,10 @@ void CEntity::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 			}
 		}
 	}
-	if (pInfos->m_sObjectName.empty()) {
+	if (pInfos->m_sObjectID.empty()) {
 		string sName;
 		GetName(sName);
-		pInfos->m_sObjectName = sName;
+		pInfos->m_sObjectID = sName;
 	}
 	if(m_pRessource) {
 		m_pRessource->GetFileName(pInfos->m_sRessourceFileName);
@@ -1144,7 +1149,7 @@ void CEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParen
 			for (unsigned int iChild = 0; iChild < pEntityInfos->m_vSubEntityInfos.size(); iChild++) {
 				ILoader::CEntityInfos* pChildInfos = dynamic_cast<ILoader::CEntityInfos*>(pEntityInfos->m_vSubEntityInfos[iChild]);
 				if (pChildInfos) {
-					CEntity* pChild = m_pEntityManager->CreateEntityFromType(pChildInfos->m_sRessourceFileName, pChildInfos->m_sTypeName, pChildInfos->m_sObjectName);
+					CEntity* pChild = m_pEntityManager->CreateEntityFromType(pChildInfos->m_sRessourceFileName, pChildInfos->m_sTypeName, pChildInfos->m_sObjectID);
 					pChild->BuildFromInfos(*pChildInfos, this, bExcludeChildren);
 				}
 			}
@@ -1241,19 +1246,14 @@ void CEntity::Goto( const CVector& oPosition, float fSpeed )
 
 void CEntity::SetEntityID( string sName )
 {
-	m_sEntityID = sName;
+	m_sID = sName;
 	if(m_sName == "")
 		SetName(sName);
 }
 
-void CEntity::GetEntityID( string& sName )
+const string& CEntity::GetIDStr() const
 {
-	sName = m_sEntityID;
-}
-
-const string& CEntity::GetEntityID() const
-{
-	return m_sEntityID;
+	return m_sID;
 }
 
 void CEntity::Colorize(float r, float g, float b, float a)

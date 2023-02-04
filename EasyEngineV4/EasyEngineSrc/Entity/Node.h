@@ -17,27 +17,6 @@ class IGeometry;
 
 class CNode : virtual public INode
 {
-
-protected:
-	INode*                     	m_pParent;
-	vector< INode* >      		m_vChild;
-	CMatrix						m_oLocalMatrix;
-	CMatrix						m_oWorldMatrix;
-	CQuaternion					m_oLocalQuaternion;
-	CQuaternion					m_oWorldQuaternion;
-	string						m_sName;
-	int							m_nID;
-	int							m_nParentID;
-	bool						m_bQuaternionMode;
-	CVector						m_vConstantLocalRotate;
-	CVector						m_vConstantLocalTranslate;
-	bool						m_bUpdateConstantLocalTranslate;
-	bool						m_bUpdateConstantLocalRotate;
-	bool						m_bIsCollidable;
-
-	void						UpdateWorldMatrix();
-	void						UpdateChildren();
-
 public:
 	                    		CNode();
 	virtual             		~CNode();
@@ -71,6 +50,7 @@ public:
 	virtual void				SetName(string sName);
 	virtual void				GetName( std::string& sName ) const;
 	virtual const string&		GetName() const;
+	virtual const string&		GetIDStr() const;
 	virtual INode*				DuplicateHierarchy();
 	void						SetID( int nID );
 	int							GetID() const;
@@ -95,6 +75,29 @@ public:
 	float						GetBoundingSphereRadius() const override;
 	void						UpdateTime(float fTime) override;
 	bool						IsCollidable() override;
+	const string&				GetTypeName() const override;
+
+protected:
+	INode*                     	m_pParent;
+	vector< INode* >      		m_vChild;
+	CMatrix						m_oLocalMatrix;
+	CMatrix						m_oWorldMatrix;
+	CQuaternion					m_oLocalQuaternion;
+	CQuaternion					m_oWorldQuaternion;
+	string						m_sName;
+	string						m_sID;
+	int							m_nID;
+	int							m_nParentID;
+	bool						m_bQuaternionMode;
+	CVector						m_vConstantLocalRotate;
+	CVector						m_vConstantLocalTranslate;
+	bool						m_bUpdateConstantLocalTranslate;
+	bool						m_bUpdateConstantLocalRotate;
+	bool						m_bIsCollidable;
+	string						m_sEntityType;
+
+	void						UpdateWorldMatrix();
+	void						UpdateChildren();
 };
 
 #endif  //NODE_H

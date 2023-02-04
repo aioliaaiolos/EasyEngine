@@ -7,6 +7,8 @@
 #include "Circle.h"
 #include "Quad.h"
 
+#define M_PI_2     1.57079632679489661923   // pi/2
+
 CGeometryManager::CGeometryManager( CPlugin::Desc& oDesc ) : IGeometryManager()
 {
 }
@@ -91,6 +93,41 @@ IQuad* CGeometryManager::CreateQuad(float lenght, float width)
 string CGeometryManager::GetName()
 {
 	return "GeometryManager";
+}
+
+void CGeometryManager::RayCast(int x, int y, const CMatrix& oWorldMatrix, const CMatrix& projectionMatrix, int nScreenWidth, int nScreenHeight, CVector& origin, CVector& ray)
+{
+	CMatrix Pinv;
+	projectionMatrix.GetInverse(Pinv);
+
+	float logicalx = (2.f * (float)x / (float)nScreenWidth) - 1.f;
+	float logicaly = 1.f - (2.f * (float)y / (float)nScreenHeight);
+
+	CVector ray_nds(logicalx, logicaly, 1.f, 1.f);
+	CVector ray_clip = CVector(ray_nds.m_x, ray_nds.m_y, -1.0, 1.0);
+
+	CVector ray_eye = Pinv * ray_clip;
+	ray_eye = CVector(ray_eye.m_x, ray_eye.m_y, -1.f, 0.f);
+
+	ray = oWorldMatrix * ray_eye;
+	ray.Normalize();
+
+	oWorldMatrix.GetPosition(origin);
+}
+
+bool CGeometryManager::IsIntersect(const CVector& linePt1, const CVector& linePt2, const CVector& M, float radius)
+{
+	CVector P12 = linePt2 - linePt1;
+	CVector P1M = M - linePt1;
+	float alpha = acosf((P12 * P1M) / (P12.Norm() * P1M.Norm()));
+	float d = P1M.Norm() * sinf(alpha);
+	if ((alpha < M_PI_2) && (d < radius)) {
+		CVector P2M = M - linePt2;
+		float beta = acosf((-P12 * P2M) / (P12.Norm() * P2M.Norm()));
+		return beta < M_PI_2;
+	}
+
+	return false;
 }
 
 extern "C" _declspec(dllexport) IGeometryManager* CreateGeometryManager( IGeometryManager::Desc& oDesc )

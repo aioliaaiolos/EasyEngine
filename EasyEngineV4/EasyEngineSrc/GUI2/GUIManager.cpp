@@ -300,7 +300,7 @@ CGUIWidget* CGUIManager::CreateImageFromSkin( const string& sSkinPath, unsigned 
 	oData.m_vMeshes.push_back( mi );
 	IRessource* pMesh = m_oRessourceManager.CreateMesh( oData, pMaterial );
 	
-	CGUIWidget* pWidget = new CGUIWidget( nWidth, nHeight );
+	CGUIWidget* pWidget = new CGUIWidget(m_oInterface, nWidth, nHeight );
 	pWidget->SetQuad( pMesh );
 	pWidget->SetSkinName( sPropertyName );	
 	return pWidget;
@@ -378,7 +378,14 @@ void CGUIManager::OnRender()
 			CGUIWindow* pWindow = *itWindow;
 			pWindow->Display();
 			IInputManager::TMouseButtonState eButtonState = m_oInputManager.GetMouseButtonState(IInputManager::eMouseButtonLeft);
-			pWindow->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);			
+			pWindow->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);	
+			if (!pWindow->IsShown())
+				if (!m_DisplayedWindowsSet.empty()) {
+					itWindow--;
+				}
+				else
+					break;
+
 		}
 
 		RenderText();
@@ -540,7 +547,7 @@ void CGUIManager::Print( char c, int x, int y, IGUIManager::TFontColor color)
 	Print( s, x, y, color);
 }
 
-void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffsetX, IGUIManager::TFontColor color)
+void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffsetX, int& nLineCount, IGUIManager::TFontColor color, unsigned int nMaxWidth)
 {
 	fOffsetX = 0;
 	unsigned int nScreenWidth, nScreenHeight;
@@ -550,20 +557,44 @@ void CGUIManager::AddTextToMeshInfos(string sText, int nPosX, int nPosY, float f
 	oTestWidget.SetPosition(nPosX, nPosY);
 	oTestWidget.GetLogicalPosition(fPosX, fPosY, nScreenWidth, nScreenHeight);	
 
-	CGUIWidget oTempWidget(0, 0);
+	CGUIWidget oTempWidget(m_oInterface, 0, 0);
+	int nLineWidth = 0;
+	nLineCount = 1;
+	int nLastSpaceIndex = -1;
 	for (int iChar = 0; iChar < sText.size(); iChar++, nNumChar++)
 	{
 		char c = sText[iChar];
 		ILoader::CMeshInfos& miTemp = m_mWidgetFontInfos[c];
 
+		bool bNewLine = false;;
+		if (c == ' ') {
+			nLastSpaceIndex = iChar;
+			int i = 0;
+			while (sText[iChar + i + 1] != ' ' && sText[iChar + i + 1] != 0) i++;
+			string sWord = sText.substr(iChar + 1, i);
+			int nWordWidth = GetWordWidth(sWord);
+			if (nLineWidth + nWordWidth > nMaxWidth) {
+				fOffsetX = 0;
+				CreateWidgetFromChar('A', color, oTempWidget);
+				oTempWidget.SetPosition(0, oTempWidget.GetDimension().GetHeight());
+				float x = 0;
+				oTempWidget.GetLogicalPosition(x, fOffsetY, nScreenWidth, nScreenHeight);
+				nLineWidth = 0;
+				nLineCount++;
+				nNumChar--;
+				continue;
+			}
+		}		
+
 		if (iChar > 0)
 		{
 			CreateWidgetFromChar(sText[iChar - 1], color, oTempWidget);
-			oTempWidget.SetPosition(oTempWidget.GetDimension().GetWidth() + m_nCharspace, 0);
+			oTempWidget.SetPosition(oTempWidget.GetDimension().GetWidth() + m_nCharspace, fOffsetY);
 			float x, y;
 			oTempWidget.GetLogicalPosition(x, y, nScreenWidth, nScreenHeight);
 			fOffsetX += x;
 		}
+		nLineWidth += oTempWidget.GetDimension().GetWidth() + m_nCharspace;
 		for (int iVertex = 0; iVertex < miTemp.m_vVertex.size(); iVertex++)
 		{
 			float ox = 0.f, oy = 0.f;
@@ -617,7 +648,8 @@ int CGUIManager::CreateStaticText(vector< string >& vText, int nPosX, int nPosY,
 	for( int iLine = 0; iLine < vText.size(); iLine++ )
 	{
 		float fOffsetX;
-		AddTextToMeshInfos(vText[iLine], nPosX, nPosY, fOffsetY, nNumChar, mi, fOffsetX, color);
+		int nLineCount;
+		AddTextToMeshInfos(vText[iLine], nPosX, nPosY, fOffsetY, nNumChar, mi, fOffsetX, nLineCount, color);
 		fOffsetY -= fFontDimY;
 	}
 	if( mi.m_vVertex.size() > 0 )
@@ -631,7 +663,7 @@ int CGUIManager::CreateStaticText(vector< string >& vText, int nPosX, int nPosY,
 	return -1;
 }
 
-IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, IGUIManager::TFontColor color)
+IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, int& nLineCount, IGUIManager::TFontColor color, int nMaxWidth)
 {
 	float fOffsetY = 0.f;
 	int nNumChar = 0;
@@ -645,7 +677,7 @@ IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, IGUIManager::TFontC
 
 	IAnimatableMesh* pARect = nullptr;
 	float fOffsetX;
-	AddTextToMeshInfos(sText, 0, 0, fOffsetY, nNumChar, mi, fOffsetX, color);
+	AddTextToMeshInfos(sText, 0, 0, fOffsetY, nNumChar, mi, fOffsetX, nLineCount, color, nMaxWidth);
 	if (mi.m_vVertex.size() > 0)
 	{
 		ami.m_vMeshes.push_back(mi);
@@ -654,16 +686,16 @@ IAnimatableMesh* CGUIManager::CreateTextMeshes(string sText, IGUIManager::TFontC
 	return pARect;
 }
 
-CGUIWidget* CGUIManager::CreateStaticText(string sText, IGUIManager::TFontColor color)
+CGUIWidget* CGUIManager::CreateStaticText(string sText, int& nLineCount, IGUIManager::TFontColor color)
 {
 	if (sText.empty())
 		throw CEException("Error : CGUIManager::CreateStaticText() attempt to create an empty text");
-	IAnimatableMesh* pARect = CreateTextMeshes(sText, color);
+	IAnimatableMesh* pARect = CreateTextMeshes(sText, nLineCount, color);
 	int nWidth = 0;
 	for (char& c : sText) {
 		nWidth += GetLetterEspacementX(c) + 1;
 	}
-	CGUIWidget* pWidget = new CGUIWidget(nWidth, GetCurrentFontEspacementY());
+	CGUIWidget* pWidget = new CGUIWidget(m_oInterface, nWidth, GetCurrentFontEspacementY());
 	pWidget->SetQuad(pARect->GetMesh(0));
 	return pWidget;
 }
@@ -687,8 +719,8 @@ void CGUIManager::CreateStaticText_(string sText, int nMaxCharacterPerLine, vect
 	if (sText[nTextIndex] == ' ' || sText[nTextIndex] == '\0')
 		nLastSpaceIndex = nTextIndex;
 	subText = sText.substr(0, nLastSpaceIndex);
-
-	CGUIWidget* pWidget = CreateStaticText(subText);
+	int nLineCount;
+	CGUIWidget* pWidget = CreateStaticText(subText, nLineCount);
 	vLineWidgets.push_back(pWidget);
 	if (sText.size() > subText.size() + 1)
 		sText = sText.substr(subText.size() + 1);
@@ -794,6 +826,15 @@ int CGUIManager::GetCurrentFontEspacementX()
 int CGUIManager::GetLetterEspacementX(char c)
 {
 	return (int)GetFontWidget(IGUIManager::TFontColor::eWhite).at(c)->GetDimension().GetWidth();
+}
+
+int CGUIManager::GetWordWidth(string s)
+{
+	int n = 0;
+	for (char c : s) {
+		n += GetLetterEspacementX(c);
+	}
+	return n;
 }
 
 int CGUIManager::GetCurrentFontEspacementY()

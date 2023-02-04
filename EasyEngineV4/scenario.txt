@@ -46,7 +46,7 @@ Adnakat :
 . Ramsab Edao
 . Ulam Edao
 . Ranja
-. Hasna
+. Asna
 . Inaya
 . Malia
 . Namia
@@ -66,6 +66,7 @@ Eran :
 . Belena Curcio
 . Tairne Ceva
 . Baditis Argios
+. Aluyne
 
 Guerriers Eran :
 . Eiluv Andabata
@@ -108,7 +109,9 @@ Etats :
 5. Mirabelle nous a demandé d'emprunter le bracelet de Namia
 6. On a informé Namia du fait que Mirabelle voulait son bracelet
 7. Namia nous a donné son bracelet
-8. Mirabelle a pris possession du bracelet et nous a avoué qu'elle avait donné le flacon a Hasna et nous a suggéré d'aller le lui demander
-9. Mirabelle nous a suggéré d'aller demander le flacon à Hasna
-10. Mirabelle nous a informé de l'endroit ou se trouvait Hasna
-11. 
+8. Mirabelle a pris possession du bracelet et nous a avoué qu'elle avait donné le flacon a Asna et nous a suggéré d'aller le lui demander
+9. Mirabelle nous a suggéré d'aller demander le flacon à Asna
+10. Mirabelle nous a informé de l'endroit ou se trouvait Asna
+11. Asna est énervée contre le joueur, elle refuse de l'aider
+12. On a dit à Asna que Mirabelle nous avait informé qu'elle lui avait donné son parfum et on demande à le voir
+13. On vient de répondre à la demande de précision d'Asna au sujet de la raison pour laquelle on veut son parfum

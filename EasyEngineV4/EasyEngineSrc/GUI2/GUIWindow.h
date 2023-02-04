@@ -15,11 +15,11 @@ class CDimension;
 class CGUIWindow  : public CGUIWidget, public virtual IGUIWindow
 {
 public:
-													CGUIWindow();
+													CGUIWindow(EEInterface& oInterface);
 													CGUIWindow(EEInterface& oInterface, string fileName);
 													CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize);
 													CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight);
-													CGUIWindow(const CDimension& windowSize);
+													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize);
 													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual											~CGUIWindow();
 	void											AddWidget(CGUIWidget* pWidget);
@@ -36,12 +36,18 @@ public:
 	void											SetGUIMode(bool bGUIMode);	
 	void											UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager::TMouseButtonState eButtonState);
 	deque<CGUIWidget*>&								GetChildren();
+	void											Close();
+	bool											IsShown();
 	virtual void									OnShow(bool bShow);
 
 protected:
+	IGUIManager*									GetGUIManager();
+
 	deque< CGUIWidget*>								m_vWidget;
 	bool											m_bGUIMode;
-	pair<CloseWindowCallback, IBaseObject*>				m_oCloseWindowCallback;
+	pair<CloseWindowCallback, IBaseObject*>			m_oCloseWindowCallback;
+	IGUIManager*									m_pGUIManager = nullptr;
+	bool											m_bIsShown;
 };
 
 

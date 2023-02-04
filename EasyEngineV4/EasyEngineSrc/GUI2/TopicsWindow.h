@@ -69,13 +69,16 @@ struct CTopicInfo
 class CTopicLink : public CLink
 {
 public:
-	CTopicLink(EEInterface& oInterface, string sName) : CLink(oInterface, sName), m_nChoiceNumber(-1) 
+	
+	CTopicLink(EEInterface& oInterface, string sName, int nMaxChar = -1) : 
+		CLink(oInterface, sName, nMaxChar), m_nChoiceNumber(-1)
 	{
 		m_oTopicInfos.m_sName = sName;
 	}
 
-	CTopicLink(EEInterface& oInterface, string sName, int nChoiceNumber) :
-		CLink(oInterface, sName),
+	
+	CTopicLink(EEInterface& oInterface, string sName, int nChoiceNumber, int nMaxWidth) :
+		CLink(oInterface, sName, nMaxWidth),
 		m_nChoiceNumber(nChoiceNumber)
 	{
 		m_oTopicInfos.m_sName = sName;
@@ -90,13 +93,6 @@ private:
 	int			m_nChoiceNumber;
 };
 
-struct CTopicInfoWidgets : public CGUIWidget
-{
-	CTopicInfoWidgets(int nWidth, int nHeight);
-
-	CGUIWidget* m_pTitle;
-	CGUIWidget*	m_pText;
-};
 
 class CTopicsWindow : public CGUIWindow, public ITopicWindow
 {
@@ -114,6 +110,7 @@ public:
 	int										SelectTopic(const vector<CTopicInfo>& topics, string sSpeakerId);
 	int										SelectTopic(string sTopicName, string sSpeakerId);
 	void									SetCurrentTopicName(string sTopicName);
+	bool									IsGoodbye();
 
 private:
 
@@ -124,15 +121,17 @@ private:
 	void									DestroyTopicsWidgets();
 	int										GetTopicTextLineCount();
 	void									OnChoiceCalled(string sChoices) override;
+	void									OnGoodbyeCalled() override;
 	void									AddTopicWidgets();
 	void									Truncate(string sText, int nMaxCharPerLine, vector<string>& output);
 	void									DecomposeTopicText(string sTopicText, vector<vector<pair<int, string>>>& vRearangedSubString);
-	void									ConvertTextArrayToWidgetArray(const vector<vector<pair<int, string>>>& vRearrangedSubString, vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets);
+	void									ConvertTextArrayToWidgetArray(const vector<vector<pair<int, string>>>& vRearrangedSubString, vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets, int& nLineCount);
 	float									PutWidgetArrayIntoTopicWidget(vector<vector<pair<int, CGUIWidget*>>>& vTopicWidgets, CGUIWindow* pTopicWidget);
 	void									AddTopicTextFromTopicName(string sName);
 	static CTopicsWindow*					GetTopicsWindowFromLink(CLink* pLink);
 	static void								OnLinkClicked(CLink* pLink);
 	static void								OnChoiceClicked(CLink* pTopicLink);
+	static void								OnGoodbyeClicked(CLink* pTopicLink);
 	static									void OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData);
 	static void								OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData);
 
@@ -154,6 +153,7 @@ private:
 	map<string, vector<CTopicInfo>>			m_mTopics;
 	bool									m_bChoiceSet;
 	IEntityManager&							m_oEntityManager;
+	bool									m_bGoodbye;
 };
 
 class CTopicFrame : public CGUIWindow
@@ -181,7 +181,6 @@ private:
 	CTopicsWindow*								GetParent();
 	int											GetTopicIndexFromY(int y);
 	void										OnItemSelected(CTopicLink* pTitle);
-	void										OnItemHover(CGUIWidget* pTitle);
 	int											IsConditionChecked(const vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
 	static void									OnGUIManagerCreated(CPlugin* plugin, IBaseObject* pData);

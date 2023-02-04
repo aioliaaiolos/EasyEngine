@@ -225,10 +225,8 @@ void CNPCEntity::OnTopicWindowClosed(IGUIWindow* pWindow, IBaseObject* pThisEnti
 
 void CNPCEntity::OpenTopicWindow()
 {
-	string sId;
-	GetEntityID(sId);
 	m_oGUIManager.GetTopicsWindow()->SetCloseWindowCallback(OnTopicWindowClosed, this);
-	m_oGUIManager.GetTopicsWindow()->SetSpeakerId(sId);
+	m_oGUIManager.GetTopicsWindow()->SetSpeakerId(GetIDStr());
 	m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 }
 
@@ -267,8 +265,7 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& o
 	
 	IGrid* pGrid = pParent->GetCollisionGrid();
 	if (!pGrid) {
-		string sSceneName;
-		m_pScene->GetEntityID(sSceneName);
+		string sSceneName = m_pScene->GetIDStr();
 		throw CEException(string("Error : no collision map found for scene '") + sSceneName);
 	}
 	pGrid->SetDepart(originx, originy);

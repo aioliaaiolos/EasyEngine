@@ -40,6 +40,7 @@ public:
 	virtual void						SetName(string sName) = 0;
 	virtual void						GetName( std::string& sName ) const = 0;
 	virtual const string&				GetName() const = 0;
+	virtual const string&				GetIDStr() const = 0;
 	virtual void						SetID( int nID ) = 0;
 	virtual int							GetID() const = 0;
 	virtual void						GetWorldMatrix( CMatrix& oMatrix ) = 0;
@@ -60,6 +61,7 @@ public:
 	virtual void						GetHierarchyCount(int& nCount) = 0;
 	virtual INode*						DuplicateHierarchy() = 0;
 	virtual bool						IsCollidable() = 0;
+	virtual const string&				GetTypeName() const = 0;
 };
 
 #endif // INODE_H

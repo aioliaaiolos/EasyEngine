@@ -121,8 +121,6 @@ public:
 	virtual void						DrawAnimationBoundingBox( bool bDraw ) = 0;
 	virtual float						GetBoundingSphereRadius() const = 0;
 	virtual void						Goto( const CVector& oPosition, float fSpeed ) = 0;
-	virtual void						GetEntityID(string& sID) = 0;
-	virtual const string&				GetEntityID() const = 0;
 	virtual void						SetEntityID( string sName ) = 0;
 	virtual void						Colorize(float r, float g, float b, float a) = 0;
 	virtual void						AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
@@ -145,6 +143,7 @@ public:
 	virtual void Wear() = 0;
 	virtual void UnWear() = 0;
 	virtual void SetOwner(ICharacter* pCharacter) = 0;	
+	virtual void Load() = 0;
 };
 
 class IBoxEntity : public virtual IEntity
@@ -280,7 +279,8 @@ public:
 	virtual void				Clear() = 0;
 	virtual IEntity*			CreateSphere( float fSize ) = 0;
 	virtual IEntity*			CreateBox(const CVector& oDimension ) = 0;
-	virtual IBoxEntity*			CreateAreaEntity(string sAreaName, const CVector& oDimension) = 0;
+	virtual IBoxEntity*			CreateAreaEntity(string sAreaID, const CVector& oDimension) = 0;
+	virtual IItem*				CreateItemEntity(string sItemID) = 0;
 	virtual IEntity*			CreateQuad(float lenght, float width) = 0;
 	virtual IAEntity*			GetFirstIAEntity() = 0;
 	virtual IAEntity*			GetNextIAEntity() = 0;

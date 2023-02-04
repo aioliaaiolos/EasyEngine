@@ -8,7 +8,7 @@ CQuadEntity::CQuadEntity(IRenderer& oRenderer, IRessourceManager& oRessourceMana
 	m_sName("QuadEntity"),
 	m_oColor(1.f, 0.f, 0.f)
 {
-
+	m_sTypeName = "QuadEntity";
 }
 
 void CQuadEntity::Update()
@@ -24,12 +24,7 @@ void CQuadEntity::Update()
 	}
 }
 
-void CQuadEntity::GetEntityID(string& sID)
-{
-	sID = m_sName;
-}
-
-const string& CQuadEntity::GetEntityID() const
+const string& CQuadEntity::GetIDStr() const
 {
 	return m_sName;
 }
@@ -37,4 +32,9 @@ const string& CQuadEntity::GetEntityID() const
 void CQuadEntity::Colorize(float r, float g, float b, float a)
 {
 	m_oColor.Fill(r, g, b, 1.f);
+}
+
+const string& CQuadEntity::GetTypeName() const
+{
+	return m_sTypeName;
 }

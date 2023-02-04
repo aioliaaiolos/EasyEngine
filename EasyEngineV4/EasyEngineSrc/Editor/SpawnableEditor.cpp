@@ -210,27 +210,12 @@ void CSpawnableEditor::GetRayPlanIntersection(int x, int y, float h, CVector& in
 
 void CSpawnableEditor::RayCast(int x, int y, CVector& p1, CVector& ray)
 {
-	CMatrix P, Pinv;
-	m_oRenderer.GetProjectionMatrix(P);
-	P.GetInverse(Pinv);
-	CMatrix Vinv;
-	m_oCameraManager.GetActiveCamera()->GetWorldMatrix(Vinv);
-
+	CMatrix w, p;
+	m_oCameraManager.GetActiveCamera()->GetWorldMatrix(w);
+	m_oRenderer.GetProjectionMatrix(p);
 	unsigned int width, height;
 	m_oRenderer.GetResolution(width, height);
-	float logicalx = (2.f * (float)x / (float)width) - 1.f;
-	float logicaly = 1.f - (2.f * (float)y / (float)height);
-
-	CVector ray_nds(logicalx, logicaly, 1.f, 1.f);
-	CVector ray_clip = CVector(ray_nds.m_x, ray_nds.m_y, -1.0, 1.0);
-
-	CVector ray_eye = Pinv * ray_clip;
-	ray_eye = CVector(ray_eye.m_x, ray_eye.m_y, -1.f, 0.f);
-
-	ray = Vinv * ray_eye;
-	ray.Normalize();
-
-	Vinv.GetPosition(p1);
+	m_oGeometryManager.RayCast(x, y, w, p, width, height, p1, ray);
 }
 
 void CSpawnableEditor::DisplayPickingRay(const CVector& camPos, const CVector& farPoint)
@@ -257,7 +242,7 @@ void CSpawnableEditor::SelectEntity(int x, int y)
 		IEntity* pEntity = entities[i];
 		CVector pos;
 		pEntity->GetWorldPosition(pos);
-		if (IsIntersect(camPos, farPoint, pos, pEntity->GetBoundingSphereRadius())) {
+		if (m_oGeometryManager.IsIntersect(camPos, farPoint, pos, pEntity->GetBoundingSphereRadius())) {
 			float lastDistanceToCam = 999999999.f;
 			CVector lastPos, currentPos;
 			if (pSelectedEntity) {
@@ -290,16 +275,6 @@ void CSpawnableEditor::DisplayLocalRepere()
 	m_pEditingEntity->GetWorldPosition(position);
 	IEntity* x = m_oEntityManager.CreateCylinder(500, 10000);
 }
-
-bool CSpawnableEditor::IsIntersect(const CVector& linePt1, const CVector& linePt2, const CVector& M, float radius) const
-{
-	CVector P12 = linePt2 - linePt1;
-	CVector P1M = M - linePt1;
-	float alpha = acosf((P12 * P1M) / (P12.Norm() * P1M.Norm()));
-	float d = P1M.Norm() * sinf(alpha);
-	return d < radius;
-}
-
 
 void CSpawnableEditor::EnableDisplayPickingRaySelected(bool enable)
 {

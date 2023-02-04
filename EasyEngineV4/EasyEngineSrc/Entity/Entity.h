@@ -76,8 +76,7 @@ public:
 	void							Link( INode* pNode ) override;
 	void							Goto( const CVector& oPosition, float fSpeed );
 	void							SetEntityID(string sName);
-	void							GetEntityID(string& sName);
-	const string&					GetEntityID() const;
+	const string&					GetIDStr() const override;
 	void							Colorize(float r, float g, float b, float a) override;
 	ICollisionMesh*					GetCollisionMesh();
 	void							ForceAssignBoundingGeometry(IGeometry* pBoundingGeometry);
@@ -105,6 +104,7 @@ public:
 	void							AttachScript(string sScript) override;
 	void							DetachScript(string sScript);
 	const string&					GetAttachedScript() const override;
+	virtual const string&			GetTypeName() const override;
 	
 
 protected:
@@ -135,7 +135,6 @@ protected:
 	map< int, IEntity* >							m_mBonesBoundingSphere;
 	bool											m_bDrawAnimationBoundingBox;
 	TCollisionCallback								m_pfnCollisionCallback;
-	string											m_sEntityID;
 	CScene*											m_pScene;
 	ICollisionMesh*									m_pCollisionMesh;
 	IGeometry*										m_pBoundingGeometry;

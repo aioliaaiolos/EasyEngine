@@ -38,7 +38,7 @@ public:
 	void SetOwner(ICharacter* pCharacter);
 	void Wear() override;
 	void UnWear() override;
-	void Load();
+	void Load() override;
 	const vector<string>& GetDummyNames();
 	string&	GetPreviewPath() override;
 	bool IsWear() override;

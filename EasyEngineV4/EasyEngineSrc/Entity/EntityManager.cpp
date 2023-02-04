@@ -101,8 +101,7 @@ void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
 	if (itCharacterInfos != m_mCharacterInfos.end()) {
 		ILoader::CAnimatedEntityInfos oCharacterInfos = itCharacterInfos->second;
 		RemoveCharacterFromDB(sOldName);
-		//m_mCharacterInfos.erase(itCharacterInfos);
-		oCharacterInfos.m_sObjectName = sNewName;
+		oCharacterInfos.m_sObjectID = sNewName;
 		m_mCharacterInfos[sNewName] = oCharacterInfos;
 
 		map<string, CCharacter*>::iterator itCharacter = m_mCharacters.find(sOldName);
@@ -119,13 +118,18 @@ void CEntityManager::ChangeCharacterName(string sOldName, string sNewName)
 	}
 }
 
-CItem* CEntityManager::GetItem(string sItem)
+CItem* CEntityManager::GetItem(string sItemID)
 {
-	map<string, CItem*>::iterator itItem = m_mItems.find(sItem);
+	map<string, CItem*>::iterator itItem = m_mItems.find(sItemID);
 	if (itItem != m_mItems.end()) {
 		return itItem->second;
 	}
 	return nullptr;
+}
+
+IItem* CEntityManager::CreateItemEntity(string sItemID)
+{
+	return new CItem(*GetItem(sItemID));
 }
 
 void CEntityManager::LoadItems()
@@ -208,7 +212,7 @@ CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTyp
 	else if (sTypeName == "Item") {
 		pEntity = new CEntity(m_oInterface, sFileName, sID, bDuplicate);
 	}
-	AddEntity( pEntity, pEntity->GetEntityID());
+	AddEntity( pEntity, pEntity->GetIDStr());
 	return pEntity;
 }
 
@@ -338,8 +342,7 @@ IEntity* CEntityManager::CreatePlaneEntity(int slices, int size, string heightTe
 
 void CEntityManager::AddNewCharacter(IEntity* pEntity)
 {
-	string sCharacterName, sCharacterNameLow;
-	pEntity->GetEntityID(sCharacterName);
+	string sCharacterName = pEntity->GetIDStr(), sCharacterNameLow;
 	sCharacterNameLow = sCharacterName;
 	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterNameLow.begin(), tolower);
 
@@ -392,7 +395,7 @@ void CEntityManager::NormalizeCharacterDatabase()
 		std::transform(it->first.begin(), it->first.end(), sNameLow.begin(), tolower);
 		if (sNameLow != it->first) {
 			m_mCharacterInfos[sNameLow] = it->second;
-			m_mCharacterInfos[sNameLow].m_sObjectName = sNameLow;
+			m_mCharacterInfos[sNameLow].m_sObjectID = sNameLow;
 			m_mCharacterInfos.erase(it);
 			it = m_mCharacterInfos.begin();
 		}
@@ -723,34 +726,32 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 				Value character;
 				character = characters[i];
 				if (character.IsObject()) {
-					if (character.HasMember("Name")) {
-						ILoader::CAnimatedEntityInfos infos;
-						infos.m_sObjectName = character["Name"].GetString();
-						infos.m_sRessourceFileName = character["RessourceFileName"].GetString();
-						infos.m_sParentName = character["ParentName"].GetString();
-						infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
-						infos.m_sTypeName = character["TypeName"].GetString();
-						infos.m_fWeight = character["Weight"].GetFloat();
-						infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();
-						infos.m_sTextureName = character["DiffuseTextureName"].GetString();
-						Value& specular = character["Specular"].GetArray();
-						infos.m_vSpecular = CVector(specular[0].GetFloat(), specular[1].GetFloat(), specular[2].GetFloat());
-						Value& animationSpeeds = character["AnimationSpeeds"];
-						for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
-							infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
-						Value& items = character["Items"];
-						for (int iItem = 0; iItem < items.Size(); iItem++) {
-							Value& item = items[iItem];
-							string itemName = item["ItemName"].GetString();
-							Value& isWearArray = item["IsWearArray"];							
-							for (int j = 0; j < isWearArray.Size(); j++) {
-								int isWear = isWearArray[j].GetInt();
-								infos.m_mItems[itemName].push_back(isWear);
-							}
+					ILoader::CAnimatedEntityInfos infos;
+					infos.m_sObjectID = character["EntityID"].GetString();
+					infos.m_sRessourceFileName = character["RessourceFileName"].GetString();
+					infos.m_sParentName = character["ParentName"].GetString();
+					infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
+					infos.m_sTypeName = character["TypeName"].GetString();
+					infos.m_fWeight = character["Weight"].GetFloat();
+					infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();
+					infos.m_sTextureName = character["DiffuseTextureName"].GetString();
+					Value& specular = character["Specular"].GetArray();
+					infos.m_vSpecular = CVector(specular[0].GetFloat(), specular[1].GetFloat(), specular[2].GetFloat());
+					Value& animationSpeeds = character["AnimationSpeeds"];
+					for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
+						infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
+					Value& items = character["Items"];
+					for (int iItem = 0; iItem < items.Size(); iItem++) {
+						Value& item = items[iItem];
+						string itemName = item["ItemName"].GetString();
+						Value& isWearArray = item["IsWearArray"];							
+						for (int j = 0; j < isWearArray.Size(); j++) {
+							int isWear = isWearArray[j].GetInt();
+							infos.m_mItems[itemName].push_back(isWear);
 						}
-						infos.m_sHairs = character["Hairs"].GetString();
-						mCharacterInfos[infos.m_sObjectName] = infos;
 					}
+					infos.m_sHairs = character["Hairs"].GetString();
+					mCharacterInfos[infos.m_sObjectID] = infos;
 				}
 			}
 		}
@@ -781,7 +782,7 @@ void CEntityManager::LoadCharacterInfoFromDB()
 		int type;
 		fs >> type;
 		fs >> infos;
-		m_mCharacterInfos[infos.m_sObjectName] = infos;
+		m_mCharacterInfos[infos.m_sObjectID] = infos;
 	}
 	fs.CloseFile();
 }
@@ -853,8 +854,7 @@ void CEntityManager::SerializeNodeInfos(INode* pNode, ostringstream& oss, int nL
 		
 		for (int j = 0; j < nLevel; j++)
 			oss << "\t";
-		string sEntityName;
-		pEntity->GetEntityID(sEntityName);
+		string sEntityName = pEntity->GetIDStr();
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		oss << "Entity name = " << sEntityName << ", ID = " << GetEntityID(pEntity) << "\n";

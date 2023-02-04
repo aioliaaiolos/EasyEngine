@@ -11,6 +11,7 @@ m_bUpdateConstantLocalTranslate( false ),
 m_bUpdateConstantLocalRotate( false ),
 m_bIsCollidable(false)
 {
+	m_sEntityType = "Node";
 }
 
 CNode::~CNode()
@@ -23,6 +24,11 @@ CNode::~CNode()
 bool CNode::IsCollidable()
 {
 	return m_bIsCollidable;
+}
+
+const string& CNode::GetTypeName() const
+{
+	return m_sEntityType;
 }
 
 INode* CNode::GetParent()
@@ -252,6 +258,11 @@ void CNode::GetName( string& sName ) const
 const string& CNode::GetName() const
 {
 	return m_sName;
+}
+
+const string& CNode::GetIDStr() const
+{
+	return m_sID;
 }
 
 void CNode::SetLocalMatrix( const CMatrix& oMat )

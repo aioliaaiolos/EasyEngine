@@ -6,6 +6,7 @@ CShape( oRenderer )
 {
 	SetName("Repere");
 	SetEntityName("Repere");
+	m_sEntityType = "Repere;";
 }
 
 void CRepere::Update()
@@ -20,12 +21,12 @@ void CRepere::SetEntityName(string sName)
 	m_sEntityID = sName;
 }
 
-void CRepere::GetEntityID(string& sName)
-{
-	sName = m_sEntityID;
-}
-
-const string& CRepere::GetEntityID() const
+const string& CRepere::GetIDStr() const
 {
 	return m_sEntityID;
+}
+
+const string& CRepere::GetTypeName() const
+{
+	return "Repere";
 }

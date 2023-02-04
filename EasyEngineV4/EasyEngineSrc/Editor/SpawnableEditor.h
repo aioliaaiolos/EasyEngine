@@ -37,7 +37,6 @@ protected:
 	void							GetRayPlanIntersection(int x, int y, float h, CVector& intersect);
 	void							RayCast(int x, int y, CVector& p1, CVector& ray);
 	void							SelectEntity(int x, int y);
-	bool							IsIntersect(const CVector& linePt1, const CVector& linePt2, const CVector& M, float radius) const;
 	void							DisplayLocalRepere();
 	void							HandleEditorManagerCreation(IEditorManager* pEditor) override;
 	void							EnableDisplayPickingRaySelected(bool enable) override;

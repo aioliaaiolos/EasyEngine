@@ -603,7 +603,7 @@ void CScene::LoadSceneObject( const ILoader::CObjectInfos* pSceneObjInfos, CEnti
 			pEntity->BuildFromInfos(*pLightEntityInfos, pParent);
 		} else {
 			const ILoader::CEntityInfos* pEntityInfos = dynamic_cast< const ILoader::CEntityInfos* >( pSceneObjInfos );
-			CEntity* pEntity = m_pEntityManager->CreateEntityFromType( sRessourceFileName, pEntityInfos->m_sTypeName, pEntityInfos->m_sObjectName);
+			CEntity* pEntity = m_pEntityManager->CreateEntityFromType( sRessourceFileName, pEntityInfos->m_sTypeName, pEntityInfos->m_sObjectID);
 			pEntity->BuildFromInfos(*pSceneObjInfos, pParent);
 			m_vCollideEntities.push_back(pEntity);
 		}

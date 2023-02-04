@@ -4,6 +4,9 @@
 #include "IGUIManager.h"
 #include "EntityManager.h"
 #include "ICamera.h"
+#include "IGeometry.h"
+
+#include "Scene.h"
 
 CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
 	CCharacter(oInterface, sFileName, "Player"),
@@ -15,6 +18,11 @@ CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
 	m_pPlayerWindow = m_oGUIManager.CreatePlayerWindow(600, 800);
 	ICameraManager& oCameraManager = static_cast<ICameraManager&>(*oInterface.GetPlugin("CameraManager"));
 	m_pLinkCamera = oCameraManager.CreateCamera(ICameraManager::TLinked, 60.f);
+
+	unsigned int nWidth, nHeight;
+	m_oRenderer.GetResolution(nWidth, nHeight);
+	m_oVisorPos.SetX(nWidth / 2);
+	m_oVisorPos.SetY(nHeight / 2);
 }
 
 
@@ -25,9 +33,9 @@ CPlayer::~CPlayer()
 
 void CPlayer::Action()
 {
-	if (m_oGUIManager.IsWindowDisplayed(m_oGUIManager.GetTopicsWindow())) {
-		m_oGUIManager.RemoveWindow(m_oGUIManager.GetTopicsWindow());
-	}
+	IGUIWindow* pTopicWindow = m_oGUIManager.GetTopicsWindow();
+	if (m_oGUIManager.IsWindowDisplayed(pTopicWindow))
+		pTopicWindow->Close();
 	else {
 		CNPCEntity* pSpeaker = NULL;
 		float fMinDistance = 200.f;
@@ -42,9 +50,7 @@ void CPlayer::Action()
 			}
 		}
 		if (pSpeaker) {
-			string sId;
-			pSpeaker->GetEntityID(sId);
-			m_oGUIManager.GetTopicsWindow()->SetSpeakerId(sId);
+			m_oGUIManager.GetTopicsWindow()->SetSpeakerId(pSpeaker->GetIDStr());
 			m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 		}
 	}
@@ -62,4 +68,60 @@ void CPlayer::ToggleDisplayPlayerWindow()
 void CPlayer::Update()
 {
 	CCharacter::Update();
+	unsigned int nWidth, nHeight;
+	m_oRenderer.GetResolution(nWidth, nHeight);
+	CMatrix p;
+	CVector ray, origin;
+	m_oRenderer.GetProjectionMatrix(p);
+	INode* pEntity = GetEntityInVisor(m_oVisorPos.GetX(), m_oVisorPos.GetY());
+	if(pEntity)
+		m_oGUIManager.Print(pEntity->GetIDStr(), m_oVisorPos.GetX(), m_oVisorPos.GetY(), IGUIManager::TFontColor::eWhite);
+}
+
+void CPlayer::CollectSelectableEntity(vector<INode*>& entities)
+{
+	INode* pParent = GetParent();
+	for (int i = 0; i < pParent->GetChildCount(); i++) {
+		INode* pChild = pParent->GetChild(i);
+		if (pChild->GetTypeName() == "Item" || pChild->GetTypeName() == "NPC") {
+			entities.push_back(pChild);
+		}
+	}
+}
+
+INode* CPlayer::GetEntityInVisor(int x, int y)
+{
+	unsigned int nWidth, nHeight;
+	m_oRenderer.GetResolution(nWidth, nHeight);
+	CMatrix p;
+	CVector ray, camPos;
+	m_oRenderer.GetProjectionMatrix(p);
+	m_oGeometryManager.RayCast(x, y, m_oWorldMatrix, p, nWidth, nHeight, camPos, ray);
+
+	static float rayLength = 200.f;
+	CVector farPoint = camPos - ray * rayLength;
+	farPoint.m_w = 1.f;
+
+	INode* pSelectedEntity = NULL;
+	vector<INode*> entities;
+	CollectSelectableEntity(entities);
+	for (int i = 0; i < entities.size(); i++) {
+		INode* pEntity = entities[i];
+		CVector pos;
+		pEntity->GetWorldPosition(pos);
+		if (m_oGeometryManager.IsIntersect(camPos, farPoint, pos, pEntity->GetBoundingSphereRadius())) {
+			float lastDistanceToCam = 999999999.f;
+			CVector lastPos, currentPos;
+			if (pSelectedEntity) {
+				pSelectedEntity->GetWorldPosition(lastPos);
+				lastDistanceToCam = (lastPos - camPos).Norm();
+			}
+			pEntity->GetWorldPosition(currentPos);
+			float newDistanceToCam = (currentPos - camPos).Norm();
+			if (newDistanceToCam < lastDistanceToCam) {
+				pSelectedEntity = pEntity;
+			}
+		}
+	}
+	return pSelectedEntity;
 }

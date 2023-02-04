@@ -25,6 +25,7 @@ public:
 	typedef void(*CloseWindowCallback)(IGUIWindow*, IBaseObject* pObject);
 
 	virtual void	Display() = 0;
+	virtual void	Close() = 0;
 	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) = 0;
 };
 
@@ -33,6 +34,7 @@ class ITopicWindow : public virtual IGUIWindow
 public:
 	virtual void SetSpeakerId(string sId) = 0;
 	virtual void OnChoiceCalled(string sChoices) = 0;
+	virtual void OnGoodbyeCalled() = 0;
 	virtual void LoadTopics(string sFileName) = 0;
 };
 

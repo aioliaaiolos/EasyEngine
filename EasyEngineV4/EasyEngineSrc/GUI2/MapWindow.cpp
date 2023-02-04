@@ -10,7 +10,7 @@ CMinimapWindow::CMinimapWindow(EEInterface& oInterface, IScene& oScene, int nWid
 	m_pGUIManager(static_cast<CGUIManager*>(oInterface.GetPlugin("GUIManager"))),
 	m_oRenderer(static_cast<IRenderer&>(*oInterface.GetPlugin("Renderer"))),
 	m_oScene(oScene),
-	m_oMinimap(512, 288)
+	m_oMinimap(oInterface, 512, 288)
 {
 	unsigned int screenWidth, screenHeight;
 	m_oRenderer.GetResolution(screenWidth, screenHeight);

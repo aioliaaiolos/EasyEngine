@@ -1,5 +1,6 @@
 #pragma once
 #include "MobileEntity.h"
+#include "Utils2\Position.h"
 
 class IGUIWindow;
 class ICamera;
@@ -16,8 +17,12 @@ public:
 
 
 protected:
+	INode* 			GetEntityInVisor(int x, int y);
+	void			CollectSelectableEntity(vector<INode*>& entities);
+
 	IGUIManager&	m_oGUIManager;
 	IGUIWindow*		m_pPlayerWindow;
 	ICamera*		m_pLinkCamera;
+	CPosition		m_oVisorPos;
 };
 

@@ -235,6 +235,12 @@ void SpawnArea(IScriptState* pState)
 	m_pWorldEditor->SpawnArea(pAreaName->m_sValue);
 }
 
+void SpawnItem(IScriptState* pState)
+{
+	CScriptFuncArgString* pItemName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->SpawnItem(pItemName->m_sValue);
+}
+
 void EditCharacter(IScriptState* pState)
 {
 	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
@@ -402,6 +408,11 @@ void Choice(IScriptState* pState)
 {
 	CScriptFuncArgString* pChoice = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
 	m_pGUIManager->GetTopicsWindow()->OnChoiceCalled(pChoice->m_sValue);
+}
+
+void Goodbye(IScriptState* pState)
+{
+	m_pGUIManager->GetTopicsWindow()->OnGoodbyeCalled();
 }
 
 void Goto( IScriptState* pState )
@@ -2563,8 +2574,7 @@ void GetNodeInfos( INode* pNode, int nLevel = 0 )
 		ostringstream sLine;		
 		for( int j = 0; j < nLevel; j++ )
 			sLine << "\t";
-		string sEntityName;
-		pEntity->GetEntityID(sEntityName);
+		string sEntityName = pEntity->GetIDStr();
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		if (sEntityName.find("CollisionPrimitive") == -1) {
@@ -2585,8 +2595,7 @@ void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
 			ostringstream sLine;
 			for (int j = 0; j < nLevel; j++)
 				sLine << "\t";
-			string sEntityName;
-			pEntity->GetEntityID(sEntityName);
+			string sEntityName = pEntity->GetIDStr();
 			if (sEntityName.empty())
 				pEntity->GetName(sEntityName);
 			sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
@@ -2783,7 +2792,7 @@ void DisplayInventory(IScriptState* pState)
 	if (pCharacter) {
 		for (const pair<string, vector<IItem*>>& items : pCharacter->GetItems()) {
 			for (IEntity* pItem : items.second) {
-				m_pConsole->Println(pItem->GetEntityID());
+				m_pConsole->Println(pItem->GetIDStr());
 			}
 		}
 	}
@@ -2812,8 +2821,7 @@ void GetCharacterID(IScriptState* pState)
 	m_pScene->GetCharactersInfos(characters);
 	for (IEntity* entity : characters)
 	{
-		string name;
-		entity->GetEntityID(name);
+		string name = entity->GetIDStr();
 		if (name == pName->m_sValue) {
 			pState->SetReturnValue(entity->GetID());
 			return;
@@ -3580,6 +3588,9 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("Choice", Choice, vType, eVoid);
 
 	vType.clear();
+	m_pScriptManager->RegisterFunction("Goodbye", Goodbye, vType, eVoid);
+
+	vType.clear();
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("Debug", Debug, vType, eInt);
 
@@ -3782,6 +3793,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("SpawnArea", SpawnArea, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SpawnItem", SpawnItem, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

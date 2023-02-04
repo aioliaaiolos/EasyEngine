@@ -3,14 +3,19 @@
 #include "guiwindow.h"
 #include "Utils2/Rectangle.h"
 #include "IRessource.h"
+#include "Interface.h"
 
-CGUIWindow::CGUIWindow()
+CGUIWindow::CGUIWindow(EEInterface& oInterface):
+	CGUIWidget(oInterface),
+	m_bGUIMode(false),
+	m_bIsShown(false)
 {
-
 }
 
 CGUIWindow::CGUIWindow(EEInterface& oInterface, string sFileName) :
-	CGUIWidget(oInterface, sFileName)
+	CGUIWidget(oInterface, sFileName),
+	m_bGUIMode(false),
+	m_bIsShown(false)
 {
 
 }
@@ -18,29 +23,33 @@ CGUIWindow::CGUIWindow(EEInterface& oInterface, string sFileName) :
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize) :
 	CGUIWidget(oInterface, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr)
+	m_oCloseWindowCallback(nullptr, nullptr),
+	m_bIsShown(false)
 {
+	m_pGUIManager = static_cast<IGUIManager*>(oInterface.GetPlugin("GUIManager"));
 }
 
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight) :
 	CGUIWidget(oInterface, fileName, nWidth, nHeight),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr)
+	m_oCloseWindowCallback(nullptr, nullptr),
+	m_bIsShown(false)
 {
-
 }
 
-CGUIWindow::CGUIWindow(const CDimension& windowSize) :
-	CGUIWidget(windowSize.GetWidth(), windowSize.GetHeight()),
+CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize) :
+	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr)
+	m_oCloseWindowCallback(nullptr, nullptr),
+	m_bIsShown(false)
 {
 }
 
 CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
 	CGUIWidget(oInterface, windowSize, skin),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr)
+	m_oCloseWindowCallback(nullptr, nullptr),
+	m_bIsShown(false)
 {
 }
 
@@ -105,7 +114,9 @@ size_t CGUIWindow::GetWidgetCount()const
 
 CGUIWidget* CGUIWindow::GetWidget( unsigned int nIndex )
 {
-	return m_vWidget[nIndex];
+	if(nIndex < m_vWidget.size())
+		return m_vWidget[nIndex];
+	return nullptr;
 }
 
 void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData)
@@ -144,7 +155,8 @@ void CGUIWindow::UpdateCallback(int nCursorXPos, int nCursorYPos, IInputManager:
 	for (size_t i = 0; i<nWidgetCount; i++)
 	{
 		CGUIWidget* pWidget = GetWidget((unsigned int)i);
-		pWidget->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);
+		if(pWidget)
+			pWidget->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);
 	}
 }
 
@@ -153,8 +165,27 @@ deque<CGUIWidget*>& CGUIWindow::GetChildren()
 	return m_vWidget;
 }
 
+void CGUIWindow::Close()
+{
+	GetGUIManager()->RemoveWindow(this);
+	m_bIsShown = false;
+}
+
+bool CGUIWindow::IsShown()
+{
+	return m_bIsShown;
+}
+
 void CGUIWindow::OnShow(bool bShow)
 {
 	if (!bShow && m_oCloseWindowCallback.first)
 		m_oCloseWindowCallback.first(this, m_oCloseWindowCallback.second);
+	m_bIsShown = bShow;
+}
+
+IGUIManager* CGUIWindow::GetGUIManager()
+{
+	if(!m_pGUIManager)
+		m_pGUIManager = static_cast<IGUIManager*>(m_oInterface.GetPlugin("GUIManager"));
+	return m_pGUIManager;
 }

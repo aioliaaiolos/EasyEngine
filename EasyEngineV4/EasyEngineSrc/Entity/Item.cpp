@@ -48,7 +48,8 @@ CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, stri
 	m_bIsWear(false),
 	m_sPreviewPath(sPreviewPath)
 {
-	m_sEntityID = sID;
+	m_sID = sID;
+	m_sTypeName = "Item";
 }
 
 CItem::Type CItem::GetTypeFromString(string sType)

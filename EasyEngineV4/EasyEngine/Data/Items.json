@@ -91,6 +91,14 @@
 			"Class": "Armor",
 			"Type": "Belt",
 			"Preview": "base-greaves.bmp"
+		},
+		{
+			"ID": "Vase",
+			"Model": "misc/vase.bme",
+			"Class": "misc",
+			"Type": "None",
+			"Preview": "vase.bmp",
+			"Value": 10
 		}
 	]
 }

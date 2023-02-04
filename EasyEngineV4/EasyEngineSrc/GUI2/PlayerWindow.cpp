@@ -18,10 +18,10 @@ CPlayerWindow::CPlayerWindow(EEInterface& oInterface, const CDimension& windowSi
 	m_pLight(nullptr),
 	m_fLightIntensity(0.06f)
 {
-	m_pArmorWindow = new CGUIWidget(windowSize.GetWidth(), windowSize.GetHeight());
+	m_pArmorWindow = new CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight());
 	SetPosition(100, 100);
 	
-	m_pInventory = new CGUIWindow(windowSize);
+	m_pInventory = new CGUIWindow(oInterface, windowSize);
 	AddWidget(m_pInventory);
 
 	IRessourceManager* pRessourceManager = static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"));

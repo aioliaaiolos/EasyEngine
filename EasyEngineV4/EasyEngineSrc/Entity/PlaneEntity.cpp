@@ -8,6 +8,7 @@ CPlaneEntity::CPlaneEntity(IRenderer& oRenderer, IRessourceManager& oRessourceMa
 	m_pMesh(nullptr)
 {
 	m_pMesh  = oRessourceManager.CreatePlane(slices, size, diffuseTexture);
+	m_sEntityType = "PlaneEntity";
 }
 
 
@@ -28,12 +29,8 @@ void CPlaneEntity::Update()
 	
 	m_oRenderer.CullFace(1);
 }
-void CPlaneEntity::GetEntityID(string& sName)
-{
-	sName = "CPlaneEntity";
-}
 
-const string& CPlaneEntity::GetEntityID() const
+const string& CPlaneEntity::GetIDStr() const
 {
 	return m_sName;
 }
@@ -41,4 +38,9 @@ const string& CPlaneEntity::GetEntityID() const
 void CPlaneEntity::Colorize(float r, float g, float b, float a)
 {
 
+}
+
+const string& CPlaneEntity::GetTypeName() const
+{
+	return m_sEntityType;
 }

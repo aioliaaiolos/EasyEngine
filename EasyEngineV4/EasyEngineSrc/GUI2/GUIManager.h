@@ -74,10 +74,10 @@ public:
 	unsigned int		GetCurrentFontWidth( char c ) const;
 	unsigned int		GetCharSpace();
 	int					CreateStaticText(vector< string >& vText, int nPosX = 0, int nPosY = 0, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
-	CGUIWidget*			CreateStaticText(string sText, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
+	CGUIWidget*			CreateStaticText(string sText, int& nLineCount, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
 	void				CreateStaticText(string sText, int nMaxWith, vector<CGUIWidget*>& vLineWidgets);
 	void				CreateStaticText_(string sText, int nMaxCharacterPerLine, vector<CGUIWidget*>& vLineWidgets);
-	IAnimatableMesh*	CreateTextMeshes(string sText, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
+	IAnimatableMesh*	CreateTextMeshes(string sText, int& nLineCount, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite, int nMaxWidth = -1);
 	void				DestroyStaticTest( int nID );
 	void				PrintStaticText( int nTextID );
 	void				EnableStaticText( int nTextID, bool bEnable );
@@ -88,6 +88,7 @@ public:
 	int					GetCurrentFontEspacementX();
 	int					GetCurrentFontEspacementY();
 	int					GetLetterEspacementX(char c);
+	int					GetWordWidth(string s);
 	string				GetName() override;
 	ITexture*			GetColorTexture(TFontColor color) const override;
 	IRessource*			GetFontMaterial(IGUIManager::TFontColor color);
@@ -144,7 +145,7 @@ private:
 	void									FlipBitmap(const unsigned char* data, int w, int h, int depth, vector< unsigned char >& vData);
 	IGUIWindow*								CreatePlayerWindow(int nWidth, int nHeight);
 	void									RenderText();
-	void									AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffset, IGUIManager::TFontColor color = IGUIManager::eWhite);
+	void									AddTextToMeshInfos(string sText, int nPosX, int nPosY, float fOffsetY, int& nNumChar, ILoader::CMeshInfos& mi, float& fOffset, int& nLineCount, IGUIManager::TFontColor color = IGUIManager::eWhite, unsigned int nMaxChar = -1);
 	const map<unsigned char, CGUIWidget*>&	GetFontWidget(IGUIManager::TFontColor color) const;
 
 	IShader*								m_pShader;
