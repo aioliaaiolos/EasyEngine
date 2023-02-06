@@ -1,7 +1,15 @@
 #pragma once
-#include "Entity.h"
+#include "MobileEntity.h"
 
-class CItem : public CEntity, public IItem
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <rapidjson/prettywriter.h>
+#include <fstream>
+using namespace rapidjson;
+
+class CItem : public CObject, public IItem
 {
 public:
 
@@ -14,6 +22,8 @@ public:
 		eSkin,
 		eChest,
 		eBelt,
+		eBeltWeapon,
+		eLeftBelt,
 		eForearm,
 		eShoulder,
 		eCalf,
@@ -30,6 +40,7 @@ public:
 		eClassNone = -1,
 		eCloth = 0,
 		eArmor,
+		eWeapon,
 		eJewel
 	};
 
@@ -49,11 +60,12 @@ public:
 	
 	static Type GetTypeFromString(string sType);
 	static map<string, TClass> s_mClassString;
-	
+	static void LoadDummyTypes(rapidjson::Document& doc);
 	static map<Type, vector<string>> s_mBodyDummies;
 
 	bool	m_bIsWear;
-private:
+
+protected:
 	static map<string, Type> s_mTypeString;
 	string	m_sPreviewPath;
 	ICharacter*	m_pOwner = nullptr;

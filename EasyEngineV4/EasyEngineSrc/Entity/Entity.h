@@ -65,7 +65,6 @@ public:
 	void							UnLinkDummyParentToDummyEntity();
 	void							SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
 	TAnimation						GetCurrentAnimationType() const{return eNone;}
-	void							GetTypeName( string& sName );
 	void							SetScaleFactor( float x, float y, float z );
 	void							GetScaleFactor(CVector& factor);
 	void							SetRenderingType( IRenderer::TRenderType t );
@@ -117,7 +116,7 @@ protected:
 	ILoaderManager*									m_pLoaderManager;
 	IScriptManager&									m_oScriptManager;
 	IConsole&										m_oConsole;
-	CBody											m_oBody;
+	CBody*											m_pBody = nullptr;
 	IAnimation*										m_pCurrentAnimation;
 	std::map< std::string, IAnimation* >			m_mAnimation;
 	bool											m_bDrawBoundingBox;
@@ -128,7 +127,6 @@ protected:
 	float											m_fBoundingSphereRadius;
 	CMatrix											m_oFirstAnimationFrameSkeletonMatrixInv;
 	bool											m_bUsePositionKeys;
-	string											m_sTypeName;
 	CMatrix											m_oScaleMatrix;
 	IRenderer::TRenderType							m_eRenderType;
 	IEntity*										m_pBoundingSphere;
@@ -158,7 +156,7 @@ protected:
 	string											m_sAttachedScript;
 	vector<unsigned char>							m_vAttachedScriptByteCode;
 	time_t											m_nLastAttachScriptTime;
-	IPhysic&										m_oPhysic;
+	IPhysic*										m_pPhysic = nullptr;
 	IWorldEditor*									m_pWorldEditor;
 
 	
@@ -182,6 +180,7 @@ protected:
 	void				ExecuteScripts();
 	static void			OnAnimationCallback(IAnimation::TEvent e, void*);
 	static void			OnEditorManagerCreated(CPlugin* plugin, IBaseObject* pData);
+	static void			OnPhysicCreated(CPlugin* plugin, IBaseObject* pData);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

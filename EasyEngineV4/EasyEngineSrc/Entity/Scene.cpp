@@ -364,7 +364,7 @@ void CScene::UpdateState()
 			for (pair<StateChangedCallback, CPlugin*>& p : m_vStateChangedCallback)
 				if (p.first)
 					p.first(m_eSceneState, p.second);
-			m_oPhysic.SetGravity(0);
+			m_pPhysic->SetGravity(0);
 		}
 		break;
 	case eLoadingComplete:
@@ -374,7 +374,7 @@ void CScene::UpdateState()
 				p.first(m_eSceneState, p.second);
 		break;
 	case eFirstUpdateDone:
-		m_oPhysic.RestoreGravity();
+		m_pPhysic->RestoreGravity();
 		m_eSceneState = eRunning;
 		break;
 	case eRunning:

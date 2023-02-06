@@ -182,6 +182,7 @@
     <ClInclude Include="Shape.h" />
     <ClInclude Include="SphereEntity.h" />
     <ClInclude Include="TestEntity.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AreaEntity.cpp" />
@@ -215,6 +216,7 @@
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="SphereEntity.cpp" />
     <ClCompile Include="TestEntity.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

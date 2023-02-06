@@ -12,7 +12,7 @@ CAreaEntity::CAreaEntity(string areaName, EEInterface& oInterface, IBox& oBox) :
 {
 	m_sEntityID = areaName;
 	GetWorldPosition(m_oLastPosition);
-	m_oBody.m_fWeight = 0.f;
+	m_pBody->m_fWeight = 0.f;
 	m_bIsCollidable = false;
 }
 
@@ -89,7 +89,7 @@ void CAreaEntity::UpdateCollision()
 					fMaxHeight = last.m_y;
 				else
 					last.m_y = fMaxHeight;
-				m_oBody.m_oSpeed.m_y = 0;
+				m_pBody->m_oSpeed.m_y = 0;
 			}
 		}
 		else {
@@ -102,10 +102,10 @@ void CAreaEntity::UpdateCollision()
 	float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
 	float fGroundHeightNext = m_pParent->GetGroundHeight(nextPosition.m_x, nextPosition.m_z) + margin;
 	float fEntityY = last.m_y - h / 2.f;
-	if (fEntityY <= fGroundHeight + m_oPhysic.GetEpsilonError()) {
-		m_oBody.m_oSpeed.m_x = 0;
-		m_oBody.m_oSpeed.m_y = 0;
-		m_oBody.m_oSpeed.m_z = 0;
+	if (fEntityY <= fGroundHeight + m_pPhysic->GetEpsilonError()) {
+		m_pBody->m_oSpeed.m_x = 0;
+		m_pBody->m_oSpeed.m_y = 0;
+		m_pBody->m_oSpeed.m_z = 0;
 		float newY = fGroundHeight + h / 2.f;
 		last.m_y = newY;
 	}

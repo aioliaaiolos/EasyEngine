@@ -379,12 +379,13 @@ void CGUIManager::OnRender()
 			pWindow->Display();
 			IInputManager::TMouseButtonState eButtonState = m_oInputManager.GetMouseButtonState(IInputManager::eMouseButtonLeft);
 			pWindow->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);	
-			if (!pWindow->IsShown())
+			if (!pWindow->IsShown()) {
 				if (!m_DisplayedWindowsSet.empty()) {
 					itWindow--;
 				}
 				else
 					break;
+			}
 
 		}
 

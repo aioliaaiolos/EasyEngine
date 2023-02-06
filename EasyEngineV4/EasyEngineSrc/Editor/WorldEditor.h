@@ -18,6 +18,7 @@ public:
 	IEntity*															SpawnCharacter(string sID) override;
 	int																	SpawnArea(string areaName) override;
 	int																	SpawnItem(string areaName) override;
+	void																LockEntity(string sEntityID) override;
 
 private:
 	void																ClearWorld();
@@ -47,7 +48,7 @@ private:
 	map<string, pair<CMatrix, string>>									m_mCharacterMatrices; // (Nom, (TM, Script))
 	map<string, vector<pair<IEntity*, CMatrix>>>						m_mEntityMatrices;
 	map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>				m_mAreaMatrices;
-	map<string, pair<IItem*, CMatrix>>									m_mItemMatrices;
+	map<string, vector<pair<IItem*, CMatrix>>>							m_mItemMatrices;
 	vector<IEntity*>													m_vEntities;
 	string																m_sCurrentWorldName;
 	const string														m_sDatabaseFileName = "world";

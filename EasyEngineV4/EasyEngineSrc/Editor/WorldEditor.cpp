@@ -46,6 +46,8 @@ void CWorldEditor::ClearWorld()
 	m_vEntities.clear();
 	m_mCharacterMatrices.clear();
 	m_mEntityMatrices.clear();
+	m_mAreaMatrices.clear();
+	m_mItemMatrices.clear();
 	m_oEntityManager.Clear();
 	m_pEditingEntity = nullptr;
 	m_mMaps.clear();
@@ -97,7 +99,6 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 				else
 					itMat++;
 			}
-
 		}
 		else {
 			entityName = pEntity->GetIDStr();
@@ -105,23 +106,31 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 			if (itCharacter != m_mCharacterMatrices.end())
 				m_mCharacterMatrices.erase(itCharacter);
 			else {
-				ostringstream oss;
-				oss << "CWorldEditor::OnEntityRemoved() : Erreur, entite " << entityName << " introuvable";
-				throw CEException(oss.str());
-			}
+				map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
+				if (itArea != m_mAreaMatrices.end())
+					m_mAreaMatrices.erase(itArea);
+				else {
+					map<string, vector<pair<IItem*, CMatrix>>>::iterator itItem = m_mItemMatrices.find(entityName);
+					if (itItem != m_mItemMatrices.end()) {
+						vector<pair<IItem*, CMatrix>>& vMatrices = itItem->second;
+						vector<pair<IItem*, CMatrix>>::iterator itMat = vMatrices.begin();
+						while (itMat != vMatrices.end()) {
+							if (itMat->first == pEntity)
+								itMat = vMatrices.erase(itMat);
+							else
+								itMat++;
+						}
+					}
+					else {
+						ostringstream oss;
+						oss << "CWorldEditor::OnEntityRemoved() : Erreur, entite " << entityName << " introuvable";
+						throw CEException(oss.str());
+					}
+				}
+			}			
 		}
 	}
-	else {
-		entityName = pEntity->GetIDStr();
-		map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
-		if (itArea != m_mAreaMatrices.end())
-			m_mAreaMatrices.erase(itArea);
-		else {
-			ostringstream oss;
-			oss << "CWorldEditor::OnEntityRemoved() : Erreur, entite " << entityName << " introuvable";
-			throw CEException(oss.str());
-		}
-	}
+	
 }
 
 string CWorldEditor::GetName()
@@ -380,6 +389,24 @@ void CWorldEditor::LoadFromJson(string sFileName)
 				m_mAreaMatrices[sName] = pair<IBoxEntity*, pair<CMatrix, CVector>>{ nullptr, {oWorldTM, oDimension} };
 			}
 		}
+		
+		if (world.HasMember("Items")) {
+			Value& staticEntities = world["Items"];
+			for (int iEntity = 0; iEntity < staticEntities.Size(); iEntity++) {
+				Value& entity = staticEntities[iEntity];
+				string sEntityID = entity["ID"].GetString();
+				Value& worldTMs = entity["WorldTMs"];
+				for (int iTM = 0; iTM < worldTMs.Size(); iTM++) {
+					Value& tm = worldTMs[iTM];
+					vector<float> vMatrix;
+					for (int i = 0; i < tm.Size(); i++)
+						vMatrix.push_back(tm[i].GetFloat());
+					CMatrix oTM;
+					oTM.Set(vMatrix);
+					m_mItemMatrices[sEntityID].push_back(pair<IItem*, CMatrix>(nullptr, oTM));
+				}
+			}
+		}
 	}
 
 	m_pEditorCamera->Link(m_pScene);
@@ -468,10 +495,27 @@ void CWorldEditor::SaveToJson(string sFileName)
 			areas.PushBack(area, doc.GetAllocator());
 		}
 
+		Value items(kArrayType);
+		for (map<string, vector<pair<IItem*, CMatrix>>>::iterator it = m_mItemMatrices.begin(); it != m_mItemMatrices.end(); it++) {
+			Value item(kObjectType), id(kStringType), tms(kArrayType);
+			id.SetString(it->first.c_str(), doc.GetAllocator());
+			for (int iMatrix = 0; iMatrix < it->second.size(); iMatrix++) {
+				if (it->second[iMatrix].first) {
+					Value tm;
+					ConvertMatrixToJsonObject(doc, it->second[iMatrix].first->GetWorldMatrix(), tm);
+					tms.PushBack(tm, doc.GetAllocator());
+				}
+			}
+			item.AddMember("ID", id, doc.GetAllocator());
+			item.AddMember("WorldTMs", tms, doc.GetAllocator());
+			items.PushBack(item, doc.GetAllocator());
+		}
+
 		world.AddMember("Maps", maps, doc.GetAllocator());
 		world.AddMember("Characters", characters, doc.GetAllocator());
 		world.AddMember("StaticEntities", entities, doc.GetAllocator());
 		world.AddMember("Areas", areas, doc.GetAllocator());
+		world.AddMember("Items", items, doc.GetAllocator());
 
 		if (doc.HasMember("World"))
 			doc["World"] = world;
@@ -558,15 +602,28 @@ int CWorldEditor::SpawnItem(string sItemName)
 	if (!m_bEditionMode)
 		SetEditionMode(true);
 	IItem* pItem = m_oEntityManager.CreateItemEntity(sItemName);
-	pItem->Load();
-	m_pEditingEntity = pItem;
-	InitSpawnedEntity();
-	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
-	m_eEditorMode = TEditorMode::eAdding;
-	m_vEntities.push_back(m_pEditingEntity);
-	CMatrix m;
-	m_mItemMatrices[sItemName] = pair<IItem*, CMatrix>(pItem, m);
+	if (pItem) {
+		pItem->Load();
+		m_pEditingEntity = pItem;
+		InitSpawnedEntity();
+		m_oCameraManager.SetActiveCamera(m_pEditorCamera);
+		m_eEditorMode = TEditorMode::eAdding;
+		m_vEntities.push_back(m_pEditingEntity);
+		CMatrix m;
+		m_mItemMatrices[sItemName].push_back(pair<IItem*, CMatrix>(pItem, m));
+	}
+	else {
+		throw CEException("Error in CWorldEditor::SpawnItem() : item '" + sItemName + "' not found in 'items.json'");
+	}
 	return -1;
+}
+
+void CWorldEditor::LockEntity(string sEntityID)
+{
+	IEntity* pEntity = m_oEntityManager.GetEntity(sEntityID);
+	if (pEntity) {
+
+	}
 }
 
 void CWorldEditor::SetEditionMode(bool bEditionMode)
@@ -651,6 +708,20 @@ void CWorldEditor::OnSceneLoaded()
 			pAreaEntity->GetBox().Set(minPoint, dim);
 			pAreaEntity->Update();
 			m_vEntities.push_back(pAreaEntity);
+		}
+	}
+	for (map<string, vector<pair<IItem*, CMatrix>>>::iterator itItem = m_mItemMatrices.begin(); itItem != m_mItemMatrices.end(); itItem++) {
+		vector<pair<IItem*, CMatrix>>& vMatrices = itItem->second;
+		for (int i = 0; i < vMatrices.size(); i++) {
+			IItem* pItem = m_oEntityManager.CreateItemEntity(string(itItem->first));
+			if (pItem) {
+				pItem->Load();
+				pItem->Link(m_pScene);
+				vMatrices[i].first = pItem;
+				pItem->SetLocalMatrix(vMatrices[i].second);
+				pItem->SetWeight(1);
+				m_vEntities.push_back(pItem);
+			}
 		}
 	}
 	if(m_bEditionMode)

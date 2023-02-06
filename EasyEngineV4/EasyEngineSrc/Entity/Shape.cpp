@@ -8,6 +8,7 @@ m_pShader( NULL ),
 m_bHidden( false )
 {
 	m_pShader = oRenderer.GetShader( "color" );
+	m_sTypeName = "Shape";
 }
 
 void CShape::DrawBoundingBox( bool bDraw )

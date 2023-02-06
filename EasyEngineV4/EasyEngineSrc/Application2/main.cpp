@@ -180,6 +180,12 @@ void OnKeyAction( CPlugin* pPlugin, unsigned int key, IInputManager::KEY_STATE s
 				if(pPlayer)
 					pPlayer->Action();
 			}
+			else if (key == 'F')
+			{
+				IPlayer* pPlayer = m_pEntityManager->GetPlayer();
+				if (pPlayer)
+					pPlayer->SetFightMode(!pPlayer->GetFightMode());
+			}
 		}
 	}
 }

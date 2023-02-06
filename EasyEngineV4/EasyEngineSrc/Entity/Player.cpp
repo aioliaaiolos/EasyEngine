@@ -5,7 +5,7 @@
 #include "EntityManager.h"
 #include "ICamera.h"
 #include "IGeometry.h"
-
+#include "Item.h"
 #include "Scene.h"
 
 CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
@@ -37,21 +37,16 @@ void CPlayer::Action()
 	if (m_oGUIManager.IsWindowDisplayed(pTopicWindow))
 		pTopicWindow->Close();
 	else {
-		CNPCEntity* pSpeaker = NULL;
-		float fMinDistance = 200.f;
-		for (int i = 0; i < m_pParent->GetChildCount(); i++) {
-			CNPCEntity* pNPC = dynamic_cast<CNPCEntity*>(m_pParent->GetChild(i));
-			if (pNPC) {
-				float d = GetDistance(pNPC);
-				if ((d < 150.f) && (fMinDistance > d)) {
-					fMinDistance = d;
-					pSpeaker = pNPC;
-				}
+		if (m_pEntityInVisor) {
+			CNPCEntity* pSpeaker = dynamic_cast<CNPCEntity*>(m_pEntityInVisor);
+			if (pSpeaker) {
+				m_oGUIManager.GetTopicsWindow()->SetSpeakerId(pSpeaker->GetIDStr());
+				m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 			}
-		}
-		if (pSpeaker) {
-			m_oGUIManager.GetTopicsWindow()->SetSpeakerId(pSpeaker->GetIDStr());
-			m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
+			else {
+				CItem* pItem = dynamic_cast<CItem*>(m_pEntityInVisor);
+				Loot(pItem);
+			}
 		}
 	}
 }
@@ -73,9 +68,9 @@ void CPlayer::Update()
 	CMatrix p;
 	CVector ray, origin;
 	m_oRenderer.GetProjectionMatrix(p);
-	INode* pEntity = GetEntityInVisor(m_oVisorPos.GetX(), m_oVisorPos.GetY());
-	if(pEntity)
-		m_oGUIManager.Print(pEntity->GetIDStr(), m_oVisorPos.GetX(), m_oVisorPos.GetY(), IGUIManager::TFontColor::eWhite);
+	m_pEntityInVisor = GetEntityInVisor(m_oVisorPos.GetX(), m_oVisorPos.GetY());
+	if(m_pEntityInVisor)
+		m_oGUIManager.Print(m_pEntityInVisor->GetIDStr(), m_oVisorPos.GetX(), m_oVisorPos.GetY(), IGUIManager::TFontColor::eWhite);
 }
 
 void CPlayer::CollectSelectableEntity(vector<INode*>& entities)
@@ -89,6 +84,12 @@ void CPlayer::CollectSelectableEntity(vector<INode*>& entities)
 	}
 }
 
+void CPlayer::Loot(CItem* pItem)
+{
+	AddItem(pItem);
+	pItem->Unlink();
+}
+
 INode* CPlayer::GetEntityInVisor(int x, int y)
 {
 	unsigned int nWidth, nHeight;
@@ -98,7 +99,7 @@ INode* CPlayer::GetEntityInVisor(int x, int y)
 	m_oRenderer.GetProjectionMatrix(p);
 	m_oGeometryManager.RayCast(x, y, m_oWorldMatrix, p, nWidth, nHeight, camPos, ray);
 
-	static float rayLength = 200.f;
+	static float rayLength = 250.f;
 	CVector farPoint = camPos - ray * rayLength;
 	farPoint.m_w = 1.f;
 

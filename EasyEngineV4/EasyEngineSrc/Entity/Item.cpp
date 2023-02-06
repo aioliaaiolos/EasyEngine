@@ -1,20 +1,9 @@
 #include "Item.h"
+#include "IGeometry.h"
 
 
-map<CItem::Type, vector<string>> CItem::s_mBodyDummies = map<CItem::Type, vector<string>>{
-	{ CItem::Type::eArm, vector<string>{"BodyDummyBrassiereG", "BodyDummyBrassiereD"} },
-	{ CItem::Type::eSkin, vector<string>{""} },
-	{ CItem::Type::eChest, vector<string>{"BodyDummyCuirasse"} },
-	{ CItem::Type::eBelt, vector<string>{"BodyDummyJupe"} },
-	{ CItem::Type::eLeftForearm, vector<string>{"BodyDummyBrassiereG"} },
-	{ CItem::Type::eRightForearm, vector<string>{"BodyDummyBrassiereD"} },
-	{ CItem::Type::eChest, vector<string>{"BodyDummyCuirasse"} },
-	{ CItem::Type::eLeftShoulder, vector<string>{"BodyDummyEpauletteG"} },
-	{ CItem::Type::eRightShoulder, vector<string>{"BodyDummyEpauletteD"} },
-	{ CItem::Type::eLeftCalf, vector<string>{"BodyDummyJambiereG"} },
-	{ CItem::Type::eRightCalf, vector<string>{"BodyDummyJambiereD"} },
-	{ CItem::Type::eBelt, vector<string>{"BodyDummyJupe"} }
-};
+
+map<CItem::Type, vector<string>> CItem::s_mBodyDummies;
 
 map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
 	{ "", CItem::eTypeNone },
@@ -24,24 +13,24 @@ map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
 	{ "Left-Arm", CItem::eLeftArm },
 	{ "Chest", CItem::eChest },
 	{ "Belt", CItem::eBelt },
+	{ "Belt-Weapon", CItem::eBeltWeapon},
 	{ "Left-Forearm", CItem::eLeftForearm },
 	{ "Right-Forearm", CItem::eRightForearm },
-	{ "Chest", CItem::eChest},
 	{ "Left-Shoulder", CItem::eLeftShoulder },
 	{ "Right-Shoulder", CItem::eRightShoulder },
 	{ "Right-Calf", CItem::eRightCalf },
-	{ "Left-Calf", CItem::eLeftCalf },
-	{ "Belt", CItem::eBelt }
+	{ "Left-Calf", CItem::eLeftCalf }
 };
 
 map<string, CItem::TClass> CItem::s_mClassString = map<string, CItem::TClass>{ 
+	{"", CItem::TClass::eClassNone },
 	{"Cloth", CItem::TClass::eCloth},
 	{"Armor", CItem::TClass::eArmor},
 	{"Jewel", CItem::TClass::eJewel}
 };
 
 CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath) :
-	CEntity(oInterface),
+	CObject(oInterface),
 	m_eClass(tclass),
 	m_eType(type),
 	m_sModelName(sModelName),
@@ -50,6 +39,26 @@ CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, stri
 {
 	m_sID = sID;
 	m_sTypeName = "Item";
+}
+
+void CItem::LoadDummyTypes(rapidjson::Document& doc)
+{
+	if (doc.HasMember("DummyTypes")) {
+		rapidjson::Value& dummyTypes = doc["DummyTypes"];
+		if (dummyTypes.IsArray()) {
+			vector<string> sDummyNames = vector<string>{ "Skin", "Arm", "Right-Arm", "Left-Arm", "Chest", "Belt", "Belt-Weapon",			
+				"Left-Forearm", "Right-Forearm", "Left-Shoulder", "Right-Shoulder", "Left-Calf", "Right-Calf" };
+			for (int iType = 0; iType < dummyTypes.Size(); iType++) {
+				rapidjson::Value& type = dummyTypes[iType];
+				string sType = type["Type"].GetString();
+				Value& dummies = type["Dummies"];
+				for (int iDummy = 0; iDummy < dummies.Size(); iDummy++) {
+					string sDummy = dummies[iDummy].GetString();
+					s_mBodyDummies[GetTypeFromString(sType.c_str())].push_back(sDummy);
+				}
+			}
+		}
+	}
 }
 
 CItem::Type CItem::GetTypeFromString(string sType)
@@ -72,6 +81,8 @@ void CItem::Load()
 	if (m_sModelName.size() > 0)
 	{
 		SetRessource(string("meshes/") + m_sModelName);
+		if (m_pBoundingGeometry)
+			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
 	}
 }
 

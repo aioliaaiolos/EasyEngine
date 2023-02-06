@@ -7,23 +7,6 @@ class IBox;
 
 class CBone : public IBone, public CNode
 {
-	IGeometryManager&						m_oGeometryManager;
-	float									m_fLastFrameInterpolatedFactor;
-	bool									m_bEnd;
-	int										m_nLastKeyValue;
-	int										m_nNextKeyValue;
-	map< string, vector< CKey > > 			m_mKeys; // Associe à chaque animation son vecteur de clés correspondant
-	vector<CKey>							m_vCurrentAnimationKeys;
-	string									m_sCurrentAnimation;
-	IBox*									m_pBoundingBox;
-	ISphere*								m_pSphere;
-	float									GetInterpolatedFactor( float fTime );
-	void									GetInterpolatedMatrix( float fTime );
-	void									GetRelativeInterpolatedMatrix( float fTime );
-	void									GetRelativeInterpolatedMatrixSinceLastFrame( float fTime );
-	void									GetInterpolatedQuaternion( float fTime, CQuaternion& q );
-	bool									IsTimeToNextKey( float fTime );
-
 public:
 							CBone( IGeometryManager& oGeometryManager );
 	
@@ -47,5 +30,23 @@ public:
 	CBone&					operator=( CBone& oBone );
 	IBone*					GetChildBoneByID(int nID) override;
 	IBone*					GetChildBoneByName(string sName) override;
+
+private:
+	IGeometryManager&						m_oGeometryManager;
+	float									m_fLastFrameInterpolatedFactor;
+	bool									m_bEnd;
+	int										m_nLastKeyValue;
+	int										m_nNextKeyValue;
+	map< string, vector< CKey > > 			m_mKeys; // Associe à chaque animation son vecteur de clés correspondant
+	vector<CKey>							m_vCurrentAnimationKeys;
+	string									m_sCurrentAnimation;
+	IBox*									m_pBoundingBox;
+	ISphere*								m_pSphere;
+	float									GetInterpolatedFactor(float fTime);
+	void									GetInterpolatedMatrix(float fTime);
+	void									GetRelativeInterpolatedMatrix(float fTime);
+	void									GetRelativeInterpolatedMatrixSinceLastFrame(float fTime);
+	void									GetInterpolatedQuaternion(float fTime, CQuaternion& q);
+	bool									IsTimeToNextKey(float fTime);
 };
 

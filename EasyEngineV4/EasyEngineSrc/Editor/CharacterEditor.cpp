@@ -413,7 +413,11 @@ void CCharacterEditor::RemoveItem(string sItemID)
 
 void CCharacterEditor::WearItem(string sItemID)
 {
-	m_pCurrentCharacter->WearItem(sItemID);
+	if(m_pCurrentCharacter)
+		m_pCurrentCharacter->WearItem(sItemID);
+	else {
+		throw(CEException("Error in CCharacterEditor::WearItem() : no active character selected"));
+	}
 }
 
 ICharacter* CCharacterEditor::GetCurrentCharacter()

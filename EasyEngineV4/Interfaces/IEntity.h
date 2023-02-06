@@ -81,6 +81,7 @@ public:
 		eJump,
 		eDying,
 		eMoveToGuard,
+		eMoveToGuardWeapon,
 		eAnimationCount
 	};
 
@@ -112,7 +113,6 @@ public:
 	virtual void						LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM ) = 0;
 	virtual void						SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ) = 0;
 	virtual TAnimation					GetCurrentAnimationType() const = 0;
-	virtual void						GetTypeName( string& sName ) = 0;
 	virtual void						SetScaleFactor( float x, float y, float z ) = 0;
 	virtual void						GetScaleFactor(CVector& scale) = 0;
 	virtual void						SetRenderingType( IRenderer::TRenderType t ) = 0;
@@ -178,6 +178,8 @@ public:
 	virtual int										GetItemCount(string sItemID) = 0;
 	virtual const map<string, vector<IItem*>>&		GetItems() const = 0;
 	virtual void									Save() = 0;
+	virtual void									SetFightMode(bool fightMode) = 0;
+	virtual bool									GetFightMode() = 0;
 };
 
 class IScene : public virtual IEntity

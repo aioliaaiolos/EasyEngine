@@ -156,9 +156,9 @@ void CSpawnableEditor::OnLeftMouseDown(int x, int y)
 				m_pEditingEntity->GetWorldPosition(pos);
 				m_pEditingEntity->Link(m_pScene);
 				m_pEditingEntity->SetLocalPosition(pos.m_x, GetPlanHeight(), pos.m_z);
-				m_pEditingEntity->SetWeight(0.f);
 				m_pEditingEntity->Update();
 			}
+			m_pEditingEntity->SetWeight(0.f);
 			OnEntitySelected();
 		}
 	}

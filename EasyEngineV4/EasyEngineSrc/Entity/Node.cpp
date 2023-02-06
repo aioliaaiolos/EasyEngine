@@ -11,7 +11,7 @@ m_bUpdateConstantLocalTranslate( false ),
 m_bUpdateConstantLocalRotate( false ),
 m_bIsCollidable(false)
 {
-	m_sEntityType = "Node";
+	m_sTypeName = "Node";
 }
 
 CNode::~CNode()
@@ -28,7 +28,7 @@ bool CNode::IsCollidable()
 
 const string& CNode::GetTypeName() const
 {
-	return m_sEntityType;
+	return m_sTypeName;
 }
 
 INode* CNode::GetParent()

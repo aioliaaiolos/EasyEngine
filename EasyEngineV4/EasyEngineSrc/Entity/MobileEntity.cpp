@@ -13,6 +13,7 @@
 #include "Interface.h"
 #include "IFileSystem.h"
 #include "Item.h"
+#include "Weapon.h"
 #include "../Utils2/StringUtils.h"
 
 map< IEntity::TAnimation, string> CCharacter::s_mAnimationTypeToString;
@@ -36,6 +37,12 @@ vector< CCharacter* >							CCharacter::s_vHumans;
 map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
 
 map<string, map<string, string>> CCharacter::s_mBodiesAnimations;
+
+CObject::CObject(EEInterface& oInterface):
+	CEntity(oInterface)
+{
+	m_pfnCollisionCallback = OnCollision;
+}
 
 CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
@@ -82,13 +89,13 @@ void CObject::OnCollision(CEntity* pThis, vector<INode*> entities)
 
 void CObject::ManageGravity()
 {
-	m_oBody.Update();
-	if (m_oBody.m_fWeight > 0.f)
+	m_pBody->Update();
+	if (m_pBody->m_fWeight > 0.f)
 	{
 		float x, y, z;
 		m_oLocalMatrix.GetPosition(x, y, z);
 		int nDelta = CTimeManager::Instance()->GetTimeElapsedSinceLastUpdate();
-		m_vNextLocalTranslate.m_y += m_oBody.m_oSpeed.m_y * (float)nDelta / 1000.f;
+		m_vNextLocalTranslate.m_y += m_pBody->m_oSpeed.m_y * (float)nDelta / 1000.f;
 	}
 }
 
@@ -120,9 +127,11 @@ void CObject::UpdateCollision()
 		bool bCollision = false;
 		m_bCollideOnObstacle = false;
 		float fMaxHeight = -999999.f;
-		if (m_oPhysic.GetGravity() > 0.f) {
+		if (m_pPhysic->GetGravity() > 0.f) {
 			for (int i = 0; i < entities.size(); i++) {
 				INode* pEntity = entities[i];
+				if (pEntity->GetTypeName() == "Item")
+					continue;
 				pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
 				IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
 				firstBox->SetTM(backupLocal);
@@ -141,7 +150,7 @@ void CObject::UpdateCollision()
 							fMaxHeight = last.m_y;
 						else
 							last.m_y = fMaxHeight;
-						m_oBody.m_oSpeed.m_y = 0;
+						m_pBody->m_oSpeed.m_y = 0;
 						oLocalMatrix.m_13 = last.m_y;
 						GetBoundingGeometry()->SetTM(oLocalMatrix);
 					}
@@ -163,10 +172,10 @@ void CObject::UpdateCollision()
 		float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
 		float fGroundHeightNext = m_pParent->GetGroundHeight(nextPosition.m_x, nextPosition.m_z) + margin;
 		float fEntityY = last.m_y - h / 2.f;
-		if (fEntityY <= fGroundHeight + m_oPhysic.GetEpsilonError()) {
-			m_oBody.m_oSpeed.m_x = 0;
-			m_oBody.m_oSpeed.m_y = 0;
-			m_oBody.m_oSpeed.m_z = 0;
+		if (fEntityY <= fGroundHeight + m_pPhysic->GetEpsilonError()) {
+			m_pBody->m_oSpeed.m_x = 0;
+			m_pBody->m_oSpeed.m_y = 0;
+			m_pBody->m_oSpeed.m_z = 0;
 			float newY = fGroundHeight + h / 2.f;
 			last.m_y = newY;
 		}
@@ -179,7 +188,7 @@ void CObject::UpdateCollision()
 				LinkAndUpdateMatrices(pEntity);
 		}
 
-		if ((bCollision || !m_oPhysic.GetGravity()) && m_pfnCollisionCallback) {
+		if ((bCollision || !m_pPhysic->GetGravity()) && m_pfnCollisionCallback) {
 			m_pfnCollisionCallback(this, entities);
 		}
 	}
@@ -204,7 +213,7 @@ m_fNeckRotV( 0 )
 	for( int i = 0; i < eAnimationCount; i++ )
 		m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
 
-	m_oBody.m_fWeight = 1.f;
+	m_pBody->m_fWeight = 1.f;
 	
 	InitAnimations();
 
@@ -225,6 +234,7 @@ m_fNeckRotV( 0 )
 	}
 
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
+	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
 }
 
 CCharacter::~CCharacter()
@@ -328,6 +338,7 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationStringToType["Jump"] = eJump;
 	s_mAnimationStringToType["Dying"] = eDying;
 	s_mAnimationStringToType["MoveToGuard"] = eMoveToGuard;
+	s_mAnimationStringToType["MoveToGuardWeapon"] = eMoveToGuardWeapon;
 
 	s_mAnimationTypeToString[eWalk] = "Walk";
 	s_mAnimationTypeToString[eRun] = "Run";
@@ -337,6 +348,7 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationTypeToString[eJump] = "Jump";
 	s_mAnimationTypeToString[eDying] = "Dying";
 	s_mAnimationTypeToString[eMoveToGuard] = "MoveToGuard";
+	s_mAnimationTypeToString[eMoveToGuardWeapon] = "MoveToGuardWeapon";
 
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
@@ -345,6 +357,7 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mOrgAnimationSpeedByType[eHitReceived] = 0.f;
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuardWeapon] = 0.f;
 
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
@@ -353,6 +366,7 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mActions["Jump"] = Jump;
 	s_mActions["Dying"] = Dying;
 	s_mActions["MoveToGuard"] = MoveToGuard;
+	s_mActions["MoveToGuardWeapon"] = MoveToGuardWeapon;
 
 	s_mStringToAnimation["Run"] = IEntity::eRun;
 
@@ -526,13 +540,19 @@ void CCharacter::UnWear(CEntity* pCloth)
 
 void CCharacter::AddItem(string sItemID)
 {
-	CItem* pItem = new CItem(*m_pEntityManager->GetItem(sItemID));
+	IItem* pItem = m_pEntityManager->CreateItemEntity(sItemID);
 	if (pItem) {
 		m_mItems[sItemID].push_back(pItem);
 		pItem->SetOwner(this);
 	}
 	else
 		throw CEException(string("Error in CCharacter::AddItem() : item '" + sItemID + "' not found"));
+}
+
+void CCharacter::AddItem(CItem* pItem)
+{
+	m_mItems[pItem->GetIDStr()].push_back(pItem);
+	pItem->SetOwner(this);
 }
 
 void CCharacter::RemoveItem(string sItemID)
@@ -596,6 +616,34 @@ int CCharacter::GetItemCount(string sItemID)
 		return itItem->second.size();
 	}
 	return 0;
+}
+
+void CCharacter::SetCurrentWeapon(CWeapon* pWeapon)
+{
+	m_pCurrentWeapon = pWeapon;
+}
+
+void CCharacter::SetFightMode(bool fightMode)
+{
+	m_bFightMode = fightMode;
+	if (m_bFightMode) {
+		if (m_pCurrentWeapon) {
+			MoveToGuardWeapon();
+			m_pCurrentWeapon->LinkToHand(m_pDummyRHand);
+		}
+		else
+			MoveToGuard();
+	}
+	else {
+		Stand();
+		if(m_pCurrentWeapon)
+			m_pCurrentWeapon->Wear();
+	}
+}
+
+bool CCharacter::GetFightMode()
+{
+	return m_bFightMode;
 }
 
 void CCharacter::Link(INode* pParent)
@@ -712,7 +760,7 @@ void CCharacter::Jump(bool bLoop)
 		//SetPredefinedAnimation("jump", bLoop);
 		//if (!m_bUsePositionKeys)
 		//ConstantLocalTranslate(CVector(0.f, m_mAnimationSpeedByType[eJump], 0.f));
-		m_oBody.m_oSpeed.m_y = 2000;
+		m_pBody->m_oSpeed.m_y = 2000;
 	}
 }
 
@@ -783,6 +831,13 @@ void CCharacter::MoveToGuard()
 	}
 }
 
+void CCharacter::MoveToGuardWeapon()
+{
+	if (m_eCurrentAnimationType != eMoveToGuardWeapon) {
+		SetPredefinedAnimation("MoveToGuardWeapon", false);
+	}
+}
+
 void CCharacter::Guard()
 {
 	//RunAction("guard", false);
@@ -800,34 +855,39 @@ void CCharacter::OnWalkAnimationCallback( IAnimation::TEvent e, void* pData )
 	}
 }
 
-void CCharacter::Walk( CCharacter* pHuman, bool bLoop  )
+void CCharacter::Walk( CCharacter* pCharacter, bool bLoop  )
 {
-	pHuman->Walk( bLoop );
+	pCharacter->Walk( bLoop );
 }
 
-void CCharacter::Stand( CCharacter* pHuman, bool bLoop  )
+void CCharacter::Stand( CCharacter* pCharacter, bool bLoop  )
 {
-	pHuman->Stand( bLoop );
+	pCharacter->Stand( bLoop );
 }
 
-void CCharacter::Run( CCharacter* pHuman, bool bLoop  )
+void CCharacter::Run( CCharacter* pCharacter, bool bLoop  )
 {
-	pHuman->Run( bLoop );
+	pCharacter->Run( bLoop );
 }
 
-void CCharacter::Jump(CCharacter* pHuman, bool bLoop)
+void CCharacter::Jump(CCharacter* pCharacter, bool bLoop)
 {
-	pHuman->Jump(bLoop);
+	pCharacter->Jump(bLoop);
 }
 
-void CCharacter::Dying(CCharacter* pHuman, bool bLoop)
+void CCharacter::Dying(CCharacter* pCharacter, bool bLoop)
 {
-	pHuman->Die();
+	pCharacter->Die();
 }
 
-void CCharacter::MoveToGuard(CCharacter* pHuman, bool bLoop)
+void CCharacter::MoveToGuard(CCharacter* pCharacter, bool bLoop)
 {
-	pHuman->MoveToGuard();
+	pCharacter->MoveToGuard();
+}
+
+void CCharacter::MoveToGuardWeapon(CCharacter* pCharacter, bool bLoop)
+{
+	pCharacter->MoveToGuard();
 }
 
 void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
@@ -887,8 +947,7 @@ void CCharacter::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 			animatedEntityInfos.m_vSubEntityInfos.push_back(pSubEntityInfo);
 		}
 	}
-	string sTypeName;
-	GetTypeName(sTypeName);
+	string sTypeName = GetTypeName();
 	animatedEntityInfos.m_sTypeName = sTypeName;
 	animatedEntityInfos.m_fWeight = GetWeight();
 	string sCustomTextureName;
@@ -976,7 +1035,9 @@ void CCharacter::SaveToJson()
 		bool characterExixts = false;
 		int characterIndex = 0;
 		rapidjson::Value entityID(rapidjson::kStringType);
-		entityID.SetString(m_sID.c_str(), doc.GetAllocator());
+		string sEntityIDLow = m_sID;
+		std::transform(m_sID.begin(), m_sID.end(), sEntityIDLow.begin(), tolower);
+		entityID.SetString(sEntityIDLow.c_str(), doc.GetAllocator());
 
 		rapidjson::Value characters(rapidjson::kArrayType);
 		if (doc.HasMember("Characters"))
@@ -1111,9 +1172,9 @@ ISphere* CCharacter::GetBoneSphere( string sBoneName )
 
 void CCharacter::AddSpeed(float x, float y, float z)
 {
-	m_oBody.m_oSpeed.m_x += x;
-	m_oBody.m_oSpeed.m_y += y;
-	m_oBody.m_oSpeed.m_z += z;
+	m_pBody->m_oSpeed.m_x += x;
+	m_pBody->m_oSpeed.m_y += y;
+	m_pBody->m_oSpeed.m_z += z;
 }
 
 IBone* CCharacter::GetPreloadedBone( string sName )

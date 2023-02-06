@@ -15,14 +15,15 @@ public:
 	void	ToggleDisplayPlayerWindow();
 	void	Update();
 
-
 protected:
 	INode* 			GetEntityInVisor(int x, int y);
 	void			CollectSelectableEntity(vector<INode*>& entities);
+	void			Loot(CItem* pItem);
 
 	IGUIManager&	m_oGUIManager;
 	IGUIWindow*		m_pPlayerWindow;
 	ICamera*		m_pLinkCamera;
 	CPosition		m_oVisorPos;
+	INode*			m_pEntityInVisor;
 };
 

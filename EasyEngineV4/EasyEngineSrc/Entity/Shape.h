@@ -39,7 +39,6 @@ public:
 	void			SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
 	TAnimation		GetCurrentAnimationType() const{return eNone;}
 	void			LinkEntityToBone( IEntity*, IBone*, TLinkType = ePreserveChildRelativeTM  ){}
-	void			GetTypeName( string& sName ){}
 	void			SetScaleFactor( float x, float y, float z ){}
 	void			SetRenderingType( IRenderer::TRenderType t ){}
 	void			DrawBoundingSphere( bool bDraw ) override{}

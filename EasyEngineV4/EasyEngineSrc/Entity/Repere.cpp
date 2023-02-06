@@ -28,5 +28,5 @@ const string& CRepere::GetIDStr() const
 
 const string& CRepere::GetTypeName() const
 {
-	return "Repere";
+	return m_sEntityType;
 }

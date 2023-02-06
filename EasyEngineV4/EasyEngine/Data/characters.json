@@ -346,30 +346,6 @@
 			"Hairs": "hairs05"
 		},
 		{
-			"EntityID": "player",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "Player",
-			"Weight": 0.0,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "Textures/skin01-tres-claire.bmp",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"Speed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": "hairs01"
-		},
-		{
 			"EntityID": "Player",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
@@ -378,7 +354,7 @@
 			"TypeName": "Player",
 			"Weight": 0.0,
 			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "Textures/skin01-tres-blanche.bmp",
+			"DiffuseTextureName": "Textures/skin02-claire.bmp",
 			"Specular": [
 				0.0,
 				0.0,

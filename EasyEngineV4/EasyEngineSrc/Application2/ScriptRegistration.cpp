@@ -237,8 +237,14 @@ void SpawnArea(IScriptState* pState)
 
 void SpawnItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pItemName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
-	m_pWorldEditor->SpawnItem(pItemName->m_sValue);
+	CScriptFuncArgString* pItemId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->SpawnItem(pItemId->m_sValue);
+}
+
+void LockEntity(IScriptState* pState)
+{
+	CScriptFuncArgString* pEntityId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	m_pWorldEditor->LockEntity(pEntityId->m_sValue);
 }
 
 void EditCharacter(IScriptState* pState)
@@ -3797,6 +3803,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("SpawnItem", SpawnItem, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("LockEntity", LockEntity, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

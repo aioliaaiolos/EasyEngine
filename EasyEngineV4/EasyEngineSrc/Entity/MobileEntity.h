@@ -6,10 +6,12 @@
 
 class IFileSystem;
 class CItem;
+class CWeapon;
 
 class CObject : public CEntity
 {
 public:
+	CObject(EEInterface& oInterface);
 	CObject(EEInterface& oInterface, string sFileName);
 	void						Update() override;
 	virtual void				ManageGravity();
@@ -52,6 +54,7 @@ public:
 	void										Roll(float fAngle);
 	IAnimation*									GetCurrentAnimation();
 	void										AddItem(string sItemName);
+	void										AddItem(CItem* pItem);
 	void										RemoveItem(string sItemName);
 	void										WearItem(string sItemID);
 	void										WearItem(IItem* pItem);
@@ -59,6 +62,9 @@ public:
 	void										UnWearItem(IItem* pItem);
 	int											GetItemCount(string sItemID);
 	const map<string, vector<IItem*>>&			GetItems() const override;
+	void										SetFightMode(bool fightMode) override;
+	bool										GetFightMode() override;
+	void										SetCurrentWeapon(CWeapon* pWeapon);
 	void										Link(INode* pParent) override;
 	IBox*										GetBoundingBox();
 	static void									InitStatics(IFileSystem& oFileSystem);
@@ -80,6 +86,7 @@ protected:
 	void										PlayHitAnimation();
 	void										PlaySecondaryHitAnimation();
 	void										MoveToGuard();
+	void										MoveToGuardWeapon();
 	void										Guard();
 	void										TurnEyesH(float fValue);
 	void										TurnNeckH(float f);
@@ -125,6 +132,9 @@ protected:
 	map<string, vector<IItem*>>					m_mItems;
 	map< TAnimation, float >					m_mAnimationSpeedByType;
 	string										m_sCurrentBodyName;
+	bool										m_bFightMode = false;
+	CWeapon*									m_pCurrentWeapon = nullptr;
+	CBone*										m_pDummyRHand = nullptr;
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;
@@ -137,10 +147,11 @@ protected:
 	static void 			Walk( CCharacter*, bool bLoop );
 	static void 			Stand( CCharacter*, bool bLoop );
 	static void 			Run( CCharacter*, bool bLoop );
-	static void				Jump(CCharacter* pHuman, bool bLoop);
-	static void				Dying(CCharacter* pHuman, bool bLoop);
-	static void				MoveToGuard(CCharacter* pHuman, bool bLoop);
-	static void 			PlayReceiveHit( CCharacter* pHuman, bool bLoop );
+	static void				Jump(CCharacter* pCharacter, bool bLoop);
+	static void				Dying(CCharacter* pCharacter, bool bLoop);
+	static void				MoveToGuard(CCharacter* pCharacter, bool bLoop);
+	static void				MoveToGuardWeapon(CCharacter* pCharacter, bool bLoop);
+	static void 			PlayReceiveHit( CCharacter* pCharacter, bool bLoop );
 	static void				OnDyingCallback(IAnimation::TEvent e, void* data);
 	static void				LoadAnimationsJsonFile(IFileSystem& oFileSystem);
 };

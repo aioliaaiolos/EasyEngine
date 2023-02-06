@@ -83,6 +83,7 @@ public:
 	virtual IEntity*	SpawnCharacter(string sID) = 0;
 	virtual int			SpawnArea(string areaName) = 0;
 	virtual int			SpawnItem(string areaName) = 0;
+	virtual void		LockEntity(string sEntityID) = 0;
 	virtual void		RemoveCharacter(string sID) = 0;
 	virtual void		SaveGame(string fileName) = 0;
 };

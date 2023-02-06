@@ -22,6 +22,7 @@
 #include "IEditor.h"
 #include "AreaEntity.h"
 #include "Item.h"
+#include "Weapon.h"
 
 #include <algorithm>
 
@@ -129,7 +130,16 @@ CItem* CEntityManager::GetItem(string sItemID)
 
 IItem* CEntityManager::CreateItemEntity(string sItemID)
 {
-	return new CItem(*GetItem(sItemID));
+	CItem* pItem = GetItem(sItemID);
+	if (pItem) {
+		if (pItem->m_eClass == CItem::TClass::eWeapon) {
+			CWeapon* pWeapon = dynamic_cast<CWeapon*>(pItem);
+			return new CWeapon(*pWeapon);
+		}
+		else
+			return new CItem(*pItem);
+	}
+	return nullptr;
 }
 
 void CEntityManager::LoadItems()
@@ -146,6 +156,7 @@ void CEntityManager::LoadItems()
 	Document doc;
 	doc.ParseStream(isw);
 	if (doc.IsObject()) {
+		CItem::LoadDummyTypes(doc);
 		if (doc.HasMember("Items")) {
 			rapidjson::Value& items = doc["Items"];
 			if (items.IsArray()) {
@@ -153,7 +164,7 @@ void CEntityManager::LoadItems()
 				for (int iItem = 0; iItem < count; iItem++) {
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
-						string sId, sModel, sClass, sType, sPreview;
+						string sId, sModel, sClass, sType, sAttackType, sPreview;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
 							if (id.IsString()) {
@@ -178,18 +189,34 @@ void CEntityManager::LoadItems()
 								sType = type.GetString();
 							}
 						}
+						if (item.HasMember("AttackType")) {
+							rapidjson::Value& attackType = item["AttackType"];
+							if (attackType.IsString()) {
+								sAttackType = attackType.GetString();
+							}
+						}
 						if (item.HasMember("Preview")) {
 							Value& type = item["Preview"];
 							if (type.IsString()) {
 								sPreview = type.GetString();
 							}
 						}
-						CItem* pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
+						CItem* pItem = nullptr;
+						if (sClass == "Weapon") {
+							pItem = new CWeapon(m_oInterface, sId, CItem::GetTypeFromString(sType), CWeapon::GetAttackTypeFromString(sAttackType), sModel, sPreview);
+							CWeapon* pWeapon = static_cast<CWeapon*>(pItem);
+							pWeapon->SetAttackType(CWeapon::GetAttackTypeFromString(sAttackType));
+						}
+						else
+							pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
 						m_mItems[sId] = pItem;
 					}
 				}
 			}
 		}
+	}
+	else {
+		throw CEException("Error in CEntityManager::LoadItems() : cannot load items.json");
 	}
 }
 

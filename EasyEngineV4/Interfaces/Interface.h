@@ -32,7 +32,13 @@ public:
 	
 	void HandlePluginCreation(string pluginName, PluginCreationProc callback, IBaseObject* pData)
 	{
-		s_vPluginCreationCallback[pluginName].push_back(pair<PluginCreationProc, IBaseObject*>(callback, pData));
+		map<string, CPlugin*>::iterator itPlugin = m_mPlugins.find(pluginName);
+		if (itPlugin != m_mPlugins.end()) {
+			map<string, vector<pair<PluginCreationProc, IBaseObject*>>>::iterator itPluginCallback = s_vPluginCreationCallback.find(pluginName);
+			callback(itPlugin->second, pData);
+		}
+		else
+			s_vPluginCreationCallback[pluginName].push_back(pair<PluginCreationProc, IBaseObject*>(callback, pData));
 	}
 
 private:

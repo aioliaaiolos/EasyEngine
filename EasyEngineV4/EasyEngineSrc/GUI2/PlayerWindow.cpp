@@ -44,7 +44,7 @@ CPlayerWindow::~CPlayerWindow()
 
 void CPlayerWindow::OnShow(bool bShow)
 {
-	CGUIWindow::SetVisibility(bShow);
+	CGUIWindow::OnShow(bShow);
 
 	if (bShow) {
 		if (!m_pPlayer) {

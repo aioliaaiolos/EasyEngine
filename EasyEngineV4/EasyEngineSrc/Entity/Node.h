@@ -94,7 +94,7 @@ protected:
 	bool						m_bUpdateConstantLocalTranslate;
 	bool						m_bUpdateConstantLocalRotate;
 	bool						m_bIsCollidable;
-	string						m_sEntityType;
+	string						m_sTypeName;
 
 	void						UpdateWorldMatrix();
 	void						UpdateChildren();

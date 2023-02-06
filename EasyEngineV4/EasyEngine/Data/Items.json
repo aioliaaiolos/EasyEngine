@@ -1,5 +1,58 @@
 {
-	
+	"DummyTypes":	[	
+	  {
+		  "Type" : "Skin", 
+		  "Dummies" : [""]
+	  },
+	  {
+		  "Type":  "Arm", 
+		  "Dummies": ["BodyDummyBrassiereG", "BodyDummyBrassiereD"]
+	  },
+	  {
+		  "Type": "Right-Arm", 
+		  "Dummies": []
+	  },
+	  {
+		  "Type": "Left-Arm", 
+		  "Dummies": []
+	  },
+	  {
+		  "Type": "Chest", 
+		  "Dummies": ["BodyDummyCuirasse"]
+	  },
+	  {
+		  "Type": "Belt", 
+		  "Dummies": ["BodyDummyJupe"]
+	  },
+	  {
+		  "Type": "Belt-Weapon",
+		  "Dummies" : ["BodyDummySword"]
+	  },
+	  {
+		  "Type": "Left-Forearm", 
+		  "Dummies" : ["BodyDummyBrassiereG"]
+	  },
+	  {
+		  "Type": "Right-Forearm", 
+		  "Dummies" : ["BodyDummyBrassiereD"]
+	  },
+	  {
+		  "Type": "Left-Shoulder", 
+		  "Dummies" : ["BodyDummyEpauletteG"]
+	  },
+	  {
+		  "Type": "Right-Shoulder", 
+		  "Dummies" : ["BodyDummyEpauletteD"]
+	  },
+	  {
+		  "Type": "Left-Calf", 
+		  "Dummies": ["BodyDummyJambiereG"]
+	  },
+	  {
+		  "Type": "Right-Calf", 
+		  "Dummies": ["BodyDummyJambiereD"]
+	  }
+	],
 	"Items": [
 		{
 			"ID": "Armlet_EvilSpelled",
@@ -95,10 +148,24 @@
 		{
 			"ID": "Vase",
 			"Model": "misc/vase.bme",
-			"Class": "misc",
-			"Type": "None",
 			"Preview": "vase.bmp",
 			"Value": 10
+		},
+		{
+			"ID": "Fiole",
+			"Model": "misc/fiole.bme",
+			"Preview": "fiole.bmp",
+			"Value": 5
+		}
+		,
+		{
+			"ID": "Sword",
+			"Model": "weapons/sword.bme",
+			"Class": "Weapon",
+			"Type": "Belt-Weapon",
+			"AttackType" : "Right-Hand",
+			"Preview": "sword.bmp",
+			"Value": 20
 		}
 	]
 }
