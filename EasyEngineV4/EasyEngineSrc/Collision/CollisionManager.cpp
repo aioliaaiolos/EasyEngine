@@ -121,7 +121,7 @@ void CCollisionManager::CreateHeightMap( IMesh* pGround, ILoader::CTextureInfos&
 	m_oRenderer.BeginRender();
 	pGround->Update();
 
-	m_oRenderer.ReadPixels(fOriginMapX, fOriginMapY, fGroundMapWidth, fGroundMapHeight, ti.m_vTexels, format);
+	m_oRenderer.ReadPixels((int)fOriginMapX, (int)fOriginMapY, (int)fGroundMapWidth, (int)fGroundMapHeight, ti.m_vTexels, format);
 	ti.m_nWidth = (int)fGroundMapWidth;
 	ti.m_nHeight = (int)fGroundMapHeight;
 	m_oRenderer.EndRender();
@@ -148,7 +148,7 @@ void CCollisionManager::ComputeGroundMapDimensions(IMesh* pMesh, int nScreenWidt
 		groundToScreenScaleFactor = pBox->GetDimension().m_x / 2.f;
 	}
 	width = (float)(((int)width / 4) * 4);
-	height = ((int)height / 4) * 4;
+	height = (float)((int)height / 4) * 4;
 }
 
 

@@ -24,17 +24,13 @@ CCharacterEditor::CCharacterEditor(EEInterface& oInterface, ICameraManager::TCam
 	m_pScene = m_oSceneManager.GetScene("Game");
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(oInterface.GetPlugin("EventDispatcher"));
 	pEventDispatcher->AbonneToMouseEvent(this, OnMouseEventCallback);
-	pEventDispatcher->AbonneToKeyEvent(this, OnKeyPressCallback);
-	oInterface.HandlePluginCreation("EditorManager", HandleEditorCreation, this);
-}
-
-void CCharacterEditor::HandleEditorCreation(CPlugin* pPlugin, IBaseObject* pData)
-{
-	CEditorManager* pEditorManager = (CEditorManager*)pPlugin;
-	CCharacterEditor* pCharacterEditor = dynamic_cast<CCharacterEditor*>(pData);
-	if (pCharacterEditor && pEditorManager) {
-		pCharacterEditor->m_pWorldEditor = dynamic_cast<CWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
-	}
+	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* pPlugin)
+	{
+		CEditorManager* pEditorManager = (CEditorManager*)pPlugin;
+		if (pEditorManager) {
+			m_pWorldEditor = dynamic_cast<CWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
+		}
+	});
 }
 
 void CCharacterEditor::SetEditionMode(bool bEditionMode)
@@ -482,9 +478,4 @@ void CCharacterEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 			}
 		}
 	}
-}
-
-void CCharacterEditor::OnKeyPressCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
-{
-
 }

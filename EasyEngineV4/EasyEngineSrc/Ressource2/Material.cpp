@@ -10,10 +10,11 @@ using namespace std;
 
 //#define OLD_VERSION
 
-CMaterial::Desc::Desc( IRenderer& oRenderer, IShader* pShader ):
-IRessource::Desc( oRenderer, pShader ),
+CMaterial::Desc::Desc(IRenderer& oRenderer, IShader* pShader ) :
 m_fShininess( 0 ),
-m_pDiffuseTexture( NULL )
+m_pDiffuseTexture(nullptr),
+m_oRenderer(oRenderer),
+m_pShader(pShader)
 {
 	for (unsigned int i=0 ; i<4 ; i++)
 	{
@@ -24,11 +25,11 @@ m_pDiffuseTexture( NULL )
 	}
 }
 
-CMaterial::CMaterial( const Desc& oDesc ) :
-IMaterial( oDesc ),
+CMaterial::CMaterial(const Desc& oDesc) :
 m_pDiffuseTexture(NULL),
 m_pShader( oDesc.m_pShader ),
-m_bUseAdditiveColor(false)
+m_bUseAdditiveColor(false),
+m_oRenderer(oDesc.m_oRenderer)
 {
 	m_vAmbient = oDesc.m_vAmbient;
 	m_vDiffuse = oDesc.m_vDiffuse;
@@ -56,7 +57,7 @@ void CMaterial::Update()
 	}
 	else
 	{
-		GetRenderer().BindTexture( 0, 0, IRenderer::T_2D );
+		m_oRenderer.BindTexture( 0, 0, IRenderer::T_2D );
 		m_pShader->SendUniformValues( "ValueTexture0", 0 );
 	}	
 #ifdef OLD_VERSION
@@ -84,11 +85,11 @@ void CMaterial::Update()
 
 #else
 
-	GetRenderer().SetMaterialAmbient(&m_vAmbient[0]);
-	GetRenderer().SetMaterialDiffuse(&m_vDiffuse[0]);
-	GetRenderer().SetMaterialSpecular(&m_vSpecular[0]);
-	GetRenderer().SetMaterialEmissive(&m_vEmissive[0]);
-	GetRenderer().SetMaterialShininess(m_fShininess);
+	m_oRenderer.SetMaterialAmbient(&m_vAmbient[0]);
+	m_oRenderer.SetMaterialDiffuse(&m_vDiffuse[0]);
+	m_oRenderer.SetMaterialSpecular(&m_vSpecular[0]);
+	m_oRenderer.SetMaterialEmissive(&m_vEmissive[0]);
+	m_oRenderer.SetMaterialShininess(m_fShininess);
 #endif // OLD_VERSION
 }
 

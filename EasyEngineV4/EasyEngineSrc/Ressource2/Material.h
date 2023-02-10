@@ -17,16 +17,6 @@ class IRenderer;
 
 class CMaterial : public IMaterial
 {
-	std::vector< float >		m_vAmbient;
-	std::vector< float >		m_vDiffuse;	
-	std::vector< float >		m_vSpecular;
-	std::vector< float >		m_vEmissive;
-	float						m_fShininess;
-	ITexture*					m_pDiffuseTexture;
-	IShader*					m_pShader;
-	vector<float>				m_vAdditionalColor;
-	bool						m_bUseAdditiveColor;
-
 public:
 	enum TMaterialType
 	{
@@ -36,8 +26,7 @@ public:
 		EMISSIVE
 	};
 
-
-	struct Desc : public IRessource::Desc
+	struct Desc
 	{
 		std::vector< float >	m_vAmbient;
 		std::vector< float >	m_vDiffuse;	
@@ -45,9 +34,12 @@ public:
 		std::vector< float >	m_vEmissive;
 		float					m_fShininess;
 		ITexture*				m_pDiffuseTexture;
-		Desc( IRenderer& oRenderer, IShader* pShader );
+		string					m_sName;
+		IShader*				m_pShader = nullptr;
+		IRenderer&				m_oRenderer;
+		Desc(IRenderer& oRenderer, IShader* pShader);
 	};
-								CMaterial( const Desc& oDesc );
+								CMaterial(const Desc& oDesc);
 	virtual						~CMaterial();
 	void						Update();
 	void						GetMaterialMatrix( CMatrix& );
@@ -63,6 +55,18 @@ public:
 	void						SetSpecular(const CVector& pos) override;
 	void						SetShininess(float shininess) override;
 	CVector						GetSpecular() override;
+
+private:
+	std::vector< float >		m_vAmbient;
+	std::vector< float >		m_vDiffuse;
+	std::vector< float >		m_vSpecular;
+	std::vector< float >		m_vEmissive;
+	float						m_fShininess;
+	ITexture*					m_pDiffuseTexture;
+	IShader*					m_pShader;
+	vector<float>				m_vAdditionalColor;
+	bool						m_bUseAdditiveColor;
+	IRenderer&					m_oRenderer;
 };
 
 

@@ -69,11 +69,11 @@ public:
 	void				DestroyAllRessources();
 	ITexture*			CreateRenderTexture(int width, int height, string sShaderName);
 	string				GetName() override;
-	void				RemoveAllLights() override;
+	void				RemoveAllLights(IRenderer& oRenderer) override;
 	void				Reset() override;
 
 private:
-	typedef IRessource*(*TRessourceCreation)(string sFileName, CRessourceManager*, IRenderer&);
+	typedef IRessource*(*TRessourceCreation)(string sFileName, EEInterface& oInterface);
 	typedef ITestMesh*(*TTestRessourceCreation)(string sFileName, CRessourceManager*, ITestShaderManager&, IRenderer&);
 	EEInterface&									m_oInterface;
 	std::map< std::string, IRessource* >			m_mRessource;
@@ -89,13 +89,13 @@ private:
 	IBone*											LoadSkeleton(ILoader::CAnimatableMeshData& oData);
 	void											ComputeNormals(ILoader::CMeshInfos& mi, int slices, IHeightMap* pHeightMap);
 
-	static IRessource*								CreateMesh(string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer);
-	static IRessource*								CreateCollisionMesh(string sFileName, CRessourceManager* pRessouceManager, IRenderer& oRenderer);
-	static IRessource*								CreateAnimation(string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer);
-	static IRessource*								CreateTexture(string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer);
-	static IRessource*								CreateLight(string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer);
-	static void										CollectMaterials(const ILoader::CMaterialInfos& oMaterialInfos, IRenderer& oRenderer, IShader* pShader, IRessourceManager* pRessourceManager, std::map< int, CMaterial* >& vMaterials);
-	static CMaterial*								CreateMaterial(const ILoader::CMaterialInfos*, IRenderer& oRenderer, IShader* pShader, IRessourceManager* pRessourceManager);
+	static IRessource*								CreateMesh(string sFileName, EEInterface& oInterface);
+	static IRessource*								CreateCollisionMesh(string sFileName, EEInterface& oInterface);
+	static IRessource*								CreateAnimation(string sFileName, EEInterface& oInterface);
+	static IRessource*								CreateTexture(string sFileName, EEInterface& oInterface);
+	static IRessource*								CreateLight(string sFileName, EEInterface& oInterface);
+	static void										CollectMaterials(EEInterface& oInterface, const ILoader::CMaterialInfos& oMaterialInfos, IShader* pShader, std::map< int, CMaterial* >& vMaterials);
+	static CMaterial*								CreateMaterial(EEInterface& oInterface, const ILoader::CMaterialInfos*, IShader* pShader);
 
 	void											CreateTextureDesc(string sFileName, CTexture2D::CDesc& desc);
 	std::map< std::string, TRessourceCreation >		m_mRessourceCreation;

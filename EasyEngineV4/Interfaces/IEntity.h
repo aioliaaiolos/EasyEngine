@@ -82,6 +82,10 @@ public:
 		eDying,
 		eMoveToGuard,
 		eMoveToGuardWeapon,
+		eMoveToGuardWeaponPart1,
+		eMoveToGuardWeaponPart2,
+		eMoveToGuardWeaponPart1Reverse,
+		eMoveToGuardWeaponPart2Reverse,
 		eAnimationCount
 	};
 

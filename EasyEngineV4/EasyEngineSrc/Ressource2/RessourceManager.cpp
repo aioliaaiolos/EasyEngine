@@ -144,7 +144,7 @@ IRessource*	CRessourceManager::CreateMaterial( ILoader::CMaterialInfos& mi, ITex
 	std::copy( mi.m_vDiffuse.begin(), mi.m_vDiffuse.end(), oDesc.m_vDiffuse.begin() );
 	std::copy( mi.m_vEmissive.begin(), mi.m_vEmissive.end(), oDesc.m_vEmissive.begin() );
 	std::copy( mi.m_vSpecular.begin(), mi.m_vSpecular.end(), oDesc.m_vSpecular.begin() );
-	return new CMaterial( oDesc );
+	return new CMaterial(oDesc);
 }
 
 IRessource* CRessourceManager::GetRessourceByExtension( string sRessourceFileName)
@@ -158,7 +158,7 @@ IRessource* CRessourceManager::GetRessourceByExtension( string sRessourceFileNam
 		CExtensionNotFoundException e( sMessage.c_str() );
 		throw e;
 	}
-	IRessource* pRessource = itRessourceCreation->second( sRessourceFileName, this, m_oRenderer );
+	IRessource* pRessource = itRessourceCreation->second( sRessourceFileName, m_oInterface);
 	return pRessource;
 }
 
@@ -167,8 +167,9 @@ int CRessourceManager::GetLightCount()
 	return m_nLightCount;
 }
 
-IRessource* CRessourceManager::CreateMesh( string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer)
+IRessource* CRessourceManager::CreateMesh( string sFileName, EEInterface& oInterface)
 {
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	ILoader::CAnimatableMeshData oData;
 	oData.m_sFileName = sFileName;
 	pRessourceManager->m_oLoaderManager.Load( sFileName, oData );
@@ -177,8 +178,7 @@ IRessource* CRessourceManager::CreateMesh( string sFileName, CRessourceManager* 
 
 IAnimatableMesh* CRessourceManager::CreateMesh( ILoader::CAnimatableMeshData& oData, IRessource* pMaterial )
 {
-	IRessource::Desc oResDesc( m_oRenderer, NULL );
-	CAnimatableMesh* pAMesh = new CAnimatableMesh( oResDesc );
+	CAnimatableMesh* pAMesh = new CAnimatableMesh;
 	IBone* pSkeleton = LoadSkeleton( oData );
 	pAMesh->SetSkeleton( pSkeleton );
 	for( unsigned int i = 0; i < oData.m_vMeshes.size(); i++ )
@@ -220,7 +220,7 @@ IAnimatableMesh* CRessourceManager::CreateMesh( ILoader::CAnimatableMeshData& oD
 		}
 		
 		if ( !pMaterial )
-			CollectMaterials( mi.m_oMaterialInfos, m_oRenderer, pShader, this, oDesc.m_mMaterials );
+			CollectMaterials(m_oInterface, mi.m_oMaterialInfos, pShader, oDesc.m_mMaterials );
 		else
 			oDesc.m_mMaterials[ 0 ] = static_cast< CMaterial* >( pMaterial );
 		if (pMaterial && !static_cast< CMaterial* >(pMaterial)->GetShader())
@@ -256,7 +256,6 @@ IAnimatableMesh* CRessourceManager::CreateMesh( ILoader::CAnimatableMeshData& oD
 		oDesc.m_pShader = pShader;
 		oDesc.m_nParentBoneID = mi.m_nParentBoneID;
 		oDesc.m_sName = mi.m_sName;
-		oDesc.m_sFileName = mi.m_sFileName;
 		oDesc.m_oOrgMaxPosition = mi.m_oOrgMaxPosition;
 		
 		CMesh* pMesh = new CMesh( oDesc );
@@ -386,11 +385,12 @@ IMesh* CRessourceManager::CreatePlane(int slices, int size, string diffuseTextur
 }
 
 
-IRessource* CRessourceManager::CreateCollisionMesh(string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer)
+IRessource* CRessourceManager::CreateCollisionMesh(string sFileName, EEInterface& oInterface)
 {
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	ILoader::CCollisionModelInfos cmi;
 	pRessourceManager->m_oLoaderManager.Load(sFileName, cmi);
-	CCollisionMesh::Desc oDesc(oRenderer, cmi);
+	CCollisionMesh::Desc oDesc(pRessourceManager->m_oRenderer, cmi);
 	return new CCollisionMesh(oDesc);
 }
 
@@ -476,9 +476,9 @@ string CRessourceManager::GetName()
 	return "RessourceManager";
 }
 
-void CRessourceManager::RemoveAllLights()
+void CRessourceManager::RemoveAllLights(IRenderer& oRenderer)
 {
-	CLight::RemoveAllLights();
+	CLight::RemoveAllLights(oRenderer);
 }
 
 void CRessourceManager::Reset()
@@ -486,17 +486,19 @@ void CRessourceManager::Reset()
 	m_mRessource.clear();
 }
 
-void CRessourceManager::CollectMaterials( const ILoader::CMaterialInfos& oMaterialInfos, IRenderer& oRenderer, IShader* pShader, IRessourceManager* pRessourceManager, std::map< int, CMaterial* >& mMaterials )
+void CRessourceManager::CollectMaterials(EEInterface& oInterface, const ILoader::CMaterialInfos& oMaterialInfos, IShader* pShader, std::map< int, CMaterial* >& mMaterials )
 {
-	mMaterials[ oMaterialInfos.m_nID ] = CreateMaterial( &oMaterialInfos, oRenderer, pShader, pRessourceManager );
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
+	mMaterials[ oMaterialInfos.m_nID ] = CreateMaterial(oInterface, &oMaterialInfos, pShader);
 	for ( unsigned int i = 0; i < oMaterialInfos.m_vSubMaterials.size(); i++ )
-		CollectMaterials( oMaterialInfos.m_vSubMaterials[ i ], oRenderer, pShader, pRessourceManager, mMaterials );
+		CollectMaterials(oInterface, oMaterialInfos.m_vSubMaterials[ i ], pShader, mMaterials );
 
 }
 
-CMaterial* CRessourceManager::CreateMaterial( const ILoader::CMaterialInfos* pMaterialInfos, IRenderer& oRenderer, IShader* pShader, IRessourceManager* pRessourceManager )
+CMaterial* CRessourceManager::CreateMaterial(EEInterface& oInterface, const ILoader::CMaterialInfos* pMaterialInfos, IShader* pShader)
 {
-	CMaterial::Desc oMatDesc( oRenderer, pShader );
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
+	CMaterial::Desc oMatDesc(pRessourceManager->m_oRenderer, pShader );
 	if ( pMaterialInfos && pMaterialInfos->m_vAmbient.size() > 0 )
 	{
 		oMatDesc.m_vAmbient.resize( pMaterialInfos->m_vAmbient.size() );
@@ -525,16 +527,16 @@ CMaterial* CRessourceManager::CreateMaterial( const ILoader::CMaterialInfos* pMa
 			oMatDesc.m_pDiffuseTexture = pTexture;
 		}		
 	}
-	return new CMaterial( oMatDesc );
+	return new CMaterial(oMatDesc);
 }
 
-IRessource* CRessourceManager::CreateAnimation( string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer )
+IRessource* CRessourceManager::CreateAnimation( string sFileName, EEInterface& oInterface)
 {	
 	ILoader::CAnimationInfos ai;
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	pRessourceManager->m_oLoaderManager.Load( sFileName, ai );
 	
-	CAnimation::Desc oRessourceDesc ( oRenderer, NULL );
-	CAnimation* pAnimation = new CAnimation( oRessourceDesc );
+	CAnimation* pAnimation = new CAnimation(oInterface);
 	pAnimation->SetStartAnimationTime( ai.m_nStartTime );
 	pAnimation->SetEndAnimationTime( ai.m_nEndTime );
 	pAnimation->SetName( ai.m_sName );
@@ -605,13 +607,13 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 	desc.m_nHeight = ti.m_nHeight;
 	desc.m_eFormat = format;
 	desc.m_vTexels.swap(ti.m_vTexels);
-	desc.m_sFileName = sFileName;
 	desc.m_nUnitTexture = 3;
 }
 
-IRessource* CRessourceManager::CreateTexture( string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer)
+IRessource* CRessourceManager::CreateTexture( string sFileName, EEInterface& oInterface)
 {
-	CTexture2D::CDesc desc(oRenderer, NULL, 0);
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
+	CTexture2D::CDesc desc(pRessourceManager->m_oRenderer, NULL, 0);
 	pRessourceManager->CreateTextureDesc(sFileName, desc);
 	CTexture2D* pTexture = new CTexture2D( desc );
 	return static_cast< ITexture* > ( pTexture );
@@ -644,8 +646,9 @@ CVector CRessourceManager::GetLightColor( IRessource* pRessource )
 	return pLight->GetColor();
 }
 
-IRessource* CRessourceManager::CreateLight( string sFileName, CRessourceManager* pRessourceManager, IRenderer& oRenderer )
+IRessource* CRessourceManager::CreateLight( string sFileName, EEInterface& oInterface)
 {
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	ILoader::CLightInfos li;
 	li.m_sFileName = sFileName;
 	pRessourceManager->m_oLoaderManager.Load( sFileName, li );
@@ -662,7 +665,7 @@ IRessource* CRessourceManager::CreateLight( string sFileName, CRessourceManager*
 		type = CLight::SPOT;
 		break;
 	}
-	CLight::Desc desc( oRenderer, NULL );
+	CLight::Desc desc(pRessourceManager->m_oRenderer, NULL );
 	desc.type = type;
 	desc.Color = CVector( li.m_oColor.m_x, li.m_oColor.m_y, li.m_oColor.m_z, li.m_oColor.m_w );
 	desc.fIntensity = li.m_fIntensity;

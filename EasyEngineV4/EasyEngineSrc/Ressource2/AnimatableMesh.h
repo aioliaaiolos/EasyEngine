@@ -7,7 +7,6 @@ class CAnimatableMesh : public IAnimatableMesh
 
 public:
 
-	CAnimatableMesh(  const IRessource::Desc& oDesc  );
 	~CAnimatableMesh();
 	void 			Update();
 	void			SetShader( IShader* pShader ) ;

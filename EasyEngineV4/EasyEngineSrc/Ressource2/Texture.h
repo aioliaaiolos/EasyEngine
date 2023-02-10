@@ -17,28 +17,32 @@
 
 class CTextureBase : public ITexture
 {
+public:
+	struct CDesc
+	{
+		float*						m_pData;
+		int							m_nUnitTexture;
+		IRenderer::TPixelFormat		m_eFormat;
+		int							m_nFrameBufferObjectId;
+		string						m_sName;
+		IShader*					m_pShader = nullptr;
+		IRenderer&					m_oRenderer;
+		CDesc(IRenderer& oRenderer, IShader* pShader, int nUnitTexture);
+	};
+	CTextureBase(const CDesc& oDesc);
+	virtual void		Update() = 0;
+	void				SetShader(IShader* pShader);
+	unsigned int		GetFrameBufferObjectId();
+	void				SetUnitTexture(int nUnitTexture);
+	void				SetUnitName(string sUnitName);
+
 protected:
 	int							m_nID;
 	int							m_nUnitTexture;
 	IShader*					m_pShader;
 	int							m_nFrameBufferObjectId;
 	string						m_sUnitName;
-
-public:
-	struct CDesc : public IRessource::Desc
-	{
-		float*						m_pData;
-		int							m_nUnitTexture;
-		IRenderer::TPixelFormat		m_eFormat;
-		int							m_nFrameBufferObjectId;
-		CDesc( IRenderer& oRenderer, IShader* pShader, int nUnitTexture );
-	};
-						CTextureBase( const CDesc& oDesc );
-	virtual void		Update() = 0;
-	void				SetShader( IShader* pShader );
-	unsigned int		GetFrameBufferObjectId();
-	void				SetUnitTexture(int nUnitTexture);
-	void				SetUnitName(string sUnitName);
+	IRenderer&					m_oRenderer;
 };
 
 class CTexture1D : public CTextureBase

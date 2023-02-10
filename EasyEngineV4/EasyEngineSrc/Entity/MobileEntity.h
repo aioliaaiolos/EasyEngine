@@ -86,7 +86,10 @@ protected:
 	void										PlayHitAnimation();
 	void										PlaySecondaryHitAnimation();
 	void										MoveToGuard();
-	void										MoveToGuardWeapon();
+	void										MoveToGuardWeaponPart1();
+	void										MoveToGuardWeaponPart2();
+	void										MoveToGuardWeaponPart1Reverse();
+	void										MoveToGuardWeaponPart2Reverse();
 	void										Guard();
 	void										TurnEyesH(float fValue);
 	void										TurnNeckH(float f);
@@ -107,6 +110,7 @@ protected:
 	void										Wear(CEntity* pEntity, string sDummyName);
 	void										UnWear(CEntity* pCloth);
 	void										SaveToJson();
+	void										CreateReverseAnimation(string sAnimationType);
 
 	string										m_sFileNameWithoutExt;
 	bool										m_bInitSkeletonOffset;
@@ -152,7 +156,6 @@ protected:
 	static void				MoveToGuard(CCharacter* pCharacter, bool bLoop);
 	static void				MoveToGuardWeapon(CCharacter* pCharacter, bool bLoop);
 	static void 			PlayReceiveHit( CCharacter* pCharacter, bool bLoop );
-	static void				OnDyingCallback(IAnimation::TEvent e, void* data);
 	static void				LoadAnimationsJsonFile(IFileSystem& oFileSystem);
 };
 

@@ -25,8 +25,6 @@ public:
 	void			UnlinkCameras() override;
 
 private:
-	
-	static void		HandleEntityManagerCreated(CPlugin* plugin, IBaseObject* pData);
 
 	map< TCameraType, ICamera* >	m_mCamera;
 	map< ICamera*, TCameraType >	m_mCameraType;

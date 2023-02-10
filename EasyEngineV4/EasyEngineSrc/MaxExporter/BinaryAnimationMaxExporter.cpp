@@ -53,8 +53,8 @@ int CBinaryAnimationMaxExporter::DoExport(const TCHAR* pName,ExpInterface *ei, I
 		GetBoneByID( mBones, mBoneIDByName, mBoneByID );
 
 		
-		m_nAnimationStart = m_nAnimationStart = pInterface->GetAnimRange().Start() / g_nTickPerFrame;
-		m_nAnimationEnd = m_nAnimationEnd = pInterface->GetAnimRange().End() / g_nTickPerFrame;
+		m_nAnimationStart = pInterface->GetAnimRange().Start() / g_nTickPerFrame;
+		m_nAnimationEnd = pInterface->GetAnimRange().End() / g_nTickPerFrame;
 
 		if( DialogBoxParam( hInstance, MAKEINTRESOURCE( IDD_ANIMEXPORT ), pInterface->GetMAXHWnd(), OnExportAnim, (LPARAM)this ) == 1 )
 		{

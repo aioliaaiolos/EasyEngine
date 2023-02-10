@@ -28,7 +28,10 @@ m_nHudX(800),
 m_nHudY(150),
 m_nHudLineHeight(15)
 {
-	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
+	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* plugin)
+	{
+			m_pEditorManager = static_cast<CEditorManager*>(plugin);
+	});
 
 	m_pEditorCamera = m_oCameraManager.GetCameraFromType(cameraType);
 	if (!m_pEditorCamera) {
@@ -38,13 +41,6 @@ m_nHudLineHeight(15)
 	m_oEntityManager.AddEntity(m_pEditorCamera, m_pEditorCamera->GetName());
 }
 
-void CEditor::HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData)
-{
-	if (pData) {
-		CEditor* pEditor = dynamic_cast<CEditor*>(pData);
-		pEditor->m_pEditorManager = static_cast<CEditorManager*>(plugin);
-	}
-}
 
 void CEditor::SetEditionMode(bool bEditionMode)
 {

@@ -132,8 +132,6 @@ private:
 	static void								OnLinkClicked(CLink* pLink);
 	static void								OnChoiceClicked(CLink* pTopicLink);
 	static void								OnGoodbyeClicked(CLink* pTopicLink);
-	static									void OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData);
-	static void								OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData);
 
 	EEInterface&							m_oInterface;
 	IRenderer&								m_oRenderer;
@@ -183,7 +181,6 @@ private:
 	void										OnItemSelected(CTopicLink* pTitle);
 	int											IsConditionChecked(const vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
-	static void									OnGUIManagerCreated(CPlugin* plugin, IBaseObject* pData);
 	static void									OnClickTopic(CLink* pLink);
 	static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);

@@ -45,6 +45,7 @@ public:
 	void							SetWeight( float fWeight ) override;
 	void							SetMesh( IMesh* pMesh );
 	void							AddAnimation( std::string sAnimationFile );
+	void							AddAnimation(string sAnimationName, IAnimation* pAnimation);
 	void							SetCurrentAnimation( std::string sAnimation );
 	IAnimation*						GetCurrentAnimation();
 	void							PlayCurrentAnimation(bool loop);
@@ -178,9 +179,6 @@ protected:
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
 	virtual CEntity*	CreateEmptyEntity(string sName);
 	void				ExecuteScripts();
-	static void			OnAnimationCallback(IAnimation::TEvent e, void*);
-	static void			OnEditorManagerCreated(CPlugin* plugin, IBaseObject* pData);
-	static void			OnPhysicCreated(CPlugin* plugin, IBaseObject* pData);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

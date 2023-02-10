@@ -139,22 +139,19 @@ void IAEntity::OnReceiveHit( IFighterEntity* pAgressor )
 {
 	m_pCurrentEnemy = pAgressor;
 	m_eFightState = IAEntity::eBeginHitReceived;
-	GetCurrentAnimation()->AddCallback( OnHitReceivedCallback, this );
-}
-
-void IAEntity::OnHitReceivedCallback( IAnimation::TEvent e, void* pData )
-{
-	IAEntity* pThisFighter = reinterpret_cast< IAEntity* >( pData );
-	switch( e )
+	int nCallbackIndex = GetCurrentAnimation()->AddCallback([this, nCallbackIndex](IAnimation::TEvent e) 
 	{
-	case IAnimation::eBeginRewind:
-		pThisFighter->GetCurrentAnimation()->RemoveCallback( OnHitReceivedCallback );
-		if( pThisFighter->m_eFightState == IAEntity::eReceivingHit )
-			pThisFighter->m_eFightState = IAEntity::eBeginPrepareForNextAttack;
-		else if(pThisFighter->GetLife() > 0)
-			pThisFighter->Stand();
-		break;
-	}
+		switch (e)
+		{
+		case IAnimation::eBeginRewind:
+			GetCurrentAnimation()->RemoveCallback(nCallbackIndex);
+			if (m_eFightState == IAEntity::eReceivingHit)
+				m_eFightState = IAEntity::eBeginPrepareForNextAttack;
+			else if (GetLife() > 0)
+				Stand();
+			break;		
+		}
+	});
 }
 
 void IAEntity::OnEndHitAnimation()

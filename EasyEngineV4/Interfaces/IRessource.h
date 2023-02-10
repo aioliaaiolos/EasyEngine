@@ -4,10 +4,12 @@
 #include <string>
 #include <vector>
 #include <string>
+#include <functional>
 #include "EEPlugin.h"
 #include "../Utils2/Chunk.h"
 #include "ILoader.h"
 #include "IRenderer.h"
+#include "Interface.h"
 
 class IRenderer;
 class IShaderManager;
@@ -27,13 +29,6 @@ using namespace std;
 
 class IRessource
 {	
-	IRenderer&						m_oRenderer;
-
-protected:
-	string							m_sFileName;
-	string							m_sName;
-	IRenderer&						GetRenderer(){ return m_oRenderer; }
-
 public:
 
 	enum TLight
@@ -42,37 +37,39 @@ public:
 		OMNI,
 		SPOT
 	};
-
 	
 	struct Desc
 	{
-		IRenderer&			m_oRenderer;
-		IShader*			m_pShader;
 		string				m_sName;
 		string				m_sFileName;
-		Desc( IRenderer& oRenderer, IShader* pShader ) : m_oRenderer( oRenderer ), m_pShader( pShader ){}
 	};
 
-	IRessource( const Desc& oDesc ) : m_oRenderer( oDesc.m_oRenderer ), m_sName( oDesc.m_sName ), m_sFileName( oDesc.m_sFileName ){}
-	virtual				~IRessource() = 0{}
+	IRessource()		
+	{
+	}
+
+	virtual				~IRessource() = 0 {}
 
 	virtual void 		Update() = 0;
-	virtual void		SetShader( IShader* pShader ) = 0;
-	virtual void		GetFileName( string& sFileName )
+	virtual void		GetFileName(string& sFileName) 
 	{ 
 		sFileName = m_sFileName; 
 	}
+	virtual void		GetName(string& sName) { sName = m_sName; }
+	virtual void		SetName(string sName) { m_sName = sName; }
 	virtual void		SetFileName( string sFileName ){ m_sFileName = sFileName; }
+	virtual void		SetShader( IShader* pShader ) = 0;
 	virtual IShader*	GetShader() const = 0;
-	virtual void		GetName( string& sName ){ sName = m_sName; }
-	virtual void		SetName( string sName ){ m_sName = sName; }
+	
+
+protected:
+	string							m_sFileName;
+	string							m_sName;
 };
 
 class ILight : public IRessource
 {
 public:
-
-	ILight(const IRessource::Desc& oDesc) : IRessource(oDesc) {}
 	virtual void SetIntensity(float fIntensity) = 0;
 	virtual void SetAmbient(float fAmbient) = 0;
 	virtual void Enable(bool enable) = 0;
@@ -81,11 +78,11 @@ public:
 class ITexture : public IRessource
 {
 public:
-	ITexture( const IRessource::Desc& oDesc ) : IRessource( oDesc ){}
 	virtual void			GetDimension( int& nWidth, int& nHeight ) = 0;
 	virtual unsigned int	GetFrameBufferObjectId() = 0;
 	virtual void			SetUnitTexture(int nUnitTexture) = 0;
 	virtual void			SetUnitName(string sUnitName) = 0;
+	virtual void			SetShader(IShader* pShader) = 0;
 };
 
 
@@ -102,9 +99,9 @@ public:
 		eBeginRewind
 
 	};
-	typedef void(*TCallback)(TEvent, void*);
+	using TCallback = std::function<void(TEvent)>;
 
-	IAnimation( const IRessource::Desc& oDesc ) : IRessource( oDesc ){}
+	IAnimation(EEInterface& oInterface){}
 	virtual void		Play( bool bLoop ) = 0;
 	virtual void		Pause( bool bPause ) = 0;
 	virtual void		Stop() = 0;
@@ -115,18 +112,18 @@ public:
 	virtual void		NextFrame() = 0;
 	virtual void		SetAnimationTime( int nTime ) = 0;
 	virtual int			GetAnimationTime() = 0;
-	virtual void		AddCallback( TCallback pCallback, void* pData ) = 0;
-	virtual void		RemoveCallback( TCallback pCallback ) = 0;
+	virtual int			AddCallback(TCallback pCallback) = 0;
+	virtual void		RemoveCallback(int nCallbackIndex) = 0;
 	virtual void		RemoveAllCallback() = 0;
 	virtual int			GetStartAnimationTime() = 0;
 	virtual int			GetEndAnimationTime() = 0;
 	virtual void		GetBoneKeysMap( map< int, vector< CKey > >& mBoneKeys ) = 0;
+	virtual IAnimation*	CreateReversedAnimation() = 0;
 };
 
 class IMaterial : public IRessource
 {
 public:
-	IMaterial(const Desc& oDesc) : IRessource(oDesc) {}
 	virtual void SetAmbient(float r, float g, float b, float a) = 0;
 	virtual void SetDiffuse(float r, float g, float b, float a) = 0;
 	virtual void SetSpecular(float r, float g, float b, float a) = 0;
@@ -139,7 +136,6 @@ public:
 class IMesh : public IRessource
 {
 public:
-	IMesh( const IRessource::Desc& oDesc ) : IRessource( oDesc ){}
 	virtual bool			operator==( const IMesh& w ) = 0;
 	virtual					~IMesh() = 0{}
 	virtual void			DrawBoundingBox( bool bDraw ) = 0;
@@ -160,12 +156,13 @@ public:
 	virtual void			SetDrawStyle(IRenderer::TDrawStyle style) = 0;
 	virtual void			UpdateInstances(int instanceCount) = 0;
 	virtual bool			IsSkinned() = 0;
+	virtual void			SetShader(IShader* pShader) = 0;
+	virtual IShader*		GetShader() = 0;
 };
 
 class IAnimatableMesh : public IRessource
 {
 public:
-	IAnimatableMesh( const IRessource::Desc& oDesc ) : IRessource( oDesc ){}
 	virtual ~IAnimatableMesh() = 0{}
 	virtual IMesh*			GetMesh( int nIndex ) = 0;
 	virtual IBone*			GetSkeleton() = 0;
@@ -176,7 +173,6 @@ public:
 class ICollisionMesh : public IRessource
 {
 public:
-	ICollisionMesh(const IRessource::Desc& oDesc) : IRessource(oDesc) {}
 	virtual bool		IsCollide(IBox* pBox) = 0;
 	virtual IGeometry*	GetGeometry(int index) = 0;
 	virtual int			GetGeometryCount() const = 0;
@@ -222,7 +218,7 @@ public:
 	virtual ITexture*			CreateRenderTexture(int width, int height, string sShaderName) = 0;
 	virtual ITexture*			CreateTexture2D(IShader* pShader, int nUnitTexture, vector< unsigned char >& vData, int nWidth, int nHeight, IRenderer::TPixelFormat eFormat) = 0;
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
-	virtual void				RemoveAllLights() = 0;
+	virtual void				RemoveAllLights(IRenderer& oRenderer) = 0;
 	virtual void				Reset() = 0;
 };
 

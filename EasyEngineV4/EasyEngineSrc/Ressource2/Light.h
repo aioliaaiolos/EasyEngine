@@ -18,7 +18,7 @@
 class CLight : public ILight
 {	
 public:
-	struct Desc : public IRessource::Desc
+	struct Desc
 	{
 		CVector				Color;
 		IRessource::TLight	type;
@@ -26,6 +26,7 @@ public:
 		float 				fAttenuationConstant;
 		float 				fAttenuationLinear;
 		float 				fAttenuationQuadratic;
+		IRenderer&			m_oRenderer;
 		Desc( IRenderer& oRenderer, IShader* pShader );
 	};
 	
@@ -42,13 +43,13 @@ public:
 	float						GetIntensity();
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }
-	static void					RemoveAllLights();
+	static void					RemoveAllLights(IRenderer& oRenderer);
 
 private:
 	static unsigned int			s_nCurrentLightID;
 	static map< int, bool >		s_mEnabledLight;
-	static IRenderer*			s_pRenderer;
 
+	IRenderer&					m_oRenderer;
 	CVector						m_Ambient;
 	CVector						m_Diffuse;
 	CVector						m_Specular;

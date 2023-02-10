@@ -216,16 +216,13 @@ void CNPCEntity::ComputePathFind2D( const CVector& oOrigin, const CVector& oDest
 	ComputePathFind2DAStar(oOrigin, oDestination, vPoints);
 }
 
-void CNPCEntity::OnTopicWindowClosed(IGUIWindow* pWindow, IBaseObject* pThisEntity)
-{
-	CNPCEntity* pThisNPCEntity = dynamic_cast<CNPCEntity*>(pThisEntity);
-	pThisNPCEntity->m_oTalkToCallback.first(pThisNPCEntity, pThisNPCEntity->m_oTalkToCallback.second);
-	pThisNPCEntity->m_oGUIManager.GetTopicsWindow()->SetCloseWindowCallback(nullptr, nullptr);
-}
-
 void CNPCEntity::OpenTopicWindow()
 {
-	m_oGUIManager.GetTopicsWindow()->SetCloseWindowCallback(OnTopicWindowClosed, this);
+	m_oGUIManager.GetTopicsWindow()->SetCloseWindowCallback([this](IGUIWindow* pWindow)
+	{
+		m_oTalkToCallback.first(this, m_oTalkToCallback.second);
+		m_oGUIManager.GetTopicsWindow()->SetCloseWindowCallback(nullptr);
+	});
 	m_oGUIManager.GetTopicsWindow()->SetSpeakerId(GetIDStr());
 	m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
 }

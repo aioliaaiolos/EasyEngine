@@ -99,5 +99,5 @@ private:
 	virtual IBox*				GetFirstCollideBox() = 0;
 	virtual IBox*				GetNextCollideBox() = 0;
 
-	static void					OnHitReceivedCallback( IAnimation::TEvent e, void* pData );
+	void						OnHitReceivedCallback( IAnimation::TEvent e);
 };

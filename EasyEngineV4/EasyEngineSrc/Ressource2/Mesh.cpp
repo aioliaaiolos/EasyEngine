@@ -21,7 +21,6 @@ using namespace std;
 CMesh::Desc::Desc( vector< float >& vVertexArray, vector<  unsigned int  >& vIndexArray,
 				vector< float >& vUVVertexArray, vector< unsigned int >& vUVIndexArray, 
 				vector< float >& vNormalVertexArray, IRenderer& oRenderer, IShader* pShader ):
-IRessource::Desc( oRenderer, pShader ),
 m_vVertexArray( vVertexArray ),
 m_vIndexArray( vIndexArray ),
 m_vUVVertexArray( vUVVertexArray ),
@@ -29,12 +28,12 @@ m_vUVIndexArray( vUVIndexArray ),
 m_vNormalVertexArray( vNormalVertexArray ),
 m_bIndexed( false ),
 m_pDrawTool( NULL ),
-m_nParentBoneID( -1 )
+m_nParentBoneID( -1 ),
+m_oRenderer(oRenderer)
 {
 }
 
 CMesh::CMesh( const Desc& oDesc ):
-IMesh( oDesc ),
 m_bIndexedGeometry( oDesc.m_bIndexed ),
 m_pBuffer( NULL ),
 m_bSkinned( false ),
@@ -55,7 +54,8 @@ m_mAnimationKeyBox( oDesc.m_mAnimationKeyBox ),
 m_bDrawAnimationBoundingBox( false ),
 m_pCurrentAnimationBoundingBox( NULL ),
 m_eDrawStyle(IRenderer::T_TRIANGLES),
-m_nEntityMatricesBufferID(-1)
+m_nEntityMatricesBufferID(-1),
+m_oRenderer(oDesc.m_oRenderer)
 {
 	m_pShader->Enable( true );
 	
@@ -63,14 +63,14 @@ m_nEntityMatricesBufferID(-1)
 	{
 		if ( oDesc.m_vVertexWeight.size() > 0 )
 		{
-			m_nVertexWeightBufferID = GetRenderer().CreateBuffer( (int)oDesc.m_vVertexWeight.size() );
-			GetRenderer().FillBuffer( oDesc.m_vVertexWeight, m_nVertexWeightBufferID );
+			m_nVertexWeightBufferID = m_oRenderer.CreateBuffer( (int)oDesc.m_vVertexWeight.size() );
+			m_oRenderer.FillBuffer( oDesc.m_vVertexWeight, m_nVertexWeightBufferID );
 
-			m_nWeightedVertexIDBufferID = GetRenderer().CreateBuffer( (int)oDesc.m_vWeightedVertexID.size() );
-			GetRenderer().FillBuffer( oDesc.m_vWeightedVertexID, m_nWeightedVertexIDBufferID );
+			m_nWeightedVertexIDBufferID = m_oRenderer.CreateBuffer( (int)oDesc.m_vWeightedVertexID.size() );
+			m_oRenderer.FillBuffer( oDesc.m_vWeightedVertexID, m_nWeightedVertexIDBufferID );
 			m_bSkinned = true;
 		}
-		m_pBuffer = GetRenderer().CreateIndexedGeometry( oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray, 
+		m_pBuffer = m_oRenderer.CreateIndexedGeometry( oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray,
 			oDesc.m_vUVIndexArray, oDesc.m_vNormalVertexArray );
 	}
 	else
@@ -81,11 +81,11 @@ m_nEntityMatricesBufferID(-1)
 			CRenderUtils::CreateNonIndexedVertexArray( oDesc.m_vIndexArray, oDesc.m_vVertexWeight, 4, vVertexWeight );
 			CRenderUtils::CreateNonIndexedVertexArray( oDesc.m_vIndexArray, oDesc.m_vWeightedVertexID, 4, vWeightedVertexID );
 
-			m_nVertexWeightBufferID = GetRenderer().CreateBuffer( (int)vVertexWeight.size() );
-			GetRenderer().FillBuffer( vVertexWeight, m_nVertexWeightBufferID );
+			m_nVertexWeightBufferID = m_oRenderer.CreateBuffer( (int)vVertexWeight.size() );
+			m_oRenderer.FillBuffer( vVertexWeight, m_nVertexWeightBufferID );
 
-			m_nWeightedVertexIDBufferID = GetRenderer().CreateBuffer( (int)vWeightedVertexID.size() );
-			GetRenderer().FillBuffer( vWeightedVertexID, m_nWeightedVertexIDBufferID );
+			m_nWeightedVertexIDBufferID = m_oRenderer.CreateBuffer( (int)vWeightedVertexID.size() );
+			m_oRenderer.FillBuffer( vWeightedVertexID, m_nWeightedVertexIDBufferID );
 
 			m_bSkinned = true;
 		}
@@ -93,8 +93,8 @@ m_nEntityMatricesBufferID(-1)
 		{
 			vector< float > vNonIndexedFaceMaterialID;
 			CreateNonIndexedMaterialVertexArray( oDesc.m_vFaceMaterialID, oDesc.m_vIndexArray, vNonIndexedFaceMaterialID );
-			m_nFaceMaterialBufferID = GetRenderer().CreateBuffer( (int)vNonIndexedFaceMaterialID.size() );
-			GetRenderer().FillBuffer( vNonIndexedFaceMaterialID, m_nFaceMaterialBufferID );
+			m_nFaceMaterialBufferID = m_oRenderer.CreateBuffer( (int)vNonIndexedFaceMaterialID.size() );
+			m_oRenderer.FillBuffer( vNonIndexedFaceMaterialID, m_nFaceMaterialBufferID );
 
 			vector< float > vTextureMaterialData;
 			CMatrix m;
@@ -106,24 +106,24 @@ m_nEntityMatricesBufferID(-1)
 			float k = 0.f;
 			while ( pow(2.f, k) < vTextureMaterialData.size()) k++;
 			vTextureMaterialData.resize(pow(2.f, k));
-			CTexture1D::CDesc oTextureDesc( GetRenderer(), m_pShader, 0 );
+			CTexture1D::CDesc oTextureDesc(m_oRenderer, m_pShader, 0 );
 			oTextureDesc.m_eFormat = IRenderer::T_RGBA;
 			oTextureDesc.m_nSize = (int)vTextureMaterialData.size();
 			oTextureDesc.m_pData = &vTextureMaterialData[ 0 ];
 			oTextureDesc.m_sName = "Material texture";
 			m_pMaterialTexture = new CTexture1D( oTextureDesc );
 		}
-		m_pBuffer = GetRenderer().CreateGeometry( oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray, 
+		m_pBuffer = m_oRenderer.CreateGeometry( oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray,
 													oDesc.m_vUVIndexArray, oDesc.m_vNormalFaceArray, oDesc.m_vNormalVertexArray );
 	}	
 }
 
 CMesh::~CMesh(void)
 {
-	GetRenderer().DeleteBuffer( m_pBuffer );
-	GetRenderer().DeleteBuffer( m_nVertexWeightBufferID );
-	GetRenderer().DeleteBuffer( m_nWeightedVertexIDBufferID );
-	GetRenderer().DeleteBuffer( m_nFaceMaterialBufferID );
+	m_oRenderer.DeleteBuffer( m_pBuffer );
+	m_oRenderer.DeleteBuffer( m_nVertexWeightBufferID );
+	m_oRenderer.DeleteBuffer( m_nWeightedVertexIDBufferID );
+	m_oRenderer.DeleteBuffer( m_nFaceMaterialBufferID );
 }
 
 void CMesh::GetOrgWorldPosition( CVector& v )
@@ -158,10 +158,15 @@ bool CMesh::IsSkinned()
 	return m_nVertexWeightBufferID != -1;
 }
 
+IShader* CMesh::GetShader()
+{
+	return m_pShader;
+}
+
 void CMesh::Update()
 {
 	m_pShader->Enable( true );
-	GetRenderer().SetRenderType( m_eRenderType );
+	m_oRenderer.SetRenderType( m_eRenderType );
 	if( m_mMaterials.size() == 1 )
 	{
 		map< int, CMaterial* >::iterator itMat = m_mMaterials.begin();
@@ -181,16 +186,16 @@ void CMesh::Update()
 	if (shaderName=="skinning")
 	{
 		nVertexWeightID = m_pShader->EnableVertexAttribArray( "vVertexWeight" );
-		GetRenderer().BindVertexBuffer( m_nVertexWeightBufferID );
+		m_oRenderer.BindVertexBuffer( m_nVertexWeightBufferID );
 		m_pShader->VertexAttributePointerf( nVertexWeightID, 4, 0 );
 
 		nWeightedVertexID = m_pShader->EnableVertexAttribArray( "vWeightedVertexID" );
-		GetRenderer().BindVertexBuffer( m_nWeightedVertexIDBufferID );
+		m_oRenderer.BindVertexBuffer( m_nWeightedVertexIDBufferID );
 		m_pShader->VertexAttributePointerf( nWeightedVertexID, 4, 0 );
 	}
 
 	if ( m_bIndexedGeometry )
-		GetRenderer().DrawIndexedGeometry( m_pBuffer, m_eDrawStyle);
+		m_oRenderer.DrawIndexedGeometry( m_pBuffer, m_eDrawStyle);
 	else
 	{
 		if ( m_mMaterials.size() > 1 )
@@ -198,7 +203,7 @@ void CMesh::Update()
 			try
 			{
 				int nMatID = m_pShader->EnableVertexAttribArray( "nMatID" );
-				GetRenderer().BindVertexBuffer( m_nFaceMaterialBufferID );
+				m_oRenderer.BindVertexBuffer( m_nFaceMaterialBufferID );
 				m_pShader->VertexAttributePointerf( nMatID, 1, 0 );
 				m_pShader->SendUniformValues( "fMultimaterial", 1.f );
 			}
@@ -227,7 +232,7 @@ void CMesh::Update()
 				}
 			}
 		}
-		GetRenderer().DrawGeometry( m_pBuffer );
+		m_oRenderer.DrawGeometry( m_pBuffer );
 	}
 
 	if (shaderName == "skinning")
@@ -239,16 +244,16 @@ void CMesh::Update()
 		m_bFirstUpdate = false;
 
 	if( m_bDrawBoundingBox )
-		CRenderUtils::DrawBox( m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), GetRenderer() );	
+		CRenderUtils::DrawBox( m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer);
 	if( m_bDrawAnimationBoundingBox && m_pCurrentAnimationBoundingBox )
-		CRenderUtils::DrawBox( m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), GetRenderer() );
-	GetRenderer().SetRenderType( IRenderer::eFill );
+		CRenderUtils::DrawBox( m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer);
+	m_oRenderer.SetRenderType( IRenderer::eFill );
 }
 
 void CMesh::UpdateInstances(int instanceCount)
 {
 	m_pShader->Enable(true);
-	GetRenderer().SetRenderType(m_eRenderType);
+	m_oRenderer.SetRenderType(m_eRenderType);
 	if (m_mMaterials.size() == 1)
 	{
 		map< int, CMaterial* >::iterator itMat = m_mMaterials.begin();
@@ -268,11 +273,11 @@ void CMesh::UpdateInstances(int instanceCount)
 	if (shaderName.find("skinning") != -1)
 	{
 		nVertexWeightID = m_pShader->EnableVertexAttribArray("vVertexWeight");
-		GetRenderer().BindVertexBuffer(m_nVertexWeightBufferID);
+		m_oRenderer.BindVertexBuffer(m_nVertexWeightBufferID);
 		m_pShader->VertexAttributePointerf(nVertexWeightID, 4, 0);
 
 		nWeightedVertexID = m_pShader->EnableVertexAttribArray("vWeightedVertexID");
-		GetRenderer().BindVertexBuffer(m_nWeightedVertexIDBufferID);
+		m_oRenderer.BindVertexBuffer(m_nWeightedVertexIDBufferID);
 		m_pShader->VertexAttributePointerf(nWeightedVertexID, 4, 0);
 	}
 	
@@ -291,7 +296,7 @@ void CMesh::UpdateInstances(int instanceCount)
 #endif // 0
 
 	if (m_bIndexedGeometry) {
-		GetRenderer().DrawIndexedGeometryInstanced(m_pBuffer, m_eDrawStyle, instanceCount);
+		m_oRenderer.DrawIndexedGeometryInstanced(m_pBuffer, m_eDrawStyle, instanceCount);
 	}
 	else
 	{
@@ -300,7 +305,7 @@ void CMesh::UpdateInstances(int instanceCount)
 			try
 			{
 				int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
-				GetRenderer().BindVertexBuffer(m_nFaceMaterialBufferID);
+				m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
 				m_pShader->VertexAttributePointerf(nMatID, 1, 0);
 				m_pShader->SendUniformValues("fMultimaterial", 1.f);
 			}
@@ -329,7 +334,7 @@ void CMesh::UpdateInstances(int instanceCount)
 				}
 			}
 		}
-		GetRenderer().DrawGeometryInstanced(m_pBuffer, instanceCount);
+		m_oRenderer.DrawGeometryInstanced(m_pBuffer, instanceCount);
 	}
 
 	if (shaderName == "skinning")
@@ -341,17 +346,17 @@ void CMesh::UpdateInstances(int instanceCount)
 		m_bFirstUpdate = false;
 
 	if (m_bDrawBoundingBox)
-		CRenderUtils::DrawBox(m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), GetRenderer());
+		CRenderUtils::DrawBox(m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer);
 	if (m_bDrawAnimationBoundingBox && m_pCurrentAnimationBoundingBox)
-		CRenderUtils::DrawBox(m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), GetRenderer());
-	GetRenderer().SetRenderType(IRenderer::eFill);
+		CRenderUtils::DrawBox(m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer);
+	m_oRenderer.SetRenderType(IRenderer::eFill);
 }
 
 void CMesh::DisplaySkeletonInfo( INode* pRoot, bool bRecurse )
 {
 	CMatrix m;
 	pRoot->GetWorldMatrix( m );
-	GetRenderer().DrawBase( m, 20 );
+	m_oRenderer.DrawBase( m, 20 );
 	for ( unsigned int i = 0; i < pRoot->GetChildCount(); i++ )
 		DisplaySkeletonInfo( pRoot->GetChild( i ) );
 }

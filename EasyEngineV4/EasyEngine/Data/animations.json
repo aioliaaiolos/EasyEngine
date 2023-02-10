@@ -31,6 +31,8 @@
 				{"HitRightArm": "HitRightArm"},
 				{"MoveToGuard": "MoveToGuard2"},
 				{"MoveToGuardWeapon": "MoveToGuardWeapon2"},
+				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1"},
+				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2"},
 				{"Original": "Original"},
 				{"Punished": "Punished"},
 				{"Run": "Run02"},

@@ -69,8 +69,23 @@ m_pCollisionMap(nullptr),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
 m_pWorldEditor(nullptr)
 {
-	oInterface.HandlePluginCreation("EditorManager", OnEditorManagerCreated, this);
-	oInterface.HandlePluginCreation("Physic", OnPhysicCreated, this);
+	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* plugin)
+	{
+		IEditorManager* pEditorManager = static_cast<IEditorManager*>(m_oInterface.GetPlugin("EditorManager"));
+		if (pEditorManager) {
+			m_pWorldEditor = dynamic_cast<IWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
+		}
+		if (!m_pWorldEditor) {
+			CEException e("Error : IEditorManager is not loaded into CEntity::OnEditorCreated()");
+			throw e;
+		}
+	});
+	oInterface.HandlePluginCreation("Physic", [this](CPlugin* plugin)
+	{
+		m_pPhysic = static_cast<IPhysic*>(m_oInterface.GetPlugin("Physic"));
+		m_pBody = new CBody(*m_pPhysic);
+	}
+	);
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
 	m_pLoaderManager = static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"));
 	m_bIsCollidable = true;	
@@ -98,28 +113,6 @@ CEntity::CEntity(EEInterface& oInterface, const std::string& sFileName, string s
 
 CEntity::~CEntity()
 {
-}
-
-void CEntity::OnEditorManagerCreated(CPlugin* plugin, IBaseObject* pData)
-{
-	CEntity* pThisEntity = dynamic_cast<CEntity*>(pData);
-	if (pThisEntity) {
-		IEditorManager* pEditorManager = static_cast<IEditorManager*>(pThisEntity->m_oInterface.GetPlugin("EditorManager"));
-		if (pEditorManager) {
-			pThisEntity->m_pWorldEditor = dynamic_cast<IWorldEditor*>(pEditorManager->GetEditor(IEditor::Type::eWorld));
-		}
-	}
-	if (!pThisEntity || !pThisEntity->m_pWorldEditor) {
-		CEException e("Error : IEditorManager is not loaded into CEntity::OnEditorCreated()");
-		throw e;
-	}
-}
-
-void CEntity::OnPhysicCreated(CPlugin* plugin, IBaseObject* pData)
-{
-	CEntity* pEntity = dynamic_cast<CEntity*>(pData);	
-	pEntity->m_pPhysic = static_cast<IPhysic*>(pEntity->m_oInterface.GetPlugin("Physic"));
-	pEntity->m_pBody = new CBody(*pEntity->m_pPhysic);
 }
 
 float CEntity::GetBoundingSphereRadius() const
@@ -235,6 +228,7 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 			m_pMesh = dynamic_cast< IMesh* >(m_pRessource);
 			m_pBaseTexture = m_pMesh->GetTexture(0);
 			m_pRessource->GetName( m_sName );
+			m_pRessource->SetFileName(sFileName);
 			m_pOrgSkeletonRoot = dynamic_cast<CBone*>(pAMesh->GetSkeleton());
 			if (m_pOrgSkeletonRoot) {
 				if (m_pSkeletonRoot) {
@@ -939,22 +933,6 @@ void CEntity::SetWeight( float fWeight )
 	m_bIsOnTheGround = false;
 }
 
-
-void CEntity::OnAnimationCallback( IAnimation::TEvent e, void* pData )
-{
-	switch( e )
-	{
-	case IAnimation::ePlay:
-		CEntity* pEntity = reinterpret_cast< CEntity* >( pData );
-		IBone* pRoot = pEntity->m_pSkeletonRoot;
-		CKey oKey;
-		pRoot->GetKeyByTime( pEntity->GetCurrentAnimation()->GetStartAnimationTime(), oKey );
-		oKey.m_oLocalTM.GetInverse( pEntity->m_oFirstAnimationFrameSkeletonMatrixInv );
-		break;
-	}
-}
-
-
 void CEntity::SetMesh( IMesh* pMesh )
 {
 	m_pRessource = pMesh;
@@ -1010,14 +988,19 @@ void CEntity::PauseCurrentAnimation(bool loop)
 		m_pCloth->m_pCurrentAnimation->Pause(loop);
 }
 
+void CEntity::AddAnimation(string sAnimationName, IAnimation* pAnimation)
+{
+	m_mAnimation[sAnimationName] = pAnimation;
+	IMesh* pMesh = static_cast<IMesh*>(m_pRessource);
+	pAnimation->SetSkeleton(m_pSkeletonRoot);
+}
+
 void CEntity::AddAnimation(string sAnimationName)
 {
 	if (m_pSkeletonRoot)
 	{
 		IAnimation* pAnimation = static_cast<IAnimation*>(m_oRessourceManager.GetRessource("/Animations/" + sAnimationName + ".bke", true));
-		m_mAnimation[sAnimationName] = pAnimation;
-		IMesh* pMesh = static_cast<IMesh*>(m_pRessource);
-		pAnimation->SetSkeleton(m_pSkeletonRoot);
+		AddAnimation(sAnimationName, pAnimation);
 	}
 	else
 	{
@@ -1032,8 +1015,18 @@ void CEntity::SetCurrentAnimation(std::string sAnimation)
 {
 	m_pCurrentAnimation = m_mAnimation[sAnimation];
 	if (m_bUsePositionKeys)
-		m_pCurrentAnimation->AddCallback(OnAnimationCallback, this);
-
+		m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
+	{
+		switch (e)
+		{
+		case IAnimation::ePlay:
+			IBone* pRoot = m_pSkeletonRoot;
+			CKey oKey;
+			pRoot->GetKeyByTime(GetCurrentAnimation()->GetStartAnimationTime(), oKey);
+			oKey.m_oLocalTM.GetInverse(m_oFirstAnimationFrameSkeletonMatrixInv);
+			break;
+		}
+	});
 	if (m_pCloth)
 		m_pCloth->SetCurrentAnimation(sAnimation);
 }

@@ -4,6 +4,7 @@
 #include <string>
 #include "EEPlugin.h"
 #include "IObject.h"
+#include <functional>
 
 class IRenderer;
 class IRessourceManager;
@@ -15,18 +16,17 @@ class ICameraManager;
 class IEntityManager;
 class IScene;
 class ITexture;
-class IBaseObject;
 
 using namespace std;
 
-class IGUIWindow : public IBaseObject
+class IGUIWindow
 {
 public:
-	typedef void(*CloseWindowCallback)(IGUIWindow*, IBaseObject* pObject);
+	using CloseWindowCallback = function<void(IGUIWindow*)>;
 
 	virtual void	Display() = 0;
 	virtual void	Close() = 0;
-	virtual void	SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData) = 0;
+	virtual void	SetCloseWindowCallback(CloseWindowCallback callback) = 0;
 };
 
 class ITopicWindow : public virtual IGUIWindow

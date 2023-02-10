@@ -16,10 +16,6 @@ class CFightSystem
 	map< IAEntity*, int >	m_mFighter;
 	void	Update();
 	IEntityManager&			m_oEntityManager;
-	static CFightSystem*	s_pInstance;
-
-	static void				OnHitAnimationCallback( IAnimation::TEvent e, void* pData );
-	static void				OnHitReceivedCallback( IAnimation::TEvent e, void* pData );
 
 public:
 	CFightSystem( IEntityManager& oEntityManager );

@@ -56,21 +56,15 @@ m_bUseInstancing(true)
 	m_itCurrentIAEntity = m_mIAEntities.end();
 	CCharacter::InitStatics(m_oFileSystem);
 	LoadCharacterInfos();
-	oInterface.HandlePluginCreation("EditorManager", HandleEditorManagerCreation, this);
-	oInterface.HandlePluginCreation("EntityManager", HandleEntityManagerCreation, this);
+	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* plugin)
+	{
+		m_pEditorManager = static_cast<IEditorManager*>(m_oInterface.GetPlugin("EditorManager"));
+	});	
+	oInterface.HandlePluginCreation("EntityManager", [this](CPlugin* plugin)
+	{
+		LoadItems();
+	});
 	
-}
-
-void CEntityManager::HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData)
-{
-	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
-	pEntityManager->m_pEditorManager = static_cast<IEditorManager*>(pEntityManager->m_oInterface.GetPlugin("EditorManager"));
-}
-
-void CEntityManager::HandleEntityManagerCreation(CPlugin* plugin, IBaseObject* pData)
-{
-	CEntityManager* pEntityManager = static_cast<CEntityManager*>(pData);
-	pEntityManager->LoadItems();
 }
 
 void CEntityManager::AddEntity( IEntity* pEntity, string sName, int id )
@@ -584,7 +578,7 @@ void CEntityManager::Clear()
 	m_mCharacters.clear();
 	m_nLastEntityID = -1;
 	m_pPlayer = nullptr;
-	m_oRessourceManager.RemoveAllLights();
+	m_oRessourceManager.RemoveAllLights(m_oRenderer);
 	m_mCollideEntities.clear();
 	m_mFighterEntities.clear();
 }

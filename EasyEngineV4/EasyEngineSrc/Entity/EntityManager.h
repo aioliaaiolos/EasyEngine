@@ -131,8 +131,8 @@ private:
 	bool													m_bUseInstancing;
 	map<string, CItem*>										m_mItems;
 
-	static void												HandleEditorManagerCreation(CPlugin* plugin, IBaseObject* pData);
-	static void												HandleEntityManagerCreation(CPlugin* plugin, IBaseObject* pData);
+	static void												HandleEditorManagerCreation(CPlugin* plugin);
+	static void												HandleEntityManagerCreation(CPlugin* plugin);
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

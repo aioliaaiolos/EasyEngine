@@ -235,11 +235,28 @@ m_fNeckRotV( 0 )
 
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
+
+	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart1, 3.f);
+	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart2, 3.f);
+	CreateReverseAnimation("MoveToGuardWeaponPart1");
+	CreateReverseAnimation("MoveToGuardWeaponPart2");
+	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart1Reverse, 3.f);
+	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart2Reverse, 3.f);
 }
 
 CCharacter::~CCharacter()
 {
 
+}
+
+void CCharacter::CreateReverseAnimation(string sAnimationType)
+{
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType];
+	IAnimation* pAnimation = m_mAnimation[sAnimationName];
+	IAnimation* pReversedAnimation = pAnimation->CreateReversedAnimation();
+	pReversedAnimation->SetName(sAnimationName + "Reverse");
+	AddAnimation(sAnimationName + "Reverse", pReversedAnimation);
+	s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"] = sAnimationName + "Reverse";
 }
 
 void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
@@ -268,7 +285,6 @@ void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 							for (int iBody = 0; iBody < bodies.Size(); iBody++) {
 								Value& body = bodies[iBody];
 								if (body.IsString()) {
-									//s_mBodiesAnimations[body.GetString()] = map<string, string>();
 									vBodies.push_back(body.GetString());
 								}
 							}
@@ -338,7 +354,10 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationStringToType["Jump"] = eJump;
 	s_mAnimationStringToType["Dying"] = eDying;
 	s_mAnimationStringToType["MoveToGuard"] = eMoveToGuard;
-	s_mAnimationStringToType["MoveToGuardWeapon"] = eMoveToGuardWeapon;
+	s_mAnimationStringToType["MoveToGuardWeaponPart1"] = eMoveToGuardWeaponPart1;
+	s_mAnimationStringToType["MoveToGuardWeaponPart2"] = eMoveToGuardWeaponPart2;
+	s_mAnimationStringToType["MoveToGuardWeaponPart1Reverse"] = eMoveToGuardWeaponPart1Reverse;
+	s_mAnimationStringToType["MoveToGuardWeaponPart2Reverse"] = eMoveToGuardWeaponPart2Reverse;
 
 	s_mAnimationTypeToString[eWalk] = "Walk";
 	s_mAnimationTypeToString[eRun] = "Run";
@@ -348,7 +367,10 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationTypeToString[eJump] = "Jump";
 	s_mAnimationTypeToString[eDying] = "Dying";
 	s_mAnimationTypeToString[eMoveToGuard] = "MoveToGuard";
-	s_mAnimationTypeToString[eMoveToGuardWeapon] = "MoveToGuardWeapon";
+	s_mAnimationTypeToString[eMoveToGuardWeaponPart1] = "MoveToGuardWeaponPart1";
+	s_mAnimationTypeToString[eMoveToGuardWeaponPart2] = "MoveToGuardWeaponPart2";
+	s_mAnimationTypeToString[eMoveToGuardWeaponPart1Reverse] = "MoveToGuardWeaponPart1Reverse";
+	s_mAnimationTypeToString[eMoveToGuardWeaponPart2Reverse] = "MoveToGuardWeaponPart2Reverse";
 
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
@@ -357,7 +379,8 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mOrgAnimationSpeedByType[eHitReceived] = 0.f;
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuardWeapon] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart2] = 0.f;
 
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
@@ -628,16 +651,46 @@ void CCharacter::SetFightMode(bool fightMode)
 	m_bFightMode = fightMode;
 	if (m_bFightMode) {
 		if (m_pCurrentWeapon) {
-			MoveToGuardWeapon();
-			m_pCurrentWeapon->LinkToHand(m_pDummyRHand);
+			MoveToGuardWeaponPart1();
+			m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
+			{
+				switch (e) {
+				case IAnimation::TEvent::eBeginRewind:
+					m_pCurrentAnimation->RemoveAllCallback();
+					m_pCurrentWeapon->LinkToHand(m_pDummyRHand);
+					MoveToGuardWeaponPart2();
+					m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e) {
+						switch (e) {
+						case IAnimation::TEvent::eBeginRewind:
+							e = e;
+							break;
+						}
+					});
+					break;
+				}
+			});
 		}
 		else
 			MoveToGuard();
 	}
 	else {
-		Stand();
-		if(m_pCurrentWeapon)
-			m_pCurrentWeapon->Wear();
+		if (m_pCurrentWeapon) {
+			MoveToGuardWeaponPart2Reverse();
+			m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
+			{
+				switch (e) {
+				case IAnimation::TEvent::eBeginRewind:
+					m_pCurrentAnimation->RemoveAllCallback();
+					m_pCurrentWeapon->Wear();
+					MoveToGuardWeaponPart1Reverse();
+					break;
+				}
+
+			});
+		}
+		else {
+			Stand();				
+		}
 	}
 }
 
@@ -768,7 +821,7 @@ void CCharacter::Die()
 {
 	if (m_eCurrentAnimationType != eDying) {
 		SetPredefinedAnimation("dying", false);
-		m_pCurrentAnimation->AddCallback(OnDyingCallback, this);
+		m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e){ m_eCurrentAnimationType = eNone;});
 	}
 }
 
@@ -788,12 +841,6 @@ void CCharacter::Roll(float fAngle)
 {
 	if (GetLife() > 0)
 		CNode::Roll(fAngle);
-}
-
-void CCharacter::OnDyingCallback(IAnimation::TEvent e, void* pEntity)
-{
-	CCharacter* pMobileEntity = (CCharacter*)pEntity;
-	pMobileEntity->m_eCurrentAnimationType = eNone;
 }
 
 void CCharacter::PlayHitAnimation()
@@ -831,10 +878,32 @@ void CCharacter::MoveToGuard()
 	}
 }
 
-void CCharacter::MoveToGuardWeapon()
+
+void CCharacter::MoveToGuardWeaponPart1()
 {
-	if (m_eCurrentAnimationType != eMoveToGuardWeapon) {
-		SetPredefinedAnimation("MoveToGuardWeapon", false);
+	if (m_eCurrentAnimationType != eMoveToGuardWeaponPart1) {
+		SetPredefinedAnimation("MoveToGuardWeaponPart1", false);
+	}
+}
+
+void CCharacter::MoveToGuardWeaponPart2()
+{
+	if (m_eCurrentAnimationType != eMoveToGuardWeaponPart2) {
+		SetPredefinedAnimation("MoveToGuardWeaponPart2", false);
+	}
+}
+
+void CCharacter::MoveToGuardWeaponPart1Reverse()
+{
+	if (m_eCurrentAnimationType != eMoveToGuardWeaponPart1Reverse) {
+		SetPredefinedAnimation("MoveToGuardWeaponPart1Reverse", false);
+	}
+}
+
+void CCharacter::MoveToGuardWeaponPart2Reverse()
+{
+	if (m_eCurrentAnimationType != eMoveToGuardWeaponPart2Reverse) {
+		SetPredefinedAnimation("MoveToGuardWeaponPart2Reverse", false);
 	}
 }
 

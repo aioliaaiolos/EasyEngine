@@ -23,7 +23,7 @@ CGUIWindow::CGUIWindow(EEInterface& oInterface, string sFileName) :
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize) :
 	CGUIWidget(oInterface, fileName, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr),
+	m_oCloseWindowCallback(nullptr),
 	m_bIsShown(false)
 {
 	m_pGUIManager = static_cast<IGUIManager*>(oInterface.GetPlugin("GUIManager"));
@@ -32,7 +32,7 @@ CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, const CDimensio
 CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight) :
 	CGUIWidget(oInterface, fileName, nWidth, nHeight),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr),
+	m_oCloseWindowCallback(nullptr),
 	m_bIsShown(false)
 {
 }
@@ -40,7 +40,7 @@ CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int
 CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize) :
 	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight()),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr),
+	m_oCloseWindowCallback(nullptr),
 	m_bIsShown(false)
 {
 }
@@ -48,7 +48,7 @@ CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize) :
 CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
 	CGUIWidget(oInterface, windowSize, skin),
 	m_bGUIMode(false),
-	m_oCloseWindowCallback(nullptr, nullptr),
+	m_oCloseWindowCallback(nullptr),
 	m_bIsShown(false)
 {
 }
@@ -119,10 +119,10 @@ CGUIWidget* CGUIWindow::GetWidget( unsigned int nIndex )
 	return nullptr;
 }
 
-void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback, IBaseObject* pData)
+
+void CGUIWindow::SetCloseWindowCallback(CloseWindowCallback callback)
 {
-	m_oCloseWindowCallback.first = callback;
-	m_oCloseWindowCallback.second = pData;
+	m_oCloseWindowCallback = callback;
 }
 
 bool CGUIWindow::IsVisible()
@@ -178,8 +178,8 @@ bool CGUIWindow::IsShown()
 
 void CGUIWindow::OnShow(bool bShow)
 {
-	if (!bShow && m_oCloseWindowCallback.first)
-		m_oCloseWindowCallback.first(this, m_oCloseWindowCallback.second);
+	if (!bShow && m_oCloseWindowCallback)
+		m_oCloseWindowCallback(this);
 	m_bIsShown = bShow;
 }
 

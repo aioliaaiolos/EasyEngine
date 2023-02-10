@@ -34,8 +34,9 @@ void CWeapon::Load()
 		}
 	}
 	m_pDummyHandle->Unlink();
-	m_oModelLocalMatrixInHandleBase = m_pDummyHandle->GetWorldMatrix();
-	m_oModelLocalMatrixInWearBase = m_pDummyWear->GetWorldMatrix();
+
+	m_pDummyHandle->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInHandleBase);
+	m_pDummyWear->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInWearBase);
 }
 
 void CWeapon::LinkToHand(INode* pHand)
@@ -43,9 +44,7 @@ void CWeapon::LinkToHand(INode* pHand)
 	m_pModelEntity->Unlink();
 	m_pDummyHandle->Unlink();
 	CMatrix id;
-	CMatrix oHandleInverse;
-	m_oModelLocalMatrixInHandleBase.GetInverse(oHandleInverse);
-	m_pModelEntity->SetLocalMatrix(oHandleInverse);
+	m_pModelEntity->SetLocalMatrix(m_oModelLocalMatrixInHandleBase);
 	m_pModelEntity->Link(m_pDummyHandle);
 	m_pDummyHandle->SetLocalMatrix(id);
 	m_pDummyHandle->Link(pHand);
@@ -58,9 +57,7 @@ void CWeapon::Wear()
 		m_pDummyHandle->Unlink();
 		m_pModelEntity->Unlink();
 		m_pModelEntity->Link(m_pDummyWear);
-		CMatrix oModelLocalMatrix;
-		m_oModelLocalMatrixInWearBase.GetInverse(oModelLocalMatrix);
-		m_pModelEntity->SetLocalMatrix(oModelLocalMatrix);
+		m_pModelEntity->SetLocalMatrix(m_oModelLocalMatrixInWearBase);
 	}
 	CItem::Wear();
 	CCharacter* pCharacter = dynamic_cast<CCharacter*>(m_pOwner);

@@ -30,7 +30,7 @@ class INode;
 class CMesh : public IMesh
 {
 public:
-	struct Desc : public IRessource::Desc
+	struct Desc : IRessource::Desc
 	{
 		std::vector< float >&			m_vVertexArray;
 		std::vector< unsigned int >&	m_vIndexArray;
@@ -48,6 +48,8 @@ public:
 		int								m_nParentBoneID;
 		CVector							m_oOrgMaxPosition;
 		map< string, IBox* >			m_mAnimationKeyBox;
+		IShader*						m_pShader;
+		IRenderer&						m_oRenderer;
 
 		Desc(  std::vector< float >& vVertexArray, std::vector<  unsigned int  >& vIndexArray,
 				std::vector< float >& vUVVertexArray, std::vector< unsigned int >& vUVIndexArray,
@@ -78,6 +80,7 @@ public:
 	IMaterial*							GetMaterial(int index) override;
 	void								SetDrawStyle(IRenderer::TDrawStyle style) override;
 	bool								IsSkinned();
+	IShader*							GetShader();
 
 
 private:
@@ -106,6 +109,7 @@ private:
 	map< string, IBox* >				m_mAnimationKeyBox;
 	IRenderer::TDrawStyle				m_eDrawStyle;
 	int									m_nEntityMatricesBufferID;
+	IRenderer&							m_oRenderer;
 
 	void								CreateMaterialTexture(const std::map< int, CMaterial* >&);
 	void								DisplaySkeletonInfo(INode* pRoot, bool bRecurse = true);

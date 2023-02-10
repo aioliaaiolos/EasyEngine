@@ -9,19 +9,19 @@ using namespace std;
 
 
 CTextureBase::CDesc::CDesc( IRenderer& oRenderer, IShader* pShader, int nUnitTexture ):
-IRessource::Desc( oRenderer, pShader ),
 m_nUnitTexture( nUnitTexture ),
-m_pData( NULL )
+m_pData( NULL ),
+m_oRenderer(oRenderer)
 {
 }
 
-CTextureBase::CTextureBase( const CDesc& oDesc ):
-ITexture( oDesc ),
+CTextureBase::CTextureBase(const CDesc& oDesc):
 m_nUnitTexture( oDesc.m_nUnitTexture ),
 m_nID( -1 ),
 m_pShader( oDesc.m_pShader ),
 m_nFrameBufferObjectId(oDesc.m_nFrameBufferObjectId),
-m_sUnitName("baseMap")
+m_sUnitName("baseMap"),
+m_oRenderer(oDesc.m_oRenderer)
 {
 }
 
@@ -56,7 +56,7 @@ CTextureBase( oDesc ),
 m_nSize( oDesc.m_nSize ),
 m_bFirstUpdate( true )
 {
-	m_nID = GetRenderer().CreateTexture1D( oDesc.m_pData, oDesc.m_nSize, IRenderer::T_RGBA );
+	m_nID = m_oRenderer.CreateTexture1D( oDesc.m_pData, oDesc.m_nSize, IRenderer::T_RGBA );
 	//delete oDesc.m_pData;
 }
 
@@ -69,7 +69,7 @@ int nCounter = 0;
 float fValue = 0.f;
 void CTexture1D::Update()
 {
-	GetRenderer().BindTexture( m_nID, m_nUnitTexture, IRenderer::T_1D );
+	m_oRenderer.BindTexture( m_nID, m_nUnitTexture, IRenderer::T_1D );
 	try
 	{
 		m_pShader->SendUniformValues( "MaterialMap", m_nUnitTexture );
@@ -113,14 +113,13 @@ CTexture2D::CTexture2D(  CDesc& oDesc ):
 CTextureBase( oDesc ),
 m_nReponse( -1 )
 {
-	m_sFileName = oDesc.m_sFileName;
 	m_nWidth = oDesc.m_nWidth;
 	m_nHeight = oDesc.m_nHeight;
 	if (oDesc.m_nTextureId == -1) {
 		if (oDesc.m_bGenerateMipmaps)
-			m_nID = GetRenderer().CreateMipmaps2D(oDesc.m_vTexels, m_nWidth, m_nHeight, oDesc.m_eFormat);
+			m_nID = m_oRenderer.CreateMipmaps2D(oDesc.m_vTexels, m_nWidth, m_nHeight, oDesc.m_eFormat);
 		else
-			m_nID = GetRenderer().CreateTexture2D(oDesc.m_vTexels, m_nWidth, m_nHeight, oDesc.m_eFormat);
+			m_nID = m_oRenderer.CreateTexture2D(oDesc.m_vTexels, m_nWidth, m_nHeight, oDesc.m_eFormat);
 	}
 	else
 		m_nID = oDesc.m_nTextureId;
@@ -138,7 +137,7 @@ IShader* CTexture2D::GetShader() const
 
 void CTexture2D::Update()
 {
-	GetRenderer().BindTexture( m_nID, m_nUnitTexture, IRenderer::T_2D );
+	m_oRenderer.BindTexture( m_nID, m_nUnitTexture, IRenderer::T_2D );
 	m_pShader->SendUniformValues(m_sUnitName, m_nUnitTexture);
 	try
 	{

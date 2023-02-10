@@ -1,10 +1,5 @@
 #include "AnimatableMesh.h"
 
-CAnimatableMesh::CAnimatableMesh(  const IRessource::Desc& oDesc  ) :
-IAnimatableMesh( oDesc )
-{
-}
-
 CAnimatableMesh::~CAnimatableMesh()
 {
 	for( int i = 0; i < GetMeshCount(); i++ )

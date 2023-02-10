@@ -8,39 +8,38 @@ m_nLife(1000)
 {
 }
 
-void IFighterEntity::OnHitAnimationCallback( IAnimation::TEvent e, void* pData )
-{
-	IFighterEntity* pThisFighter = reinterpret_cast< IFighterEntity* >( pData );
-	bool bEndAnimation = false;
-	if( e == IAnimation::eAfterUpdate && !pThisFighter->m_bHitEnemy )
-	{
-		IFighterEntity* pEnemy = pThisFighter->GetFirstEnemy();
-		while( pEnemy )
-		{
-			if( pThisFighter->IsHitIntersectEnemySphere( pEnemy ) )
-			{
-				if( pThisFighter->IsHitIntersectEnemyBox( pEnemy ) )
-				{
-					pEnemy->ReceiveHit( pThisFighter );
-					pEnemy->OnReceiveHit( pThisFighter );
-					pThisFighter->m_bHitEnemy = true;
-				}
-			}
-			pEnemy = pThisFighter->GetNextEnemy();
-		}
-	}
-	else if( e == IAnimation::eBeginRewind )
-	{
-		pThisFighter->GetCurrentAnimation()->RemoveAllCallback();
-		pThisFighter->m_bHitEnemy = false;
-		pThisFighter->OnEndHitAnimation();
-	}
-}
 
 void IFighterEntity::OnHit( IFighterEntity* pAgressor, string sHitBoneName )
 {
+
 	m_sCurrentHitBoneName = sHitBoneName;
-	pAgressor->GetCurrentAnimation()->AddCallback( OnHitAnimationCallback, pAgressor );
+	pAgressor->GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
+	{
+		bool bEndAnimation = false;
+		if (e == IAnimation::eAfterUpdate && !m_bHitEnemy)
+		{
+			IFighterEntity* pEnemy = GetFirstEnemy();
+			while (pEnemy)
+			{
+				if (IsHitIntersectEnemySphere(pEnemy))
+				{
+					if (IsHitIntersectEnemyBox(pEnemy))
+					{
+						pEnemy->ReceiveHit(this);
+						pEnemy->OnReceiveHit(this);
+						m_bHitEnemy = true;
+					}
+				}
+				pEnemy = GetNextEnemy();
+			}
+		}
+		else if (e == IAnimation::eBeginRewind)
+		{
+			GetCurrentAnimation()->RemoveAllCallback();
+			m_bHitEnemy = false;
+			OnEndHitAnimation();
+		}
+	});
 }
 
 void IFighterEntity::MainHit()
@@ -67,7 +66,17 @@ void IFighterEntity::OnEndHitAnimation()
 
 void IFighterEntity::OnReceiveHit( IFighterEntity* pEnemy )
 {
-	GetCurrentAnimation()->AddCallback(OnHitReceivedAnimationCallback, this);
+	GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
+	{
+		switch (e)
+		{
+		case IAnimation::eBeginRewind:
+			GetCurrentAnimation()->RemoveAllCallback();
+			if (GetLife() > 0)
+				Stand();
+			break;
+		}
+	});
 }
 
 void IFighterEntity::ReceiveHit(IFighterEntity* pEnemy)
@@ -97,19 +106,6 @@ void IFighterEntity::IncreaseLife(int nLife)
 		Die();
 }
 
-
-void IFighterEntity::OnHitReceivedAnimationCallback( IAnimation::TEvent e, void* pData )
-{
-	IFighterEntity* pThisEntity = reinterpret_cast< IFighterEntity* >( pData );
-	switch( e )
-	{
-	case IAnimation::eBeginRewind:
-		pThisEntity->GetCurrentAnimation()->RemoveAllCallback();
-		if(pThisEntity->GetLife() > 0)
-			pThisEntity->Stand();
-		break;
-	}
-}
 
 bool IFighterEntity::IsHitIntersectEnemySphere( IFighterEntity* pEnemy )
 {

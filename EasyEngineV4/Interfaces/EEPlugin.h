@@ -18,7 +18,7 @@ class EEInterface;
 class CPlugin;
 
 
-class CPlugin : public IBaseObject
+class CPlugin
 {
 public:
 

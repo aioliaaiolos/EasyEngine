@@ -1,4 +1,3 @@
-#define ANIMATION_CPP
 
 #include "Animation.h"
 #include <windows.h> // GetTickCount()
@@ -8,14 +7,12 @@
 using namespace std;
 
 
-
-
-CAnimation::CAnimation( const IRessource::Desc& oDesc ):
-IAnimation( oDesc ),
+CAnimation::CAnimation(EEInterface& oInterface):
+IAnimation(oInterface),
+m_oInterface(oInterface),
 m_nCurrentAnimationTime( -1 ),
 m_bLoop( true ),
 m_fSpeed( 1.f ),
-//m_nAnimationLenght( 16000 ),
 m_nStartAnimationTime( 0 ),
 m_nEndAnimationTime( 16000 ),
 m_bPause( false ),
@@ -178,32 +175,23 @@ void CAnimation::Stop()
 	m_bPause = true;
 }
 
-void CAnimation::AddCallback( TCallback pCallback, void* pData )
+int CAnimation::AddCallback(TCallback pCallback)
 {
-	CCallback c;
-	c.m_pCallback = pCallback;
-	c.m_pCallbackData = pData;
-	m_vCallback.push_back( c );
+	m_vCallback.push_back(pCallback);
+	return m_vCallback.size() - 1;
 }
 
 void CAnimation::CallCallbacks( TEvent e )
 {
 	for( unsigned int i = 0; i < m_vCallback.size(); i++ )
-		if( m_vCallback[ i ].m_pCallback )
-			m_vCallback[ i ].m_pCallback( e, m_vCallback[ i ].m_pCallbackData );
+		if( m_vCallback[ i ])
+			m_vCallback[ i ](e);
 }
 
-void CAnimation::RemoveCallback( TCallback pCallback )
+
+void CAnimation::RemoveCallback(int nCallbackIndex)
 {
-	vector< CCallback >::iterator itCallback = m_vCallback.begin();
-	for( itCallback; itCallback != m_vCallback.end(); itCallback++ )
-	{
-		if( itCallback->m_pCallback == pCallback )
-		{
-			m_vCallback.erase( itCallback );
-			return;
-		}
-	}
+	m_vCallback.erase(m_vCallback.begin() + nCallbackIndex);
 }
 
 void CAnimation::RemoveAllCallback()
@@ -224,4 +212,19 @@ int CAnimation::GetEndAnimationTime()
 void CAnimation::GetBoneKeysMap( map< int, vector< CKey > >& mBoneKeys )
 {
 	mBoneKeys = m_mBoneKeys;
+}
+
+IAnimation*	CAnimation::CreateReversedAnimation()
+{
+	CAnimation* pReversedAnimation = new CAnimation(m_oInterface);
+	pReversedAnimation->m_nEndAnimationTime = m_nEndAnimationTime - m_nStartAnimationTime;
+	for (const pair<int, vector<CKey>>& bone : m_mBoneKeys) {
+		pReversedAnimation->AddBone(bone.first);
+		for (int i = bone.second.size() - 1; i >= 0; i--) {
+			CKey key = bone.second[i];
+			if( (key.m_nTimeValue >= m_nStartAnimationTime) && (key.m_nTimeValue <= m_nEndAnimationTime))
+				pReversedAnimation->AddKey(bone.first, m_nEndAnimationTime - key.m_nTimeValue, key.m_eType, key.m_oLocalTM, key.m_oWorldTM, key.m_oQuat);
+		}
+	}
+	return pReversedAnimation;
 }

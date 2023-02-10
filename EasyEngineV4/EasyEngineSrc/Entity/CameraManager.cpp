@@ -15,19 +15,15 @@ m_pActiveCamera( NULL )
 	IRenderer* pRenderer = static_cast<IRenderer*>(oInterface.GetPlugin("Renderer"));
 	m_vRenderer.push_back(pRenderer);
 
-	oInterface.HandlePluginCreation("EntityManager", HandleEntityManagerCreated, this);
+	oInterface.HandlePluginCreation("EntityManager", [this](CPlugin* plugin)
+	{
+		m_pEntityManager = static_cast<IEntityManager*>(plugin);
+	});
 	
 }
 
 CCameraManager::~CCameraManager()
 {
-}
-
-
-void CCameraManager::HandleEntityManagerCreated(CPlugin* plugin, IBaseObject* pData)
-{
-	CCameraManager* pCameraManager = (CCameraManager*)pData;
-	pCameraManager->m_pEntityManager = (IEntityManager*)plugin; //static_cast<IEntityManager*>(pCameraManager->m_oInterface.GetPlugin("EntityManager"));
 }
 
 ICamera* CCameraManager::CreateCamera( TCameraType type, float fFov)

@@ -1717,7 +1717,7 @@ void SetAnimation( IScriptState* pState )
 {
 	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >(  pState->GetArg( 0 ) );
 	CScriptFuncArgString* pAnim = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-	string sAnimationFileName = pAnim->m_sValue + ".bke";
+	string sAnimationFileName = pAnim->m_sValue;
 	IEntity* pEntity = dynamic_cast< IEntity* >( m_pEntityManager->GetEntity( pID->m_nValue ) );
 	if( pEntity )
 	{
@@ -1775,15 +1775,6 @@ void LoadShader( IScriptState* pState )
 void LoadTopicFile(IScriptState* pState)
 {
 	m_pGUIManager->GetTopicsWindow()->LoadTopics("Topics.json");
-}
-
-void DisplayShaderName( IScriptState* pState )
-{
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
-	string sShaderName;
-	pEntity->GetRessource()->GetShader()->GetName( sShaderName );
-	m_pConsole->Println( sShaderName );
 }
 
 void SetHMPrecision( IScriptState* pState )
@@ -4144,11 +4135,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back( eInt );
 	m_pScriptManager->RegisterFunction( "SetHMPrecision", SetHMPrecision, vType, eVoid);
-
-	vType.clear();
-	vType.push_back( eInt );
-	m_pScriptManager->RegisterFunction( "DisplayShaderName", DisplayShaderName, vType, eVoid);
-
+	
 	vType.clear();
 	vType.push_back( eString );
 	m_pScriptManager->RegisterFunction( "LoadShader", LoadShader, vType, eVoid);

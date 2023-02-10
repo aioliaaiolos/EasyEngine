@@ -34,26 +34,22 @@ CTopicsWindow::CTopicsWindow(EEInterface& oInterface, int width, int height) :
 	AddWidget(m_pTopicTextFrame);
 	m_pTopicTextFrame->SetRelativePosition(10, 10);
 	SetGUIMode(true);
-	m_oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
-	m_oInterface.HandlePluginCreation("ScriptManager", OnScriptManagerCreated, this);
+	m_oInterface.HandlePluginCreation("GUIManager", [this](CPlugin* pGUIManager)
+	{
+		m_pGUIManager = static_cast<CGUIManager*>(pGUIManager);
+	});
+	m_oInterface.HandlePluginCreation("ScriptManager",[this](CPlugin* plugin)
+	{
+		m_pScriptManager = static_cast<IScriptManager*>(plugin);
+	});
 }
 
-void CTopicsWindow::OnScriptManagerCreated(CPlugin* plugin, IBaseObject* pData)
-{
-	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
-	pTopicWindow->m_pScriptManager = static_cast<IScriptManager*>(plugin);
-}
 
 IScriptManager* CTopicsWindow::GetScriptManager()
 {
 	return m_pScriptManager;
 }
 
-void CTopicsWindow::OnGUIManagerCreated(CPlugin* pGUIManager, IBaseObject* pData)
-{
-	CTopicsWindow* pTopicWindow = dynamic_cast<CTopicsWindow*>(pData);
-	pTopicWindow->m_pGUIManager = static_cast<CGUIManager*>(pGUIManager);
-}
 
 void CTopicsWindow::OnShow(bool bShow)
 {
@@ -792,7 +788,10 @@ CTopicFrame::CTopicFrame(EEInterface& oInterface, int width, int height, const m
 {
 	m_mFontColorFromTopicState[eNormal] = IGUIManager::eWhite;
 	m_mFontColorFromTopicState[ePressed] = IGUIManager::eTurquoise;
-	m_oInterface.HandlePluginCreation("GUIManager", OnGUIManagerCreated, this);
+	m_oInterface.HandlePluginCreation("GUIManager",	[this](CPlugin* plugin)
+	{
+		m_pGUIManager = static_cast<CGUIManager*>(plugin);
+	});
 
 	CTopicsWindow* pTopicsWindow = GetParent();
 }
@@ -805,12 +804,6 @@ CTopicFrame::~CTopicFrame()
 CTopicsWindow* CTopicFrame::GetParent()
 {
 	return (CTopicsWindow*)m_pParent;
-}
-
-void CTopicFrame::OnGUIManagerCreated(CPlugin* plugin, IBaseObject* pData)
-{
-	CTopicFrame* pTopicFrame = dynamic_cast<CTopicFrame*>(pData);
-	pTopicFrame->m_pGUIManager = static_cast<CGUIManager*>(plugin);
 }
 
 int CTopicFrame::GetTextHeight()

@@ -56,9 +56,6 @@ private:
 	virtual bool				IsHitIntersectEnemyBox( IFighterEntity* pEnemy );
 	virtual void				OnEndHitAnimation();	
 	virtual IBox*				GetBoundingBox() = 0;	
-
-	static void					OnHitAnimationCallback( IAnimation::TEvent e, void* pData );
-	static void					OnHitReceivedAnimationCallback( IAnimation::TEvent e, void* pData );
 };
 
 #endif // IFIGHTERENTITY_H
