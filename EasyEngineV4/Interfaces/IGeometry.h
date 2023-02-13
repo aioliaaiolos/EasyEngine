@@ -20,16 +20,6 @@ public:
 	virtual void	BuildFromArrays( const vector<float >& vWeightVertex, const vector< float >& vWeightedVertexID ) = 0;
 };
 
-class ISphere
-{
-public:
-	virtual float				GetRadius() const = 0;
-	virtual void				SetRadius( float fRadius ) = 0;
-	virtual void				SetCenter( CVector& oCenter ) = 0;
-	virtual const CVector&		GetCenter() const = 0;
-	
-};
-
 class IBox;
 
 class IGeometry : public IPersistantObject
@@ -61,7 +51,7 @@ public:
 	virtual const CMatrix&		GetTM() const = 0;	
 	virtual const CVector&		GetBase() const = 0;
 	virtual float				ComputeBoundingSphereRadius() const = 0;
-	virtual IGeometry*			Duplicate() = 0;
+	virtual IGeometry*			Duplicate() const = 0;
 	virtual float				GetHeight() const = 0;
 	virtual void				Transform(const CMatrix& tm) = 0;
 	virtual float				GetDistance(const IGeometry& oGeometry) const = 0;
@@ -74,9 +64,21 @@ public:
 	virtual void				GetBBoxPoints(vector< CVector >& vPoints) = 0;
 	virtual void				GetName(string& sName) { sName = m_sName; }
 	virtual void				SetName(string& sName) { m_sName = sName; }
+	virtual void				GetCenter(CVector& oCenter) const = 0;
+	virtual float				GetRadius() const = 0;
 
 protected:
 	string m_sName;
+};
+
+class ISphere
+{
+public:
+	virtual float				GetRadius() const = 0;
+	virtual void				SetRadius(float fRadius) = 0;
+	virtual void				SetCenter(CVector& oCenter) = 0;
+	virtual const CVector&		GetCenter() const = 0;
+
 };
 
 class ILine
@@ -114,7 +116,6 @@ public:
 	virtual void				GetDimension(CVector& dim) const = 0;
 	virtual void				SetTM(const CMatrix& m) = 0;
 	virtual void				GetPoints( vector< CVector >& vPoints ) = 0;
-	virtual void				GetCenter( CVector& oCenter ) const = 0;
 	virtual void				SetX(float x) = 0;
 	virtual void				SetY(float y) = 0;
 	virtual void				SetZ(float z) = 0;
@@ -125,7 +126,6 @@ public:
 class ICylinder : public IGeometry
 {
 public:
-	virtual float		GetRadius() const = 0;
 	virtual void		SetTM(const CMatrix& m) = 0;
 	virtual void		Set(const CMatrix& oBase, float fRadius, float fHeight) = 0;
 	virtual void		ComputeTangent(const CVector& oLinePoint, CVector& oTangentPoint, bool bLeft) = 0;

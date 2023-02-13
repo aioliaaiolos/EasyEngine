@@ -68,21 +68,21 @@ public:
 	void										Link(INode* pParent) override;
 	IBox*										GetBoundingBox();
 	static void									InitStatics(IFileSystem& oFileSystem);
-
 	static map<string, IEntity::TAnimation>		s_mStringToAnimation;
 
 protected:
 	typedef void (*TAction)( CCharacter*, bool );
 
 	void										InitAnimations();
-	void										SetPredefinedAnimation(string s, bool bLoop);
+	void										SetPredefinedAnimation(string s, bool bLoop, int nFrameNumber = 0);
 	void 										Walk(bool bLoop);
 	void 										Stand(bool bLoop);
 	void 										Run(bool bLoop);
 	void 										Jump(bool bLoop);
-	void										PlayReceiveHit(bool bLoop);
+	void										ReceiveHit(bool bLoop);
 	void										Stand();
-	void										PlayReceiveHit();
+	void										HitWeapon();
+	void										ReceiveHit();
 	void										PlayHitAnimation();
 	void										PlaySecondaryHitAnimation();
 	void										MoveToGuard();
@@ -103,14 +103,16 @@ protected:
 	ICollisionManager&							GetCollisionManager() { return m_oCollisionManager; }
 	ISphere*									GetBoneSphere(string sBoneName);
 	void										AddSpeed(float x, float y, float z);
-	const string&								GetAttackBoneName();
+	IGeometry*									GetAttackGeometry();
 	const string&								GetSecondaryAttackBoneName();
 	IGeometry*									GetBoundingGeometry() override;
 	void										Wear(string sClothPath, string sDummyName);
 	void										Wear(CEntity* pEntity, string sDummyName);
 	void										UnWear(CEntity* pCloth);
 	void										SaveToJson();
-	void										CreateReverseAnimation(string sAnimationType);
+	IAnimation*									CreateReverseAnimation(string sAnimationType);
+	const CMatrix&								GetWeaponTM() const override;
+	bool										GetFightMode() const override;
 
 	string										m_sFileNameWithoutExt;
 	bool										m_bInitSkeletonOffset;
@@ -139,6 +141,7 @@ protected:
 	bool										m_bFightMode = false;
 	CWeapon*									m_pCurrentWeapon = nullptr;
 	CBone*										m_pDummyRHand = nullptr;
+	IGeometry*									m_pWeaponGeometry = nullptr;
 
 	static map< string, TAction >				s_mActions;
 	static map< string, TAnimation >			s_mAnimationStringToType;
@@ -155,7 +158,8 @@ protected:
 	static void				Dying(CCharacter* pCharacter, bool bLoop);
 	static void				MoveToGuard(CCharacter* pCharacter, bool bLoop);
 	static void				MoveToGuardWeapon(CCharacter* pCharacter, bool bLoop);
-	static void 			PlayReceiveHit( CCharacter* pCharacter, bool bLoop );
+	static void				StopRunning(CCharacter* pCharacter, bool bLoop);
+	static void 			ReceiveHit( CCharacter* pCharacter, bool bLoop );
 	static void				LoadAnimationsJsonFile(IFileSystem& oFileSystem);
 };
 

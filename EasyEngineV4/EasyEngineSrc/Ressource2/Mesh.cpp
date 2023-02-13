@@ -58,6 +58,7 @@ m_nEntityMatricesBufferID(-1),
 m_oRenderer(oDesc.m_oRenderer)
 {
 	m_pShader->Enable( true );
+	m_sName = oDesc.m_sName;
 	
 	if ( m_bIndexedGeometry )
 	{

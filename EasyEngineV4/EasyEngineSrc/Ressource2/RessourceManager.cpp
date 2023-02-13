@@ -5,9 +5,10 @@
 #include "RessourceManager.h"
 
 // Engine
-#include "../Utils2/EasyFile.h"
-#include "../Utils2/Dimension.h"
-#include "../Utils2/StringUtils.h"
+#include "Utils2/EasyFile.h"
+#include "Utils2/Dimension.h"
+#include "Utils2/StringUtils.h"
+#include "Utils2/TimeManager.h"
 
 // Ressources
 #include "Mesh.h"
@@ -829,5 +830,9 @@ extern "C" _declspec(dllexport) IRessourceManager* CreateRessourceManager(EEInte
 	return new CRessourceManager(oInterface);
 }
 
+extern "C" _declspec(dllexport) CTimeManager* CreateTimeManager(EEInterface& oInterface)
+{
+	return new CTimeManager(nullptr, "TimeManager");
+}
 
 #endif	//RESSOURCE_MANAGER_H

@@ -15,7 +15,7 @@ public :
 	const CMatrix&		GetTM() const;
 	const CVector&		GetBase() const;
 	float				ComputeBoundingSphereRadius() const;
-	IGeometry*			Duplicate();
+	IGeometry*			Duplicate() const override;
 	float				GetHeight() const;
 	void				Transform(const CMatrix& tm);
 	float				GetDistance(const IGeometry& oGeometry) const;
@@ -25,6 +25,8 @@ public :
 	void				GetBBoxDimension(CVector& dim) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	const CVector&		GetBBoxDimension() const override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
+	void				GetCenter(CVector& oCenter) const override;
+	float				GetRadius() const override;
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const override;
 	IPersistantObject& operator << (const CBinaryFileStorage& store) override;

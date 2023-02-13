@@ -8,11 +8,8 @@ m_nLife(1000)
 {
 }
 
-
-void IFighterEntity::OnHit( IFighterEntity* pAgressor, string sHitBoneName )
+void IFighterEntity::OnHit( IFighterEntity* pAgressor)
 {
-
-	m_sCurrentHitBoneName = sHitBoneName;
 	pAgressor->GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
 	{
 		bool bEndAnimation = false;
@@ -23,8 +20,12 @@ void IFighterEntity::OnHit( IFighterEntity* pAgressor, string sHitBoneName )
 			{
 				if (IsHitIntersectEnemySphere(pEnemy))
 				{
+					if (m_oHitEnemySphereCallback)
+						m_oHitEnemySphereCallback(pEnemy);
 					if (IsHitIntersectEnemyBox(pEnemy))
 					{
+						if (m_oHitEnemyBoxCallback)
+							m_oHitEnemyBoxCallback(pEnemy);
 						pEnemy->ReceiveHit(this);
 						pEnemy->OnReceiveHit(this);
 						m_bHitEnemy = true;
@@ -44,9 +45,9 @@ void IFighterEntity::OnHit( IFighterEntity* pAgressor, string sHitBoneName )
 
 void IFighterEntity::MainHit()
 {
-	if (GetLife() > 0) {
+	if (GetFightMode() && GetLife() > 0) {
 		PlayHitAnimation();
-		OnHit(this, GetAttackBoneName());
+		OnHit(this);
 	}
 }
 
@@ -54,14 +55,13 @@ void IFighterEntity::SecondaryHit()
 {
 	if (GetLife() > 0) {
 		PlaySecondaryHitAnimation();
-		OnHit(this, GetAttackBoneName());
+		OnHit(this);
 	}
 }
 
 void IFighterEntity::OnEndHitAnimation()
 {
-	if (m_nLife > 0)
-		Stand();
+
 }
 
 void IFighterEntity::OnReceiveHit( IFighterEntity* pEnemy )
@@ -83,7 +83,7 @@ void IFighterEntity::ReceiveHit(IFighterEntity* pEnemy)
 {
 	IncreaseLife(-100);
 	if(GetLife() > 0)	
-		PlayReceiveHit();
+		ReceiveHit();
 }
 
 
@@ -106,20 +106,31 @@ void IFighterEntity::IncreaseLife(int nLife)
 		Die();
 }
 
-
 bool IFighterEntity::IsHitIntersectEnemySphere( IFighterEntity* pEnemy )
 {
-	ISphere* pBoneSphere = GetBoneSphere( m_sCurrentHitBoneName );
 	CVector oEnemyWorldPosition;
-	pEnemy->GetPosition( oEnemyWorldPosition );
-	float fBoneDistance = ( pBoneSphere->GetCenter() - oEnemyWorldPosition ).Norm();
-	return fBoneDistance < ( pBoneSphere->GetRadius() + pEnemy->GetBoundingSphereRadius());
+	pEnemy->GetPosition( oEnemyWorldPosition );	
+	CVector oWeaponCenter;
+	GetAttackGeometry()->GetCenter(oWeaponCenter);
+	oWeaponCenter = GetWeaponTM() * oWeaponCenter;
+	float fBoneDistance = (oWeaponCenter - oEnemyWorldPosition ).Norm();
+	return fBoneDistance < (GetAttackGeometry()->GetRadius() + pEnemy->GetBoundingSphereRadius());
 }
 
 bool IFighterEntity::IsHitIntersectEnemyBox( IFighterEntity* pEnemy )
 {
-	IBox* pEnemyBox = pEnemy->GetBoundingBox();
-	pEnemyBox->SetTM( pEnemy->GetWorldTM() );
-	ISphere* pBoneSphere = GetBoneSphere( m_sCurrentHitBoneName );
-	return GetCollisionManager().IsIntersection( *pEnemyBox, *pBoneSphere );
+	IBox* pBox = static_cast<IBox*>(pEnemy->GetBoundingGeometry());
+	pBox->SetTM(pEnemy->GetWorldTM());	
+	GetAttackGeometry()->SetTM(GetWeaponTM());
+	return pBox->IsIntersect(*GetAttackGeometry());
+}
+
+void IFighterEntity::SetHitEnemySphereCallback(THitEnemyCallback callback)
+{
+	m_oHitEnemySphereCallback = callback;
+}
+
+void IFighterEntity::SetHitEnemyBoxCallback(THitEnemyCallback callback)
+{
+	m_oHitEnemyBoxCallback = callback;
 }

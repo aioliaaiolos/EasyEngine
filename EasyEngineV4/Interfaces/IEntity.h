@@ -27,6 +27,7 @@ class IFighterEntity;
 class IGUIManager;
 class IPhysic;
 class ICharacter;
+class CTimeManager;
 
 using namespace std;
 
@@ -46,14 +47,14 @@ struct CKey
 class CBody
 {
 public:
-	CBody(IPhysic& oPhysic);
+	CBody(EEInterface& oInterface);
 	float		m_fWeight;
 	CVector		m_oSpeed;
-				CBody();
 	void		Update();
 
 private:
-	IPhysic&	m_oPhysic;
+	IPhysic&		m_oPhysic;
+	CTimeManager&	m_oTimeManager;
 
 	//static float		GetEpsilonError(){ return 0.001f; }
 	
@@ -75,12 +76,14 @@ public:
 		eWalk,
 		eStand,
 		eRun,
+		eHitWeapon,
 		eHitLeftFoot,
 		eHitRightArm,
-		eHitReceived,
+		eReceiveHit,
 		eJump,
 		eDying,
 		eMoveToGuard,
+		eGuard,
 		eMoveToGuardWeapon,
 		eMoveToGuardWeaponPart1,
 		eMoveToGuardWeaponPart2,
@@ -305,7 +308,8 @@ public:
 	virtual IPlayer*			GetPlayer() = 0;
 	virtual IEntity*			CreatePlaneEntity(int slices, int size, string heightTexture, string diffuseTexture) = 0;
 	virtual IBone*				CreateBone() const = 0;
-	virtual void				AddNewCharacter(IEntity* pEntity) = 0;
+	virtual void				AddNewCharacterInWorld(IEntity* pEntity) = 0;
+	virtual void				RemoveCharacterFromWorld(string sCharacterID) = 0;
 	virtual ICharacter*			BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) = 0;
 	virtual void				GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos) = 0;
 	virtual void				NormalizeCharacterDatabase() = 0;

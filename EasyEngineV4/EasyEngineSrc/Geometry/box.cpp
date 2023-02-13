@@ -38,6 +38,14 @@ void CBox::GetCenter( CVector& oCenter ) const
 	oCenter = m_oMinPoint +  m_oDimension / 2.f;
 }
 
+float CBox::GetRadius() const
+{
+	CVector oCenter;
+	GetCenter(oCenter);
+	CVector oMaxPoint = (m_oDimension / 2.f) - m_oMinPoint;
+	return(oMaxPoint - oCenter).Norm();
+}
+
 void CBox::SetX(float x)
 {
 	m_oDimension.m_x = x;
@@ -114,7 +122,7 @@ const CVector& CBox::GetBase() const
 	return m_oMinPoint;
 }
 
-IGeometry* CBox::Duplicate()
+IGeometry* CBox::Duplicate() const
 {
 	return new CBox(*this);
 }
@@ -341,7 +349,7 @@ void CBox::GetPoints( vector< CVector >& vPoints )
 	vTemp.push_back( m_oMinPoint );
 	vTemp.push_back( m_oMinPoint + CVector( m_oDimension.m_x, 0, 0 ) );
 	vTemp.push_back( m_oMinPoint + CVector( 0, m_oDimension.m_y, 0 ) );
-	vTemp.push_back( m_oMinPoint + CVector( 0, 0, m_oMinPoint.m_z ) );
+	vTemp.push_back( m_oMinPoint + CVector( 0, 0, m_oDimension.m_z ) );
 	vTemp.push_back( m_oMinPoint + CVector( m_oDimension.m_x, m_oDimension.m_y, 0 ) );
 	vTemp.push_back( m_oMinPoint + CVector( m_oDimension.m_x, 0, m_oDimension.m_z ) );
 	vTemp.push_back( m_oMinPoint + CVector( 0, m_oDimension.m_y, m_oDimension.m_z ) );

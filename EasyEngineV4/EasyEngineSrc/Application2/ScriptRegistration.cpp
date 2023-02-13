@@ -25,6 +25,7 @@
 #include "../Utils2/EasyFile.h"
 #include "../Utils2/StringUtils.h"
 #include "IEventDispatcher.h"
+#include "Utils2/TimeManager.h"
 
 // stl
 #include <sstream>
@@ -53,6 +54,7 @@ extern IEventDispatcher*	m_pEventDispatcher;
 extern IEditorManager*		m_pEditorManager;
 extern IPathFinder*			m_pPathFinder;
 extern IPhysic*				m_pPhysic;
+extern CTimeManager*		m_pTimeManager;
 
 IEntity* m_pRepere = NULL;
 vector< string > g_vStringsResumeMode;
@@ -605,6 +607,16 @@ void SetLife(IScriptState* pState)
 		pFighter->SetLife(pLife->m_nValue);
 }
 
+void DisplayLife(IScriptState* pState)
+{
+	CScriptFuncArgString* pEntityId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityId->m_sValue);
+	IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pEntity);
+	if (pFighter) {
+		m_pConsole->Println(pFighter->GetLife());
+	}
+}
+
 void Attack(IScriptState* pState)
 {
 	CScriptFuncArgInt* pAgressorId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
@@ -893,7 +905,7 @@ void SetCurrentPlayer( IScriptState* pState )
 	}		
 }
 
-void GetPlayerId(IScriptState* pState)
+void GetPlayerID(IScriptState* pState)
 {
 	IPlayer* pPlayer = m_pEntityManager->GetPlayer();
 	pState->SetReturnValue(m_pEntityManager->GetEntityID(pPlayer));
@@ -1609,7 +1621,13 @@ void PauseAnimation( IScriptState* pState )
 		ostringstream ossMessage;
 		ossMessage << "Erreur, l'identifiant numéro " << pIDEntity->m_nValue << " n'est pas valide";
 		m_pConsole->Println( ossMessage.str() );
-	}	
+	}
+}
+
+void PauseTime(IScriptState* pState)
+{
+	CScriptFuncArgInt* pPause = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	m_pTimeManager->PauseTime(pPause->m_nValue == 0 ? false : true);
 }
 
 //ID entité, ID bone
@@ -3542,6 +3560,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vector< TFuncArgType > vType;
 
 	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("PauseTime", PauseTime, vType, eVoid);
+
+	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("DisplayInventory", DisplayInventory, vType, eVoid);
 
@@ -3769,7 +3791,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction("SetGroundMargin", SetGroundMargin, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction("GetPlayerId", GetPlayerId, vType, eInt);
+	m_pScriptManager->RegisterFunction("GetPlayerID", GetPlayerID, vType, eInt);
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction("DisplayGroundMargin", DisplayGroundMargin, vType, eVoid);
@@ -4538,4 +4560,8 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("SetLife", SetLife, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DisplayLife", DisplayLife, vType, eVoid);
 }

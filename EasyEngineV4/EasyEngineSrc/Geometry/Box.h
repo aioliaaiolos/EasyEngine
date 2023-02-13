@@ -24,7 +24,8 @@ public:
 	void				GetDimension(CVector& dim) const;
 						
 	void				Set( const CVector& oMinPoint, const CVector& oDimension );
-	void				GetCenter( CVector& oCenter ) const;
+	void				GetCenter( CVector& oCenter ) const override;
+	float				GetRadius() const override;
 	void				SetX(float x);
 	void				SetY(float y);
 	void				SetZ(float z);
@@ -33,7 +34,7 @@ public:
 	float				ComputeBoundingSphereRadius()const;
 	float				ComputeBoundingCylinderRadius( TAxis eGeneratorAxis ) const;
 	const CVector&		CBox::GetBase() const;
-	IGeometry*			Duplicate();
+	IGeometry*			Duplicate() const override;
 	float				GetHeight() const;
 	void				Transform(const CMatrix& tm);
 	float				GetDistance(const IGeometry& oGeometry) const;
@@ -66,6 +67,7 @@ private:
 	CMatrix				m_oTM;
 	CMatrix				m_oBackupInvTM;
 	CVector				m_oDimension;
+	CVector				m_oCenter;
 
 	bool				TestBoxesCollisionIntoFirstBoxBase(const IBox& b1, const IBox& b2) const;
 	float				GetDistanceInBase(const IBox& oBox) const;

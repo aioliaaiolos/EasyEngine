@@ -14,7 +14,8 @@
 #include "IFileSystem.h"
 #include "Item.h"
 #include "Weapon.h"
-#include "../Utils2/StringUtils.h"
+#include "BoxEntity.h"
+#include "Utils2/StringUtils.h"
 
 map< IEntity::TAnimation, string> CCharacter::s_mAnimationTypeToString;
 
@@ -94,7 +95,7 @@ void CObject::ManageGravity()
 	{
 		float x, y, z;
 		m_oLocalMatrix.GetPosition(x, y, z);
-		int nDelta = CTimeManager::Instance()->GetTimeElapsedSinceLastUpdate();
+		int nDelta = m_oTimeManager.GetTimeElapsedSinceLastUpdate();
 		m_vNextLocalTranslate.m_y += m_pBody->m_oSpeed.m_y * (float)nDelta / 1000.f;
 	}
 }
@@ -213,8 +214,7 @@ m_fNeckRotV( 0 )
 	for( int i = 0; i < eAnimationCount; i++ )
 		m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
 
-	m_pBody->m_fWeight = 1.f;
-	
+	m_pBody->m_fWeight = 1.f;	
 	InitAnimations();
 
 	s_vHumans.push_back( this );
@@ -225,8 +225,9 @@ m_fNeckRotV( 0 )
 	m_pfnCollisionCallback = OnCollision;
 	m_sSecondaryAttackBoneName = "OrteilsG";
 	m_sAttackBoneName = "MainD";
+	
 	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));
-	pEntityManager->AddNewCharacter(this);
+	pEntityManager->AddNewCharacterInWorld(this);
 
 	map< string, map< int, IBox* > >::iterator itBox = m_oKeyBoundingBoxes.find("stand-normal");
 	if (itBox != m_oKeyBoundingBoxes.end()) {
@@ -235,13 +236,20 @@ m_fNeckRotV( 0 )
 
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
+	IBone* pBone = GetPreloadedBone(m_sAttackBoneName);
+	IBox* pRHandBox = static_cast<IBox*>(pBone->GetBoundingBox()->Duplicate());
+	CVector oMinPoint;
+	pRHandBox->SetMinPoint(oMinPoint);
+	m_pRHandBoxEntity = new CBoxEntity(m_oInterface, *pRHandBox);
+	m_pRHandBoxEntity->Link(m_pDummyRHand);
 
 	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart1, 3.f);
 	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart2, 3.f);
-	CreateReverseAnimation("MoveToGuardWeaponPart1");
-	CreateReverseAnimation("MoveToGuardWeaponPart2");
-	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart1Reverse, 3.f);
-	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart2Reverse, 3.f);
+	SetAnimationSpeed(IEntity::TAnimation::eHitWeapon, 3.f);
+	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
+	pReverse->SetSpeed(3.f);
+	pReverse = CreateReverseAnimation("MoveToGuardWeaponPart2");
+	pReverse->SetSpeed(3.f);
 }
 
 CCharacter::~CCharacter()
@@ -249,7 +257,7 @@ CCharacter::~CCharacter()
 
 }
 
-void CCharacter::CreateReverseAnimation(string sAnimationType)
+IAnimation* CCharacter::CreateReverseAnimation(string sAnimationType)
 {
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType];
 	IAnimation* pAnimation = m_mAnimation[sAnimationName];
@@ -257,6 +265,19 @@ void CCharacter::CreateReverseAnimation(string sAnimationType)
 	pReversedAnimation->SetName(sAnimationName + "Reverse");
 	AddAnimation(sAnimationName + "Reverse", pReversedAnimation);
 	s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"] = sAnimationName + "Reverse";
+	return pReversedAnimation;
+}
+
+const CMatrix& CCharacter::GetWeaponTM() const
+{
+	if(m_pCurrentWeapon)
+		return m_pCurrentWeapon->GetWorldMatrix();
+	return m_pRHandBoxEntity->GetWorldMatrix();
+}
+
+bool CCharacter::GetFightMode() const
+{
+	return m_bFightMode;
 }
 
 void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
@@ -349,10 +370,13 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationStringToType["Walk"] = eWalk;
 	s_mAnimationStringToType["Run"] = eRun;
 	s_mAnimationStringToType["Stand"] = eStand;
+	s_mAnimationStringToType["HitReceived"] = eReceiveHit;
+	s_mAnimationStringToType["HitWeapon"] = eHitWeapon;
 	s_mAnimationStringToType["HitLeftFoot"] = eHitLeftFoot;
 	s_mAnimationStringToType["HitRightArm"] = eHitRightArm;
 	s_mAnimationStringToType["Jump"] = eJump;
 	s_mAnimationStringToType["Dying"] = eDying;
+	s_mAnimationStringToType["Guard"] = eGuard;
 	s_mAnimationStringToType["MoveToGuard"] = eMoveToGuard;
 	s_mAnimationStringToType["MoveToGuardWeaponPart1"] = eMoveToGuardWeaponPart1;
 	s_mAnimationStringToType["MoveToGuardWeaponPart2"] = eMoveToGuardWeaponPart2;
@@ -362,11 +386,14 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationTypeToString[eWalk] = "Walk";
 	s_mAnimationTypeToString[eRun] = "Run";
 	s_mAnimationTypeToString[eStand] = "Stand";
+	s_mAnimationTypeToString[eReceiveHit] = "HitReceived";
+	s_mAnimationTypeToString[eHitWeapon] = "HitWeapon";
 	s_mAnimationTypeToString[eHitLeftFoot] = "HitLeftFoot";
 	s_mAnimationTypeToString[eHitRightArm] = "HitRightArm";
 	s_mAnimationTypeToString[eJump] = "Jump";
 	s_mAnimationTypeToString[eDying] = "Dying";
 	s_mAnimationTypeToString[eMoveToGuard] = "MoveToGuard";
+	s_mAnimationTypeToString[eGuard] = "Guard";
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart1] = "MoveToGuardWeaponPart1";
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart2] = "MoveToGuardWeaponPart2";
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart1Reverse] = "MoveToGuardWeaponPart1Reverse";
@@ -374,9 +401,10 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
+	s_mOrgAnimationSpeedByType[eHitWeapon] = 0.f;
 	s_mOrgAnimationSpeedByType[eRun] = -7.f;
 	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
-	s_mOrgAnimationSpeedByType[eHitReceived] = 0.f;
+	s_mOrgAnimationSpeedByType[eReceiveHit] = 0.f;
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
@@ -385,11 +413,12 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
 	s_mActions["Stand"] = Stand;
-	s_mActions["PlayReceiveHit"] = PlayReceiveHit;
+	s_mActions["ReceiveHit"] = ReceiveHit;
 	s_mActions["Jump"] = Jump;
 	s_mActions["Dying"] = Dying;
 	s_mActions["MoveToGuard"] = MoveToGuard;
 	s_mActions["MoveToGuardWeapon"] = MoveToGuardWeapon;
+	s_mActions["StopRunning"] = StopRunning;
 
 	s_mStringToAnimation["Run"] = IEntity::eRun;
 
@@ -398,13 +427,24 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 
 IGeometry* CCharacter::GetBoundingGeometry()
 {
-	return m_pBoundingGeometry;
+	string sAnimationType = "Stand";
+	if (m_bFightMode)
+		sAnimationType = "Guard";
+
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType];
+	string sAnimationNameLow = sAnimationName;
+	std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
+	map<int, IBox*>::iterator itBox = m_oKeyBoundingBoxes[sAnimationNameLow].begin();
+	if (itBox != m_oKeyBoundingBoxes[sAnimationNameLow].end()) {
+		return itBox->second;
+	}
+	return nullptr;
+
 	if (m_pCurrentAnimation) {
 		string sAnimationName;
 		m_pCurrentAnimation->GetName(sAnimationName);
 		sAnimationName = sAnimationName.substr(sAnimationName.find_last_of("/") + 1);
 		int time = m_pCurrentAnimation->GetAnimationTime();
-		//int key = (time / 160) * 160;
 		int key = 160;
 		map<int, IBox*>::iterator itBox = m_oKeyBoundingBoxes[sAnimationName].find(key);
 		if (itBox == m_oKeyBoundingBoxes[sAnimationName].end()) {
@@ -440,9 +480,9 @@ IGeometry* CCharacter::GetBoundingGeometry()
 	return m_pMesh->GetBBox();
 }
 
-const string& CCharacter::GetAttackBoneName()
+IGeometry* CCharacter::GetAttackGeometry()
 {
-	return m_sAttackBoneName;
+	return m_pWeaponGeometry;
 }
 
 const string& CCharacter::GetSecondaryAttackBoneName()
@@ -629,6 +669,8 @@ void CCharacter::UnWearItem(IItem* pBaseItem)
 	if (pItem->m_bIsWear) {
 		pItem->m_bIsWear = false;
 		UnWear(pItem);
+		if (pItem == m_pCurrentWeapon)
+			m_pCurrentWeapon = nullptr;
 	}
 }
 
@@ -648,9 +690,12 @@ void CCharacter::SetCurrentWeapon(CWeapon* pWeapon)
 
 void CCharacter::SetFightMode(bool fightMode)
 {
+	if (m_bFightMode == fightMode)
+		return;
 	m_bFightMode = fightMode;
 	if (m_bFightMode) {
 		if (m_pCurrentWeapon) {
+			m_pWeaponGeometry = m_pCurrentWeapon->GetBoundingGeometry();
 			MoveToGuardWeaponPart1();
 			m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
 			{
@@ -670,8 +715,10 @@ void CCharacter::SetFightMode(bool fightMode)
 				}
 			});
 		}
-		else
+		else {
+			m_pWeaponGeometry = m_pRHandBoxEntity->GetBoundingGeometry();
 			MoveToGuard();
+		}
 	}
 	else {
 		if (m_pCurrentWeapon) {
@@ -759,18 +806,18 @@ void CCharacter::RunAction( string sAction, bool bLoop )
 		itAction->second(this, bLoop);
 }
 
-void CCharacter::SetPredefinedAnimation( string s, bool bLoop )
+void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 {
 	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s];
 	SetCurrentAnimation( sAnimationName );
 	if( !m_pCurrentAnimation )
 	{
-		string sMessage = string( "Erreur : fichier \"" ) + sAnimationName + "\" manquant";
-		CFileNotFoundException e( sMessage );
-		e.m_sFileName = sAnimationName;
+		string sMessage = string( "Erreur : Animation type \"" ) + s + "\" manquante";
+		CEException e( sMessage );
 		throw e;
 	}
+	m_pCurrentAnimation->SetAnimationTime(nFrameNumber);
 	m_pCurrentAnimation->Play( bLoop );
 	if (m_pCloth) {
 		m_pCloth->SetCurrentAnimation(sAnimationName);
@@ -783,7 +830,7 @@ void CCharacter::Walk( bool bLoop )
 {
 	if (m_eCurrentAnimationType != eWalk)
 	{
-		SetPredefinedAnimation("walk", bLoop);
+		SetPredefinedAnimation("Walk", bLoop);
 		if (!m_bUsePositionKeys)
 			ConstantLocalTranslate(CVector(0.f, 0.f, -m_mAnimationSpeedByType[eWalk]));
 	}
@@ -820,7 +867,7 @@ void CCharacter::Jump(bool bLoop)
 void CCharacter::Die()
 {
 	if (m_eCurrentAnimationType != eDying) {
-		SetPredefinedAnimation("dying", false);
+		SetPredefinedAnimation("Dying", false);
 		m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e){ m_eCurrentAnimationType = eNone;});
 	}
 }
@@ -845,7 +892,11 @@ void CCharacter::Roll(float fAngle)
 
 void CCharacter::PlayHitAnimation()
 {
-	SetPredefinedAnimation("HitRightArm", false);
+	if (m_pCurrentWeapon) {
+		SetPredefinedAnimation("HitWeapon", false);
+	}
+	else
+		SetPredefinedAnimation("HitRightArm", false);
 }
 
 void CCharacter::PlaySecondaryHitAnimation()
@@ -853,21 +904,21 @@ void CCharacter::PlaySecondaryHitAnimation()
 	SetPredefinedAnimation("HitLeftFoot", false);
 }
 
-void CCharacter::PlayReceiveHit( bool bLoop )
+void CCharacter::ReceiveHit( bool bLoop )
 {
 	SetPredefinedAnimation( "HitReceived", bLoop );
 	if( !m_bUsePositionKeys )
-		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eHitReceived ], 0.f ) );
+		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eReceiveHit ], 0.f ) );
 }
 
-void CCharacter::PlayReceiveHit( CCharacter* pEntity, bool bLoop )
+void CCharacter::ReceiveHit( CCharacter* pEntity, bool bLoop )
 {
-	pEntity->PlayReceiveHit( bLoop );
+	pEntity->ReceiveHit( bLoop );
 }
 
-void CCharacter::PlayReceiveHit()
+void CCharacter::ReceiveHit()
 {
-	RunAction("PlayReceiveHit", false);
+	RunAction("ReceiveHit", false);
 }
 
 void CCharacter::MoveToGuard()
@@ -878,6 +929,12 @@ void CCharacter::MoveToGuard()
 	}
 }
 
+void CCharacter::HitWeapon()
+{
+	if (m_eCurrentAnimationType != eHitWeapon) {
+		SetPredefinedAnimation("HitWeapon", false);
+	}
+}
 
 void CCharacter::MoveToGuardWeaponPart1()
 {
@@ -957,6 +1014,18 @@ void CCharacter::MoveToGuard(CCharacter* pCharacter, bool bLoop)
 void CCharacter::MoveToGuardWeapon(CCharacter* pCharacter, bool bLoop)
 {
 	pCharacter->MoveToGuard();
+}
+
+void CCharacter::StopRunning(CCharacter* pCharacter, bool bLoop)
+{
+	if (!pCharacter->m_bFightMode)
+		pCharacter->Stand();
+	else {
+		pCharacter->MoveToGuardWeaponPart2();
+		pCharacter->GetCurrentAnimation()->SetAnimationTime(pCharacter->GetCurrentAnimation()->GetEndAnimationTime());
+		if (!pCharacter->m_bUsePositionKeys)
+			pCharacter->ConstantLocalTranslate(CVector(0.f, pCharacter->m_mAnimationSpeedByType[eStand], 0.f));
+	}
 }
 
 void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )

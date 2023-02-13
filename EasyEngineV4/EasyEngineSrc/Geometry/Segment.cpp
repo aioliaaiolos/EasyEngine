@@ -76,7 +76,7 @@ float CSegment::ComputeBoundingSphereRadius() const
 	return (m_oFirst - m_oLast).Norm();
 }
 
-IGeometry*	CSegment::Duplicate()
+IGeometry*	CSegment::Duplicate() const
 {
 	return NULL;
 }
@@ -84,6 +84,16 @@ IGeometry*	CSegment::Duplicate()
 float CSegment::GetHeight() const
 {
 	return 0.f;
+}
+
+void CSegment::GetCenter(CVector& oCenter) const
+{
+	oCenter = (m_oFirst - m_oLast) / 2.f;
+}
+
+float CSegment::GetRadius() const
+{
+	return (m_oFirst - m_oLast).Norm() / 2.f;
 }
 
 void CSegment::Transform(const CMatrix& tm)

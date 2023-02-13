@@ -1,13 +1,12 @@
 #include "pathFinder.h"
-
+#include "Interface.h"
 #include "Exception.h"
+#include "Utils2/TimeManager.h"
 
 #include <string>
 #include <vector>
 #include <sstream>
 #include <fstream>
-
-#include "Utils2/TimeManager.h"
 
 using namespace std;
 
@@ -152,12 +151,13 @@ int CGrid::CCell::GetHCost() const
 	return m_nHCost;
 }
 
-CGrid::CGrid(int rowCount, int columnCount) :
+CGrid::CGrid(EEInterface& oInterface, int rowCount, int columnCount) :
 m_nRowCount(rowCount),
 m_nColumnCount(columnCount),
 m_pDepart(NULL),
 m_pDestination(NULL),
-m_bManualMode(false)
+m_bManualMode(false),
+m_oTimeManager(static_cast<CTimeManager&>(*oInterface.GetPlugin("TimeManager")))
 {
 	Init();
 }
@@ -436,12 +436,12 @@ bool CGrid::ProcessGrid(int startRow, int startColumn)
 {
 	int currentRow = startRow, currentColumn = startColumn, nextRow = -1, nextColumn = -1;
 	bool complete = false;
-	int t1 = CTimeManager::Instance()->GetCurrentTimeInMillisecond();
+	int t1 = m_oTimeManager.GetCurrentTimeInMillisecond();
 	while (!complete) {
 		complete = ProcessNode(currentRow, currentColumn, nextRow, nextColumn);
 		currentRow = nextRow;
 		currentColumn = nextColumn;
-		int t2 = CTimeManager::Instance()->GetCurrentTimeInMillisecond();
+		int t2 = m_oTimeManager.GetCurrentTimeInMillisecond();
 		if (t2 - t1 > 0)
 			return false;
 	}
@@ -600,13 +600,14 @@ CPathFinder::CPathFinder(EEInterface& oInterface) :
 	m_xMinMargin(-1),
 	m_yMinMargin(-1),
 	m_xMaxMargin(-1),
-	m_yMaxMargin(-1)
+	m_yMaxMargin(-1),
+	m_oInterface(oInterface)
 {
 }
 
 IGrid* CPathFinder::CreateGrid(int rowCount, int columnCount)
 {
-	return new CGrid(rowCount, columnCount);
+	return new CGrid(m_oInterface, rowCount, columnCount);
 }
 
 bool CPathFinder::FindPath(IGrid* grid)

@@ -1,6 +1,7 @@
 
 #include "Animation.h"
 #include <windows.h> // GetTickCount()
+#include "Utils2/TimeManager.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -19,7 +20,8 @@ m_bPause( false ),
 m_bStart( false ),
 m_nLastTickCount( 0 ),
 m_nCurrentTickCount( 0 ),
-m_pSkeletonRoot( NULL )
+m_pSkeletonRoot( NULL ),
+m_oTimeManager(static_cast<CTimeManager&>(*oInterface.GetPlugin("TimeManager")))
 {
 }
 
@@ -95,14 +97,14 @@ void CAnimation::SetSkeleton( IBone* pBone )
 
 void CAnimation::UpdateAnimationTime()
 {
-	int nCurrentTickCount = GetTickCount();
+	int nCurrentTickCount = m_oTimeManager.GetCurrentTimeInMillisecond();
 	if (m_nCurrentAnimationTime == -1)
 	{
 		m_nCurrentAnimationTime = m_nStartAnimationTime;
 		m_nLastTickCount = nCurrentTickCount;
 	}
 	if (m_bPause || !m_bStart)
-		m_nLastTickCount = GetTickCount();
+		m_nLastTickCount = m_oTimeManager.GetCurrentTimeInMillisecond();
 
 	int nDeltaTickCount = nCurrentTickCount - m_nLastTickCount;
 	m_nLastTickCount = nCurrentTickCount;
@@ -123,7 +125,7 @@ void CAnimation::UpdateAnimationTime()
 void CAnimation::Play( bool bLoop )
 {
 	m_nCurrentAnimationTime = -1;
-	m_nLastTickCount = GetTickCount();
+	m_nLastTickCount = m_oTimeManager.GetCurrentTimeInMillisecond();
 	m_bStart = true;
 	m_bPause = false;
 	m_bLoop = bLoop;

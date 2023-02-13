@@ -1,17 +1,30 @@
+#include "EEPlugin.h"
 
-class CTimeManager
+
+class CTimeManager : CPlugin
 {
-	unsigned long		m_nCurrentTime;
-	unsigned long		m_nTimeElapsedSinceLastUpdate;
-
-	static CTimeManager*	s_pInstance;
-	CTimeManager();
-
 public:
+
+	CTimeManager(CPlugin* pParent, const std::string& sName);
 	
 	void				Update();
 	unsigned long		GetCurrentTimeInMillisecond();
 	int					GetTimeElapsedSinceLastUpdate();
+	void				PauseTime(bool bPause);
+	void				PauseTimeDelay(int nDelayInMilliseconds);
+	string				GetName() override;
+	bool				IsTimePaused();
 
-	static CTimeManager*		Instance();
+
+private:
+	unsigned long		m_nCurrentTime;
+	unsigned long		m_nTimeElapsedSinceLastUpdate;
+	unsigned long		m_nLastUpdateTime;
+	bool				m_bPause = false;
+	string				m_sName;
+	bool				m_bDelayedPause = false;
+
+	int					m_nTimeWhenDelayedPause = 0;
+	int					m_nTimedPauseValue = 0;
+	
 };

@@ -81,6 +81,7 @@ public:
 	ICollisionMesh*					GetCollisionMesh();
 	void							ForceAssignBoundingGeometry(IGeometry* pBoundingGeometry);
 	IGeometry*						GetBoundingGeometry();
+	void							SetBoundingGeometry(IGeometry* pGeometry);
 	IBox*							GetBoundingBox();
 	float							GetHeight();
 	void							LinkAndUpdateMatrices(CEntity* pEntity);
@@ -159,6 +160,7 @@ protected:
 	time_t											m_nLastAttachScriptTime;
 	IPhysic*										m_pPhysic = nullptr;
 	IWorldEditor*									m_pWorldEditor;
+	CTimeManager&									m_oTimeManager;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);

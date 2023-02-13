@@ -17,6 +17,7 @@ public:
 	void			Load() override;
 	void			LinkToHand(INode* pHand);
 	void			Wear() override;
+	void			Update() override;
 	static Type		GetAttackTypeFromString(string sAttackType);
 	
 
@@ -24,9 +25,9 @@ private:
 	Type						m_eAttackType;
 	INode*						m_pDummyWear = nullptr;
 	INode*						m_pDummyHandle = nullptr;
-	INode*						m_pModelEntity = nullptr;
 	CMatrix						m_oModelLocalMatrixInHandleBase;
 	CMatrix						m_oModelLocalMatrixInWearBase;
+	IGeometryManager&			m_oGeometryManager;
 
 	static map<string, Type>	s_mAttackType;
 };

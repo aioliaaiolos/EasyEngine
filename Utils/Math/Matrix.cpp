@@ -773,7 +773,7 @@ void CMatrix::AddTranslation( float x, float y, float z )
 	m_23 += z;
 }
 
-void CMatrix::GetAffinePart( CVector& v )
+void CMatrix::GetAffinePart( CVector& v ) const
 {
 	v.m_x = m_03;
 	v.m_y = m_13;

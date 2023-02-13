@@ -27,7 +27,6 @@ public:
 	IFighterEntity*			GetFirstEnemy();
 	IFighterEntity*			GetNextEnemy();
 	void					GetPosition( CVector& v );
-	void					ReceiveHit( IFighterEntity* pEnemy );
 	void					Stand();
 	void					Die();
 	void					Goto( const CVector& oPosition, float fSpeed );

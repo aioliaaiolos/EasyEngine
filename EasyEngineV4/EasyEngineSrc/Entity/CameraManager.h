@@ -22,7 +22,8 @@ public:
 	TCameraType		GetCameraType( ICamera* pCamera ) ;
 	ICamera*		GetCameraFromType( TCameraType type );
 	string			GetName() override;
-	void			UnlinkCameras() override;
+	void			UnlinkCameras() override; 
+	float			GetCameraBaseFov() override;
 
 private:
 

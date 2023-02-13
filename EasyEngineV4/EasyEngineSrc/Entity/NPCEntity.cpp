@@ -11,6 +11,7 @@
 #include "Utils2/Logger.h"
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
+IAEntity(oInterface),
 CCharacter(oInterface, sFileName, sID),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
 m_oGUIManager(static_cast<IGUIManager&>(*oInterface.GetPlugin("GUIManager"))),
@@ -129,10 +130,6 @@ void CNPCEntity::GetPosition( CVector& v )
 	CCharacter::GetPosition( v );
 }
 
-void CNPCEntity::ReceiveHit( IFighterEntity* pEnemy )
-{
-	CCharacter::ReceiveHit(pEnemy);
-}
 
 void CNPCEntity::Stand()
 {

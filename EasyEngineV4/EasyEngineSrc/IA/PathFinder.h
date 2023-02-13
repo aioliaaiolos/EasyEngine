@@ -8,6 +8,8 @@
 #include <map>
 #include <set>
 
+class CTimeManager;
+
 using namespace std;
 
 class CGrid : public IGrid
@@ -47,7 +49,7 @@ public:
 		TCell m_eCellType;
 	};
 
-	CGrid(int rowCount, int columnCount);
+	CGrid(EEInterface& oInterface, int rowCount, int columnCount);
 	void AddObstacle(int row, int column);
 	void RemoveObstacle(int row, int column);
 	void SetDepart(int x, int y);
@@ -90,6 +92,7 @@ private:
 	vector<CGrid::ICell*> m_vCloseList;
 	vector<CGrid::ICell*> m_vPath;
 	bool m_bManualMode;
+	CTimeManager&	m_oTimeManager;
 };
 
 class CPathFinder : public IPathFinder
@@ -108,6 +111,8 @@ private:
 	int		m_yMinMargin;
 	int		m_xMaxMargin;
 	int		m_yMaxMargin;
+
+	EEInterface&	m_oInterface;
 };
 
 

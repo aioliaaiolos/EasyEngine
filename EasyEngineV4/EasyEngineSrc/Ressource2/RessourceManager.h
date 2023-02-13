@@ -37,7 +37,7 @@ class IEntityManager;
 class ICollisionManager;
 class IHeightMap;
 struct CMaterialInfos;
-
+class CTimeManager;
 
 typedef unsigned int uint;
 
@@ -110,5 +110,6 @@ private:
 
 
 extern "C" _declspec(dllexport) IRessourceManager* CreateRessourceManager(EEInterface& oInterface);
+extern "C" _declspec(dllexport) CTimeManager* CreateTimeManager(EEInterface& oInterface);
 
 #endif  //RESSOURCEMANAGER_H

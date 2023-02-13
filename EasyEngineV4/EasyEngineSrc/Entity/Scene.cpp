@@ -80,11 +80,9 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 
 	m_pMinimapTexture = CreateMinimapTexture();
 
-	m_pPlayerMapSphere = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity("playerPointer.bme", ""));
+	m_pPlayerMapSphere = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity("playerPointer.bme"));
 	m_pPlayerMapSphere->SetShader(m_oRenderer.GetShader(m_sMapFirstPassShaderName));
-
-	ICamera* pFreeCamera = m_oCameraManager.CreateCamera(ICameraManager::TFree, 40.f);
-	pFreeCamera->Link(this);
+	m_pPlayerMapSphere->SetName("PlayerPointer");
 }
 
 CScene::~CScene()
@@ -257,7 +255,7 @@ void CScene::Update()
 	if (m_vMapEntities.size() == 0) {
 		OnChangeSector();
 	}
-	CTimeManager::Instance()->Update();
+	m_oTimeManager.Update();
 	RenderScene();
 
 	if (m_bDisplayMinimap) {

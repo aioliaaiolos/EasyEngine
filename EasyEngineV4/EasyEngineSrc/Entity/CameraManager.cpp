@@ -104,8 +104,12 @@ void CCameraManager::UnlinkCameras()
 {
 	for (map< TCameraType, ICamera* >::iterator it = m_mCamera.begin(); it != m_mCamera.end(); it++) {
 		it->second->Unlink();
-	}
-	
+	}	
+}
+
+float CCameraManager::GetCameraBaseFov()
+{
+	return 40.f;
 }
 
 extern "C" _declspec(dllexport) ICameraManager* CreateCameraManager(EEInterface& oInterface)

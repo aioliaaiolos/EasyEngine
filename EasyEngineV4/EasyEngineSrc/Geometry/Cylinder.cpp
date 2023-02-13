@@ -208,7 +208,7 @@ const CVector& CCylinder::GetBase() const
 	return m_oTM.GetPosition();
 }
 
-IGeometry* CCylinder::Duplicate()
+IGeometry* CCylinder::Duplicate() const
 {
 	return new CCylinder(*this);
 }
@@ -418,4 +418,9 @@ void CCylinder::GetBBoxDimension(CVector& dim)
 const CVector& CCylinder::GetBBoxDimension() const
 {
 	return m_oDimension;
+}
+
+void CCylinder::GetCenter(CVector& oCenter) const
+{
+	m_oTM.GetAffinePart(oCenter);
 }

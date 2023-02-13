@@ -1,5 +1,8 @@
 #include "Weapon.h"
 #include "Bone.h"
+#include "IGeometry.h"
+#include "BoxEntity.h"
+#include "Interface.h"
 
 map<string, CWeapon::Type> CWeapon::s_mAttackType = map<string, CWeapon::Type>
 { 
@@ -9,9 +12,9 @@ map<string, CWeapon::Type> CWeapon::s_mAttackType = map<string, CWeapon::Type>
 };
 
 CWeapon::CWeapon(EEInterface& oInterface, string sID, CItem::Type wearType, Type attackType, string sModelName, string sPreviewPath):
-	CItem(oInterface, sID, CItem::TClass::eWeapon, wearType, sModelName, sPreviewPath)
+	CItem(oInterface, sID, CItem::TClass::eWeapon, wearType, sModelName, sPreviewPath),
+	m_oGeometryManager(static_cast<IGeometryManager&>(*m_oInterface.GetPlugin("GeometryManager")))
 {
-
 }
 
 void CWeapon::SetAttackType(Type type)
@@ -26,26 +29,29 @@ void CWeapon::Load()
 	for (int i = 0; i < m_pSkeletonRoot->GetChildCount(); i++) {
 		INode* pChild = m_pSkeletonRoot->GetChild(i);
 		IBone* pBone = dynamic_cast<IBone*>(pChild);
-		if (pBone) {
+		if (pBone)
 			m_pDummyHandle = pBone;
-		}
-		else {
-			m_pModelEntity = pChild;
-		}
 	}
 	m_pDummyHandle->Unlink();
 
 	m_pDummyHandle->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInHandleBase);
 	m_pDummyWear->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInWearBase);
+
+	// box
+	/*
+	IBoxEntity* pWeaponBoxEntity = new CBoxEntity(m_oInterface, *static_cast<IBox*>(m_pModel->GetBoundingGeometry()));
+	pWeaponBoxEntity->SetName("WeaponBox");
+	pWeaponBoxEntity->Link(m_pModel);
+	m_pModel->Update();*/
 }
 
 void CWeapon::LinkToHand(INode* pHand)
 {
-	m_pModelEntity->Unlink();
+	m_pModel->Unlink();
 	m_pDummyHandle->Unlink();
 	CMatrix id;
-	m_pModelEntity->SetLocalMatrix(m_oModelLocalMatrixInHandleBase);
-	m_pModelEntity->Link(m_pDummyHandle);
+	m_pModel->SetLocalMatrix(m_oModelLocalMatrixInHandleBase);
+	m_pModel->Link(m_pDummyHandle);
 	m_pDummyHandle->SetLocalMatrix(id);
 	m_pDummyHandle->Link(pHand);
 	pHand->Update();
@@ -53,15 +59,20 @@ void CWeapon::LinkToHand(INode* pHand)
 
 void CWeapon::Wear()
 {
-	if (m_pModelEntity) {
+	if (m_pModel) {
 		m_pDummyHandle->Unlink();
-		m_pModelEntity->Unlink();
-		m_pModelEntity->Link(m_pDummyWear);
-		m_pModelEntity->SetLocalMatrix(m_oModelLocalMatrixInWearBase);
+		m_pModel->Unlink();
+		m_pModel->Link(m_pDummyWear);
+		m_pModel->SetLocalMatrix(m_oModelLocalMatrixInWearBase);
 	}
 	CItem::Wear();
 	CCharacter* pCharacter = dynamic_cast<CCharacter*>(m_pOwner);
 	pCharacter->SetCurrentWeapon(this);
+}
+
+void CWeapon::Update()
+{
+	CItem::Update();
 }
 
 CWeapon::Type CWeapon::GetAttackTypeFromString(string sAttackType)

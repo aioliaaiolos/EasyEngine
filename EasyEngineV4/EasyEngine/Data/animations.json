@@ -7,10 +7,13 @@
 			[
 				{"Dying": "Dying"},
 				{"Guard": "Guard"},
+				{"HitWeapon": "HitWeapon"},
 				{"HitLeftFoot": "HitLeftFoot"},
 				{"HitReceived": "HitReceived"},
 				{"HitRightArm": "HitRightArm"},
 				{"MoveToGuard": "MoveToGuard"},
+				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1"},
+				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2"},
 				{"Original": "Original"},
 				{"Punished": "Punished"},
 				{"Run": "Run"},
@@ -25,12 +28,12 @@
 			"actionAnimations": 
 			[
 				{"Dying": "Dying"},
-				{"Guard": "Guard"},
+				{"Guard": "Guard2"},
+				{"HitWeapon": "HitWeapon2"},
 				{"HitLeftFoot": "HitLeftFoot"},
 				{"HitReceived": "HitReceived"},
 				{"HitRightArm": "HitRightArm"},
 				{"MoveToGuard": "MoveToGuard2"},
-				{"MoveToGuardWeapon": "MoveToGuardWeapon2"},
 				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1"},
 				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2"},
 				{"Original": "Original"},

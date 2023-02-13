@@ -91,6 +91,7 @@ function onLoadingGame()
 	//EditWorld("testLoot");	
 	//LoadWorld("", "OnWorldLoaded");
 	LoadWorld("empty", "OnWorldLoaded");
+	//EditWorld("empty");
 	
 	//EditWorld("");
 	//LoadWorld("", "OnWorldLoaded");
@@ -127,4 +128,14 @@ function OnWorldLoaded()
 	AddCharacterItem("Player", "Vase");
 	AddCharacterItem("Player", "Fiole");
 	AddCharacterItem("Player", "Sword");
+	
+	
+	p=GetPlayerID();
+	m=GetEntityID("mirabelle");
+	SetLife(p, 100000);
+	SetLife(m, 100000);
+	//DisplayBBox(m, 1);
+	//DisplayBBox(p, 1);
+	SetAnimationSpeed(p, "Run", 2);
+	
 }

@@ -11,6 +11,7 @@
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
 
+class CTimeManager;
 
 using namespace std;
 
@@ -62,6 +63,7 @@ private:
 	int											m_nEndAnimationTime;
 	vector<TCallback>							m_vCallback;
 	EEInterface&								m_oInterface;
+	CTimeManager&								m_oTimeManager;
 
 	void										UpdateAnimationTime();
 	void										CallCallbacks( TEvent e );

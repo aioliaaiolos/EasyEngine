@@ -35,7 +35,8 @@ public:
 	IEntity*												CreateMobileEntity( string sFileNamee, IFileSystem* pFileSystem, string sID ) override;
 	IPlayer*												CreatePlayer(string sFileName) override;
 	IEntity*												CreatePlaneEntity(int slices, int size, string heightTexture, string diffuseTexture) override;
-	void													AddNewCharacter(IEntity* pEntity) override;
+	void													AddNewCharacterInWorld(IEntity* pEntity) override;
+	void													RemoveCharacterFromWorld(string sCharacterID) override;
 	ICharacter*												BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) override;
 	void													GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos);
 	void													NormalizeCharacterDatabase();

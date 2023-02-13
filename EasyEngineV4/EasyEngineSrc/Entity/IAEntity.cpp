@@ -2,30 +2,32 @@
 #include "Utils2/TimeManager.h"
 #include "ICollisionManager.h"
 #include "IGeometry.h"
-
+#include "Utils2/Logger.h"
 
 const float fRotateSpeed = 10.f;
+const float g_fArrivedAtDestinationDistance = 115.f;
 
-IAEntity::IAEntity():
+IAEntity::IAEntity(EEInterface& oInterface):
 m_nRecoveryTime( 1000 ),
 m_bHitEnemy( false ),
 m_eFightState( eNoFight ),
 m_eTalkToState(eNoTalkTo),
 m_fAngleRemaining( 0.f ),
 m_bArriveAtDestination( true ),
-m_fDestinationDeltaRadius( 100.f ),
+m_fDestinationDeltaRadius(g_fArrivedAtDestinationDistance),
 m_nCurrentPathPointNumber( 0 ),
 m_pCurrentEnemy(NULL),
 m_bFaceToTarget(false),
 m_pCurrentInterlocutor(nullptr),
 m_oTalkToCallback(nullptr, nullptr),
-
-m_fForceDeltaRotation(0.)
+m_fForceDeltaRotation(0.),
+m_oTimeManager(static_cast<CTimeManager&>(*oInterface.GetPlugin("TimeManager")))
 {
 }
 
 void IAEntity::UpdateFightState()
 {
+	float distance = 0;
 	CVector oEnemyPos;
 	switch( m_eFightState )
 	{
@@ -44,7 +46,7 @@ void IAEntity::UpdateFightState()
 		break;
 	case eGoingToEnemy:
 		m_pCurrentEnemy->GetPosition( oEnemyPos );
-		if( GetDistanceTo2dPoint( oEnemyPos ) > 100.f )
+		if( GetDistanceTo2dPoint( oEnemyPos ) > m_fDestinationDeltaRadius)
 		{
 			SetDestination( oEnemyPos );
 			Run();
@@ -70,18 +72,19 @@ void IAEntity::UpdateFightState()
 		break;
 	case eBeginPrepareForNextAttack:
 		Guard();
-		m_nBeginWaitTimeBeforeNextAttack = CTimeManager::Instance()->GetCurrentTimeInMillisecond();
+		m_nBeginWaitTimeBeforeNextAttack = m_oTimeManager.GetCurrentTimeInMillisecond();
 		m_eFightState = ePreparingForNextAttack;
 		break;
 	case ePreparingForNextAttack:
 		m_pCurrentEnemy->GetPosition( oEnemyPos );
-		if( GetDistanceTo2dPoint( oEnemyPos ) > 75.f )
+		distance = GetDistanceTo2dPoint(oEnemyPos);
+		if(distance > g_fArrivedAtDestinationDistance)
 			m_eFightState = eBeginGoToEnemy;
 		else
 		{
 			FaceTo(oEnemyPos);
 			//MoveToGuard();
-			m_nCurrentWaitTimeBeforeNextAttack = CTimeManager::Instance()->GetCurrentTimeInMillisecond() - m_nBeginWaitTimeBeforeNextAttack;
+			m_nCurrentWaitTimeBeforeNextAttack = m_oTimeManager.GetCurrentTimeInMillisecond() - m_nBeginWaitTimeBeforeNextAttack;
 			if( m_nCurrentWaitTimeBeforeNextAttack > m_nRecoveryTime )
 				m_eFightState = eBeginLaunchAttack;
 		}
@@ -137,28 +140,30 @@ void IAEntity::UpdateTalkToState()
 
 void IAEntity::OnReceiveHit( IFighterEntity* pAgressor )
 {
-	m_pCurrentEnemy = pAgressor;
-	m_eFightState = IAEntity::eBeginHitReceived;
-	int nCallbackIndex = GetCurrentAnimation()->AddCallback([this, nCallbackIndex](IAnimation::TEvent e) 
-	{
-		switch (e)
+	if (m_bFightingIAEnabled) {
+		SetFightMode(true);
+		m_pCurrentEnemy = pAgressor;
+		m_eFightState = IAEntity::eBeginHitReceived;
+		GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
 		{
-		case IAnimation::eBeginRewind:
-			GetCurrentAnimation()->RemoveCallback(nCallbackIndex);
-			if (m_eFightState == IAEntity::eReceivingHit)
-				m_eFightState = IAEntity::eBeginPrepareForNextAttack;
-			else if (GetLife() > 0)
-				Stand();
-			break;		
-		}
-	});
+			switch (e)
+			{
+			case IAnimation::eBeginRewind:
+				GetCurrentAnimation()->RemoveAllCallback();
+				if (m_eFightState == IAEntity::eReceivingHit)
+					m_eFightState = IAEntity::eBeginPrepareForNextAttack;
+				else if (GetLife() > 0)
+					Stand();
+				break;
+			}
+		});
+	}
 }
 
 void IAEntity::OnEndHitAnimation()
 {
 	if( m_eFightState == IAEntity::eLaunchingAttack )
 		m_eFightState = IAEntity::eEndLaunchAttack;
-	//Stand();
 }
 
 void IAEntity::FaceTo(const CVector& target)
@@ -196,13 +201,19 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 	CVector oPos;
 	GetPosition( oPos );
 	
-	ComputePathFind2D(oPos, oDestination, m_vCurrentPath);
+	try {
+		ComputePathFind2D(oPos, oDestination, m_vCurrentPath);
+	}
+	catch (CEException& e) {
+		m_vCurrentPath.push_back(oDestination);
+		CLogger::Log() << e.what();
+	}
 
 	if (!m_vCurrentPath.empty()) {
 		if (m_vCurrentPath.size() > 1)
-			m_fDestinationDeltaRadius = 50.f;
+			m_fDestinationDeltaRadius = g_fArrivedAtDestinationDistance;
 		else
-			m_fDestinationDeltaRadius = 100.f;
+			m_fDestinationDeltaRadius = g_fArrivedAtDestinationDistance;
 		m_nCurrentPathPointNumber = 0;
 		m_oDestination = m_vCurrentPath[m_nCurrentPathPointNumber];
 		m_fAngleRemaining = GetDestinationAngleRemaining();
@@ -238,7 +249,8 @@ void IAEntity::UpdateGoto()
 			if( m_nCurrentPathPointNumber >= m_vCurrentPath.size() - 1 )
 			{
 				m_bArriveAtDestination = true;
-				Stand();
+				if(!GetFightMode())
+					Stand();
 				m_vCurrentPath.clear();
 			}
 			else
@@ -310,7 +322,7 @@ bool IAEntity::IsArrivedAtDestination()
 void IAEntity::OnCollision( IAEntity* pEntity )
 {
 	IAEntity* pHuman = static_cast< IAEntity* >( pEntity );
-	//pHuman->m_bArriveAtDestination = true;
+	pHuman->m_bArriveAtDestination = true;
 	pHuman->Stand();
 }
 

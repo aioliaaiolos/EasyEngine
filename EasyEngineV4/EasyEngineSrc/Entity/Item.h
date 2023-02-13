@@ -45,29 +45,34 @@ public:
 	};
 
 	CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath);
-	void operator=(const CItem& item);
-	void SetOwner(ICharacter* pCharacter);
-	void Wear() override;
-	void UnWear() override;
-	void Load() override;
-	const vector<string>& GetDummyNames();
-	string&	GetPreviewPath() override;
-	bool IsWear() override;
+	void											operator=(const CItem& item);
+	void											SetOwner(ICharacter* pCharacter);
+	void											Wear() override;
+	void											UnWear() override;
+	void											Load() override;
+	const vector<string>&							GetDummyNames();
+	string&											GetPreviewPath() override;
+	bool											IsWear() override;
+	void											DrawBoundingBox(bool bDraw) override;
+	const CMatrix&									GetWorldMatrix() const override;
+	CEntity*										GetModel();
 
-	TClass m_eClass;
-	Type m_eType;
-	string m_sModelName;
+	TClass											m_eClass;
+	Type											m_eType;
+	string											m_sModelName;
+	bool											m_bIsWear;
 	
-	static Type GetTypeFromString(string sType);
-	static map<string, TClass> s_mClassString;
-	static void LoadDummyTypes(rapidjson::Document& doc);
-	static map<Type, vector<string>> s_mBodyDummies;
+	static Type										GetTypeFromString(string sType);
+	static map<string, TClass>						s_mClassString;
+	static void										LoadDummyTypes(rapidjson::Document& doc);
+	static map<Type, vector<string>>				s_mBodyDummies;
 
-	bool	m_bIsWear;
+	
 
 protected:
-	static map<string, Type> s_mTypeString;
-	string	m_sPreviewPath;
-	ICharacter*	m_pOwner = nullptr;
-	
+	static map<string, Type>						s_mTypeString;
+	string											m_sPreviewPath;
+	ICharacter*										m_pOwner = nullptr;
+	CEntity*										m_pModel = nullptr;
+	EEInterface&									m_oInterface;
 };

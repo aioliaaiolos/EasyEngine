@@ -60,6 +60,7 @@ public:
 	virtual TCameraType		GetCameraType(ICamera* pCamera) = 0;
 	virtual ICamera*		GetCameraFromType(TCameraType type) = 0;
 	virtual void			UnlinkCameras() = 0;
+	virtual float			GetCameraBaseFov() = 0;
 };
 
 

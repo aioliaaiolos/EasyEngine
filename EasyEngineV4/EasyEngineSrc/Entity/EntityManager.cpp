@@ -361,7 +361,7 @@ IEntity* CEntityManager::CreatePlaneEntity(int slices, int size, string heightTe
 	return planeEntity;
 }
 
-void CEntityManager::AddNewCharacter(IEntity* pEntity)
+void CEntityManager::AddNewCharacterInWorld(IEntity* pEntity)
 {
 	string sCharacterName = pEntity->GetIDStr(), sCharacterNameLow;
 	sCharacterNameLow = sCharacterName;
@@ -372,6 +372,16 @@ void CEntityManager::AddNewCharacter(IEntity* pEntity)
 		throw CCharacterAlreadyExistsException(sCharacterNameLow);
 	CCharacter* pCharacter = dynamic_cast<CCharacter*>(pEntity);
 	m_mCharacters[sCharacterNameLow] = pCharacter;
+}
+
+void CEntityManager::RemoveCharacterFromWorld(string sCharacterID)
+{
+	string sCharacterIDLow = sCharacterID;
+	std::transform(sCharacterID.begin(), sCharacterID.end(), sCharacterIDLow.begin(), tolower);
+	map<string, CCharacter*>::iterator itCharacter = m_mCharacters.find(sCharacterIDLow);
+	if (itCharacter != m_mCharacters.end()) {
+		m_mCharacters.erase(itCharacter);
+	}
 }
 
 ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent)

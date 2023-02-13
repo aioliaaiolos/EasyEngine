@@ -36,7 +36,7 @@ m_nHudLineHeight(15)
 	m_pEditorCamera = m_oCameraManager.GetCameraFromType(cameraType);
 	if (!m_pEditorCamera) {
 		ICamera* pFreeCamera = m_oCameraManager.GetCameraFromType(ICameraManager::TCameraType::TFree);
-		m_pEditorCamera = m_oCameraManager.CreateCamera(cameraType, pFreeCamera->GetFov());
+		m_pEditorCamera = m_oCameraManager.CreateCamera(cameraType, m_oCameraManager.GetCameraBaseFov());
 	}
 	m_oEntityManager.AddEntity(m_pEditorCamera, m_pEditorCamera->GetName());
 }

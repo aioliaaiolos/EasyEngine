@@ -24,7 +24,6 @@
 #include "IHud.h"
 #include "IScriptManager.h"
 #include "IEntity.h"
-#include "../Utils2/Chunk.h"
 #include "ICamera.h"
 #include "Exception.h"
 #include "ScriptRegistration.h"
@@ -34,6 +33,7 @@
 #include "IEditor.h"
 #include "IPhysic.h"
 #include "Interface.h"
+#include "Utils2/TimeManager.h"
 
 #ifdef NDEBUG
 #define CATCH_EXCEPTION
@@ -77,6 +77,7 @@ IPathFinder*			m_pPathFinder = nullptr;
 IPhysic*				m_pPhysic = nullptr;
 IEditorManager*			m_pEditorManager = nullptr;
 EEInterface*			m_pInterface = nullptr;
+CTimeManager*			m_pTimeManager = nullptr;
 
 vector< IEntity* > m_vLight;
 bool	m_bFirstTimeOpenFile = true;
@@ -84,8 +85,6 @@ CDebugTool* m_pDebugTool = NULL;
 CNode* m_pEntity = NULL;
 IScene* m_pScene = NULL;
 
-float m_nDeltaTickCount = 0;
-float m_nLastTickCount = 0;
 int m_nLastGameMousePosx, m_nLastGameMousePosy;
 CMatrix ident;
 bool m_bRenderScene = true;
@@ -209,7 +208,7 @@ void UpdatePerso()
 			}
 			else if( eStateWalk == IInputManager::JUST_RELEASED )
 			{
-				pPerso->RunAction( "Stand", true );
+				pPerso->RunAction( "StopRunning", true );
 				m_pActionManager->ForceActionState( "AvancerPerso", IInputManager::RELEASED );
 			}
 			IInputManager::KEY_STATE eStateJump = m_pActionManager->GetKeyActionState("SautPerso");
@@ -250,7 +249,8 @@ void UpdatePerso()
 				int x, y;
 				m_pInputManager->GetOffsetMouse( x, y );
 				float s = m_pInputManager->GetMouseSensitivity();
-				pPerso->Yaw( - x * s );
+				if(!m_pTimeManager->IsTimePaused())
+					pPerso->Yaw( - x * s );
 				m_pCameraManager->GetActiveCamera()->Pitch((float)-y/30.f);
 			}
 		}
@@ -259,9 +259,6 @@ void UpdatePerso()
 
 void OnUpdateWindow()
 {
-	int nTickCount = GetTickCount();
-	m_nDeltaTickCount = nTickCount - m_nLastTickCount;
-	m_nLastTickCount = (float)nTickCount;
 	m_pInputManager->OnUpdate();
 	if( !m_pConsole->IsOpen() && !m_pGUIManager->GetGUIMode())
 		UpdateCamera();
@@ -317,6 +314,8 @@ EEInterface* InitPlugins( string sCmdLine )
 
 	CGFXOption oOption;
 	GetOptionsByCommandLine( sCmdLine, oOption );
+
+	m_pTimeManager = static_cast<CTimeManager*>(CPlugin::Create(*pInterface, "Ressource.dll", "CreateTimeManager"));
 
 	m_pPathFinder = static_cast<IPathFinder*>(CPlugin::Create(*pInterface, sDirectoryName + "IA.dll", "CreatePathFinder"));
 		

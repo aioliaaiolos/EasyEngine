@@ -103,8 +103,10 @@ void CWorldEditor::OnEntityRemoved(IEntity* pEntity)
 		else {
 			entityName = pEntity->GetIDStr();
 			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
-			if (itCharacter != m_mCharacterMatrices.end())
+			if (itCharacter != m_mCharacterMatrices.end()) {
+				m_oEntityManager.RemoveCharacterFromWorld(itCharacter->first);
 				m_mCharacterMatrices.erase(itCharacter);
+			}
 			else {
 				map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>::iterator itArea = m_mAreaMatrices.find(entityName);
 				if (itArea != m_mAreaMatrices.end())

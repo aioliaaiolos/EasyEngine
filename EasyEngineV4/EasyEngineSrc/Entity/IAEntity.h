@@ -14,7 +14,7 @@ friend class CFightSystem;
 
 
 public:
-	IAEntity();
+	IAEntity(EEInterface& oInterface);
 	virtual void				Goto(const CVector& oPosition, float fSpeed);
 	void						TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback) override;
 	void						Update();
@@ -75,20 +75,22 @@ private:
 	vector<CVector>				m_vCurrentPath;
 	int							m_nCurrentPathPointNumber;
 	float						m_fDestinationDeltaRadius;
-
+	CTimeManager&				m_oTimeManager;
+	bool						m_bFightingIAEnabled = true;
 	
 	void						UpdateFaceTo();
 	void						UpdateFightState();
 	float						GetAngleBetween2Vectors(CVector& v1, CVector& v2);
 	float						GetDestinationAngleRemaining();
 	void						TurnFaceToDestination();
-	void						OnReceiveHit( IFighterEntity* pAgressor );
+	void						OnReceiveHit( IFighterEntity* pAgressor ) override;
 	void						OnEndHitAnimation();
 	void						FaceTo(const CVector& point);
 	void						Attack(IFighterEntity* pEntity);
 	void						Attack(IFighterEntityInterface* pEntity);
 	virtual void				ComputePathFind2D( const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints) = 0;
 	virtual void				SetDestination( const CVector& oDestination );
+	
 
 	virtual void				Turn( float fAngle ) = 0;
 	virtual IAnimation*			GetCurrentAnimation() = 0;
@@ -98,6 +100,4 @@ private:
 	virtual void				Guard() = 0;
 	virtual IBox*				GetFirstCollideBox() = 0;
 	virtual IBox*				GetNextCollideBox() = 0;
-
-	void						OnHitReceivedCallback( IAnimation::TEvent e);
 };

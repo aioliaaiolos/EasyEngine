@@ -31,6 +31,7 @@ map<string, CItem::TClass> CItem::s_mClassString = map<string, CItem::TClass>{
 
 CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath) :
 	CObject(oInterface),
+	m_oInterface(oInterface),
 	m_eClass(tclass),
 	m_eType(type),
 	m_sModelName(sModelName),
@@ -81,8 +82,20 @@ void CItem::Load()
 	if (m_sModelName.size() > 0)
 	{
 		SetRessource(string("meshes/") + m_sModelName);
-		if (m_pBoundingGeometry)
+		if (m_pBoundingGeometry) {
 			m_fBoundingSphereRadius = m_pBoundingGeometry->ComputeBoundingSphereRadius();
+			IBone* pDummyRoot = dynamic_cast<IBone*>(GetChildCount() > 0 ? GetChild(0) : nullptr);
+			if (pDummyRoot) {
+				for (int i = 0; i < pDummyRoot->GetChildCount(); i++) {
+					CEntity* pModel = dynamic_cast<CEntity*>(pDummyRoot->GetChild(i));
+					if (pModel) {
+						m_pModel = pModel;
+						pModel->SetBoundingGeometry(m_pBoundingGeometry);
+					}
+				}
+			}
+
+		}
 	}
 }
 
@@ -118,4 +131,19 @@ string&	CItem::GetPreviewPath()
 bool CItem::IsWear()
 {
 	return m_bIsWear;
+}
+
+void CItem::DrawBoundingBox(bool bDraw)
+{
+	m_pModel->DrawBoundingBox(bDraw);
+}
+
+const CMatrix& CItem::GetWorldMatrix() const
+{
+	return m_pModel->GetWorldMatrix();
+}
+
+CEntity* CItem::GetModel()
+{
+	return m_pModel;
 }

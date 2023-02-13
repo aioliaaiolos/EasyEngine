@@ -14,7 +14,7 @@ public:
 	CCylinder();
 	CCylinder(const CCylinder& box);
 	CCylinder( const CMatrix& oTM, float fRadius, float fHeight );
-	float				GetRadius() const;
+	float				GetRadius() const override;
 	float				GetHeight() const;
 	void				SetTM(const CMatrix& m);
 	void				Set( const CMatrix& oBase, float fRadius, float fHeight );
@@ -26,7 +26,7 @@ public:
 	const CMatrix&		GetTM() const;
 	float				ComputeBoundingSphereRadius() const;
 	const CVector&		GetBase() const;
-	IGeometry*			Duplicate();
+	IGeometry*			Duplicate() const override;
 	void				Transform(const CMatrix& tm);
 	float				GetHeight();
 	float				GetDistance(const IGeometry& oGeometry) const;
@@ -38,6 +38,7 @@ public:
 	void				GetBBoxDimension(CVector& dim) override;
 	const CVector&		GetBBoxDimension() const override;
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CCylinder::GetBBoxDimension()"); }
+	void				GetCenter(CVector& oCenter) const override;
 	
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const override;

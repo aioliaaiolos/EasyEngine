@@ -27,6 +27,7 @@
 #include "Utils2/TimeManager.h"
 #include "Utils2/RenderUtils.h"
 #include "Utils2/StringUtils.h"
+#include "Utils2/Logger.h"
 
 using namespace std;
 
@@ -67,7 +68,8 @@ m_pCloth(nullptr),
 m_pCollisionGrid(nullptr),
 m_pCollisionMap(nullptr),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
-m_pWorldEditor(nullptr)
+m_pWorldEditor(nullptr),
+m_oTimeManager(static_cast<CTimeManager&>(*oInterface.GetPlugin("TimeManager")))
 {
 	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* plugin)
 	{
@@ -83,7 +85,7 @@ m_pWorldEditor(nullptr)
 	oInterface.HandlePluginCreation("Physic", [this](CPlugin* plugin)
 	{
 		m_pPhysic = static_cast<IPhysic*>(m_oInterface.GetPlugin("Physic"));
-		m_pBody = new CBody(*m_pPhysic);
+		m_pBody = new CBody(m_oInterface);
 	}
 	);
 	m_pEntityManager = static_cast<CEntityManager*>(oInterface.GetPlugin("EntityManager"));
@@ -366,7 +368,7 @@ void CEntity::UpdateCollision()
 				x = oComposedMatrix.m_03;
 				z = oComposedMatrix.m_23;
 			}
-			int nDelta = CTimeManager::Instance()->GetTimeElapsedSinceLastUpdate();
+			int nDelta = m_oTimeManager.GetTimeElapsedSinceLastUpdate();
 			const float margin = -20.;
 			float fGroundHeight = m_pScene->GetGroundHeight(x, z) + m_pScene->GetGroundMargin();
 			float fEntityZ = m_oLocalMatrix.m_13 + m_pBoundingGeometry->GetBase().m_y + m_pBody->m_oSpeed.m_y * (float)nDelta / 1000.f;
@@ -941,7 +943,7 @@ void CEntity::SetMesh( IMesh* pMesh )
 
 void CEntity::DrawBoundingBox( bool bDraw )
 {
-m_bDrawBoundingBox = bDraw;
+	m_bDrawBoundingBox = bDraw;
 }
 
 void CEntity::SetShader(IShader* pShader)
@@ -999,8 +1001,13 @@ void CEntity::AddAnimation(string sAnimationName)
 {
 	if (m_pSkeletonRoot)
 	{
-		IAnimation* pAnimation = static_cast<IAnimation*>(m_oRessourceManager.GetRessource("/Animations/" + sAnimationName + ".bke", true));
-		AddAnimation(sAnimationName, pAnimation);
+		try {
+			IAnimation* pAnimation = static_cast<IAnimation*>(m_oRessourceManager.GetRessource("/Animations/" + sAnimationName + ".bke", true));
+			AddAnimation(sAnimationName, pAnimation);
+		}
+		catch (CEException) {
+			CLogger::Log() << "Error : Animation '" + sAnimationName + "' not found";
+		}
 	}
 	else
 	{
@@ -1279,6 +1286,11 @@ IGeometry* CEntity::GetBoundingGeometry()
 		pGeometry = m_pBoundingGeometry;
 
 	return pGeometry;
+}
+
+void CEntity::SetBoundingGeometry(IGeometry* pGeometry)
+{
+	m_pBoundingGeometry = pGeometry;
 }
 
 IBox* CEntity::GetBoundingBox()

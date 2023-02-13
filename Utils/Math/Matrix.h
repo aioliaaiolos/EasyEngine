@@ -54,7 +54,7 @@ public:
 	void				Get( std::vector< float >& vData ) const;
 	void				Set( const float* arr );
 	void				Set( const vector< float >& vData );
-	void				GetAffinePart( CVector& v );
+	void				GetAffinePart( CVector& v ) const;
 	void				GetxBase(CVector& v) const;
 	void				GetyBase(CVector& v) const;
 	void				GetzBase(CVector& v) const;

@@ -85,7 +85,7 @@ float CQuad::ComputeBoundingSphereRadius() const
 	return m_fLenght;
 }
 
-IGeometry* CQuad::Duplicate()
+IGeometry* CQuad::Duplicate() const
 {
 	return NULL;
 }
@@ -118,6 +118,16 @@ IGeometry::TFace CQuad::GetReactionYAlignedPlane(const CVector& firstPoint, cons
 IGeometry::TFace CQuad::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
 {
 	return eNone;
+}
+
+void CQuad::GetCenter(CVector& oCenter) const
+{
+	oCenter = GetBase();
+}
+
+float CQuad::GetRadius() const
+{
+	return (m_fLenght / 2.f) * (m_fLenght / 2.f) + (m_fWidth / 2.f) * (m_fLenght / 2.f);
 }
 
 const IPersistantObject& CQuad::operator >> (CBinaryFileStorage& store) const
