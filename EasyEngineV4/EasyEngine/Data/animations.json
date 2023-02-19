@@ -7,7 +7,7 @@
 			[
 				{"Dying": "Dying"},
 				{"Guard": "Guard"},
-				{"HitWeapon": "HitWeapon"},
+				{"HitWeapon": "HitWeapon2"},
 				{"HitLeftFoot": "HitLeftFoot"},
 				{"HitReceived": "HitReceived"},
 				{"HitRightArm": "HitRightArm"},
@@ -29,13 +29,13 @@
 			[
 				{"Dying": "Dying"},
 				{"Guard": "Guard2"},
-				{"HitWeapon": "HitWeapon2"},
+				{"HitWeapon": "HitWeapon2", "Speed": 3.0},
 				{"HitLeftFoot": "HitLeftFoot"},
 				{"HitReceived": "HitReceived"},
 				{"HitRightArm": "HitRightArm"},
 				{"MoveToGuard": "MoveToGuard2"},
-				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1"},
-				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2"},
+				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1", "Speed": 3.0},
+				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2", "Speed": 3.0},
 				{"Original": "Original"},
 				{"Punished": "Punished"},
 				{"Run": "Run02"},
@@ -43,6 +43,28 @@
 				{"Seat": "Seat"},
 				{"Stand": "Stand02"},
 				{"Walk": "Walk"}
+			]
+		},
+		{
+			"bodies": ["body01-m"],
+			"actionAnimations": 
+			[
+				{"Dying": "Original-m"},
+				{"Guard": "Guard-m"},
+				{"HitWeapon": "HitWeapon-m"},
+				{"HitLeftFoot": "Original-m"},
+				{"HitReceived": "HitReceived-m"},
+				{"HitRightArm": "HitRightArm-m"},
+				{"MoveToGuard": "MoveToGuard-m"},
+				{"MoveToGuardWeaponPart1": "Original-m"},
+				{"MoveToGuardWeaponPart2": "Original-m"},
+				{"Original": "Original-m"},
+				{"Punished": "Original-m"},
+				{"Run": "run-m", "Speed": 2.0},
+				{"Sexy": "Original-m"},
+				{"Seat": "Original-m"},
+				{"Stand": "stand-m"},
+				{"Walk": "Original-m"}
 			]
 		}
 	]

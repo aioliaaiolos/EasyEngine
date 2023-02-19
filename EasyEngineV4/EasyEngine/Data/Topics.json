@@ -174,7 +174,7 @@
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Avez-vous récupéré le <link>bracelet de Namia</link> ? Non ? C'est bien ce qui me semblait... A l'avenir, je vous prie de ne vous adressez à moi qu'une fois que vous me l'aurez rapporté."
+				"Avez-vous récupéré le <link>bracelet de Namia</link> ? Non ? C'est bien ce qui me semblait. A l'avenir, je vous prie de ne vous adressez à moi qu'une fois que vous me l'aurez rapporté !"
 			],
 			"Conditions": [
 				{
@@ -239,6 +239,25 @@
 				}
 			],
 			"Action": ["Mission_Infirmerie=9"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Je vous ai déjà dis d'aller voir Hasna... Cessez de m'importuner maintenant, je dois rester concentrée quand je met mes boucles d'oreilles, vous ne voudriez tout de meme pas que je me pique ?"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "8",
+					"Comp": ">"
+				}
+			]
 		},
 		{
 			"Title" : "Flacon",
@@ -419,7 +438,8 @@
 					"Value": "3",
 					"Comp": "=="
 				}
-			]
+			],
+			"Action": ["Mission_Infirmerie=14"]
 		},
 		{
 			"Title" : "Flacon",
@@ -435,9 +455,114 @@
 				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
-					"Value": "12",
+					"Value": "14",
 					"Comp": ">"
 				}
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Pardon ? Est-ce que je vous connais ? Pourquoi me posez-vous des questions ? Je veux sortir d'ici !"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "15",
+					"Comp": "=="
+				}
+			],
+			"Action": [
+				"Choice(\"{1}Calmez-vous, je ne vous veux aucun mal, j'ai simplement besoin de récupérer ce flacon pour le rendre à Ranja, elle seule peut me faire sortir d'ici{2}Hasna ne m'avait pas menti, vous avez vraiment une araignée dans le plafond{3}Je vous promet de vous faire sortir d'ici si vous m'aidez à retrouver ce flacon\");"
+			]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : ["Ce flacon, le flacon de l'espoir, de la fin de l'ennui apres ces nuits sans fin, qui m'a chauffé le coeur et donné un sens à ma vie. Pourquoi voudriez-vous que je m'en sépare ?"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "15",
+					"Comp": "=="
+				}
+				,
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Goodbye()"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Ce n'est pas grave, les araignées sont toujours là mais depuis qu'Hasna lui a donné le flacon du bonheur, Aluyn ne les voit plus."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "15",
+					"Comp": "=="
+				}
+				,
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Action": ["Goodbye()"]
+		},
+		{
+			"Title" : "Flacon",
+			"Text" : [
+				"Les cendrent volent au gré du vent, puis disparaissent dans l'immensité de la mer, comme si elles n'avaient jamais existé. Le nectar coule dans les veines d'Aluyn, puis disparait à son tour. ",				
+				"Le bien que vous cherchez est plus précieux encore, mais je ne peux vous aider que si vous acceptez de le partager avec moi."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "15",
+					"Comp": "=="
+				}
+				,
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "3",
+					"Comp": "=="
+				}
+			],
+			"Action": [
+			"Choice(\"{1}Ahem, j'ai peur de ne pas tout comprendre, parlez-vous notre langue ?{2}hmm... Si je comprend bien, vous voudriez que je vous rapporte un sac de cendre heu... avec du nectar ?{3}Pour l'instant, le seul bien que je cherche c'est ce maudit flacon, vous voulez quoi en échange ?{4}Ouch, la journée a du etre dure, voulez-vous que je repasse un peu plus tard ?\")",
+			"Mission_Infirmerie=16"
 			]
 		},
 		{
@@ -445,7 +570,7 @@
 			"Text": [
 				"Une Erane un peu étrange, mais sympathique malgré tout. Un conseil, n'essayez pas de la contrarier si vous voulez obtenir quelque chose. Son lit est à coté de celui de Namia."
 			],
-			"Conditions:" : [
+			"Conditions" : [
 				{
 					"Name": "CharacterId",
 					"Value": "hasna",
@@ -454,8 +579,8 @@
 				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
-					"Value": "14",
-					"Comp": "=="
+					"Value": "13",
+					"Comp": ">"
 				}			
 			],
 			"Action": ["Mission_Infirmerie=15"]
@@ -775,6 +900,17 @@
 				{
 					"Name": "CharacterId",
 					"Value": "geraldine",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Administration", 
+			"Text": ["Ah oui, je connais, c'est un batiment avec plein de gens sérieux dedans qui écrivent des trucs sur du papier."],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
 					"Comp": "=="
 				}
 			]

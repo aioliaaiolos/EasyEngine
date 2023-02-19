@@ -76,6 +76,7 @@ public:
 		eWalk,
 		eStand,
 		eRun,
+		eRunReverse,
 		eHitWeapon,
 		eHitLeftFoot,
 		eHitRightArm,
@@ -89,6 +90,7 @@ public:
 		eMoveToGuardWeaponPart2,
 		eMoveToGuardWeaponPart1Reverse,
 		eMoveToGuardWeaponPart2Reverse,
+		eOriginal,
 		eAnimationCount
 	};
 
@@ -118,7 +120,7 @@ public:
 	virtual void						Hide( bool bHide ) = 0;
 	virtual void						RunAction( string sAction, bool bLoop ) = 0;
 	virtual void						LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM ) = 0;
-	virtual void						SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ) = 0;
+	virtual void						SetMovmentSpeed(TAnimation eAnimationType, float fSpeed) = 0;
 	virtual TAnimation					GetCurrentAnimationType() const = 0;
 	virtual void						SetScaleFactor( float x, float y, float z ) = 0;
 	virtual void						GetScaleFactor(CVector& scale) = 0;

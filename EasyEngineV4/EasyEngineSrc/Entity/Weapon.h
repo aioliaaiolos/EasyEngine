@@ -18,6 +18,8 @@ public:
 	void			LinkToHand(INode* pHand);
 	void			Wear() override;
 	void			Update() override;
+
+	int				m_nDamage = 0;
 	static Type		GetAttackTypeFromString(string sAttackType);
 	
 
@@ -28,6 +30,6 @@ private:
 	CMatrix						m_oModelLocalMatrixInHandleBase;
 	CMatrix						m_oModelLocalMatrixInWearBase;
 	IGeometryManager&			m_oGeometryManager;
-
+	
 	static map<string, Type>	s_mAttackType;
 };

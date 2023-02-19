@@ -325,6 +325,7 @@ public:
 		map<string, string>						m_mClothesToNode;
 		map<string, vector<int>>				m_mItems;
 		string									m_sHairs;
+		float									m_fStrength = 0.f;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{

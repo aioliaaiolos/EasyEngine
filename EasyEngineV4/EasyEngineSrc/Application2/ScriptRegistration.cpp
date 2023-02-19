@@ -998,7 +998,7 @@ void SetAnimationSpeed( IScriptState* pState )
 			m_pConsole->Println(oss.str());
 			return;
 		}
-		pEntity->SetAnimationSpeed( eAnim, pSpeed->m_fValue );
+		pEntity->SetMovmentSpeed(eAnim, pSpeed->m_fValue);
 	}
 	else
 	{

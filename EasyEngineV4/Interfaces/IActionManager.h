@@ -22,10 +22,10 @@ public:
 
 	struct Desc : public CPlugin::Desc
 	{
-		IInputManager&	m_oInputManager;
-		Desc( IInputManager& oInputManager ) : 
+		EEInterface& m_oInterface;
+		Desc(EEInterface& oInterface) :
 			CPlugin::Desc( NULL, "ActionManager" ),
-			m_oInputManager( oInputManager ){}
+			m_oInterface(oInterface){}
 	};
 
 	virtual void 								AddKeyAction( string sActionName, WPARAM key) = 0;

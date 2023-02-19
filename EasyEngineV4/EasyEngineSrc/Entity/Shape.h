@@ -36,7 +36,7 @@ public:
 	IBone*			GetSkeletonRoot(){ return NULL; }
 	void			Hide( bool bHide );
 	void			RunAction( string sAction, bool bLoop ){}
-	void			SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
+	void			SetMovmentSpeed( TAnimation eAnimationType, float fSpeed ) override{}
 	TAnimation		GetCurrentAnimationType() const{return eNone;}
 	void			LinkEntityToBone( IEntity*, IBone*, TLinkType = ePreserveChildRelativeTM  ){}
 	void			SetScaleFactor( float x, float y, float z ){}

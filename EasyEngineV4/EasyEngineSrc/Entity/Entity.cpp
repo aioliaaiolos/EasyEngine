@@ -258,23 +258,7 @@ void CEntity::SetRessource( string sFileName, bool bDuplicate )
 					LinkEntityToBone( pEntity, pParentBone );
 				}
 			}
-			string bboxFileName = sFileName.substr(0, sFileName.find(".")) + ".bbox";
-			ILoader::CAnimationBBoxInfos bboxInfos;
-			try {
-				m_pLoaderManager->Load(bboxFileName, bboxInfos);
-				m_oKeyBoundingBoxes = bboxInfos.mKeyBoundingBoxes;
-				map<string, map<int, IBox*> >::iterator itBoxes = m_oKeyBoundingBoxes.find("stand-normal");
-				if (itBoxes == m_oKeyBoundingBoxes.end()) {
-					ostringstream oss;
-					oss << "Erreur : l'entite '" << sFileName << "' ne possede pas de bounding box pour 'stand-normal'";
-					exception e(oss.str().c_str());
-					throw e;
-				}
-				m_pBoundingGeometry = itBoxes->second.begin()->second;
-			}
-			catch (CFileNotFoundException& e) {
-				m_pBoundingGeometry = m_pMesh->GetBBox();
-			}
+			m_pBoundingGeometry = m_pMesh->GetBBox();
 			CreateAndLinkCollisionChildren(sFileName);
 		}
 	}
@@ -1335,9 +1319,12 @@ void CEntity::GetSkeletonEntities(CBone* pRoot, vector< CEntity* >& vEntity, str
 		if (pEntity)
 		{
 			string sFileName;
-			pEntity->GetRessource()->GetFileName(sFileName);
-			if (sFileFilter != sFileName)
-				vEntity.push_back(pEntity);
+			IRessource* pRessource = pEntity->GetRessource();
+			if (pRessource) {
+				pRessource->GetFileName(sFileName);
+				if (sFileFilter != sFileName)
+					vEntity.push_back(pEntity);
+			}
 		}
 		else
 			GetSkeletonEntities(dynamic_cast<CBone*>(pRoot->GetChild(iChild)), vEntity, sFileFilter);

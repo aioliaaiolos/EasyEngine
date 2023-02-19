@@ -34,10 +34,8 @@ map< string, IEntity::TAnimation >			CCharacter::s_mAnimationStringToType;
 map< IEntity::TAnimation, float > 			CCharacter::s_mOrgAnimationSpeedByType;
 map< string, CCharacter::TAction >				CCharacter::s_mActions;
 vector< CCharacter* >							CCharacter::s_vHumans;
-
 map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
-
-map<string, map<string, string>> CCharacter::s_mBodiesAnimations;
+map<string, map<string, pair<string, float>>> CCharacter::s_mBodiesAnimations;
 
 CObject::CObject(EEInterface& oInterface):
 	CEntity(oInterface)
@@ -217,6 +215,27 @@ m_fNeckRotV( 0 )
 	m_pBody->m_fWeight = 1.f;	
 	InitAnimations();
 
+	string bboxFileName = sFileName.substr(0, sFileName.find(".")) + ".bbox";
+	ILoader::CAnimationBBoxInfos bboxInfos;
+	try {
+		m_pLoaderManager->Load(bboxFileName, bboxInfos);
+		m_oKeyBoundingBoxes = bboxInfos.mKeyBoundingBoxes;
+		string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName]["Stand"].first;
+		string sAnimationNameLow = sAnimationName;
+		std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
+		map<string, map<int, IBox*> >::iterator itBoxes = m_oKeyBoundingBoxes.find(sAnimationNameLow);
+		if (itBoxes == m_oKeyBoundingBoxes.end()) {
+			ostringstream oss;
+			oss << "Erreur : l'entite '" << sFileName << "' ne possede pas de bounding box pour '" + sAnimationNameLow + "'";
+			exception e(oss.str().c_str());
+			throw e;
+		}
+		m_pBoundingGeometry = itBoxes->second.begin()->second;
+	}
+	catch (CFileNotFoundException& e) {
+		m_pBoundingGeometry = m_pMesh->GetBBox();
+	}
+
 	s_vHumans.push_back( this );
 	m_pLeftEye = dynamic_cast< IEntity* >( m_pSkeletonRoot->GetChildBoneByName( "OeilG" ) );
 	m_pRightEye = dynamic_cast< IEntity* >( m_pSkeletonRoot->GetChildBoneByName( "OeilD" ) );
@@ -237,19 +256,24 @@ m_fNeckRotV( 0 )
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
 	IBone* pBone = GetPreloadedBone(m_sAttackBoneName);
-	IBox* pRHandBox = static_cast<IBox*>(pBone->GetBoundingBox()->Duplicate());
-	CVector oMinPoint;
-	pRHandBox->SetMinPoint(oMinPoint);
-	m_pRHandBoxEntity = new CBoxEntity(m_oInterface, *pRHandBox);
-	m_pRHandBoxEntity->Link(m_pDummyRHand);
+	const IBox* pAttackBBox = static_cast<const IBox*>(pBone->GetBoundingBox());
+	IBox* pRHandBox = static_cast<IBox*>(pAttackBBox ? pAttackBBox->Duplicate() : nullptr);
+	if (pRHandBox) {
+		CVector oMinPoint;
+		pRHandBox->SetMinPoint(oMinPoint);
+		m_pRHandBoxEntity = new CBoxEntity(m_oInterface, *pRHandBox);
+		m_pRHandBoxEntity->Link(m_pDummyRHand);
+		m_pRHandBoxEntity->Hide(true);
+	}
+	else
+		throw CEException("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName);
 
-	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart1, 3.f);
-	SetAnimationSpeed(IEntity::TAnimation::eMoveToGuardWeaponPart2, 3.f);
-	SetAnimationSpeed(IEntity::TAnimation::eHitWeapon, 3.f);
 	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
-	pReverse->SetSpeed(3.f);
+	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart1"].second);
 	pReverse = CreateReverseAnimation("MoveToGuardWeaponPart2");
-	pReverse->SetSpeed(3.f);
+	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart2"].second);
+	pReverse = CreateReverseAnimation("Run");
+	SetAnimationSetSpeed();
 }
 
 CCharacter::~CCharacter()
@@ -259,12 +283,12 @@ CCharacter::~CCharacter()
 
 IAnimation* CCharacter::CreateReverseAnimation(string sAnimationType)
 {
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType];
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType].first;
 	IAnimation* pAnimation = m_mAnimation[sAnimationName];
 	IAnimation* pReversedAnimation = pAnimation->CreateReversedAnimation();
 	pReversedAnimation->SetName(sAnimationName + "Reverse");
 	AddAnimation(sAnimationName + "Reverse", pReversedAnimation);
-	s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"] = sAnimationName + "Reverse";
+	s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"].first = sAnimationName + "Reverse";
 	return pReversedAnimation;
 }
 
@@ -278,6 +302,11 @@ const CMatrix& CCharacter::GetWeaponTM() const
 bool CCharacter::GetFightMode() const
 {
 	return m_bFightMode;
+}
+
+int CCharacter::GetHitDamage()
+{
+	return m_nStrength + (m_pCurrentWeapon ? m_pCurrentWeapon->m_nDamage : 0);
 }
 
 void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
@@ -317,15 +346,16 @@ void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 							for (int iActionAnim = 0; iActionAnim < actionAnimations.Size(); iActionAnim++) {
 								Value& actionAnim = actionAnimations[iActionAnim];
 								if (actionAnim.IsObject()) {
-									for (const string& sBody : vBodies) {
-										for (const pair<string, TAnimation>& animType : s_mAnimationStringToType) {
-											if (actionAnim.HasMember(animType.first.c_str())) {
-												Value& action = actionAnim[animType.first.c_str()];
-												if (action.IsString()) {
-													s_mBodiesAnimations[sBody][animType.first.c_str()] = action.GetString();
-												}
-											}
+									string sMemberName = actionAnim.MemberBegin()->name.GetString();
+									string sMemberValue = actionAnim.MemberBegin()->value.GetString();
+									for (const string& sBody : vBodies) {										
+										s_mBodiesAnimations[sBody][sMemberName].first = sMemberValue;
+										if (actionAnim.HasMember("Speed")) {
+											Value& speed = actionAnim["Speed"];
+											s_mBodiesAnimations[sBody][sMemberName].second = speed.GetFloat();
 										}
+										else
+											s_mBodiesAnimations[sBody][sMemberName].second = 1.f;
 									}
 								}
 							}
@@ -355,12 +385,12 @@ void CCharacter::InitAnimations()
 		CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
 		
 		bool endLoop = false;
-		map<string, string>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
-		for (const pair<string, string>& actionAnim : bodyAnimations) {
-			AddAnimation(actionAnim.second);
+		map<string, pair<string, float>>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
+		for (const pair<string, pair<string, float>>& actionAnim : bodyAnimations) {
+			AddAnimation(actionAnim.second.first);
 			TAnimation animType = s_mAnimationStringToType[actionAnim.first];
 			if (animType == eStand)
-				m_sStandAnimation = actionAnim.second;
+				m_sStandAnimation = actionAnim.second.first;
 		}
 	}
 }
@@ -369,6 +399,7 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 {
 	s_mAnimationStringToType["Walk"] = eWalk;
 	s_mAnimationStringToType["Run"] = eRun;
+	s_mAnimationStringToType["RunReverse"] = eRunReverse;
 	s_mAnimationStringToType["Stand"] = eStand;
 	s_mAnimationStringToType["HitReceived"] = eReceiveHit;
 	s_mAnimationStringToType["HitWeapon"] = eHitWeapon;
@@ -382,9 +413,11 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationStringToType["MoveToGuardWeaponPart2"] = eMoveToGuardWeaponPart2;
 	s_mAnimationStringToType["MoveToGuardWeaponPart1Reverse"] = eMoveToGuardWeaponPart1Reverse;
 	s_mAnimationStringToType["MoveToGuardWeaponPart2Reverse"] = eMoveToGuardWeaponPart2Reverse;
+	s_mAnimationStringToType["Original"] = eOriginal;
 
 	s_mAnimationTypeToString[eWalk] = "Walk";
 	s_mAnimationTypeToString[eRun] = "Run";
+	s_mAnimationTypeToString[eRunReverse] = "RunReverse";
 	s_mAnimationTypeToString[eStand] = "Stand";
 	s_mAnimationTypeToString[eReceiveHit] = "HitReceived";
 	s_mAnimationTypeToString[eHitWeapon] = "HitWeapon";
@@ -398,20 +431,24 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart2] = "MoveToGuardWeaponPart2";
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart1Reverse] = "MoveToGuardWeaponPart1Reverse";
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart2Reverse] = "MoveToGuardWeaponPart2Reverse";
+	s_mAnimationTypeToString[eOriginal] = "Original";
 
 	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
 	s_mOrgAnimationSpeedByType[eStand] = 0.f;
 	s_mOrgAnimationSpeedByType[eHitWeapon] = 0.f;
 	s_mOrgAnimationSpeedByType[eRun] = -7.f;
+	s_mOrgAnimationSpeedByType[eRunReverse] = 7.f;
 	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
 	s_mOrgAnimationSpeedByType[eReceiveHit] = 0.f;
 	s_mOrgAnimationSpeedByType[eDying] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
 	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart2] = 0.f;
+	s_mOrgAnimationSpeedByType[eOriginal] = 0.f;
 
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
+	s_mActions["RunReverse"] = RunReverse;
 	s_mActions["Stand"] = Stand;
 	s_mActions["ReceiveHit"] = ReceiveHit;
 	s_mActions["Jump"] = Jump;
@@ -431,7 +468,7 @@ IGeometry* CCharacter::GetBoundingGeometry()
 	if (m_bFightMode)
 		sAnimationType = "Guard";
 
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType];
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType].first;
 	string sAnimationNameLow = sAnimationName;
 	std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
 	map<int, IBox*>::iterator itBox = m_oKeyBoundingBoxes[sAnimationNameLow].begin();
@@ -809,7 +846,7 @@ void CCharacter::RunAction( string sAction, bool bLoop )
 void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 {
 	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s];
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s].first;
 	SetCurrentAnimation( sAnimationName );
 	if( !m_pCurrentAnimation )
 	{
@@ -845,11 +882,19 @@ void CCharacter::Stand( bool bLoop )
 
 void CCharacter::Run( bool bLoop )
 {
-	if( m_eCurrentAnimationType != eRun )
-	{
+	if( m_eCurrentAnimationType != eRun ) {
 		SetPredefinedAnimation( "Run", bLoop );
 		if( !m_bUsePositionKeys )
 			ConstantLocalTranslate( CVector( 0.f, 0.f, -m_mAnimationSpeedByType[eRun]) );
+	}
+}
+
+void CCharacter::RunReverse(bool bLoop)
+{
+	if (m_eCurrentAnimationType != eRunReverse) {
+		SetPredefinedAnimation("RunReverse", bLoop);
+		if (!m_bUsePositionKeys)
+			ConstantLocalTranslate(CVector(0.f, 0.f, -m_mAnimationSpeedByType[eRunReverse]));
 	}
 }
 
@@ -996,6 +1041,11 @@ void CCharacter::Run( CCharacter* pCharacter, bool bLoop  )
 	pCharacter->Run( bLoop );
 }
 
+void CCharacter::RunReverse(CCharacter* pCharacter, bool bLoop)
+{
+	pCharacter->RunReverse(bLoop);
+}
+
 void CCharacter::Jump(CCharacter* pCharacter, bool bLoop)
 {
 	pCharacter->Jump(bLoop);
@@ -1028,23 +1078,46 @@ void CCharacter::StopRunning(CCharacter* pCharacter, bool bLoop)
 	}
 }
 
-void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed )
+IAnimation* CCharacter::GetAnimation(TAnimation eAnimationType)
 {
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]];
-	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
-	if (itAnimation != m_mAnimation.end()) {
-		itAnimation->second->SetSpeed(fSpeed);
-		m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s_mAnimationTypeToString[eAnimationType]].first;
+	if (!sAnimationName.empty()) {
+		map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
+		if (itAnimation != m_mAnimation.end()) {
+			return itAnimation->second;
+		}
 	}
-	else {
-		throw CEException("Error : animation '" + sAnimationName + "' not defined for body '" + m_sCurrentBodyName + "'");
+	return nullptr;
+}
+
+void CCharacter::SetAnimationSetSpeed()
+{
+	map<string, pair<string, float>>& animations = s_mBodiesAnimations[m_sCurrentBodyName];
+	for (const pair<string, pair<string, float>>& anim : animations) {
+		map< string, IEntity::TAnimation >::iterator itAnimation = s_mAnimationStringToType.find(anim.first);
+		if((itAnimation != s_mAnimationStringToType.end()) && (anim.second.second > 0.f))
+			SetAnimationSpeed(itAnimation->second, anim.second.second);
 	}
+}
+
+void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed)
+{
+	IAnimation* pAnimation = GetAnimation(eAnimationType);
+	if (pAnimation != nullptr)
+		pAnimation->SetSpeed(fSpeed);
+}
+
+void CCharacter::SetMovmentSpeed(TAnimation eAnimationType, float fSpeed)
+{
+	IAnimation* pAnimation = GetAnimation(eAnimationType);
+	SetAnimationSpeed(eAnimationType, pAnimation->GetSpeed() * fSpeed);
+	m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
 }
 
 float CCharacter::GetAnimationSpeed(IEntity::TAnimation eAnimationType)
 {
 	string sType = s_mAnimationTypeToString[eAnimationType];
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sType];
+	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sType].first;
 	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimationName);
 	IAnimation* pAnimation = nullptr;
 	if (itAnimation != m_mAnimation.end())
@@ -1125,7 +1198,7 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 		for (int i = 0; i < m_pMesh->GetMaterialCount(); i++)
 			m_vCustomSpecular = pAnimatedEntityInfos->m_vSpecular;
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
-			SetAnimationSpeed(CCharacter::s_mStringToAnimation[it->first], it->second);
+			SetMovmentSpeed(CCharacter::s_mStringToAnimation[it->first], it->second);
 		Stand();
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
@@ -1184,10 +1257,15 @@ void CCharacter::SaveToJson()
 			for (rapidjson::Value::ConstValueIterator itCharacter = characters.Begin(); itCharacter != characters.End(); itCharacter++)
 			{
 				const rapidjson::Value& character = *itCharacter;
-				if (character.IsObject() && character["Name"] == entityID.GetString())
-				{
-					characterExixts = true;
-					break;
+				if (character.IsObject()) {
+					if (character.HasMember("EntityID")) {
+						if (character["EntityID"] == entityID.GetString()) {
+							characterExixts = true;
+							break;
+						}
+					}
+					else
+						throw CEException("Error : Character does not have an 'EntityID' member");
 				}
 				characterIndex++;
 			}
@@ -1198,7 +1276,7 @@ void CCharacter::SaveToJson()
 		character.AddMember("EntityID", entityID, doc.GetAllocator());		
 
 		rapidjson::Value ressourceName(kStringType), ressourceFileName(kStringType), parentName(kStringType), parentBoneID(kNumberType), typeName(kStringType),
-			weight(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
+			weight(kNumberType), strength(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
 			items(kArrayType), hairs(kStringType);
 
 		ressourceName.SetString(pInfos->m_sRessourceName.c_str(), doc.GetAllocator());
@@ -1207,6 +1285,7 @@ void CCharacter::SaveToJson()
 		parentBoneID.SetInt(pInfos->m_nParentBoneID);
 		typeName.SetString(pCharacterInfos-> m_sTypeName.c_str(), doc.GetAllocator());
 		weight.SetFloat(pCharacterInfos->m_fWeight);
+		strength.SetInt(m_nStrength);
 		grandParentDummyRootID.SetInt(pCharacterInfos->m_nGrandParentDummyRootID);
 		diffuseTextureName.SetString(pCharacterInfos->m_sTextureName.c_str(), doc.GetAllocator());
 		specular.SetArray();		
@@ -1249,6 +1328,7 @@ void CCharacter::SaveToJson()
 		character.AddMember("ParentBoneID", parentBoneID, doc.GetAllocator());
 		character.AddMember("TypeName", typeName, doc.GetAllocator());
 		character.AddMember("Weight", weight, doc.GetAllocator());
+		character.AddMember("Strength", strength, doc.GetAllocator());
 		character.AddMember("GrandParentDummyRootID", grandParentDummyRootID, doc.GetAllocator());
 		character.AddMember("DiffuseTextureName", diffuseTextureName, doc.GetAllocator());
 		character.AddMember("Specular", specular, doc.GetAllocator());

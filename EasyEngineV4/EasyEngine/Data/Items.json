@@ -165,7 +165,8 @@
 			"Type": "Belt-Weapon",
 			"AttackType" : "Right-Hand",
 			"Preview": "sword.bmp",
-			"Value": 20
+			"Value": 20,
+			"Damage": 15
 		}
 	]
 }

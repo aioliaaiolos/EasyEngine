@@ -46,7 +46,8 @@ void IAEntity::UpdateFightState()
 		break;
 	case eGoingToEnemy:
 		m_pCurrentEnemy->GetPosition( oEnemyPos );
-		if( GetDistanceTo2dPoint( oEnemyPos ) > m_fDestinationDeltaRadius)
+		//if( GetDistanceTo2dPoint( oEnemyPos ) > m_fDestinationDeltaRadius)
+		if (!m_bArriveAtDestination)
 		{
 			SetDestination( oEnemyPos );
 			Run();
@@ -83,7 +84,6 @@ void IAEntity::UpdateFightState()
 		else
 		{
 			FaceTo(oEnemyPos);
-			//MoveToGuard();
 			m_nCurrentWaitTimeBeforeNextAttack = m_oTimeManager.GetCurrentTimeInMillisecond() - m_nBeginWaitTimeBeforeNextAttack;
 			if( m_nCurrentWaitTimeBeforeNextAttack > m_nRecoveryTime )
 				m_eFightState = eBeginLaunchAttack;

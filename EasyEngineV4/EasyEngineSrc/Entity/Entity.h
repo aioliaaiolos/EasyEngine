@@ -64,7 +64,7 @@ public:
 	void							LinkEntityToBone( IEntity* pChild, IBone* pParentBone, TLinkType = ePreserveChildRelativeTM );
 	virtual void					LinkDummyParentToDummyEntity(IEntity* pEntity, string sDummyName);
 	void							UnLinkDummyParentToDummyEntity();
-	void							SetAnimationSpeed( TAnimation eAnimationType, float fSpeed ){}
+	void							SetMovmentSpeed( TAnimation eAnimationType, float fSpeed ) override {}
 	TAnimation						GetCurrentAnimationType() const{return eNone;}
 	void							SetScaleFactor( float x, float y, float z );
 	void							GetScaleFactor(CVector& factor);

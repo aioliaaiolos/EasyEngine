@@ -8,6 +8,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
 			"Specular": [
@@ -81,6 +82,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
 			"Specular": [
@@ -118,6 +120,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
 			"Specular": [
@@ -149,6 +152,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
 			"Specular": [
@@ -186,6 +190,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-moyenne.bmp",
 			"Specular": [
@@ -210,13 +215,14 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"EntityID": "charlotte",
+			"EntityID": "aluyn",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body03.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-blanc.bmp",
 			"Specular": [
@@ -254,6 +260,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-blanc.bmp",
 			"Specular": [
@@ -285,6 +292,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "textures/skin01-moyenne.bmp",
 			"Specular": [
@@ -322,6 +330,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
 			"Specular": [
@@ -353,6 +362,7 @@
 			"ParentBoneID": -1,
 			"TypeName": "Player",
 			"Weight": 0.0,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-claire.bmp",
 			"Specular": [
@@ -368,6 +378,31 @@
 			],
 			"Items": [],
 			"Hairs": "hairs01"
+		},
+		{
+			"EntityID": "homme",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 10,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": ""
 		}
 	]
 }

@@ -8,9 +8,10 @@ m_nLife(1000)
 {
 }
 
-void IFighterEntity::OnHit( IFighterEntity* pAgressor)
+void IFighterEntity::OnHit()
 {
-	pAgressor->GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
+	m_bHitEnemy = false;
+	GetCurrentAnimation()->AddCallback([this](IAnimation::TEvent e)
 	{
 		bool bEndAnimation = false;
 		if (e == IAnimation::eAfterUpdate && !m_bHitEnemy)
@@ -37,7 +38,6 @@ void IFighterEntity::OnHit( IFighterEntity* pAgressor)
 		else if (e == IAnimation::eBeginRewind)
 		{
 			GetCurrentAnimation()->RemoveAllCallback();
-			m_bHitEnemy = false;
 			OnEndHitAnimation();
 		}
 	});
@@ -47,7 +47,7 @@ void IFighterEntity::MainHit()
 {
 	if (GetFightMode() && GetLife() > 0) {
 		PlayHitAnimation();
-		OnHit(this);
+		OnHit();
 	}
 }
 
@@ -55,7 +55,7 @@ void IFighterEntity::SecondaryHit()
 {
 	if (GetLife() > 0) {
 		PlaySecondaryHitAnimation();
-		OnHit(this);
+		OnHit();
 	}
 }
 
@@ -81,7 +81,7 @@ void IFighterEntity::OnReceiveHit( IFighterEntity* pEnemy )
 
 void IFighterEntity::ReceiveHit(IFighterEntity* pEnemy)
 {
-	IncreaseLife(-100);
+	IncreaseLife(-pEnemy->GetHitDamage());
 	if(GetLife() > 0)	
 		ReceiveHit();
 }

@@ -1,14 +1,30 @@
 #include "ActionManager.h"
+#include "Interface.h"
 
 using namespace std;
 
 
-CActionManager::CActionManager( IActionManager::Desc& oDesc ) :
+CActionManager::CActionManager(IActionManager::Desc& oDesc ) :
 IActionManager( oDesc ),
 m_fMouseSensibility(0.03f),
-m_oInputManager( oDesc.m_oInputManager )
+m_oInputManager(static_cast<IInputManager&>(*oDesc.m_oInterface.GetPlugin("InputManager")))
 {
 	m_oInputManager.AbonneToKeyEvent( static_cast< CPlugin* > ( this ), OnKeyAction );
+	IEventDispatcher& oEventDspatcher = static_cast<IEventDispatcher&>(*oDesc.m_oInterface.GetPlugin("EventDispatcher"));
+
+	// Not working, need to execute it before getKeyState
+	/*
+	oEventDspatcher.AbonneToWindowEvent(this, [](CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int x, int y) 
+	{
+		CActionManager* pActionManager = static_cast<CActionManager*>(pPlugin);
+		for (map< unsigned int, IInputManager::KEY_STATE >::iterator itKey = pActionManager->m_mKeyboardState.begin(); 
+			itKey != pActionManager->m_mKeyboardState.end(); itKey++) {
+			if (itKey->second == IInputManager::KEY_STATE::JUST_PRESSED)
+				itKey->second = IInputManager::KEY_STATE::PRESSED;
+			else if (itKey->second == IInputManager::KEY_STATE::JUST_RELEASED)
+				itKey->second = IInputManager::KEY_STATE::RELEASED;
+		}
+	});*/
 }
 
 CActionManager::~CActionManager(void)

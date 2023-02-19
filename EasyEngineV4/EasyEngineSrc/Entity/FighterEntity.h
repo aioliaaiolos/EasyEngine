@@ -26,6 +26,7 @@ public:
 	void						SetLife(int nLife);
 	void						IncreaseLife(int nLife);
 	virtual void				ReceiveHit(IFighterEntity* pEnemy);
+	virtual int					GetHitDamage() = 0;
 	virtual void				MainHit() override;
 	virtual void				SecondaryHit() override;	
 	virtual void				Die() = 0;
@@ -37,7 +38,7 @@ public:
 
 protected:
 	IFighterEntity();
-	virtual void				OnHit(IFighterEntity* pAgressor);
+	virtual void				OnHit();
 	virtual void				Stand() = 0;
 	virtual ICollisionManager&	GetCollisionManager() = 0;
 

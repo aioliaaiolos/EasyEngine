@@ -159,6 +159,7 @@ void CEntityManager::LoadItems()
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
 						string sId, sModel, sClass, sType, sAttackType, sPreview;
+						int nValue = 0, nDamage = 0;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
 							if (id.IsString()) {
@@ -195,14 +196,28 @@ void CEntityManager::LoadItems()
 								sPreview = type.GetString();
 							}
 						}
+						if (item.HasMember("Value")) {
+							Value& type = item["Value"];
+							if (type.IsString()) {
+								nValue = type.GetInt();
+							}
+						}
+						if (item.HasMember("Damage")) {
+							Value& type = item["Damage"];
+							if (type.IsInt()) {
+								nDamage = type.GetInt();
+							}
+						}
 						CItem* pItem = nullptr;
 						if (sClass == "Weapon") {
 							pItem = new CWeapon(m_oInterface, sId, CItem::GetTypeFromString(sType), CWeapon::GetAttackTypeFromString(sAttackType), sModel, sPreview);
 							CWeapon* pWeapon = static_cast<CWeapon*>(pItem);
+							pWeapon->m_nDamage = nDamage;
 							pWeapon->SetAttackType(CWeapon::GetAttackTypeFromString(sAttackType));
 						}
 						else
 							pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
+						pItem->m_nValue = nValue;
 						m_mItems[sId] = pItem;
 					}
 				}
@@ -764,6 +779,7 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
 					infos.m_sTypeName = character["TypeName"].GetString();
 					infos.m_fWeight = character["Weight"].GetFloat();
+					infos.m_fStrength = character["Strength"].GetFloat();
 					infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();
 					infos.m_sTextureName = character["DiffuseTextureName"].GetString();
 					Value& specular = character["Specular"].GetArray();

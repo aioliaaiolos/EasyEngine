@@ -111,9 +111,10 @@ function OnWorldLoaded()
 {
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
 	
-	AddCharacterItem("Player", "Armlet_EvilSpelled");
+	//AddCharacterItem("Player", "Armlet_EvilSpelled");
 	AddCharacterItem("Player", "Tunique_Hospital");
-	/*
+	
+	
 	AddCharacterItem("Player", "Underpants");
 	AddCharacterItem("Player", "Bra");
 	AddCharacterItem("Player", "Base_Gauntlet_Left");
@@ -124,18 +125,18 @@ function OnWorldLoaded()
 	AddCharacterItem("Player", "Base_Boot_Left");
 	AddCharacterItem("Player", "Base_Boot_Right");
 	AddCharacterItem("Player", "Base_Greave");
-	AddCharacterItem("Player", "Dress_LongueWide");	*/
+	AddCharacterItem("Player", "Dress_LongueWide");	
 	AddCharacterItem("Player", "Vase");
 	AddCharacterItem("Player", "Fiole");
 	AddCharacterItem("Player", "Sword");
-	
 	
 	p=GetPlayerID();
 	m=GetEntityID("mirabelle");
 	SetLife(p, 100000);
 	SetLife(m, 100000);
+	
 	//DisplayBBox(m, 1);
 	//DisplayBBox(p, 1);
-	SetAnimationSpeed(p, "Run", 2);
+	SetAnimationSpeed(p, "Run", 1.5);
 	
 }

@@ -191,37 +191,50 @@ void OnKeyAction( CPlugin* pPlugin, unsigned int key, IInputManager::KEY_STATE s
 
 void UpdatePerso()
 {
-	IPlayer* pPerso = m_pEntityManager->GetPlayer();
-	if(pPerso && !m_pConsole->IsOpen() && !m_pGUIManager->GetGUIMode())
+	IPlayer* pPlayer = m_pEntityManager->GetPlayer();
+	if(pPlayer && !m_pConsole->IsOpen() && !m_pGUIManager->GetGUIMode())
 	{		
 		ICamera* pCamera = m_pCameraManager->GetActiveCamera();
-		if( pPerso && (m_pCameraManager->GetCameraType(pCamera) == ICameraManager::TLinked) ) {
-			IInputManager::KEY_STATE eStateWalk = m_pActionManager->GetKeyActionState( "AvancerPerso");
+		if( pPlayer && (m_pCameraManager->GetCameraType(pCamera) == ICameraManager::TLinked) ) {
+			IInputManager::KEY_STATE eStateWalk = m_pActionManager->GetKeyActionState( "AvancerPlayer");
 			if( eStateWalk == IInputManager::JUST_PRESSED || eStateWalk == IInputManager::PRESSED )
 			{
 				if(m_pInputManager->GetKeyState(VK_SHIFT) == IInputManager::JUST_PRESSED || m_pInputManager->GetKeyState(VK_SHIFT) == IInputManager::PRESSED)
-					pPerso->RunAction("Walk", true);
+					pPlayer->RunAction("Walk", true);
 				else
-					pPerso->RunAction( "Run", true );
+					pPlayer->RunAction( "Run", true );
 					
-				m_pActionManager->ForceActionState( "AvancerPerso", IInputManager::PRESSED );
+				m_pActionManager->ForceActionState( "AvancerPlayer", IInputManager::PRESSED );
 			}
-			else if( eStateWalk == IInputManager::JUST_RELEASED )
+			IInputManager::KEY_STATE eStateMoveBack = m_pActionManager->GetKeyActionState("ReculerPlayer");
+			if (eStateMoveBack == IInputManager::JUST_PRESSED || eStateMoveBack == IInputManager::PRESSED)
 			{
-				pPerso->RunAction( "StopRunning", true );
-				m_pActionManager->ForceActionState( "AvancerPerso", IInputManager::RELEASED );
+				pPlayer->RunAction("RunReverse", true);
+				m_pActionManager->ForceActionState("ReculerPlayer", IInputManager::PRESSED);
 			}
+			if( eStateWalk == IInputManager::JUST_RELEASED)
+			{
+				pPlayer->RunAction( "StopRunning", true );
+				m_pActionManager->ForceActionState( "AvancerPlayer", IInputManager::RELEASED );
+			}
+			
+			if (eStateMoveBack == IInputManager::JUST_RELEASED)
+			{
+				pPlayer->RunAction("StopRunning", true);
+				m_pActionManager->ForceActionState("ReculerPlayer", IInputManager::RELEASED);
+			}
+
 			IInputManager::KEY_STATE eStateJump = m_pActionManager->GetKeyActionState("SautPerso");
 			if (eStateJump == IInputManager::JUST_PRESSED)
 			{
-				pPerso->RunAction("Jump", true);
+				pPlayer->RunAction("Jump", true);
 				m_pActionManager->ForceActionState("SautPerso", IInputManager::PRESSED);
 			}
 
 			IInputManager::TMouseButtonState eStatePiedG = m_pActionManager->GetMouseActionState( "HitLeftFoot");
 			if( eStatePiedG == IInputManager::eMouseButtonStateJustDown )
 			{
-				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPerso);
+				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPlayer);
 				if (pFighter)
 					pFighter->SecondaryHit();
 			}
@@ -229,7 +242,7 @@ void UpdatePerso()
 			IInputManager::TMouseButtonState eStateRightFist = m_pActionManager->GetMouseActionState("HitRightArm");
 			if (eStateRightFist == IInputManager::eMouseButtonStateJustDown)
 			{
-				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPerso);
+				IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pPlayer);
 				if (pFighter)
 					pFighter->MainHit();
 			}
@@ -250,7 +263,7 @@ void UpdatePerso()
 				m_pInputManager->GetOffsetMouse( x, y );
 				float s = m_pInputManager->GetMouseSensitivity();
 				if(!m_pTimeManager->IsTimePaused())
-					pPerso->Yaw( - x * s );
+					pPlayer->Yaw( - x * s );
 				m_pCameraManager->GetActiveCamera()->Pitch((float)-y/30.f);
 			}
 		}
@@ -334,7 +347,7 @@ EEInterface* InitPlugins( string sCmdLine )
 	oInputManagerDesc.m_nResY = nResY;
 	m_pInputManager = static_cast< IInputManager* >( CPlugin::Create( oInputManagerDesc, sDirectoryName + "IO.dll", "CreateInputManager" ) );
 
-	IActionManager::Desc oActionManagerDesc( *m_pInputManager );
+	IActionManager::Desc oActionManagerDesc(*pInterface);
 	m_pActionManager = static_cast< IActionManager* >( CPlugin::Create( oActionManagerDesc, sDirectoryName + "IO.dll", "CreateActionManager" ) );
 
 	IWindow::Desc oWindowDesc( nResX, nResY, "AC", *m_pEventDispatcher );
@@ -388,14 +401,15 @@ void InitKeyActions()
 	m_pActionManager->AddKeyAction("MoreSpeed", 'V');
 	m_pActionManager->AddKeyAction("LessSpeed", 'C');
 	m_pActionManager->AddKeyAction("Action", 'E');
-	//m_pActionManager->AddKeyAction("Map", 'M');
+	m_pActionManager->AddKeyAction("Map", 'M');
 	m_pActionManager->AddKeyAction("CameraYaw", AXIS_H);
 	m_pActionManager->AddKeyAction("CameraPitch", AXIS_V);
 	m_pActionManager->AddKeyAction("Console", 222);
 	m_pActionManager->AddGUIAction("CursorX", AXIS_H);
 	m_pActionManager->AddGUIAction("CursorY", AXIS_V);
 
-	m_pActionManager->AddKeyAction("AvancerPerso", 'T');
+	m_pActionManager->AddKeyAction("AvancerPlayer", 'W');
+	m_pActionManager->AddKeyAction("ReculerPlayer", 'S');
 	m_pActionManager->AddKeyAction("SautPerso", ' ');
 	m_pActionManager->AddMouseAction("HitLeftFoot", IInputManager::eMouseButtonRight, IInputManager::eMouseButtonStateJustDown);
 	m_pActionManager->AddMouseAction("HitRightArm", IInputManager::eMouseButtonLeft, IInputManager::eMouseButtonStateJustDown);

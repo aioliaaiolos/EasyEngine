@@ -520,6 +520,8 @@ void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string,
 		IGameSkin* pGameSkin = pGameObject->GetIGameSkin();
 		if (pGameSkin)
 		{
+			if (pGameSkin->GetNumOfSkinnedVerts() == 0)
+				MessageBoxA(nullptr, "Avertissement : le skin ne contient aucun vertex", "Pas de vertex dans le skin", MB_ICONWARNING);
 			for (int iVertexIndex = 0; iVertexIndex < pGameSkin->GetNumOfSkinnedVerts(); iVertexIndex++)
 			{
 				int nBoneCount = 0;
