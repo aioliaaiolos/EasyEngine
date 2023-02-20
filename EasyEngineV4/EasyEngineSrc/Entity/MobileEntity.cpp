@@ -856,10 +856,6 @@ void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 	}
 	m_pCurrentAnimation->SetAnimationTime(nFrameNumber);
 	m_pCurrentAnimation->Play( bLoop );
-	if (m_pCloth) {
-		m_pCloth->SetCurrentAnimation(sAnimationName);
-		m_pCloth->PlayCurrentAnimation(bLoop);
-	}
 	m_eCurrentAnimationType = s_mAnimationStringToType[ s ];
 }
 

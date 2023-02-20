@@ -355,12 +355,12 @@
 			"Hairs": "hairs05"
 		},
 		{
-			"EntityID": "Player",
+			"EntityID": "Player0",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06b.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
-			"TypeName": "Player",
+			"TypeName": "NPC",
 			"Weight": 0.0,
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
@@ -380,12 +380,12 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"EntityID": "homme",
+			"EntityID": "Player",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
-			"TypeName": "NPC",
+			"TypeName": "Player",
 			"Weight": 0.0,
 			"Strength": 10,
 			"GrandParentDummyRootID": -1,

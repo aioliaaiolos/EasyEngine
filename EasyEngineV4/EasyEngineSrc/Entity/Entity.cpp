@@ -64,7 +64,6 @@ m_pBaseTexture(nullptr),
 m_pCustomTexture(nullptr),
 m_bIsOnTheGround(true),
 m_bUseCustomSpecular(false),
-m_pCloth(nullptr),
 m_pCollisionGrid(nullptr),
 m_pCollisionMap(nullptr),
 m_oPathFinder(static_cast<IPathFinder&>(*oInterface.GetPlugin("PathFinder"))),
@@ -963,15 +962,11 @@ IAnimation* CEntity::GetCurrentAnimation()
 void CEntity::PlayCurrentAnimation(bool loop)
 {
 	m_pCurrentAnimation->Play(loop);
-	if (m_pCloth && m_pCloth->m_pCurrentAnimation)
-		m_pCloth->m_pCurrentAnimation->Play(loop);
 }
 
 void CEntity::PauseCurrentAnimation(bool loop)
 {
 	m_pCurrentAnimation->Pause(loop);
-	if (m_pCloth && m_pCloth->m_pCurrentAnimation)
-		m_pCloth->m_pCurrentAnimation->Pause(loop);
 }
 
 void CEntity::AddAnimation(string sAnimationName, IAnimation* pAnimation)
@@ -1018,8 +1013,6 @@ void CEntity::SetCurrentAnimation(std::string sAnimation)
 			break;
 		}
 	});
-	if (m_pCloth)
-		m_pCloth->SetCurrentAnimation(sAnimation);
 }
 
 bool CEntity::HasAnimation(string sAnimationName)

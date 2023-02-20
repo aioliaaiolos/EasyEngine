@@ -131,9 +131,9 @@ function OnWorldLoaded()
 	AddCharacterItem("Player", "Sword");
 	
 	p=GetPlayerID();
-	m=GetEntityID("mirabelle");
+	//m=GetEntityID("mirabelle");
 	SetLife(p, 100000);
-	SetLife(m, 100000);
+	//SetLife(m, 100000);
 	
 	//DisplayBBox(m, 1);
 	//DisplayBBox(p, 1);
