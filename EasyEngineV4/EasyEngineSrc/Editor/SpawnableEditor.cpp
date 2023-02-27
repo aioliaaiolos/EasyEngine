@@ -26,11 +26,6 @@ m_eEditingMode(eXForm)
 	m_oEventDispatcher.AbonneToMouseEvent(this, OnMouseEventCallback);
 }
 
-void CSpawnableEditor::HandleEditorManagerCreation(IEditorManager* pEditorManager)
-{
-	m_pEditorManager = static_cast<CEditorManager*>(pEditorManager);
-}
-
 void CSpawnableEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent e, int x, int y)
 {
 	CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
@@ -175,8 +170,12 @@ void CSpawnableEditor::GetRayPlanIntersection(int x, int y, float h, CVector& in
 #endif // DEBUG_TEST_PLANE
 
 	IMesh* pMesh = static_cast<IMesh*>(m_pScene->GetRessource());
-	const CVector& d = pMesh->GetBBox()->GetDimension();
-	IQuad* quad = m_oGeometryManager.CreateQuad(d.m_x, d.m_z);
+	CVector dim;
+	if (pMesh)
+		dim = pMesh->GetBBox()->GetDimension();
+	else
+		dim = CVector(100000, 0, 100000);
+	IQuad* quad = m_oGeometryManager.CreateQuad(dim.m_x, dim.m_z);
 	CMatrix quadTM;
 	quadTM.SetPosition(0, h, 0);
 	quad->SetTM(quadTM);
@@ -194,7 +193,7 @@ void CSpawnableEditor::GetRayPlanIntersection(int x, int y, float h, CVector& in
 		m_pDebugSphere->SetLocalPosition(intersect);
 
 		if (!m_pQuadEntity) {
-			m_pQuadEntity = m_oEntityManager.CreateQuad(d.m_x, d.m_z);
+			m_pQuadEntity = m_oEntityManager.CreateQuad(dim.m_x, dim.m_z);
 			m_pQuadEntity->Link(m_pScene);
 		}
 		m_pQuadEntity->SetLocalPosition(0.f, h, 0.f);

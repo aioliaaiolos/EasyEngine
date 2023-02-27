@@ -148,17 +148,31 @@ void CVirtualProcessor::Execute( const vector<unsigned char>& vBinary, const vec
 
 float CVirtualProcessor::GetVariableValue(string varName)
 {
-	const CVar* var = s_pSemanticAnalyser->GetVariable(varName);
-	if (var) {
+	const CVar* pVar = s_pSemanticAnalyser->GetVariable(varName);
+	if (pVar) {
 		int ebp = 0;
-		if (var->m_nScopePos == 0)
-			return m_pMemory[var->m_nRelativeStackPosition];
+		if (pVar->m_nScopePos == 0)
+			return m_pMemory[pVar->m_nRelativeStackPosition];
 		else {
-			ebp = m_mEbpValueByScope[var->m_nScopePos];
-			return m_pMemory[ebp - var->m_nRelativeStackPosition];
+			ebp = m_mEbpValueByScope[pVar->m_nScopePos];
+			return m_pMemory[ebp - pVar->m_nRelativeStackPosition];
 		}
 	}
 	return -1.f;
+}
+
+void CVirtualProcessor::SetVariableValue(string sVariableName, float value)
+{
+	const CVar* pVar = s_pSemanticAnalyser->GetVariable(sVariableName);
+	if (pVar) {
+		int ebp = 0;
+		if (pVar->m_nScopePos == 0)
+			m_pMemory[pVar->m_nRelativeStackPosition] = value;
+		else {
+			ebp = m_mEbpValueByScope[pVar->m_nScopePos];
+			m_pMemory[ebp - pVar->m_nRelativeStackPosition] = value;
+		}
+	}
 }
 
 float CVirtualProcessor::GetRegisterValue(CRegister::TType reg)

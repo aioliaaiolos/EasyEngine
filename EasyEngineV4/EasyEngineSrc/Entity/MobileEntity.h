@@ -67,6 +67,8 @@ public:
 	void													SetCurrentWeapon(CWeapon* pWeapon);
 	void													Link(INode* pParent) override;
 	IBox*													GetBoundingBox();
+	const string&											GetClass();
+	void													SetClass(string sClassName);
 	static void												InitStatics(IFileSystem& oFileSystem);
 	static map<string, IEntity::TAnimation>					s_mStringToAnimation;
 
@@ -148,6 +150,7 @@ protected:
 	CWeapon*												m_pCurrentWeapon = nullptr;
 	CBone*													m_pDummyRHand = nullptr;
 	IGeometry*												m_pWeaponGeometry = nullptr;
+	string													m_sClass;
 
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;

@@ -136,7 +136,7 @@ IEntity* CreateEntity( string sName )
 
 void EnableWatchLog(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEnable = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pEnable = static_cast<CValueInt*>(pState->GetArg(0));
 	g_bEnableWatchLog = pEnable->m_nValue != 0;
 }
 
@@ -156,7 +156,7 @@ void DisplayGlslVersion(IScriptState* pState)
 
 void SpawnEntity(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sName = pName->m_sValue;
 	if (sName.find(".bme") == -1)
 		sName += ".bme";
@@ -200,7 +200,7 @@ void SpawnEntity(IScriptState* pState)
 
 void SpawnCharacter(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	string id = pID->m_sValue;
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException(false);
@@ -233,25 +233,25 @@ void SpawnCharacter(IScriptState* pState)
 
 void SpawnArea(IScriptState* pState)
 {
-	CScriptFuncArgString* pAreaName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pAreaName = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->SpawnArea(pAreaName->m_sValue);
 }
 
 void SpawnItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pItemId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pItemId = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->SpawnItem(pItemId->m_sValue);
 }
 
 void LockEntity(IScriptState* pState)
 {
-	CScriptFuncArgString* pEntityId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pEntityId = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->LockEntity(pEntityId->m_sValue);
 }
 
 void EditCharacter(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	string id = pID->m_sValue;
 	try
 	{
@@ -270,8 +270,8 @@ void EditCharacter(IScriptState* pState)
 
 void ChangeCharacterName(IScriptState* pState)
 {
-	CScriptFuncArgString* pOld = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
-	CScriptFuncArgString* pNew = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueString* pOld = static_cast< CValueString* >(pState->GetArg(0));
+	CValueString* pNew = static_cast< CValueString* >(pState->GetArg(1));
 	m_pEntityManager->ChangeCharacterName(pOld->m_sValue, pNew->m_sValue);
 }
 
@@ -282,7 +282,7 @@ void NormalizeCharacterDatabase(IScriptState* pState)
 
 void EditCloth(IScriptState* pState)
 {
-	CScriptFuncArgString* pClothName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pClothName = static_cast< CValueString* >(pState->GetArg(0));
 	try {
 		m_pCharacterEditor->EditCloth(pClothName->m_sValue);
 	}
@@ -293,9 +293,9 @@ void EditCloth(IScriptState* pState)
 
 void OffsetCloth(IScriptState* pState)
 {
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	CValueFloat* px = static_cast< CValueFloat* >(pState->GetArg(0));
+	CValueFloat* py = static_cast< CValueFloat* >(pState->GetArg(1));
+	CValueFloat* pz = static_cast< CValueFloat* >(pState->GetArg(2));
 	try {
 		m_pCharacterEditor->OffsetCloth(px->m_fValue, py->m_fValue, pz->m_fValue);
 	}
@@ -311,17 +311,17 @@ void SaveCloth(IScriptState* pState)
 
 void OffsetEyes(IScriptState* pState)
 {
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	CValueFloat* px = static_cast< CValueFloat* >(pState->GetArg(0));
+	CValueFloat* py = static_cast< CValueFloat* >(pState->GetArg(1));
+	CValueFloat* pz = static_cast< CValueFloat* >(pState->GetArg(2));
 	m_pCharacterEditor->OffsetEyes(px->m_fValue, py->m_fValue, pz->m_fValue);
 }
 
 void TurnEyes(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pYaw	= static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
-	CScriptFuncArgFloat* pPitch = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
-	CScriptFuncArgFloat* pRoll	= static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
+	CValueFloat* pYaw	= static_cast< CValueFloat* >(pState->GetArg(0));
+	CValueFloat* pPitch = static_cast< CValueFloat* >(pState->GetArg(1));
+	CValueFloat* pRoll	= static_cast< CValueFloat* >(pState->GetArg(2));
 	m_pCharacterEditor->TurnEyes(pYaw->m_fValue, pPitch->m_fValue, pRoll->m_fValue);
 }
 
@@ -332,7 +332,7 @@ void SaveModifiedMesh(IScriptState* pState)
 
 void EditWorld(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	string id = pID->m_sValue;
 	try
 	{
@@ -346,7 +346,7 @@ void EditWorld(IScriptState* pState)
 
 void EditMap(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	string id = pID->m_sValue;
 	try
 	{
@@ -370,13 +370,13 @@ void AdaptGroundToAllEntities(IScriptState* pState)
 
 void SetHairs(IScriptState* pState)
 {
-	CScriptFuncArgString* pHairs = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pHairs = static_cast< CValueString* >(pState->GetArg(0));
 	m_pCharacterEditor->SetHairs(pHairs->m_sValue);
 }
 
 void ShowGUICursor(IScriptState* pState)
 {
-	CScriptFuncArgInt* pShowCursor = (CScriptFuncArgInt*)pState->GetArg(0);
+	CValueInt* pShowCursor = (CValueInt*)pState->GetArg(0);
 	ShowCursor(pShowCursor->m_nValue == 1 ? TRUE : FALSE);
 }
 
@@ -387,20 +387,20 @@ void DisplayFov( IScriptState* pState )
 
 void SetFov( IScriptState* pState )
 {
-	CScriptFuncArgFloat* pFov = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* pFov = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 	m_pRenderer->SetFov( pFov->m_fValue );
 }
 
 void print(IScriptState* pState)
 {
-	CScriptFuncArgInt* pInt = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CValueInt* pInt = static_cast< CValueInt* >(pState->GetArg(0));
 	m_pConsole->Println(pInt->m_nValue);
 }
 
 void SetEntityName( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pEntityName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueString* pEntityName = static_cast< CValueString* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 		pEntity->SetEntityID( pEntityName->m_sValue );
@@ -414,7 +414,7 @@ void SetEntityName( IScriptState* pState )
 
 void Choice(IScriptState* pState)
 {
-	CScriptFuncArgString* pChoice = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CValueString* pChoice = static_cast<CValueString*>(pState->GetArg(0));
 	m_pGUIManager->GetTopicsWindow()->OnChoiceCalled(pChoice->m_sValue);
 }
 
@@ -425,10 +425,10 @@ void Goodbye(IScriptState* pState)
 
 void Goto( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+	CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	try
 	{
@@ -451,8 +451,8 @@ void Goto( IScriptState* pState )
 
 void DisplayAnimationBBox( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pBool = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pBool = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
@@ -463,9 +463,9 @@ void DisplayAnimationBBox( IScriptState* pState )
 
 void CreateBox( IScriptState* pState )
 {
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+	CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
 	IEntity* pBox = m_pEntityManager->CreateBox(CVector( px->m_fValue, py->m_fValue, pz->m_fValue ) );
 	pBox->Link( m_pScene );
 	ostringstream oss;
@@ -477,7 +477,7 @@ void CreateBox( IScriptState* pState )
 
 void CreateSphere( IScriptState* pState )
 {
-	CScriptFuncArgFloat* pRadius = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* pRadius = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 	//ISphere* pSphere = m_pGeometryManager->CreateSphere( CVector(), pRadius->m_fValue );
 	IEntity* pSphereEntity = m_pEntityManager->CreateSphere( pRadius->m_fValue );
 	pSphereEntity->Link( m_pScene );
@@ -490,8 +490,8 @@ void CreateSphere( IScriptState* pState )
 
 void CreateQuad(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pLenght = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
-	CScriptFuncArgFloat* pWidth = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CValueFloat* pLenght = static_cast< CValueFloat* >(pState->GetArg(0));
+	CValueFloat* pWidth = static_cast< CValueFloat* >(pState->GetArg(1));
 	IEntity* pQuadEntity = m_pEntityManager->CreateQuad(pLenght->m_fValue, pWidth->m_fValue);
 	pQuadEntity->Link(m_pScene);
 	ostringstream oss;
@@ -503,8 +503,8 @@ void CreateQuad(IScriptState* pState)
 
 void RayTrace(IScriptState* pState)
 {
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CValueFloat* px = static_cast< CValueFloat* >(pState->GetArg(0));
+	CValueFloat* py = static_cast< CValueFloat* >(pState->GetArg(1));
 
 	unsigned int w, h;
 	m_pRenderer->GetResolution(w, h);
@@ -542,8 +542,8 @@ void CreateRepere( IScriptState* pState )
 
 void ChangeBase( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntity1ID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pEntity2ID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pEntity1ID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntity2ID = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity1 = static_cast< IEntity* >( m_pEntityManager->GetEntity( pEntity1ID->m_nValue ) );
 	IEntity* pEntity2 = static_cast< IEntity* >( m_pEntityManager->GetEntity( pEntity2ID->m_nValue ) );
 	CMatrix oWorld1, oWorld1Inv, oWorld2, oNewWorld2, id;
@@ -557,10 +557,10 @@ void ChangeBase( IScriptState* pState )
 
 void SetPreferedKeyBBox( IScriptState* pState )
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pObjectName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-	CScriptFuncArgString* pAnimationName = static_cast< CScriptFuncArgString* >( pState->GetArg( 2 ) );
-	CScriptFuncArgInt* pKey = static_cast< CScriptFuncArgInt* >( pState->GetArg( 3 ) );
+	CValueString* pFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pObjectName = static_cast< CValueString* >( pState->GetArg( 1 ) );
+	CValueString* pAnimationName = static_cast< CValueString* >( pState->GetArg( 2 ) );
+	CValueInt* pKey = static_cast< CValueInt* >( pState->GetArg( 3 ) );
 	string sFileName = pFileName->m_sValue;
 	if( sFileName.find( ".bme" ) == -1 )
 		sFileName += ".bme";
@@ -599,8 +599,8 @@ void SetPreferedKeyBBox( IScriptState* pState )
 
 void SetLife(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntityId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgInt* pLife = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CValueInt* pEntityId = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueInt* pLife = static_cast< CValueInt* >(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityId->m_nValue);
 	IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pEntity);
 	if(pFighter)
@@ -609,7 +609,7 @@ void SetLife(IScriptState* pState)
 
 void DisplayLife(IScriptState* pState)
 {
-	CScriptFuncArgString* pEntityId = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pEntityId = static_cast< CValueString* >(pState->GetArg(0));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityId->m_sValue);
 	IFighterEntityInterface* pFighter = dynamic_cast<IFighterEntityInterface*>(pEntity);
 	if (pFighter) {
@@ -619,8 +619,8 @@ void DisplayLife(IScriptState* pState)
 
 void Attack(IScriptState* pState)
 {
-	CScriptFuncArgInt* pAgressorId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgInt* pVictimId = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CValueInt* pAgressorId = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueInt* pVictimId = static_cast< CValueInt* >(pState->GetArg(1));
 	IAEntityInterface* pAgressor = dynamic_cast<IAEntityInterface*>(m_pEntityManager->GetEntity(pAgressorId->m_nValue));
 	if (pAgressor) {
 		IFighterEntityInterface* pVictim = dynamic_cast<IFighterEntityInterface*>(m_pEntityManager->GetEntity(pVictimId->m_nValue));
@@ -630,6 +630,16 @@ void Attack(IScriptState* pState)
 	}
 }
 
+void SpeakerAttack(IScriptState* pState)
+{	
+	IAEntityInterface* pSpeaker = dynamic_cast<IAEntityInterface*>(m_pEntityManager->GetEntity(m_pGUIManager->GetTopicsWindow()->GetSpeakerID()));
+	if (pSpeaker) {
+		CValueString* pVictimID = static_cast<CValueString*>(pState->GetArg(0));
+		IFighterEntityInterface* pCharacter = dynamic_cast<IFighterEntityInterface*>(m_pEntityManager->GetEntity(pVictimID->m_sValue));
+		if (pCharacter)
+			pSpeaker->Attack(pCharacter);
+	}
+}
 
 vector<unsigned char> vCallbackByteCode;
 void TalkToCallback(IAEntityInterface* pThis, IFighterEntityInterface* pInterlocutor)
@@ -639,9 +649,9 @@ void TalkToCallback(IAEntityInterface* pThis, IFighterEntityInterface* pInterloc
 
 void TalkTo(IScriptState* pState)
 {
-	CScriptFuncArgInt* pTalkerId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgInt* pInterlocutorId = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
-	CScriptFuncArgString* pCallback = static_cast< CScriptFuncArgString* >(pState->GetArg(2));
+	CValueInt* pTalkerId = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueInt* pInterlocutorId = static_cast< CValueInt* >(pState->GetArg(1));
+	CValueString* pCallback = static_cast< CValueString* >(pState->GetArg(2));
 
 	string sTalkToScriptCallback;
 	sTalkToScriptCallback = pCallback->m_sValue;
@@ -662,9 +672,9 @@ void TalkTo(IScriptState* pState)
 
 void ComputeKeysBoundingBoxes( IScriptState* pState )
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pObjectName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-	CScriptFuncArgString* pAnimationName = static_cast< CScriptFuncArgString* >( pState->GetArg( 2 ) );
+	CValueString* pFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pObjectName = static_cast< CValueString* >( pState->GetArg( 1 ) );
+	CValueString* pAnimationName = static_cast< CValueString* >( pState->GetArg( 2 ) );
 	string sFileName = pFileName->m_sValue;
 	if( sFileName.find( ".bme" ) == -1 )
 		sFileName += ".bme";
@@ -802,13 +812,13 @@ void ComputeKeysBoundingBoxes( IScriptState* pState )
 
 void LocalTranslate( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-		CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-		CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
+		CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+		CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+		CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
 		pEntity->LocalTranslate( px->m_fValue, py->m_fValue, pz->m_fValue );
 	}
 	else
@@ -831,7 +841,7 @@ ICameraManager::TCameraType GetCamTypeByString(string sCamType)
 
 void SetCameraType( IScriptState* pState )
 {
-	CScriptFuncArgString* pCamType = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pCamType = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	ICamera* pCamera = m_pCameraManager->GetCameraFromType(GetCamTypeByString(pCamType->m_sValue));
 	if (pCamera) {
 		m_pCameraManager->SetActiveCamera(pCamera);
@@ -854,8 +864,8 @@ void SetCameraType( IScriptState* pState )
 
 void DisplayCamera(IScriptState* pState)
 {
-	CScriptFuncArgString* pCamType = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
-	CScriptFuncArgInt* pDisplay = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CValueString* pCamType = static_cast< CValueString* >(pState->GetArg(0));
+	CValueInt* pDisplay = static_cast< CValueInt* >(pState->GetArg(1));
 	ICamera* pCamera = m_pCameraManager->GetCameraFromType(GetCamTypeByString(pCamType->m_sValue));
 	if(pCamera)
 		pCamera->DisplayViewCone(pDisplay->m_nValue > 0 ? true : false);
@@ -868,7 +878,7 @@ void DisplayCamera(IScriptState* pState)
 
 void InitCamera(IScriptState* pState)
 {
-	CScriptFuncArgString* pCamtype = (CScriptFuncArgString*) pState->GetArg(0);
+	CValueString* pCamtype = (CValueString*) pState->GetArg(0);
 	ICamera* pCamera = m_pCameraManager->GetCameraFromType(GetCamTypeByString(pCamtype->m_sValue));
 	if (pCamera) {
 		CMatrix m;
@@ -881,7 +891,7 @@ void InitCamera(IScriptState* pState)
 
 void GetCameraID(IScriptState* pState)
 {
-	CScriptFuncArgString* pType = (CScriptFuncArgString*)pState->GetArg(0);
+	CValueString* pType = (CValueString*)pState->GetArg(0);
 	ICameraManager::TCameraType type = ICameraManager::TFree;
 	if(pType->m_sValue == "link")
 		type = ICameraManager::TLinked;
@@ -893,7 +903,7 @@ void GetCameraID(IScriptState* pState)
 
 void SetCurrentPlayer( IScriptState* pState )
 {
-	CScriptFuncArgInt* pPlayerID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pPlayerID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IPlayer* pPlayer = dynamic_cast<IPlayer*>(m_pEntityManager->GetEntity(pPlayerID->m_nValue ));
 	if(pPlayer)
 		m_pEntityManager->SetPlayer( dynamic_cast<IPlayer*>(pPlayer) );
@@ -913,14 +923,14 @@ void GetPlayerID(IScriptState* pState)
 
 void SetGravity( IScriptState* pState )
 {
-	CScriptFuncArgFloat* pGravity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* pGravity = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 	m_pPhysic->SetGravity(pGravity->m_fValue);
 }
 
 void DisplayNodeInfos( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pNodeID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pNodeID = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
@@ -950,14 +960,14 @@ void DisplayNodeInfos( IScriptState* pState )
 
 void Debug(IScriptState* pState)
 {
-	CScriptFuncArgInt* pValue = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CValueInt* pValue = static_cast< CValueInt* >(pState->GetArg(0));
 	pValue = pValue;
 }
 
 void SetCurrentAnimationSpeed(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgFloat* pSpeed = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
+	CValueInt* pEntityID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* pSpeed = static_cast< CValueFloat* >(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityID->m_nValue);
 	if (pEntity)
 	{
@@ -976,9 +986,9 @@ void SetCurrentAnimationSpeed(IScriptState* pState)
 
 void SetAnimationSpeed( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pAnimationName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* pSpeed = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueString* pAnimationName = static_cast< CValueString* >( pState->GetArg( 1 ) );
+	CValueFloat* pSpeed = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
@@ -1010,19 +1020,19 @@ void SetAnimationSpeed( IScriptState* pState )
 
 void StopRender( IScriptState* pState )
 {
-	CScriptFuncArgInt* pRender = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pRender = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	m_bRenderScene = pRender->m_nValue == 1 ? false : true;
 }
 
 void StopUpdateEntity(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntityId = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CValueInt* pEntityId = static_cast< CValueInt* >(pState->GetArg(0));
 	//m_pEntityManager-
 }
 
 void Walk( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	//pEntity->Walk();
 	if(pEntity)
@@ -1036,7 +1046,7 @@ void Walk( IScriptState* pState )
 
 void Run( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if (pEntity)
 		pEntity->RunAction("Run", true);
@@ -1050,7 +1060,7 @@ void Run( IScriptState* pState )
 
 void Stand( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 		//pEntity->Stand();
@@ -1065,12 +1075,12 @@ void Stand( IScriptState* pState )
 
 void RunAction( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgString* pAction = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-		CScriptFuncArgInt* pLoop = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
+		CValueString* pAction = static_cast< CValueString* >( pState->GetArg( 1 ) );
+		CValueInt* pLoop = static_cast< CValueInt* >( pState->GetArg( 2 ) );
 		bool bLoop = pLoop->m_nValue == 1 ? true : false;
 		pEntity->RunAction( pAction->m_sValue, bLoop );
 	}
@@ -1086,10 +1096,10 @@ void RunAction( IScriptState* pState )
 
 void GenerateRandomNPC(IScriptState* pState)
 {
-	CScriptFuncArgString* pNPCFileName = (CScriptFuncArgString*)pState->GetArg(0);
-	CScriptFuncArgString* pArmorName = (CScriptFuncArgString*)pState->GetArg(1);
-	CScriptFuncArgInt* pNPCCount = (CScriptFuncArgInt*)pState->GetArg(2);
-	CScriptFuncArgInt* pPercentRadius = (CScriptFuncArgInt*)pState->GetArg(3);
+	CValueString* pNPCFileName = (CValueString*)pState->GetArg(0);
+	CValueString* pArmorName = (CValueString*)pState->GetArg(1);
+	CValueInt* pNPCCount = (CValueInt*)pState->GetArg(2);
+	CValueInt* pPercentRadius = (CValueInt*)pState->GetArg(3);
 
 
 	srand((unsigned)time(NULL));
@@ -1123,13 +1133,13 @@ void GenerateRandomNPC(IScriptState* pState)
 
 void SetScale( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-		CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-		CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
+		CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+		CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+		CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
 		pEntity->SetScaleFactor( px->m_fValue, py->m_fValue, pz->m_fValue );
 	}
 	else
@@ -1142,8 +1152,8 @@ void SetScale( IScriptState* pState )
 
 void CreateMobileEntity( IScriptState* pState )
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pStringID = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueString* pName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pStringID = static_cast< CValueString* >(pState->GetArg(1));
 	string sName = pName->m_sValue;
 	if( sName.find( ".bme" ) == -1 )
 		sName += ".bme";
@@ -1188,9 +1198,9 @@ void CreateMobileEntity( IScriptState* pState )
 
 void GetVec3DFromArg(IScriptState* pState, int argIdx, CVector& v)
 {
-	v.m_x = ((CScriptFuncArgFloat*)pState->GetArg(argIdx))->m_fValue;
-	v.m_y = ((CScriptFuncArgFloat*)pState->GetArg(argIdx + 1))->m_fValue;
-	v.m_z = ((CScriptFuncArgFloat*)pState->GetArg(argIdx + 2))->m_fValue;
+	v.m_x = ((CValueFloat*)pState->GetArg(argIdx))->m_fValue;
+	v.m_y = ((CValueFloat*)pState->GetArg(argIdx + 1))->m_fValue;
+	v.m_z = ((CValueFloat*)pState->GetArg(argIdx + 2))->m_fValue;
 }
 
 void CreateLineEntity(IScriptState* pState)
@@ -1209,8 +1219,8 @@ void CreateLineEntity(IScriptState* pState)
 
 void CreateNPC( IScriptState* pState )
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueString* pName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(1));
 	string sFileName = pName->m_sValue;
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException( false );
@@ -1254,7 +1264,7 @@ void CreateNPC( IScriptState* pState )
 
 void CreatePlayer(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sName = pName->m_sValue;
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException(false);
@@ -1303,27 +1313,27 @@ void SaveCharacter(IScriptState* pState)
 
 void SaveCharacterInWorld(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pID = (CValueString*)(pState->GetArg(0));
 	//m_pEntityManager->SaveCharacterToDB(pID->m_sValue);
 	m_pCharacterEditor->Save();
 }
 
 void RemoveCharacterFromWorld(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	if(m_pWorldEditor->IsEnabled())
 		m_pWorldEditor->RemoveCharacter(pID->m_sValue);
 }
 
 void RemoveCharacterFromDB(IScriptState* pState)
 {
-	CScriptFuncArgString* pID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
 	m_pEntityManager->RemoveCharacterFromDB(pID->m_sValue);
 }
 
 void CreateMinimapEntity(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sName = pName->m_sValue;
 	if (sName.find(".bme") == -1)
 		sName += ".bme";
@@ -1368,7 +1378,7 @@ void CreateMinimapEntity(IScriptState* pState)
 
 void CreateTestEntity(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sName = pName->m_sValue;
 	if (sName.find(".bme") == -1)
 		sName += ".bme";
@@ -1413,7 +1423,7 @@ void CreateTestEntity(IScriptState* pState)
 
 void DisplayAnimationTime( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
@@ -1427,8 +1437,8 @@ void DisplayAnimationTime( IScriptState* pState )
 
 void SetAnimationTime( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pFrame = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pFrame = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 		pEntity->GetCurrentAnimation()->SetAnimationTime( pFrame->m_nValue );
@@ -1450,7 +1460,7 @@ void NextAnimationKey( IScriptState* pState )
 
 void NextAnimationFrame( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 		pEntity->GetCurrentAnimation()->NextFrame();
@@ -1460,27 +1470,27 @@ void NextAnimationFrame( IScriptState* pState )
 
 void SetConstantLocalTranslate( IScriptState* pState )
 {
-	CScriptFuncArgInt* pEntityID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pEntityID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pEntityID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-		CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-		CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
+		CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+		CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+		CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
 		pEntity->ConstantLocalTranslate( CVector( px->m_fValue, py->m_fValue, pz->m_fValue ) );
 	}
 }
 
 void SetZCollisionError( IScriptState* pState )
 {
-	CScriptFuncArgFloat* pEpsilon = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* pEpsilon = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 	m_pPhysic->SetZCollisionError( pEpsilon->m_fValue );
 }
 
 void GetNodeId(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntityId = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgString* pNodeName = (CScriptFuncArgString*)pState->GetArg(1);
+	CValueInt* pEntityId = (CValueInt*)pState->GetArg(0);
+	CValueString* pNodeName = (CValueString*)pState->GetArg(1);
 
 	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityId->m_nValue);
 	if (pEntity && pEntity->GetSkeletonRoot()) {
@@ -1496,11 +1506,11 @@ void GetNodeId(IScriptState* pState)
 
 void LinkToId( IScriptState* pState )
 {
-	CScriptFuncArgInt* pIDEntity1 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pIDNode1 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
-	CScriptFuncArgInt* pIDEntity2 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
-	CScriptFuncArgInt* pIDNode2 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 3 ) );
-	CScriptFuncArgString* pLinkType = static_cast< CScriptFuncArgString* >( pState->GetArg( 4 ) );
+	CValueInt* pIDEntity1 = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pIDNode1 = static_cast< CValueInt* >( pState->GetArg( 1 ) );
+	CValueInt* pIDEntity2 = static_cast< CValueInt* >( pState->GetArg( 2 ) );
+	CValueInt* pIDNode2 = static_cast< CValueInt* >( pState->GetArg( 3 ) );
+	CValueString* pLinkType = static_cast< CValueString* >( pState->GetArg( 4 ) );
 
 	IEntity* pEntity1 = m_pEntityManager->GetEntity( pIDEntity1->m_nValue );
 	if( pEntity1 )
@@ -1569,8 +1579,8 @@ void LinkToId( IScriptState* pState )
 
 void HideEntity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pHide = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pHide = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	bool bHide = pHide->m_nValue == 1 ? true : false;
 	pEntity->Hide( bHide );
@@ -1578,32 +1588,32 @@ void HideEntity( IScriptState* pState )
 
 void Sleep( IScriptState* pState )
 {
-	CScriptFuncArgInt* pTime = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pTime = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	Sleep( pTime->m_nValue );
 }
 
 void StopAnimation( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	pEntity->GetCurrentAnimation()->Stop();
 }
 
 void DetachAnimation( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	pEntity->DetachCurrentAnimation();
 }
 
 void PauseAnimation( IScriptState* pState )
 {
-	CScriptFuncArgInt* pIDEntity = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pIDEntity = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	
 	bool bGoodEntityID = true;
 	if( pIDEntity )
 	{
-		CScriptFuncArgInt* pIDBool = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+		CValueInt* pIDBool = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 		IEntity* pEntity = m_pEntityManager->GetEntity( pIDEntity->m_nValue );
 		if( pEntity )
 		{
@@ -1626,15 +1636,15 @@ void PauseAnimation( IScriptState* pState )
 
 void PauseTime(IScriptState* pState)
 {
-	CScriptFuncArgInt* pPause = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pPause = static_cast<CValueInt*>(pState->GetArg(0));
 	m_pTimeManager->PauseTime(pPause->m_nValue == 0 ? false : true);
 }
 
 //ID entité, ID bone
 void SelectBone( IScriptState* pState )
 {
-	CScriptFuncArgInt* pIDEntity = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pBoneName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueInt* pIDEntity = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueString* pBoneName = static_cast< CValueString* >(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity( pIDEntity->m_nValue );
 	if( pEntity )
 	{
@@ -1664,7 +1674,7 @@ void Yaw( IScriptState* pState )
 {
 	if( m_pSelectedNode )
 	{
-		CScriptFuncArgFloat* pAngle = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+		CValueFloat* pAngle = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 		m_pSelectedNode->Yaw( pAngle->m_fValue );
 		m_pSelectedNode->Update();
 	}
@@ -1674,7 +1684,7 @@ void Pitch( IScriptState* pState )
 {
 	if( m_pSelectedNode )
 	{
-		CScriptFuncArgFloat* pAngle = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+		CValueFloat* pAngle = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 		m_pSelectedNode->Pitch( pAngle->m_fValue );
 		m_pSelectedNode->Update();
 	}
@@ -1684,7 +1694,7 @@ void Roll( IScriptState* pState )
 {
 	if( m_pSelectedNode )
 	{
-		CScriptFuncArgFloat* pAngle = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
+		CValueFloat* pAngle = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
 		m_pSelectedNode->Roll( pAngle->m_fValue );
 		m_pSelectedNode->Update();
 	}
@@ -1706,7 +1716,7 @@ void GetSkeletonInfos( INode* pNode, vector< CNodeInfos >& vInfos )
 
 void DisplayEntitySkeletonInfos( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 	{
@@ -1733,8 +1743,8 @@ void reset( IScriptState* pState )
 
 void SetAnimation( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >(  pState->GetArg( 0 ) );
-	CScriptFuncArgString* pAnim = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >(  pState->GetArg( 0 ) );
+	CValueString* pAnim = static_cast< CValueString* >( pState->GetArg( 1 ) );
 	string sAnimationFileName = pAnim->m_sValue;
 	IEntity* pEntity = dynamic_cast< IEntity* >( m_pEntityManager->GetEntity( pID->m_nValue ) );
 	if( pEntity )
@@ -1763,8 +1773,8 @@ void SetAnimation( IScriptState* pState )
 
 void PlayCurrentAnimation( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pLoop = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pLoop = static_cast< CValueInt* >(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 	{
@@ -1786,7 +1796,7 @@ void PlayCurrentAnimation( IScriptState* pState )
 
 void LoadShader( IScriptState* pState )
 {
-	CScriptFuncArgString* pShaderName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pShaderName = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	m_pRenderer->LoadShader( pShaderName->m_sValue );
 }
 
@@ -1797,7 +1807,7 @@ void LoadTopicFile(IScriptState* pState)
 
 void SetHMPrecision( IScriptState* pState )
 {
-	CScriptFuncArgInt* pPrecision = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pPrecision = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	m_pCollisionManager->SetHeightMapPrecision( pPrecision->m_nValue );
 }
 
@@ -1808,7 +1818,7 @@ void StopDisplayHM( IScriptState* pState )
 
 void DisplayHM( IScriptState* pState )
 {
-	CScriptFuncArgString* pString = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pString = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	string sFileName = pString->m_sValue;
 	if( sFileName.find( ".bme" ) == -1 )
 		sFileName += ".bme";
@@ -1855,7 +1865,7 @@ void DisplayFonctionList(void* params)
 
 void flist( IScriptState* pState )
 {
-	CScriptFuncArgString* pString = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pString = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	m_pScriptManager->GetRegisteredFunctions(g_vStringsResumeMode);
 	g_sBegin = pString->m_sValue;
 	transform( pString->m_sValue.begin(), pString->m_sValue.end(), g_sBegin.begin(), tolower );
@@ -1864,7 +1874,7 @@ void flist( IScriptState* pState )
 
 void DisplayLightIntensity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pLightEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	float fIntensity = m_pRessourceManager->GetLightIntensity( pLightEntity->GetRessource() );
 	ostringstream oss;
@@ -1901,7 +1911,7 @@ void RunScript( string sFileName )
 
 void run( IScriptState* pState )
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pName = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	string sFileName = pName->m_sValue;
 	if( sFileName.find( ".eas" ) == -1 )
 		sFileName += ".eas";
@@ -1910,7 +1920,7 @@ void run( IScriptState* pState )
 
 void LoadImage( IScriptState* pState )
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pName = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	ILoader::CTextureInfos ti;
 	ti.m_bFlip = true;
 	try
@@ -1926,7 +1936,7 @@ void LoadImage( IScriptState* pState )
 
 void DisplayRepere( IScriptState* pState )
 {
-	CScriptFuncArgInt* pDisplay = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pDisplay = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	if( pDisplay->m_nValue == 1 && m_pRepere->GetParent() != m_pScene )
 		m_pRepere->Link( m_pScene );
 	else if( pDisplay->m_nValue == 0 )
@@ -1985,8 +1995,8 @@ void Reset(IScriptState* pState)
 
 void ExportBMEToAscii( IScriptState* pState )
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pOutFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueString* pFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pOutFileName = static_cast< CValueString* >(pState->GetArg(1));
 	string sBMEName = pFileName->m_sValue;
 	int nExtPos = (int)sBMEName.find( ".bme" );
 	string sFileNameWithoutExt;
@@ -2011,8 +2021,8 @@ void ExportBMEToAscii( IScriptState* pState )
 
 void ExportBKEToAscii( IScriptState* pState )
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pPrecision = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueString* pFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueInt* pPrecision = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	string sBKEName = pFileName->m_sValue;
 	int nExtPos = (int)sBKEName.find( ".bke" );
 	string sFileNameWithoutExt;
@@ -2035,7 +2045,7 @@ void ExportBKEToAscii( IScriptState* pState )
 
 void ExportBSEToAscii(IScriptState* pState)
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pFileName = static_cast< CValueString* >(pState->GetArg(0));
 	string sBSEName = pFileName->m_sValue;
 	int nExtPos = (int)sBSEName.find(".bse");
 	string sFileNameWithoutExt;
@@ -2084,10 +2094,10 @@ void ClearScene( IScriptState* pState )
 
 void SetSceneMap( IScriptState* pState )
 {
-	CScriptFuncArgString* pRessourceFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pDiffuseFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
-	CScriptFuncArgInt* pLength = static_cast< CScriptFuncArgInt* >(pState->GetArg(2));
-	CScriptFuncArgFloat* pHeight = static_cast< CScriptFuncArgFloat* >(pState->GetArg(3));
+	CValueString* pRessourceFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pDiffuseFileName = static_cast< CValueString* >(pState->GetArg(1));
+	CValueInt* pLength = static_cast< CValueInt* >(pState->GetArg(2));
+	CValueFloat* pHeight = static_cast< CValueFloat* >(pState->GetArg(3));
 
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException( false );
@@ -2122,8 +2132,8 @@ void SetSceneMap( IScriptState* pState )
 
 void DrawCollisionModels(IScriptState* pState)
 {
-	CScriptFuncArgInt* pCharacterID = dynamic_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	CScriptFuncArgInt* pDisplay = dynamic_cast<CScriptFuncArgInt*>(pState->GetArg(1));
+	CValueInt* pCharacterID = dynamic_cast<CValueInt*>(pState->GetArg(0));
+	CValueInt* pDisplay = dynamic_cast<CValueInt*>(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pCharacterID->m_nValue);
 	
 	if (pEntity) {
@@ -2133,20 +2143,20 @@ void DrawCollisionModels(IScriptState* pState)
 
 void EnableInstancingMode(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEnable = dynamic_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pEnable = dynamic_cast<CValueInt*>(pState->GetArg(0));
 	m_pEntityManager->EnableInstancing(pEnable->m_nValue == 0 ? false : true);
 }
 
 void SetTexture(IScriptState* pState)
 {
-	CScriptFuncArgString* pTextureName = dynamic_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CValueString* pTextureName = dynamic_cast<CValueString*>(pState->GetArg(0));
 	m_pCharacterEditor->SetTexture(pTextureName->m_sValue);
 }
 
 void SetTextureInWorld(IScriptState* pState)
 {
-	CScriptFuncArgInt* pCharacterID = dynamic_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	CScriptFuncArgString* pTextureName = dynamic_cast<CScriptFuncArgString*>(pState->GetArg(1));
+	CValueInt* pCharacterID = dynamic_cast<CValueInt*>(pState->GetArg(0));
+	CValueString* pTextureName = dynamic_cast<CValueString*>(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_nValue));
 	if (pCharacter) {
 		pCharacter->SetDiffuseTexture(pTextureName->m_sValue);
@@ -2161,8 +2171,8 @@ void SetTextureInWorld(IScriptState* pState)
 
 void SetEntityWeight( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pWeight = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* pWeight = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 		pEntity->SetWeight( pWeight->m_fValue );
@@ -2176,7 +2186,7 @@ void SetEntityWeight( IScriptState* pState )
 
 void LoadHM( IScriptState* pState )
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pFileName = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	vector< vector< unsigned char > > vPixels;
 	try
 	{
@@ -2215,7 +2225,7 @@ bool g_bHMHackEnabled = false;
 
 void EnableHMHack(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEnable = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CValueInt* pEnable = static_cast< CValueInt* >(pState->GetArg(0));
 	g_bHMHackEnabled = (pEnable->m_nValue == 1);
 
 	m_pCollisionManager->EnableHMHack(false);
@@ -2229,7 +2239,7 @@ void EnableHMHack(IScriptState* pState)
 
 void CreateHM( IScriptState* pState )
 {
-	CScriptFuncArgString* pString = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pString = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	string sFileName = pString->m_sValue;
 	if( sFileName.find( ".bme" ) == -1 )
 		sFileName += ".bme";
@@ -2277,7 +2287,7 @@ void CreateHM( IScriptState* pState )
 
 void CreateHMFromFile(IScriptState* pState)
 {
-	CScriptFuncArgString* pString = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CValueString* pString = static_cast<CValueString*>(pState->GetArg(0));
 	string sFileName = pString->m_sValue;
 	if (sFileName.find(".bme") == -1)
 		sFileName += ".bme";
@@ -2317,10 +2327,10 @@ void ScreenCapture( IScriptState* pState )
 
 void ScreenCaptureFine(IScriptState* pState)
 {
-	CScriptFuncArgInt* x = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	CScriptFuncArgInt* y = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
-	CScriptFuncArgInt* w = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
-	CScriptFuncArgInt* h = static_cast<CScriptFuncArgInt*>(pState->GetArg(3));
+	CValueInt* x = static_cast<CValueInt*>(pState->GetArg(0));
+	CValueInt* y = static_cast<CValueInt*>(pState->GetArg(1));
+	CValueInt* w = static_cast<CValueInt*>(pState->GetArg(2));
+	CValueInt* h = static_cast<CValueInt*>(pState->GetArg(3));
 
 	ostringstream ossFile;
 	int i = 0;
@@ -2341,8 +2351,8 @@ void ScreenCaptureFine(IScriptState* pState)
 
 void SetLightIntensity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pIntensity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* pIntensity = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 
 	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
 	if (pLightEntity) {
@@ -2359,8 +2369,8 @@ void SetLightIntensity( IScriptState* pState )
 
 void SetLightAmbient(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgFloat* pAmbient = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));	
+	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* pAmbient = static_cast< CValueFloat* >(pState->GetArg(1));	
 	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
 	if (pLightEntity) {
 		ILight* pLight = dynamic_cast<ILight*>(pLightEntity->GetRessource());
@@ -2377,11 +2387,11 @@ void SetLightAmbient(IScriptState* pState)
 
 void CreateLight(IScriptState* pState)
 {
-	CScriptFuncArgInt* pr = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pg = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
-	CScriptFuncArgInt* pb = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
-	CScriptFuncArgString* pType = static_cast< CScriptFuncArgString* >( pState->GetArg( 3 ) );
-	CScriptFuncArgFloat* pIntensity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 4 ) );
+	CValueInt* pr = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pg = static_cast< CValueInt* >( pState->GetArg( 1 ) );
+	CValueInt* pb = static_cast< CValueInt* >( pState->GetArg( 2 ) );
+	CValueString* pType = static_cast< CValueString* >( pState->GetArg( 3 ) );
+	CValueFloat* pIntensity = static_cast< CValueFloat* >( pState->GetArg( 4 ) );
 	CVector Color( (float)pr->m_nValue / 255.f, (float)pg->m_nValue / 255.f, (float)pb->m_nValue / 255.f, 1.f );
 	string sType = pType->m_sValue;
 	transform( pType->m_sValue.begin(), pType->m_sValue.end(), sType.begin(), tolower );
@@ -2408,8 +2418,8 @@ void CreateLight(IScriptState* pState)
 
 void CreateLightw( IScriptState* pState )
 {
-	CScriptFuncArgString* pType = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pIntensity = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueString* pType = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueFloat* pIntensity = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 	CVector Color( 1.f, 1.f, 1.f, 1.f );
 	string sType = pType->m_sValue;
 	transform( pType->m_sValue.begin(), pType->m_sValue.end(), sType.begin(), tolower );
@@ -2436,9 +2446,9 @@ void CreateLightw( IScriptState* pState )
 void CreateCollisionMap(IScriptState* pState)
 {
 	IEntity* pNode = nullptr;
-	CScriptFuncArgInt* pId = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));	
-	CScriptFuncArgInt* pCellSize = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
-	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(2));
+	CValueInt* pId = static_cast<CValueInt*>(pState->GetArg(0));	
+	CValueInt* pCellSize = static_cast<CValueInt*>(pState->GetArg(1));
+	CValueFloat* pBias = static_cast<CValueFloat*>(pState->GetArg(2));
 	if (pId->m_nValue == 0)
 		pNode = m_pScene;
 	else
@@ -2450,24 +2460,24 @@ void CreateCollisionMap(IScriptState* pState)
 
 void EnablePathFindSaving(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEnable = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
-	CScriptFuncArgInt* pXmin = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
-	CScriptFuncArgInt* pYmin = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
-	CScriptFuncArgInt* pXmax = static_cast<CScriptFuncArgInt*>(pState->GetArg(3));
-	CScriptFuncArgInt* pYMax = static_cast<CScriptFuncArgInt*>(pState->GetArg(4));
+	CValueInt* pEnable = static_cast<CValueInt*>(pState->GetArg(0));
+	CValueInt* pXmin = static_cast<CValueInt*>(pState->GetArg(1));
+	CValueInt* pYmin = static_cast<CValueInt*>(pState->GetArg(2));
+	CValueInt* pXmax = static_cast<CValueInt*>(pState->GetArg(3));
+	CValueInt* pYMax = static_cast<CValueInt*>(pState->GetArg(4));
 	m_pPathFinder->EnableSaveGrid(pEnable->m_nValue != 0, pXmin->m_nValue, pYmin->m_nValue, pXmax->m_nValue, pYMax->m_nValue);
 }
 
 void IsAbsolutePath(IScriptState* pState)
 {
-	CScriptFuncArgString* pPath = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CValueString* pPath = static_cast<CValueString*>(pState->GetArg(0));
 	pState->SetReturnValue(CEasyFile::IsAbsolutePath(pPath->m_sValue) ? 1 : 0);
 }
 
 void TestRegExpr(IScriptState* pState)
 {
-	CScriptFuncArgString* pString= static_cast<CScriptFuncArgString*>(pState->GetArg(0));
-	CScriptFuncArgString* pRegExpr = static_cast<CScriptFuncArgString*>(pState->GetArg(1));
+	CValueString* pString= static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pRegExpr = static_cast<CValueString*>(pState->GetArg(1));
 
 	regex reg(pRegExpr->m_sValue);
 	sregex_iterator itBegin = sregex_iterator(pString->m_sValue.begin(), pString->m_sValue.end(), reg);
@@ -2477,8 +2487,8 @@ void TestRegExpr(IScriptState* pState)
 
 void RollEntity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pRoll = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* pRoll = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if (!pEntity) {
 		ostringstream oss;
@@ -2491,8 +2501,8 @@ void RollEntity( IScriptState* pState )
 
 void PitchEntity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pPitch = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* pPitch = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 		pEntity->Pitch( pPitch->m_fValue );
@@ -2502,8 +2512,8 @@ void PitchEntity( IScriptState* pState )
 
 void YawEntity( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* pYaw = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* pYaw = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if(pEntity)
 		pEntity->Yaw( pYaw->m_fValue );
@@ -2516,8 +2526,8 @@ void YawEntity( IScriptState* pState )
 
 void SetEntityShader( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pShaderName = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueString* pShaderName = static_cast< CValueString* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	IShader* pShader = m_pRenderer->GetShader( pShaderName->m_sValue );
 	pEntity->SetShader( pShader );
@@ -2525,33 +2535,33 @@ void SetEntityShader( IScriptState* pState )
 
 void SetEntitySpecular(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgFloat* pr = (CScriptFuncArgFloat*)pState->GetArg(1);
-	CScriptFuncArgFloat* pg = (CScriptFuncArgFloat*)pState->GetArg(2);
-	CScriptFuncArgFloat* pb = (CScriptFuncArgFloat*)pState->GetArg(3);
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueFloat* pr = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pg = (CValueFloat*)pState->GetArg(2);
+	CValueFloat* pb = (CValueFloat*)pState->GetArg(3);
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	pEntity->SetCustomSpecular(CVector(pr->m_fValue, pg->m_fValue, pb->m_fValue));
 }
 
 void SetSpecular(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pr = (CScriptFuncArgFloat*)pState->GetArg(0);
-	CScriptFuncArgFloat* pg = (CScriptFuncArgFloat*)pState->GetArg(1);
-	CScriptFuncArgFloat* pb = (CScriptFuncArgFloat*)pState->GetArg(2);
+	CValueFloat* pr = (CValueFloat*)pState->GetArg(0);
+	CValueFloat* pg = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pb = (CValueFloat*)pState->GetArg(2);
 	if (m_pCharacterEditor->IsEnabled())
 		m_pCharacterEditor->SetSpecular(pr->m_fValue, pg->m_fValue, pb->m_fValue);
 }
 
 void SetShininess(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pShininess = (CScriptFuncArgFloat*)pState->GetArg(0);
+	CValueFloat* pShininess = (CValueFloat*)pState->GetArg(0);
 	m_pCharacterEditor->SetShininess(pShininess->m_fValue);
 }
 
 void SetEntityShininess(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgFloat* pShininess = (CScriptFuncArgFloat*)pState->GetArg(1);
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueFloat* pShininess = (CValueFloat*)pState->GetArg(1);
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	if (pEntity) {
 		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
@@ -2569,10 +2579,10 @@ void SetEntityShininess(IScriptState* pState)
 
 void ColorizeEntity(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgFloat* pr = (CScriptFuncArgFloat*)pState->GetArg(1);
-	CScriptFuncArgFloat* pg = (CScriptFuncArgFloat*)pState->GetArg(2);
-	CScriptFuncArgFloat* pb = (CScriptFuncArgFloat*)pState->GetArg(3);
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueFloat* pr = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pg = (CValueFloat*)pState->GetArg(2);
+	CValueFloat* pb = (CValueFloat*)pState->GetArg(3);
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	if (pEntity) {
 		IMesh* pMesh = dynamic_cast<IMesh*>(pEntity->GetRessource());
@@ -2625,32 +2635,32 @@ void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
 
 void Kill(IScriptState* pState)
 {
-	CScriptFuncArgInt* pId = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pId = (CValueInt*)(pState->GetArg(0));
 	m_pEntityManager->Kill(pId->m_nValue);
 }
 
 void SetNPCState(IScriptState* pState)
 {
-	CScriptFuncArgInt* pNPCState = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pNPCState = (CValueInt*)(pState->GetArg(0));
 	pState = pState;
 }
 
 void WearArmorToDummy(IScriptState* pState)
 {
- 	CScriptFuncArgInt* pId = (CScriptFuncArgInt*)(pState->GetArg(0));
-	CScriptFuncArgString* pArmor = (CScriptFuncArgString*)(pState->GetArg(1));
+ 	CValueInt* pId = (CValueInt*)(pState->GetArg(0));
+	CValueString* pArmor = (CValueString*)(pState->GetArg(1));
 	m_pEntityManager->WearArmorToDummy(pId->m_nValue, pArmor->m_sValue);
 }
 
 void WearShoes(IScriptState* pState)
 {
-	CScriptFuncArgString* pShoes = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pShoes = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->WearShoes(pShoes->m_sValue);
 }
 
 void UnWearShoes(IScriptState* pState)
 {
-	CScriptFuncArgString* pShoes = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pShoes = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->UnWearShoes(pShoes->m_sValue);
 }
 
@@ -2661,8 +2671,8 @@ void UnWearAllShoes(IScriptState* pState)
 
 void WearCharacterItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pCharacterID = (CScriptFuncArgString*)(pState->GetArg(0));
-	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
+	CValueString* pCharacterID = (CValueString*)(pState->GetArg(0));
+	CValueString* pItemID = (CValueString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
 	if (pCharacter) {
 		pCharacter->WearItem(pItemID->m_sValue);
@@ -2674,21 +2684,21 @@ void WearCharacterItem(IScriptState* pState)
 
 void WearItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pItemID = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->WearItem(pItemID->m_sValue);
 }
 
 
 void AddItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pItemName = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pItemName = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->AddItem(pItemName->m_sValue);
 }
 
 void AddCharacterItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
-	CScriptFuncArgString* pItemName = (CScriptFuncArgString*)(pState->GetArg(1));
+	CValueString* pCharacterName = (CValueString*)(pState->GetArg(0));
+	CValueString* pItemName = (CValueString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
 	if(pCharacter)
 		pCharacter->AddItem(pItemName->m_sValue);
@@ -2696,35 +2706,150 @@ void AddCharacterItem(IScriptState* pState)
 
 void RemoveCharacterItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
-	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
-	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
-	pCharacter->RemoveItem(pItemID->m_sValue);
+	CValueString* pCharacterName = (CValueString*)(pState->GetArg(0));
+	CValueString* pItemID = (CValueString*)(pState->GetArg(1));
+	string sCharacterNameLow = pCharacterName->m_sValue;
+	std::transform(pCharacterName->m_sValue.begin(), pCharacterName->m_sValue.end(), sCharacterNameLow.begin(), tolower);
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(sCharacterNameLow));
+	if(pCharacter)
+		pCharacter->RemoveItem(pItemID->m_sValue);
+	else {
+		m_pConsole->Println("Error : character '" + sCharacterNameLow + "' does not exists");
+	}
 }
 
 void RemoveItem(IScriptState* pState)
 {
-	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pItemID = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->RemoveItem(pItemID->m_sValue);
 }
 
 void GetItemCount(IScriptState* pState)
 {
-	CScriptFuncArgString* pCharacterName = (CScriptFuncArgString*)(pState->GetArg(0));
-	CScriptFuncArgString* pItemID = (CScriptFuncArgString*)(pState->GetArg(1));
+	CValueString* pCharacterName = (CValueString*)(pState->GetArg(0));
+	CValueString* pItemID = (CValueString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
 	pState->SetReturnValue(pCharacter->GetItemCount(pItemID->m_sValue));
 }
 
+void GetCharacterLocalVarInt(IScriptState* pState)
+{
+	CValueString* pCharacterID = static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter) {
+		IValue* pValue = pCharacter->GetLocalVariableValue(pVarName->m_sValue);
+		CValueInt* pInt = static_cast<CValueInt*>(pValue);
+		pState->SetReturnValue(pInt->m_nValue);
+	}
+	else
+		pState->SetReturnValue(-1);
+}
+
+void SetCharacterLocalVarInt(IScriptState* pState)
+{
+	CValueString* pCharacterID = static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(1));
+	CValueInt* pVarValue = static_cast<CValueInt*>(pState->GetArg(2));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter)		
+		pCharacter->SetLocalVariableValue(pVarName->m_sValue, pVarValue->m_nValue);
+}
+
+/*
+void GetCharacterLocalVar(IScriptState* pState)
+{
+	CValueString* pCharacterID = static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter) {
+		IValue* pValue = pCharacter->GetLocalVariableValue(pVarName->m_sValue);
+		if (pValue->GetType() == IValue::eFloat) {
+			CValueFloat* pFloat = static_cast<CValueFloat*>(pValue);
+			pState->SetReturnValue(pFloat->m_fValue);
+		}
+		else if (pValue->GetType() == IValue::eInt) {
+			CValueInt* pFloat = static_cast<CValueInt*>(pValue);
+			pState->SetReturnValue(pFloat->m_nValue);
+		}
+		else 
+			pState->SetReturnValue(-1.f);
+	}
+	else
+		pState->SetReturnValue(-1.f);
+}
+
+void SetCharacterLocalVar(IScriptState* pState)
+{
+	CValueString* pCharacterID = static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(1));
+	CValueString* pVarValue = static_cast<CValueString*>(pState->GetArg(2));
+
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter) {
+		if(CStringUtils::IsInteger(pVarValue->m_sValue))
+			pCharacter->SetLocalVariableValue(pVarName->m_sValue, atoi(pVarValue->m_sValue.c_str()));
+		else if (CStringUtils::IsFloat(pVarValue->m_sValue)) {
+			float fValue = atof(pVarValue->m_sValue.c_str());
+			pCharacter->SetLocalVariableValue(pVarName->m_sValue, fValue);
+		}
+		else
+			pCharacter->SetLocalVariableValue(pVarName->m_sValue, pVarValue->m_sValue);
+	}
+
+}
+*/
+
+void DisplayCharacterLocaVar(IScriptState* pState)
+{
+	CValueString* pCharacterID = static_cast<CValueString*>(pState->GetArg(0));
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(1));
+ 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterID->m_sValue));
+	if (pCharacter) {
+		IValue* pValue = pCharacter->GetLocalVariableValue(pVarName->m_sValue);
+		if (pValue->GetType() == IValue::eString) {
+			CValueString* pStringValue = static_cast<CValueString*>(pValue);
+			m_pConsole->Println(pStringValue->m_sValue);
+		}
+		else if (pValue->GetType() == IValue::eInt) {
+			CValueInt* pIntValue = static_cast<CValueInt*>(pValue);
+			m_pConsole->Println(pIntValue->m_nValue);
+		}
+		if (pValue->GetType() == IValue::eFloat) {
+			CValueFloat* pFloatValue = static_cast<CValueFloat*>(pValue);
+			m_pConsole->Println(pFloatValue->m_fValue);
+		}
+	}
+}
+
+void DisplaySpeakerID(IScriptState* pState)
+{
+	m_pConsole->Println(m_pGUIManager->GetTopicsWindow()->GetSpeakerID());
+}
+
+void GetSpeakerLocalVarInt(IScriptState* pState)
+{
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(0));
+	CValueInt* pValue = static_cast<CValueInt*>(m_pGUIManager->GetTopicsWindow()->GetSpeakerLocalVar(pVarName->m_sValue));
+	pState->SetReturnValue(pValue->m_nValue);
+}
+
+void SetSpeakerLocalVarInt(IScriptState* pState)
+{
+	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(0));
+	CValueInt* pVarValue = static_cast<CValueInt*>(pState->GetArg(1));
+	m_pGUIManager->GetTopicsWindow()->SetSpeakerLocalVar(pVarName->m_sValue, pVarValue->m_nValue);
+}
+
 void SetBody(IScriptState* pState)
 {
-	CScriptFuncArgString* pBody = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pBody = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->SetBody(pBody->m_sValue);
 }
 
 void DisplayPickingRaySelected(IScriptState* pState)
 {
-	CScriptFuncArgInt* pDisplay = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pDisplay = (CValueInt*)(pState->GetArg(0));
 	if(m_pMapEditor->IsEnabled())
 		m_pMapEditor->EnableDisplayPickingRaySelected(pDisplay->m_nValue > 0);
 	else if (m_pWorldEditor->IsEnabled()) {
@@ -2734,7 +2859,7 @@ void DisplayPickingRaySelected(IScriptState* pState)
 
 void DisplayPickingRayMouseMove(IScriptState* pState)
 {
-	CScriptFuncArgInt* pDisplay = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pDisplay = (CValueInt*)(pState->GetArg(0));
 	if (m_pMapEditor->IsEnabled())
 		m_pMapEditor->EnableDisplayPickingRayMouseMove(pDisplay->m_nValue > 0);
 	else if (m_pWorldEditor->IsEnabled()) {
@@ -2744,7 +2869,7 @@ void DisplayPickingRayMouseMove(IScriptState* pState)
 
 void DisplayPickingIntersectPlane(IScriptState* pState)
 {
-	CScriptFuncArgInt* pDisplay = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pDisplay = (CValueInt*)(pState->GetArg(0));
 	if (m_pMapEditor->IsEnabled())
 		m_pMapEditor->EnableDisplayPickingIntersectPlane(pDisplay->m_nValue > 0);
 	else if (m_pWorldEditor->IsEnabled()) {
@@ -2786,7 +2911,7 @@ void DisplayEntities( IScriptState* pState )
 
 void DisplayCollisionEntities(IScriptState* pState)
 {
-	CScriptFuncArgInt* pParentID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
+	CValueInt* pParentID = static_cast< CValueInt* >(pState->GetArg(0));
 	IEntity* pParent = m_pEntityManager->GetEntity(pParentID->m_nValue);
 	g_vStringsResumeMode.clear();
 	GetCollisionNodeInfos(pParent);
@@ -2802,7 +2927,7 @@ void DisplayMobileEntities(IScriptState* pState)
 
 void DisplayInventory(IScriptState* pState)
 {
-	CScriptFuncArgString* pEntityID = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pEntityID = static_cast< CValueString* >(pState->GetArg(0));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityID->m_sValue));
 	if (pCharacter) {
 		for (const pair<string, vector<IItem*>>& items : pCharacter->GetItems()) {
@@ -2816,7 +2941,7 @@ void DisplayInventory(IScriptState* pState)
 void GetEntityID( IScriptState* pState )
 {
 	ostringstream oss;
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(  pState->GetArg( 0 ) );
+	CValueString* pName = static_cast< CValueString* >(  pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pName->m_sValue );
 	if( pEntity )
 	{
@@ -2831,7 +2956,7 @@ void GetEntityID( IScriptState* pState )
 
 void GetCharacterID(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
+	CValueString* pName = static_cast<CValueString*>(pState->GetArg(0));
 	vector<IEntity*> characters; 
 	m_pScene->GetCharactersInfos(characters);
 	for (IEntity* entity : characters)
@@ -2847,13 +2972,26 @@ void GetCharacterID(IScriptState* pState)
 
 void AttachScriptToEntity(IScriptState* pState)
 {
-	CScriptFuncArgString* pScriptName = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
-	CScriptFuncArgString* pEntityName = static_cast< CScriptFuncArgString* >(pState->GetArg(1));
+	CValueString* pEntityName = static_cast< CValueString* >(pState->GetArg(0));
+	CValueString* pScriptName = static_cast<CValueString*>(pState->GetArg(1));	
 	IEntity* pEntity = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityName->m_sValue));
 	if (pEntity) {
-		pEntity->AttachScript(pScriptName->m_sValue);
+		pEntity->AttachScriptFunction(pScriptName->m_sValue);
 	}
-	if (!pEntity) {
+	else {
+		CEException e(string("Error : entity '") + pEntityName->m_sValue + "' doesn't exists");
+		throw e;
+	}
+}
+
+void DetachScript(IScriptState* pState)
+{
+	CValueString* pEntityName = static_cast< CValueString* >(pState->GetArg(0));
+	CValueString* pScriptName = static_cast<CValueString*>(pState->GetArg(1));
+	IEntity* pEntity = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pEntityName->m_sValue));
+	if (pEntity)
+		pEntity->DetachScriptFunction(pScriptName->m_sValue);
+	else {
 		CEException e(string("Error : entity '") + pEntityName->m_sValue + "' doesn't exists");
 		throw e;
 	}
@@ -2861,8 +2999,8 @@ void AttachScriptToEntity(IScriptState* pState)
 
 void IsIntersect(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEntity1Id = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgInt* pEntity2Id = static_cast< CScriptFuncArgInt* >(pState->GetArg(1));
+	CValueInt* pEntity1Id = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueInt* pEntity2Id = static_cast< CValueInt* >(pState->GetArg(1));
 	IEntity* pEntity1 = m_pEntityManager->GetEntity(pEntity1Id->m_nValue);
 	IEntity* pEntity2 = m_pEntityManager->GetEntity(pEntity2Id->m_nValue);
 	string sErrorMessage;
@@ -2880,8 +3018,8 @@ void IsIntersect(IScriptState* pState)
 
 void DisplayBBox( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* pDraw = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* pDraw = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if (!pEntity) {
 		ostringstream oss;
@@ -2896,7 +3034,7 @@ void DisplayBBox( IScriptState* pState )
 
 void DisplayBBoxInfos(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pID = static_cast<CValueInt*>(pState->GetArg(0));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	IBox* pBox = dynamic_cast<IBox*>(pEntity->GetBoundingGeometry());
 	if (pBox) {
@@ -2921,7 +3059,7 @@ void SetBkgColor( IScriptState* pState )
 	vector< int > v;
 	for( int i = 0; i < 3; i++ )
 	{
-		CScriptFuncArgInt* pArg = static_cast< CScriptFuncArgInt* >( pState->GetArg( i ) );
+		CValueInt* pArg = static_cast< CValueInt* >( pState->GetArg( i ) );
 		v.push_back( pArg->m_nValue );
 	}
 	m_pRenderer->SetBackgroundColor( (float)v[0 ] / 255.f, (float)v[ 1 ] / 255.f, (float)v[ 2 ] / 255.f, 1 );
@@ -2943,16 +3081,16 @@ void DisplayCamPos( IScriptState* pState )
 
 void PrintHUD(IScriptState* pState)
 {
-	CScriptFuncArgString* pText = static_cast<CScriptFuncArgString*>(pState->GetArg(0));
-	CScriptFuncArgInt* px = static_cast<CScriptFuncArgInt*>(pState->GetArg(1));
-	CScriptFuncArgInt* py = static_cast<CScriptFuncArgInt*>(pState->GetArg(2));
+	CValueString* pText = static_cast<CValueString*>(pState->GetArg(0));
+	CValueInt* px = static_cast<CValueInt*>(pState->GetArg(1));
+	CValueInt* py = static_cast<CValueInt*>(pState->GetArg(2));
 	int slot = m_pHud->CreateNewSlot(px->m_nValue, py->m_nValue);
 	m_pHud->PrintInSlot(slot, 0, pText->m_sValue);
 }
 
 void RemoveHudSlot(IScriptState* pState)
 {
-	CScriptFuncArgInt* pSlot = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pSlot = static_cast<CValueInt*>(pState->GetArg(0));
 	m_pHud->RemoveText(pSlot->m_nValue);
 }
 
@@ -2991,7 +3129,7 @@ void EntityCallback(CPlugin*, IEventDispatcher::TEntityEvent e, IEntity* pEntity
 
 void WatchEntityPosition(IScriptState* pState)
 {
-	CScriptFuncArgInt* pId = dynamic_cast<CScriptFuncArgInt*>((pState->GetArg(0)));
+	CValueInt* pId = dynamic_cast<CValueInt*>((pState->GetArg(0)));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pId->m_nValue);
 	if(pEntity)
 		pEntity->AbonneToEntityEvent(EntityCallback);
@@ -3004,7 +3142,7 @@ void WatchEntityPosition(IScriptState* pState)
 
 void StopWatchEntityPosition(IScriptState* pState)
 {
-	CScriptFuncArgInt* pId = dynamic_cast<CScriptFuncArgInt*>((pState->GetArg(0)));
+	CValueInt* pId = dynamic_cast<CValueInt*>((pState->GetArg(0)));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pId->m_nValue);
 	int i = 0;
 	pEntity->DeabonneToEntityEvent(EntityCallback);
@@ -3012,9 +3150,9 @@ void StopWatchEntityPosition(IScriptState* pState)
 
 void SetCamPos( IScriptState* pState )
 {
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+	CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
 	ICamera* pCamera = m_pCameraManager->GetActiveCamera();
 	if (pCamera)
 		pCamera->SetLocalPosition(px->m_fValue, py->m_fValue, pz->m_fValue);
@@ -3024,28 +3162,28 @@ void SetCamPos( IScriptState* pState )
 
 void YawCamera(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pYaw = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CValueFloat* pYaw = static_cast< CValueFloat* >(pState->GetArg(0));
 	m_pCameraManager->GetActiveCamera()->Yaw(pYaw->m_fValue);
 }
 
 void PitchCamera(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pPitch = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CValueFloat* pPitch = static_cast< CValueFloat* >(pState->GetArg(0));
 	m_pCameraManager->GetActiveCamera()->Pitch(pPitch->m_fValue);
 }
 
 void RollCamera(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pRoll = static_cast< CScriptFuncArgFloat* >(pState->GetArg(0));
+	CValueFloat* pRoll = static_cast< CValueFloat* >(pState->GetArg(0));
 	m_pCameraManager->GetActiveCamera()->Roll(pRoll->m_fValue);
 }
 
 void SetEntityPos( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+	CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if (pEntity)
 		pEntity->SetWorldPosition(px->m_fValue, py->m_fValue, pz->m_fValue);
@@ -3055,10 +3193,10 @@ void SetEntityPos( IScriptState* pState )
 
 void SetEntityDummyRootPos(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >(pState->GetArg(0));
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >(pState->GetArg(1));
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >(pState->GetArg(2));
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >(pState->GetArg(3));
+	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* px = static_cast< CValueFloat* >(pState->GetArg(1));
+	CValueFloat* py = static_cast< CValueFloat* >(pState->GetArg(2));
+	CValueFloat* pz = static_cast< CValueFloat* >(pState->GetArg(3));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	if (pEntity) {
 		IBone* pDummy = pEntity->GetSkeletonRoot();
@@ -3074,7 +3212,7 @@ void SetEntityDummyRootPos(IScriptState* pState)
 void DisplayEntityPosition( IScriptState* pState )
 {
 	ostringstream oss;
-	CScriptFuncArgInt* pInt = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pInt = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pInt->m_nValue );
 	if (pEntity) {
 		CVector vPos;
@@ -3093,13 +3231,13 @@ void Exit( IScriptState* pState )
 
 void GenerateAssemblerListing(IScriptState* pState)
 {
-	CScriptFuncArgInt* pEnable = (CScriptFuncArgInt*)(pState->GetArg(0));
+	CValueInt* pEnable = (CValueInt*)(pState->GetArg(0));
 	m_pScriptManager->GenerateAssemblerListing(pEnable->m_nValue);
 }
 
 void CreateEntity( IScriptState* pState )
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
+	CValueString* pName = static_cast< CValueString* >( pState->GetArg( 0 ) );
 	string sName = pName->m_sValue;
 	bool bak = m_pRessourceManager->IsCatchingExceptionEnabled();
 	m_pRessourceManager->EnableCatchingException( false );
@@ -3139,7 +3277,7 @@ void CreateEntity( IScriptState* pState )
 
 void LoadMap(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sFileName = pName->m_sValue;
 	try
 	{
@@ -3166,7 +3304,7 @@ void LoadMap(IScriptState* pState)
 
 void SaveMap(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
 	string sName = pName->m_sValue;
 	try
 	{
@@ -3183,7 +3321,7 @@ void SaveMap(IScriptState* pState)
 
 void Advertise(IScriptState* pState)
 {
-	CScriptFuncArgString* pCharacterId = (CScriptFuncArgString*)pState->GetArg(0);
+	CValueString* pCharacterId = (CValueString*)pState->GetArg(0);
 
 }
 
@@ -3199,8 +3337,8 @@ void LoadWorld(IScriptState* pState)
 {
 	try
 	{
-		CScriptFuncArgString* pWorldName = (CScriptFuncArgString*)pState->GetArg(0);
-		CScriptFuncArgString* pCallback = (CScriptFuncArgString*)pState->GetArg(1);
+		CValueString* pWorldName = (CValueString*)pState->GetArg(0);
+		CValueString* pCallback = (CValueString*)pState->GetArg(1);
 		g_sScriptCallback = pCallback->m_sValue;
 		m_pWorldEditor->SetEditionMode(false);
 		m_pWorldEditor->Load(pWorldName->m_sValue);
@@ -3221,7 +3359,7 @@ void SaveWorld(IScriptState* pState)
 {
 	try
 	{
-		CScriptFuncArgString* pWorldName = (CScriptFuncArgString*)pState->GetArg(0);
+		CValueString* pWorldName = (CValueString*)pState->GetArg(0);
 		m_pWorldEditor->Save(pWorldName->m_sValue);
 		m_pConsole->Println("Monde sauvegardé");
 	}
@@ -3235,39 +3373,40 @@ void SaveWorld(IScriptState* pState)
 
 void SaveGame(IScriptState* pState)
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pFileName = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->SaveGame(pFileName->m_sValue);
+	m_pConsole->Println("Game saved successfully");
 }
 
 void LoadGame(IScriptState* pState)
 {
-	CScriptFuncArgString* pFileName = static_cast< CScriptFuncArgString* >(pState->GetArg(0));
+	CValueString* pFileName = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->Load(pFileName->m_sValue);
 }
 
 void Merge( IScriptState* pState )
 {
-	CScriptFuncArgString* pString = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* px = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
-	CScriptFuncArgFloat* py = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 3 ) );
-	CScriptFuncArgFloat* pz = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 4 ) );
+	CValueString* pString = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueFloat* px = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* py = static_cast< CValueFloat* >( pState->GetArg( 3 ) );
+	CValueFloat* pz = static_cast< CValueFloat* >( pState->GetArg( 4 ) );
 	
 	m_pScene->Merge(pString->m_sValue, px->m_fValue, py->m_fValue, pz->m_fValue);
 }
 
 void TestMessageBox( IScriptState* pState )
 {
-	CScriptFuncArgString* pMessage = static_cast< CScriptFuncArgString* >( pState->GetArg( 0 ) );
-	CScriptFuncArgString* pCaption = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
-	CScriptFuncArgInt* pBoxType = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
+	CValueString* pMessage = static_cast< CValueString* >( pState->GetArg( 0 ) );
+	CValueString* pCaption = static_cast< CValueString* >( pState->GetArg( 1 ) );
+	CValueInt* pBoxType = static_cast< CValueInt* >( pState->GetArg( 2 ) );
 	MessageBox( NULL, pMessage->m_sValue.c_str(), pCaption->m_sValue.c_str(), pBoxType->m_nValue );
 }
 
 void Operation( IScriptState* pState )
 {
-	CScriptFuncArgFloat* p0 = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 0 ) );
-	CScriptFuncArgFloat* p1 = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 1 ) );
-	CScriptFuncArgFloat* p2 = static_cast< CScriptFuncArgFloat* >( pState->GetArg( 2 ) );
+	CValueFloat* p0 = static_cast< CValueFloat* >( pState->GetArg( 0 ) );
+	CValueFloat* p1 = static_cast< CValueFloat* >( pState->GetArg( 1 ) );
+	CValueFloat* p2 = static_cast< CValueFloat* >( pState->GetArg( 2 ) );
 	ostringstream oss;
 	oss << "arg 0 = " << p0->m_fValue << "\narg 1 = " << p1->m_fValue << "\narg 2 = " << p2->m_fValue;
 	m_pConsole->Println( oss.str() );
@@ -3275,9 +3414,9 @@ void Operation( IScriptState* pState )
 
 void Operation3( IScriptState* pState )
 {
-	CScriptFuncArgInt* p0 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
-	CScriptFuncArgInt* p1 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
-	CScriptFuncArgInt* p2 = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
+	CValueInt* p0 = static_cast< CValueInt* >( pState->GetArg( 0 ) );
+	CValueInt* p1 = static_cast< CValueInt* >( pState->GetArg( 1 ) );
+	CValueInt* p2 = static_cast< CValueInt* >( pState->GetArg( 2 ) );
 	ostringstream oss;
 	oss << "arg 0 = " << p0->m_nValue << "\narg 1 = " << p1->m_nValue << "\narg 2 = " << p2->m_nValue;
 	MessageBox( NULL, oss.str().c_str(), "", MB_OK );
@@ -3290,11 +3429,11 @@ void cls( IScriptState* pState )
 
 void SetRenderType( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgString* pType = static_cast< CScriptFuncArgString* >( pState->GetArg( 1 ) );
+		CValueString* pType = static_cast< CValueString* >( pState->GetArg( 1 ) );
 		if( pType->m_sValue == "line" )
 			pEntity->SetRenderingType( IRenderer::eLine );
 		else if( pType->m_sValue == "fill" )
@@ -3306,11 +3445,11 @@ void SetRenderType( IScriptState* pState )
 
 void DisplayBoundingSphere( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgInt* pBool = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
+		CValueInt* pBool = static_cast< CValueInt* >( pState->GetArg( 1 ) );
 		bool bDraw = pBool->m_nValue == 1 ? true : false;
 		pEntity->DrawBoundingSphere( bDraw );
 	}
@@ -3318,12 +3457,12 @@ void DisplayBoundingSphere( IScriptState* pState )
 
 void DisplayBoneBoundingSphere( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 	{
-		CScriptFuncArgInt* pBoneID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 1 ) );
-		CScriptFuncArgInt* pBool = static_cast< CScriptFuncArgInt* >( pState->GetArg( 2 ) );
+		CValueInt* pBoneID = static_cast< CValueInt* >( pState->GetArg( 1 ) );
+		CValueInt* pBool = static_cast< CValueInt* >( pState->GetArg( 2 ) );
 		bool bDraw = pBool->m_nValue == 1 ? true : false;
 		pEntity->DrawBoneBoundingSphere( pBoneID->m_nValue, bDraw );
 	}
@@ -3331,7 +3470,7 @@ void DisplayBoneBoundingSphere( IScriptState* pState )
 
 void Unlink( IScriptState* pState )
 {
-	CScriptFuncArgInt* pID = static_cast< CScriptFuncArgInt* >( pState->GetArg( 0 ) );
+	CValueInt* pID = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	IEntity* pEntity = m_pEntityManager->GetEntity( pID->m_nValue );
 	if( pEntity )
 		pEntity->Unlink();
@@ -3342,7 +3481,7 @@ void SetCameraMatrix(IScriptState* pState)
 	m_pRenderer->LockCamera(false);
 	vector<float> v;
 	for (int i = 0; i < 16; i++) {
-		CScriptFuncArgFloat* a = (CScriptFuncArgFloat*)pState->GetArg(i);
+		CValueFloat* a = (CValueFloat*)pState->GetArg(i);
 		v.push_back(a->m_fValue);
 	}
 
@@ -3354,7 +3493,7 @@ void SetCameraMatrix(IScriptState* pState)
 
 void LockCamera(IScriptState* pState)
 {
-	CScriptFuncArgInt* pLock = (CScriptFuncArgInt*)pState->GetArg(0);
+	CValueInt* pLock = (CValueInt*)pState->GetArg(0);
 	m_pRenderer->LockCamera(pLock->m_nValue);
 }
 
@@ -3367,7 +3506,7 @@ void DisplayMatrix(CMatrix m)
 
 void DisplayEntityMatrix(IScriptState* pState)
 {
-	CScriptFuncArgInt* pID = dynamic_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pID = dynamic_cast<CValueInt*>(pState->GetArg(0));
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	if (pEntity)
 		DisplayMatrix(pEntity->GetWorldMatrix());
@@ -3397,7 +3536,7 @@ void DisplayProjectionMatrix(IScriptState* pState)
 
 void SetProjectionMatrixType(IScriptState* pState)
 {
-	CScriptFuncArgString* pType = (CScriptFuncArgString*)pState->GetArg(0);
+	CValueString* pType = (CValueString*)pState->GetArg(0);
 
 	CMatrix m;
 	if (pType->m_sValue == "2d") {
@@ -3414,7 +3553,7 @@ void SetProjectionMatrixType(IScriptState* pState)
 
 void testCollisionShader(IScriptState* pState)
 {
-	CScriptFuncArgString* pMode = (CScriptFuncArgString*)(pState->GetArg(0));
+	CValueString* pMode = (CValueString*)(pState->GetArg(0));
 	if (pMode) {
 		string mode = pMode->m_sValue;
 		IMesh* pGroundMesh = dynamic_cast<IMesh*>(m_pScene->GetRessource());
@@ -3434,7 +3573,7 @@ void testCollisionShader(IScriptState* pState)
 void ReloadShader(IScriptState* pState)
 {
 	try {
-		CScriptFuncArgString* pArg = (CScriptFuncArgString*)pState->GetArg(0);
+		CValueString* pArg = (CValueString*)pState->GetArg(0);
 		m_pRenderer->ReloadShader(pArg->m_sValue);
 	}
 	catch (exception e)
@@ -3445,14 +3584,14 @@ void ReloadShader(IScriptState* pState)
 
 void CullFace(IScriptState* pState)
 {
- 	CScriptFuncArgInt* pArg = (CScriptFuncArgInt*)pState->GetArg(0);
+ 	CValueInt* pArg = (CValueInt*)pState->GetArg(0);
 	m_pRenderer->CullFace(pArg->m_nValue == 0 ? false : true);
 }
 
 void EnableRenderCallback(IScriptState* pState)
 {
-	CScriptFuncArgString* pName = (CScriptFuncArgString*)pState->GetArg(0);
-	CScriptFuncArgInt* pEnable = (CScriptFuncArgInt*)pState->GetArg(1);
+	CValueString* pName = (CValueString*)pState->GetArg(0);
+	CValueInt* pEnable = (CValueInt*)pState->GetArg(1);
 	CPlugin* plugin = CPlugin::GetPlugin(pName->m_sValue);
 	if (plugin) {
 		plugin->EnableRenderEvent(pEnable->m_nValue == 0 ? false : true);
@@ -3463,14 +3602,14 @@ void EnableRenderCallback(IScriptState* pState)
 
 void SetLineWidth(IScriptState* pState)
 {
-	CScriptFuncArgInt* pWidth = (CScriptFuncArgInt*)pState->GetArg(0);
+	CValueInt* pWidth = (CValueInt*)pState->GetArg(0);
 	m_pRenderer->SetLineWidth(pWidth->m_nValue);
 }
 
 void PatchBMEMeshTextureName(IScriptState* pState)
 {
-	CScriptFuncArgString* pBMEName = (CScriptFuncArgString*)pState->GetArg(0);
-	CScriptFuncArgString* pTextureName = (CScriptFuncArgString*)pState->GetArg(1);
+	CValueString* pBMEName = (CValueString*)pState->GetArg(0);
+	CValueString* pTextureName = (CValueString*)pState->GetArg(1);
 
 	ILoader::CAnimatableMeshData mi;
 	ILoader::CAnimatableMeshData test;
@@ -3491,7 +3630,7 @@ void PatchBMEMeshTextureName(IScriptState* pState)
 
 void OpenConsole(IScriptState* pState)
 {
-	CScriptFuncArgInt* pOpen = static_cast<CScriptFuncArgInt*>(pState->GetArg(0));
+	CValueInt* pOpen = static_cast<CValueInt*>(pState->GetArg(0));
 	m_pConsole->Open(pOpen->m_nValue != 0);
 }
 
@@ -3504,22 +3643,22 @@ void ResetFreeCamera(IScriptState* pState)
 
 void PrintReg(IScriptState* pState)
 {
-	CScriptFuncArgString* pReg = (CScriptFuncArgString*)pState->GetArg(0);
+	CValueString* pReg = (CValueString*)pState->GetArg(0);
 	float regValue = m_pScriptManager->GetRegisterValue(pReg->m_sValue);
 	m_pConsole->Print(regValue);
 }
 
 void DisplayGroundHeight(IScriptState* pState)
 {
-	CScriptFuncArgFloat* px = (CScriptFuncArgFloat*)pState->GetArg(0);
-	CScriptFuncArgFloat* pz = (CScriptFuncArgFloat*)pState->GetArg(1);
+	CValueFloat* px = (CValueFloat*)pState->GetArg(0);
+	CValueFloat* pz = (CValueFloat*)pState->GetArg(1);
 	float h = m_pCollisionManager->GetMapHeight(0, px->m_fValue, pz->m_fValue);
 	m_pConsole->Println(h);
 }
 
 void SetGroundMargin(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pMargin = (CScriptFuncArgFloat*)pState->GetArg(0);
+	CValueFloat* pMargin = (CValueFloat*)pState->GetArg(0);
 	IScene* pScene = dynamic_cast<IScene*>(m_pScene);
 	pScene->SetGroundMargin(pMargin->m_fValue);
 }
@@ -3532,10 +3671,10 @@ void DisplayGroundMargin(IScriptState* pState)
 
 void CreatePlaneEntity(IScriptState* pState)
 {
-	CScriptFuncArgInt* pSlices = (CScriptFuncArgInt*)pState->GetArg(0);
-	CScriptFuncArgInt* pSize = (CScriptFuncArgInt*)pState->GetArg(1);
-	CScriptFuncArgString* pHeightTextureName = (CScriptFuncArgString*)pState->GetArg(2);
-	CScriptFuncArgString* pDiffuseTextureName = (CScriptFuncArgString*)pState->GetArg(3);
+	CValueInt* pSlices = (CValueInt*)pState->GetArg(0);
+	CValueInt* pSize = (CValueInt*)pState->GetArg(1);
+	CValueString* pHeightTextureName = (CValueString*)pState->GetArg(2);
+	CValueString* pDiffuseTextureName = (CValueString*)pState->GetArg(3);
 	IEntity* pEntity = m_pEntityManager->CreatePlaneEntity(pSlices->m_nValue, pSize->m_nValue, pHeightTextureName->m_sValue, pDiffuseTextureName->m_sValue);
 	pEntity->Link(m_pScene);
 	pState->SetReturnValue(m_pEntityManager->GetEntityID(pEntity));
@@ -3543,7 +3682,7 @@ void CreatePlaneEntity(IScriptState* pState)
 
 void SetCollisionMapBias(IScriptState* pState)
 {
-	CScriptFuncArgFloat* pBias = static_cast<CScriptFuncArgFloat*>(pState->GetArg(0));
+	CValueFloat* pBias = static_cast<CValueFloat*>(pState->GetArg(0));
 	m_pMapEditor->SetBias(pBias->m_fValue);
 }
 
@@ -3558,6 +3697,40 @@ void GetTime(IScriptState* pState)
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	/*
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("GetCharacterLocalVar", GetCharacterLocalVar, vType, eInt);*/
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("SetCharacterLocalVarInt", SetCharacterLocalVarInt, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("GetCharacterLocalVarInt", GetCharacterLocalVarInt, vType, eInt);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplaySpeakerID", DisplaySpeakerID, vType, eInt);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DisplayCharacterLocaVar", DisplayCharacterLocaVar, vType, eInt);
+	
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("GetSpeakerLocalVarInt", GetSpeakerLocalVarInt, vType, eInt);
+	
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("SetSpeakerLocalVarInt", SetSpeakerLocalVarInt, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);
@@ -3629,6 +3802,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eString);
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("AttachScriptToEntity", AttachScriptToEntity, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DetachScript", DetachScript, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4376,6 +4554,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("Attack", Attack, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SpeakerAttack", SpeakerAttack, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);

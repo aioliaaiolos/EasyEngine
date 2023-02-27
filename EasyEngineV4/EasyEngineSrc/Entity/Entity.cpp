@@ -197,7 +197,7 @@ void CEntity::SetSkinOffset(float x, float y, float z)
 	m_oSkinOffset = CVector(x, y, z);
 }
 
-void CEntity::AttachScript(string sScript)
+void CEntity::AttachScriptFunction(string sScript)
 {
 	vector<unsigned char> vByteCode;
 	m_oScriptManager.Compile(sScript + "();", vByteCode);
@@ -612,16 +612,16 @@ void CEntity::ExecuteScripts()
 			string errorMessage;
 			e.GetErrorMessage(errorMessage);
 			m_oConsole.Println(m_sAttachedScript + "() : " + errorMessage);
-			DetachScript(m_sAttachedScript);
+			DetachScriptFunction(m_sAttachedScript);
 		}
 		catch (CEException& e) {
 			m_oConsole.Println(m_sAttachedScript + "() : " + e.what());
-			DetachScript(m_sAttachedScript);
+			DetachScriptFunction(m_sAttachedScript);
 		}
 	}
 }
 
-void CEntity::DetachScript(string sScript)
+void CEntity::DetachScriptFunction(string sScript)
 {
 	m_sAttachedScript = "";
 	m_vAttachedScriptByteCode.clear();
@@ -635,6 +635,66 @@ const string& CEntity::GetAttachedScript() const
 const string& CEntity::GetTypeName() const
 {
 	return m_sTypeName;
+}
+
+void CEntity::SetLocalVariableValue(string sVariableName, IValue* pValue)
+{
+	map<string, IValue*>::iterator itScriptLocal = m_mLocalScriptVariable.find(sVariableName);
+	if (itScriptLocal == m_mLocalScriptVariable.end()) {
+		m_mLocalScriptVariable.insert(map<string, IValue*>::value_type(sVariableName, nullptr));
+	}
+	delete m_mLocalScriptVariable[sVariableName];
+	m_mLocalScriptVariable[sVariableName] = pValue;
+}
+
+IValue* CEntity::GetLocalVariableValue(string sVariableName)
+{
+	map<string, IValue*>::iterator itValue = m_mLocalScriptVariable.find(sVariableName);
+	if(itValue != m_mLocalScriptVariable.end())
+		return itValue->second;
+	return nullptr;
+}
+
+bool CEntity::GetLocalVariableValue(string sVariableName, string& sValue)
+{
+	CValueString* pString = dynamic_cast<CValueString*>(GetLocalVariableValue(sVariableName));
+	if (pString)
+		sValue = pString->m_sValue;
+	return pString != nullptr;
+}
+
+bool CEntity::GetLocalVariableValue(string sVariableName, int& nValue)
+{
+	CValueInt* pInt = dynamic_cast<CValueInt*>(GetLocalVariableValue(sVariableName));
+	if (pInt)
+		nValue = pInt->m_nValue;
+	return pInt != nullptr;
+}
+
+bool CEntity::GetLocalVariableValue(string sVariableName, float& fValue)
+{
+	CValueFloat* pFloat = dynamic_cast<CValueFloat*>(GetLocalVariableValue(sVariableName));
+	if (pFloat)
+		fValue = pFloat->m_fValue;
+	return pFloat != nullptr;
+}
+
+void CEntity::SetLocalVariableValue(string sVariableName, string sValue)
+{
+	CValueString* pValue = new CValueString(sValue);
+	SetLocalVariableValue(sVariableName, pValue);
+}
+
+void CEntity::SetLocalVariableValue(string sVariableName, int nValue)
+{
+	CValueInt* pValue = new CValueInt(nValue);
+	SetLocalVariableValue(sVariableName, pValue);
+}
+
+void CEntity::SetLocalVariableValue(string sVariableName, float fValue)
+{
+	CValueFloat* pValue = new CValueFloat(fValue);
+	SetLocalVariableValue(sVariableName, pValue);
 }
 
 void CEntity::UpdateBoundingBox()

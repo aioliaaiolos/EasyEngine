@@ -19,6 +19,7 @@ class IScriptManager;
 class IConsole;
 class IPhysic;
 class IWorldEditor;
+class IValue;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 
@@ -102,10 +103,16 @@ public:
 	IGrid*							GetCollisionGrid();
 	void							SetSkinOffset(float x, float y, float z) override;
 	void							SetSkinOffset(CVector& oSkinOffset);
-	void							AttachScript(string sScript) override;
-	void							DetachScript(string sScript);
+	void							AttachScriptFunction(string sScript) override;
+	void							DetachScriptFunction(string sScript);
 	const string&					GetAttachedScript() const override;
 	virtual const string&			GetTypeName() const override;
+	bool							GetLocalVariableValue(string sVariableName, string& sValue) override;
+	bool							GetLocalVariableValue(string sVariableName, int& nValue) override;
+	bool							GetLocalVariableValue(string sVariableName, float& fValue) override;
+	void							SetLocalVariableValue(string sVariableName, string sValue) override;
+	void							SetLocalVariableValue(string sVariableName, int nValue) override;
+	void							SetLocalVariableValue(string sVariableName, float fValue) override;
 	
 
 protected:
@@ -161,6 +168,7 @@ protected:
 	IPhysic*										m_pPhysic = nullptr;
 	IWorldEditor*									m_pWorldEditor;
 	CTimeManager&									m_oTimeManager;
+	map<string, IValue*>							m_mLocalScriptVariable;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -181,6 +189,8 @@ protected:
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
 	virtual CEntity*	CreateEmptyEntity(string sName);
 	void				ExecuteScripts();
+	void				SetLocalVariableValue(string sVariableName, IValue* pValue);
+	IValue*				GetLocalVariableValue(string sVariableName);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

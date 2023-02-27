@@ -7,12 +7,12 @@
 
 class CScriptState : public IScriptState
 {
-	vector< IScriptFuncArg* >	m_vArg;
+	vector< IValue* >	m_vArg;
 	float						m_fReturnValue;
 
 public:
-	IScriptFuncArg* GetArg( int iIndex );
-	void			AddArg( IScriptFuncArg* pArg );
+	IValue* GetArg( int iIndex );
+	void			AddArg( IValue* pArg );
 	void			SetReturnValue(float ret);
 	float			GetReturnValue();
 };

@@ -21,7 +21,9 @@ struct CCondition
 		eEqual = 0,
 		eDifferent,
 		eSup,
+		eSupEqual,
 		eInf,
+		eInfEqual,
 		eIs,
 		eIsNot
 	};
@@ -40,11 +42,68 @@ struct CCondition
 		case eSup:
 			return val > value;
 			break;
+		case eSupEqual:
+			return val >= value;
+			break;
 		case eInf:
 			return val < value;
 			break;
+		case eInfEqual:
+			return val <= value;
+			break;
 		case eDifferent:
 			return val != value;
+			break;
+		default:
+			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
+			break;
+		}
+	}
+	bool Evaluate(float val) const
+	{
+		float value = atof(m_sValue.c_str());
+		switch (m_eComp) {
+		case eEqual:
+			return val == value;
+			break;
+		case eSup:
+			return val > value;
+			break;
+		case eSupEqual:
+			return val >= value;
+			break;
+		case eInf:
+			return val < value;
+			break;
+		case eInfEqual:
+			return val <= value;
+			break;
+		case eDifferent:
+			return val != value;
+			break;
+		default:
+			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
+			break;
+		}
+	}
+	bool Evaluate(string val) const
+	{
+		m_sValue;
+		switch (m_eComp) {
+		case eEqual:
+			return val == m_sValue;
+			break;
+		case eSup:
+			return val > m_sValue;
+			break;
+		case eInf:
+			return val < m_sValue;
+			break;
+		case eDifferent:
+			return val != m_sValue;
+			break;
+		default:
+			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
 			break;
 		}
 	}
@@ -52,12 +111,8 @@ struct CCondition
 
 struct CTopicInfo
 {
-	CTopicInfo() {}
-	CTopicInfo(const string& sText, const vector<CCondition>& conditions, const vector<string>& actions) :
-		m_sText(sText),
-		m_vConditions(conditions),
-		m_vAction(actions)		
-	{}
+	CTopicInfo();
+	CTopicInfo(const string& sText, const vector<CCondition>& conditions, const vector<string>& actions);
 	void ExecuteActions(IScriptManager* pScriptManager, CTopicsWindow* pTopicsWindow);
 
 	string m_sName;
@@ -87,6 +142,7 @@ public:
 	CTopicInfo&	GetTopicInfos();
 	void		SetTopicInfos(const CTopicInfo& oTopicInfos);
 	int			GetChoiceNumber();
+	//void		SetChoiceNumber(int nChoiceNumber);
 
 private:
 	CTopicInfo	m_oTopicInfos;
@@ -100,7 +156,7 @@ public:
 	CTopicsWindow(EEInterface& oInterface, int width, int height);
 	virtual ~CTopicsWindow();
 	void									AddTopic(string sTopicName, string sText, const vector<CCondition>& vConditions, const vector<string>& vAction);
-	void									AddGreating(string sText, vector<CCondition>& conditions);
+	void									AddGreating(string sText, vector<CCondition>& conditions, vector<string>& actions);
 	void									AddTopicText(const string& sTopicText, bool bNewParagraph = true);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
@@ -111,13 +167,19 @@ public:
 	int										SelectTopic(string sTopicName, string sSpeakerId);
 	void									SetCurrentTopicName(string sTopicName);
 	bool									IsGoodbye();
+	IValue*									GetSpeakerLocalVar(string sVarName) override;
+	void									SetSpeakerLocalVar(string sLocalVar, string sValue) override;
+	void									SetSpeakerLocalVar(string sLocalVar, int nValue) override;
+	const string&							GetSpeakerID() override;
 
 private:
 
 	void									LoadTopics(string sFileName);
+	void									LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction);
 	void									LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName);
 	void									DecodeString(string& sIn, string& sOut);
 	void									OnShow(bool bShow) override;
+	void									DisplayGreating();
 	void									DestroyTopicsWidgets();
 	int										GetTopicTextLineCount();
 	void									OnChoiceCalled(string sChoices) override;

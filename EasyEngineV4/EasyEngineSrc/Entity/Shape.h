@@ -58,9 +58,17 @@ public:
 	void			CreateCollisionMaps(float fBias, int nCellSize = -1) override{}
 	void			SetSkinOffset(float x, float y, float z) override {}
 	void			GetScaleFactor(CVector& factor) override{}
-	void			AttachScript(string sScriptName) override {}
+	void			AttachScriptFunction(string sScriptName) override {}
 	bool			TestCollision(INode* pEntity) override { return false; }
 	const			string& GetAttachedScript() const override { return ""; }
+	IValue*			GetLocalVariableValue(string sVariableName) override { return nullptr; }
+	bool			GetLocalVariableValue(string sVariableName, string& sValue) override { return false; }
+	bool			GetLocalVariableValue(string sVariableName, int& nValue) override { return false; }
+	bool			GetLocalVariableValue(string sVariableName, float& fValue) override { return false; }
+	void			SetLocalVariableValue(string sVariableName, string sValue) override {}
+	void			SetLocalVariableValue(string sVariableName, int nValue) override {}
+	void			SetLocalVariableValue(string sVariableName, float fValue) override {}
+	void			DetachScriptFunction(string sScript) override {}
 };
 
 #endif // SHAPE_H

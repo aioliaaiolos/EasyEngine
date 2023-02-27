@@ -14,6 +14,7 @@ public:
 	CVirtualProcessor(CSemanticAnalyser* pSemanticAnalyser, CBinGenerator* pBinGenerator, bool bPutAllCodeIntoSameMemory);
 	void	Execute(const vector< unsigned char >& vBinary, const vector< int >& vInstrSize);
 	float	GetVariableValue(string varName);
+	void	SetVariableValue(string sVariableName, float value);
 	float	GetRegisterValue(CRegister::TType reg);
 
 private:

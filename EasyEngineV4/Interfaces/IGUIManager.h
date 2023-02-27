@@ -16,6 +16,7 @@ class ICameraManager;
 class IEntityManager;
 class IScene;
 class ITexture;
+struct IValue;
 
 using namespace std;
 
@@ -36,6 +37,10 @@ public:
 	virtual void OnChoiceCalled(string sChoices) = 0;
 	virtual void OnGoodbyeCalled() = 0;
 	virtual void LoadTopics(string sFileName) = 0;
+	virtual void SetSpeakerLocalVar(string sVarName, string sValue) = 0;
+	virtual void SetSpeakerLocalVar(string sLocalVar, int nValue) = 0;
+	virtual IValue* GetSpeakerLocalVar(string sVarName) = 0;
+	virtual const string& GetSpeakerID() = 0;
 };
 
 class IGUIManager : public CPlugin

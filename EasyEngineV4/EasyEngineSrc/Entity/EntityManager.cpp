@@ -158,7 +158,7 @@ void CEntityManager::LoadItems()
 				for (int iItem = 0; iItem < count; iItem++) {
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
-						string sId, sModel, sClass, sType, sAttackType, sPreview;
+						string sId, sModel, sClass, sType, sAttackType, sPreview, sDiffuse;
 						int nValue = 0, nDamage = 0;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
@@ -208,6 +208,12 @@ void CEntityManager::LoadItems()
 								nDamage = type.GetInt();
 							}
 						}
+						if (item.HasMember("Diffuse")) {
+							Value& type = item["Diffuse"];
+							if (type.IsString()) {
+								sDiffuse = type.GetString();
+							}
+						}
 						CItem* pItem = nullptr;
 						if (sClass == "Weapon") {
 							pItem = new CWeapon(m_oInterface, sId, CItem::GetTypeFromString(sType), CWeapon::GetAttackTypeFromString(sAttackType), sModel, sPreview);
@@ -218,6 +224,7 @@ void CEntityManager::LoadItems()
 						else
 							pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
 						pItem->m_nValue = nValue;
+						pItem->m_sDiffuse = sDiffuse;
 						m_mItems[sId] = pItem;
 					}
 				}
@@ -297,9 +304,9 @@ IEntity* CEntityManager::GetEntity( int nEntityID )
 	return NULL;
 }
 
-IEntity* CEntityManager::GetEntity( string sEntityName )
+IEntity* CEntityManager::GetEntity( string sEntityID )
 {
-	map< string, IEntity* >::iterator itEntity = m_mNameEntities.find( sEntityName );
+	map< string, IEntity* >::iterator itEntity = m_mNameEntities.find( sEntityID );
 	if( itEntity != m_mNameEntities.end() )
 		return itEntity->second;
 	return NULL;
@@ -778,6 +785,8 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					infos.m_sParentName = character["ParentName"].GetString();
 					infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
 					infos.m_sTypeName = character["TypeName"].GetString();
+					if(character.HasMember("Class"))
+						infos.m_sClass = character["Class"].GetString();
 					infos.m_fWeight = character["Weight"].GetFloat();
 					infos.m_fStrength = character["Strength"].GetFloat();
 					infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();

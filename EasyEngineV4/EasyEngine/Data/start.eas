@@ -13,28 +13,18 @@ function onExitHospitalArea()
 {
 	Player = GetEntityID("Player");
 	area = GetEntityID("area-hospital");
-	Debug(9);
+
 	if(IsIntersect(Player, area)==0)
 	{
-		Debug(0);
 		if(GuardAdvise==0)
 		{
 			guardHospital = GetEntityID("garde hopital");
 			numberAdvertises = numberAdvertises + 1;
-			Debug(1);
-			if(numberAdvertises > 2)
-			{
-				Debug(2);
-				stateGuardHospital = 1;
-			}
 			GuardAdvise = 1;
 			TalkTo(guardHospital, Player, "OnGuardTopicClosed");
-			Debug(3);
-			
 		}
 		if(GuardAdvise == 1)
 		{
-			Debug(4);
 			if(GuardTimerStarted == 1)
 			{
 				timeElapsedSinceLastAdvise = GetTime() - lastTime;
@@ -55,12 +45,6 @@ function OnGuardTopicClosed()
 	GuardTimerStarted = 1;
 	lastTime = GetTime();
 	Debug(7);
-	if(stateGuardHospital == 1)
-	{
-		GuardTimerStarted = 0;
-		Attack(guardHospital, Player);
-		Debug(8);
-	}
 }
 
 function onLoadingGame()
@@ -89,8 +73,8 @@ function onLoadingGame()
 	//LoadWorld("TestHopital");
 	
 	//EditWorld("testLoot");	
-	//LoadWorld("", "OnWorldLoaded");
-	LoadWorld("empty", "OnWorldLoaded");
+	LoadWorld("", "OnWorldLoaded");
+	//LoadWorld("empty", "OnWorldLoaded");
 	//EditWorld("empty");
 	
 	//EditWorld("");
@@ -109,7 +93,7 @@ function onLoadingGame()
 
 function OnWorldLoaded()
 {
-	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);
+	//SetAnimationSpeed(GetEntityID("Player"), "run", 10.0);
 	
 	//AddCharacterItem("Player", "Armlet_EvilSpelled");
 	AddCharacterItem("Player", "Tunique_Hospital");
@@ -126,17 +110,19 @@ function OnWorldLoaded()
 	AddCharacterItem("Player", "Base_Boot_Right");
 	AddCharacterItem("Player", "Base_Greave");
 	AddCharacterItem("Player", "Dress_LongueWide");	
-	AddCharacterItem("Player", "Vase");
-	AddCharacterItem("Player", "Fiole");
+	//AddCharacterItem("Player", "Vase");
+	//AddCharacterItem("Player", "Fiole");
 	AddCharacterItem("Player", "Sword");
 	
 	p=GetPlayerID();
-	//m=GetEntityID("mirabelle");
+	m=GetEntityID("mirabelle");
 	SetLife(p, 100000);
-	//SetLife(m, 100000);
+	SetLife(m, 100000);
 	
 	//DisplayBBox(m, 1);
 	//DisplayBBox(p, 1);
 	SetAnimationSpeed(p, "Run", 1.5);
+	
+	SetCharacterLocalVarInt("garde hopital", "numberAdvertise", 0);
 	
 }

@@ -11,36 +11,47 @@
 
 using namespace std;
 
-struct IScriptFuncArg
+struct IValue
 {
-	virtual ~IScriptFuncArg() = 0 {}
+	enum Type
+	{
+		eString = 0,
+		eInt,
+		eFloat
+	};
+
+	virtual ~IValue() = 0 {}
+	virtual Type GetType() = 0;
 };
 
-struct CScriptFuncArgInt : public IScriptFuncArg
+struct CValueInt : public IValue
 {
 	int m_nValue;
-	CScriptFuncArgInt(){}
-	CScriptFuncArgInt( int nValue ) : m_nValue( nValue ){}
+	CValueInt(){}
+	CValueInt( int nValue ) : m_nValue( nValue ){}
+	Type GetType() override { return eInt; }
 };
 
-struct CScriptFuncArgFloat : public IScriptFuncArg
+struct CValueFloat : public IValue
 {
 	float	m_fValue;
-	CScriptFuncArgFloat(){}
-	CScriptFuncArgFloat( float fValue ) : m_fValue( fValue ){}
+	CValueFloat(){}
+	CValueFloat( float fValue ) : m_fValue( fValue ){}
+	Type GetType() override { return eFloat; }
 };
 
-struct CScriptFuncArgString : public IScriptFuncArg
+struct CValueString : public IValue
 {
 	string m_sValue;
-	CScriptFuncArgString(){}
-	CScriptFuncArgString( string sValue ) : m_sValue( sValue ){}
+	CValueString(){}
+	CValueString( string sValue ) : m_sValue( sValue ){}
+	Type GetType() override { return eString; }
 };
 
 class IScriptState
 {
 public:
-	virtual IScriptFuncArg* GetArg( int iIndex ) = 0;
+	virtual IValue* GetArg( int iIndex ) = 0;
 	virtual void			SetReturnValue(float ret) = 0;
 };
 
@@ -70,6 +81,7 @@ public:
 	virtual float	GetRegisterValue(string sRegisterName) = 0;
 	virtual void	GenerateAssemblerListing(bool generate) = 0;
 	virtual void	Compile(string script, vector<unsigned char>& vByteCode) = 0;
+	virtual void	SetVariableValue(string sVariableName, float value) = 0;
 };
 
 #endif // ISCRIPTMANAGER_H

@@ -62,6 +62,13 @@
 			"Preview": "Armlet_EvilSpelled.bmp"
 		},
 		{
+			"ID": "Opium_Fiole",
+			"Model": "misc/fiole.bme",
+			"Preview": "Opium-fiole.bmp",
+			"Diffuse": "Opium.bmp",
+			"Value": 500
+		},
+		{
 			"ID": "Tunique_Hospital",
 			"Model": "clothes/tunique5.bme",
 			"Class": "Cloth",
@@ -156,8 +163,7 @@
 			"Model": "misc/fiole.bme",
 			"Preview": "fiole.bmp",
 			"Value": 5
-		}
-		,
+		},
 		{
 			"ID": "Sword",
 			"Model": "weapons/sword.bme",
@@ -167,6 +173,13 @@
 			"Preview": "sword.bmp",
 			"Value": 20,
 			"Damage": 15
+		},
+		{
+			"ID": "Pass-Hospital",
+			"Model": "Items/pass-hospital.bme",
+			"Diffuse": "items/pass.bmp",
+			"Preview": "pass-hospital.bmp",
+			"Value": 20
 		}
 	]
 }

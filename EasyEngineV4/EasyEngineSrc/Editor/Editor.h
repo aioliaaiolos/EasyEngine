@@ -23,9 +23,7 @@ public:
 
 	virtual void			SetEditionMode(bool bEditionMode) override;
 
-protected:	
-
-	static void HandleEditorManagerCreation(CPlugin* plugin);
+protected:
 
 	CEditorManager*			m_pEditorManager;
 	IEntityManager&			m_oEntityManager;

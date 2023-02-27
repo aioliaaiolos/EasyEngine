@@ -62,6 +62,7 @@ public:
 	string											m_sModelName;
 	bool											m_bIsWear;
 	int												m_nValue = 0;
+	string											m_sDiffuse;
 	
 	static Type										GetTypeFromString(string sType);
 	static map<string, TClass>						s_mClassString;

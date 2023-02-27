@@ -3,7 +3,7 @@
 #include <sstream>
 #include <algorithm>
 
-void CScriptState::AddArg( IScriptFuncArg* pArg )
+void CScriptState::AddArg( IValue* pArg )
 {
 	m_vArg.push_back( pArg );
 }
@@ -18,7 +18,7 @@ float CScriptState::GetReturnValue()
 	return m_fReturnValue;
 }
 
-IScriptFuncArg* CScriptState::GetArg( int iIndex )
+IValue* CScriptState::GetArg( int iIndex )
 {
 	if( iIndex >= m_vArg.size() )
 	{
@@ -109,14 +109,14 @@ CSemanticAnalyser::CSemanticAnalyser():
 void CSemanticAnalyser::RegisterFunction( std::string sFunctionName, ScriptFunction Function, const vector< TFuncArgType >& vArgsType, TFuncArgType returnType)
 {
 	FuncMap::const_iterator it = m_mInterruption.find( sFunctionName );
-	if( it == m_mInterruption.end() )
+	if (it == m_mInterruption.end())
 	{
-		m_mInterruption[ sFunctionName ].first = Function;
-		m_mInterruption[ sFunctionName ].second.first = vArgsType;
+		m_mInterruption[sFunctionName].first = Function;
+		m_mInterruption[sFunctionName].second.first = vArgsType;
 		m_mInterruption[sFunctionName].second.second = returnType;
 	}
 	else
-		throw 1;
+		throw CEException("Error in CSemanticAnalyser::RegisterFunction() : function '" + sFunctionName + "' already registered");
 }
 
 void CSemanticAnalyser::GetRegisteredFunctions( vector< string >& vFuncNames )
@@ -363,17 +363,17 @@ float CSemanticAnalyser::CallInterruption( int nIntIndex, const vector< float >&
 	{
 		for( unsigned int i = 0; i < vArgs.size(); i++ )
 		{
-			IScriptFuncArg* pArg = NULL;
+			IValue* pArg = NULL;
 			switch( vArgType[ i ] )
 			{
 			case eFloat:
-				pArg = new CScriptFuncArgFloat( vArgs[ i ] );
+				pArg = new CValueFloat( vArgs[ i ] );
 				break;
 			case eInt:
-				pArg = new CScriptFuncArgInt( (int)vArgs[ i ] );
+				pArg = new CValueInt( (int)vArgs[ i ] );
 				break;
 			case eString:
-				pArg = new CScriptFuncArgString( m_mAddressString[ (int)vArgs[ i ] ] );
+				pArg = new CValueString( m_mAddressString[ (int)vArgs[ i ] ] );
 				break;
 			}
 			pState->AddArg( pArg );

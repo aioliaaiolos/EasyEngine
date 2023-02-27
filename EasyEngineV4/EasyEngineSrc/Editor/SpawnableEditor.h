@@ -38,7 +38,6 @@ protected:
 	void							RayCast(int x, int y, CVector& p1, CVector& ray);
 	void							SelectEntity(int x, int y);
 	void							DisplayLocalRepere();
-	void							HandleEditorManagerCreation(IEditorManager* pEditor) override;
 	void							EnableDisplayPickingRaySelected(bool enable) override;
 	void							EnableDisplayPickingRayMouseMove(bool enable) override;
 	void							EnableDisplayPickingIntersectPlane (bool enable) override;

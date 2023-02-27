@@ -407,10 +407,10 @@ void CBox::Draw(IRenderer& oRenderer) const
 
 bool IsComplexCollision(IBox& box1, IBox& box2)
 {
-	if ( (box1.GetDimension().m_x > 0.5f * box2.GetDimension().m_x) && 
-		 (box1.GetDimension().m_x < 2.f  * box2.GetDimension().m_x) &&
-		 (box1.GetDimension().m_z > 0.5f * box2.GetDimension().m_z) && 
-		 (box1.GetDimension().m_z < 2.f  * box2.GetDimension().m_z)) {
+	if ( (box1.GetDimension().m_x > 0.25f * box2.GetDimension().m_x) && 
+		 (box1.GetDimension().m_x < 4.f  * box2.GetDimension().m_x) &&
+		 (box1.GetDimension().m_z > 0.25f * box2.GetDimension().m_z) && 
+		 (box1.GetDimension().m_z < 4.f  * box2.GetDimension().m_z)) {
 		return false;
 	}
 	return true;

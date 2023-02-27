@@ -350,6 +350,7 @@ void IAEntity::TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback)
 
 void IAEntity::Attack(IFighterEntity* pEntity)
 {
+	SetFightMode(true);
 	m_pCurrentEnemy = pEntity;
 	m_eFightState = eBeginGoToEnemy;
 }

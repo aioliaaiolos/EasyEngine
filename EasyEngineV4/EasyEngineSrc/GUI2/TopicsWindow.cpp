@@ -55,6 +55,7 @@ void CTopicsWindow::OnShow(bool bShow)
 {
 	CGUIWindow::OnShow(bShow);
 	if (!bShow) {
+		m_sCurrentTopicName = "";
 		m_sText.clear();
 		m_pTopicFrame->DestroyTopicsWidgets();
 		m_nTopicTextPointer = 0;
@@ -62,10 +63,16 @@ void CTopicsWindow::OnShow(bool bShow)
 	else {
 		m_bGoodbye = false;
 		m_pTopicFrame->UpdateTopics();
+		DisplayGreating();
+	}
+}
 
-		int index = SelectTopic(m_vGreatings, m_sSpeakerId);
-		if(index != -1)
-			AddTopicText(m_vGreatings[index].m_sText);
+void CTopicsWindow::DisplayGreating()
+{
+	int index = SelectTopic(m_vGreatings, m_sSpeakerId);
+	if (index != -1) {
+		AddTopicText(m_vGreatings[index].m_sText);
+		m_vGreatings[index].ExecuteActions(m_pScriptManager, this);
 	}
 }
 
@@ -78,11 +85,12 @@ void CTopicsWindow::AddTopic(string sTopicName, string sText, const vector<CCond
 	m_mTopics[sTopicName].push_back(topic);
 }
 
-void CTopicsWindow::AddGreating(string sText, vector<CCondition>& conditions)
+void CTopicsWindow::AddGreating(string sText, vector<CCondition>& conditions, vector<string>& actions)
 {
 	CTopicInfo greating;
 	greating.m_sText = sText;
 	greating.m_vConditions = conditions;
+	greating.m_vAction = actions;
 	m_vGreatings.push_back(greating);
 }
 
@@ -464,7 +472,12 @@ void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 		pTopicWindow->m_bChoiceSet = true;
 		if (pTopicWindow->m_sCurrentTopicName[0] > 'Z')
 			pTopicWindow->m_sCurrentTopicName[0] -= 'a' - 'A';
-		pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
+		if(!pTopicWindow->m_sCurrentTopicName.empty())
+			pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
+		else {
+			pTopicWindow->DisplayGreating();
+		}
+		pTopicWindow->m_pScriptManager->SetVariableValue("choice", 0);
 	}
 }
 
@@ -537,65 +550,8 @@ void CTopicsWindow::LoadTopics(string sFileName)
 								}
 							}
 						}
-						if (topic.HasMember("Conditions")) {
-							rapidjson::Value& conditions = topic["Conditions"];
-							if (conditions.IsArray()) {
-								for (int iCondition = 0; iCondition < conditions.GetArray().Size(); iCondition++) {
-									rapidjson::Value& condition = conditions[iCondition];
-									CCondition c;
-									string sTestVariableName, sTestVariableValue;
-									if (condition.IsObject()) {
-										if (condition.HasMember("Name")) {
-											if (condition.HasMember("Type")) {
-												rapidjson::Value& type = condition["Type"];
-												if (type.IsString())
-													c.m_sType = type.GetString();
-											}
-											rapidjson::Value& name = condition["Name"];
-											if (name.IsString())
-												c.m_sName = name.GetString();
-											rapidjson::Value& value = condition["Value"];
-											if (value.IsString())
-												c.m_sValue = value.GetString();
-											if (condition.HasMember("Comp")) {
-												rapidjson::Value& comp = condition["Comp"];
-												if (value.IsString()) {
-													string sComp = comp.GetString();
-													if (sComp == "==")
-														c.m_eComp = CCondition::eEqual;
-													else if (sComp == "!=")
-														c.m_eComp = CCondition::eDifferent;
-													else if (sComp == "<")
-														c.m_eComp = CCondition::eInf;
-													else if (sComp == ">")
-														c.m_eComp = CCondition::eSup;
-													else if (sComp == "is")
-														c.m_eComp = CCondition::eIs;
-													else if (sComp == "isNot")
-														c.m_eComp = CCondition::eIsNot;
-												}
-											}
-											else
-												throw CEException(string("Error during parsing '") + sFileName + "' : 'Comp' is missing in condition for topic '" + topic.GetString());
-										}
-									}
-									vConditions.push_back(c);
-								}
-							}
-						}
-						if (topic.HasMember("Action")) {
-							rapidjson::Value& actions = topic["Action"];
-							if (actions.IsArray()) {
-								for (int iAction = 0; iAction < actions.GetArray().Size(); iAction++) {
-									rapidjson::Value& action = actions[iAction];
-									if (action.IsString()) {
-										string sAction = action.GetString();
-										DecodeString(sAction, sAction);
-										vAction.push_back(sAction);
-									}
-								}
-							}
-						}
+						LoadJsonConditions(topic, vConditions, sFileName);
+						LoadJsonActions(topic, vAction);
 					}
 					else if (topic.IsString()) {
 					}
@@ -612,6 +568,7 @@ void CTopicsWindow::LoadTopics(string sFileName)
 				for (int iGreating = 0; iGreating < count; iGreating++) {
 					string sText;
 					vector<CCondition> vConditions;
+					vector<string> vAction;
 					rapidjson::Value& greating = greatings[iGreating];
 					if (greating.IsObject()) {
 						if (greating.HasMember("Text")) {
@@ -626,21 +583,38 @@ void CTopicsWindow::LoadTopics(string sFileName)
 								}
 							}
 						}
-						LoadJsonConditions(greating, vConditions, sFileName);						
+						LoadJsonConditions(greating, vConditions, sFileName);
+						LoadJsonActions(greating, vAction);
 					}
 					DecodeString(sText, sText);
-					AddGreating(sText, vConditions);
+					AddGreating(sText, vConditions, vAction);
 				}
 			}
 		}
 	}
 	else {
-		CTopicException e("Erreur de chargement de topics.json");
+		CTopicException e("Erreur lors de chargement de 'topics.json'");
 		throw e;
 	}
 	ifs.close();
 }
 
+void CTopicsWindow::LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction)
+{
+	if (oParentNode.HasMember("Actions")) {
+		rapidjson::Value& actions = oParentNode["Actions"];
+		if (actions.IsArray()) {
+			for (int iAction = 0; iAction < actions.GetArray().Size(); iAction++) {
+				rapidjson::Value& action = actions[iAction];
+				if (action.IsString()) {
+					string sAction = action.GetString();
+					DecodeString(sAction, sAction);
+					vAction.push_back(sAction);
+				}
+			}
+		}
+	}
+}
 
 void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName)
 {
@@ -675,8 +649,12 @@ void CTopicsWindow::LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCo
 									c.m_eComp = CCondition::eDifferent;
 								else if (sComp == "<")
 									c.m_eComp = CCondition::eInf;
+								else if (sComp == "<=")
+									c.m_eComp = CCondition::eInfEqual;
 								else if (sComp == ">")
 									c.m_eComp = CCondition::eSup;
+								else if (sComp == ">=")
+									c.m_eComp = CCondition::eSupEqual;
 								else if (sComp == "is")
 									c.m_eComp = CCondition::eIs;
 								else if (sComp == "isNot")
@@ -730,7 +708,7 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 					break;
 				}
 			}
-			else if (condition.m_sType == "Item") {
+			else if (condition.m_sType == "PCItem") {
 				int count = m_oEntityManager.GetPlayer()->GetItemCount(condition.m_sName);
 				if(condition.Evaluate(count))
 					topicVerifiedConditionCount[i] += 1;
@@ -738,7 +716,53 @@ int CTopicsWindow::SelectTopic(const vector<CTopicInfo>& topics, string sSpeaker
 					topicVerifiedConditionCount[i] = -1;
 					break;
 				}
-
+			}
+			else if (condition.m_sType == "SpeakerLocal") {
+				IEntity* pCharacter = m_oEntityManager.GetEntity(sSpeakerId);
+				if (pCharacter) {
+					if (CStringUtils::IsInteger(condition.m_sValue)) {
+						int nCharacterValue;
+						if (pCharacter->GetLocalVariableValue(condition.m_sName, nCharacterValue)) {
+							if (condition.Evaluate(nCharacterValue))
+								topicVerifiedConditionCount[i] += 1;
+							else {
+								topicVerifiedConditionCount[i] -= 1;
+								break;
+							}
+						 }
+					}
+					else if (CStringUtils::IsFloat(condition.m_sValue)) {
+						float fCharacterValue;
+						if(pCharacter->GetLocalVariableValue(condition.m_sName, fCharacterValue) && condition.Evaluate(fCharacterValue))
+							topicVerifiedConditionCount[i] += 1;
+						else {
+							topicVerifiedConditionCount[i] -= 1;
+							break;
+						}
+					}
+					else {
+						string sCharacterValue;
+						if(pCharacter->GetLocalVariableValue(condition.m_sName, sCharacterValue) && condition.Evaluate(sCharacterValue))
+							topicVerifiedConditionCount[i] += 1;
+						else {
+							topicVerifiedConditionCount[i] -= 1;
+							break;
+						}
+					}
+				}
+				else {
+					topicVerifiedConditionCount[i] -= 1;
+					break;
+				}
+			}
+			else if (condition.m_sName == "SpeakerClass") {
+				ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_oEntityManager.GetEntity(sSpeakerId));
+				if (condition.m_sValue == pCharacter->GetClass())
+					topicVerifiedConditionCount[i] += 1;
+				else {
+					topicVerifiedConditionCount[i] -= 1;
+					break;
+				}
 			}
 		}
 		i++;
@@ -762,6 +786,47 @@ void CTopicsWindow::SetCurrentTopicName(string sTopicName)
 bool CTopicsWindow::IsGoodbye()
 {
 	return m_bGoodbye;
+}
+
+IValue* CTopicsWindow::GetSpeakerLocalVar(string sVarName)
+{
+	IEntity* pCharacter = m_oEntityManager.GetEntity(m_sSpeakerId);
+	if (pCharacter) {
+		IValue* pValue = pCharacter->GetLocalVariableValue(sVarName);
+		return pValue;
+	}
+	return nullptr;
+}
+
+void CTopicsWindow::SetSpeakerLocalVar(string sLocalVar, string sValue)
+{
+	IEntity* pCharacter = m_oEntityManager.GetEntity(m_sSpeakerId);
+	if (pCharacter) {
+		if (CStringUtils::IsInteger(sValue)) {
+			int nValue = atoi(sValue.c_str());
+			pCharacter->SetLocalVariableValue(sLocalVar, nValue);
+		}
+		else if (CStringUtils::IsFloat(sValue)) {
+			float fValue = atof(sValue.c_str());
+			pCharacter->SetLocalVariableValue(sLocalVar, fValue);
+		}
+		else
+			pCharacter->GetLocalVariableValue(sLocalVar, sValue);
+	}
+}
+
+void CTopicsWindow::SetSpeakerLocalVar(string sLocalVar, int nValue)
+{
+	IEntity* pCharacter = m_oEntityManager.GetEntity(m_sSpeakerId);
+	if (pCharacter)
+		pCharacter->SetLocalVariableValue(sLocalVar, nValue);
+	else
+		throw CEException("Error in CTopicsWindow::SetSpeakerLocalVar() : character '" + m_sSpeakerId + "' not found");
+}
+
+const string& CTopicsWindow::GetSpeakerID()
+{
+	return m_sSpeakerId;
 }
 
 void CTopicsWindow::SetSpeakerId(string sId)
@@ -975,10 +1040,38 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 					break;
 				}
 			}
-			else if (condition.m_sType == "Item") {
+			else if (condition.m_sType == "PCItem") {
 				int count = m_oEntityManager.GetPlayer()->GetItemCount(condition.m_sName);
-				bool test = (checked[i] = condition.Evaluate(count));
+				checked[i] = condition.Evaluate(count);
 				if (!checked[i])
+					break;
+			}
+			else if (condition.m_sType == "SpeakerLocal") {
+				IEntity* pCharacter = m_oEntityManager.GetEntity(sSpeakerId);
+				if (pCharacter) {
+					if (CStringUtils::IsInteger(condition.m_sValue)) {
+						int nCharacterValue;
+						pCharacter->GetLocalVariableValue(condition.m_sName, nCharacterValue);
+						checked[i] = condition.Evaluate(nCharacterValue);
+						if (!checked[i])
+							break;
+					}
+					else if (CStringUtils::IsFloat(condition.m_sValue)) {
+						float fCharacterValue;
+						pCharacter->GetLocalVariableValue(condition.m_sName, fCharacterValue);
+						checked[i] = condition.Evaluate(fCharacterValue);
+						if (!checked[i])
+							break;
+					}
+					else {
+						string sCharacterValue;
+						pCharacter->GetLocalVariableValue(condition.m_sName, sCharacterValue);
+						checked[i] = condition.Evaluate(sCharacterValue);
+						if (!checked[i])
+							break;
+					}
+				}
+				else
 					break;
 			}
 		}
@@ -990,6 +1083,18 @@ int CTopicFrame::IsConditionChecked(const vector<CTopicInfo>& topics, string sSp
 			return true;
 	}
 	return false;
+}
+
+CTopicInfo::CTopicInfo() 
+{
+}
+
+CTopicInfo::CTopicInfo(const string& sText, const vector<CCondition>& conditions, const vector<string>& actions) :
+	m_sText(sText),
+	m_vConditions(conditions),
+	m_vAction(actions)
+{
+
 }
 
 void CTopicInfo::ExecuteActions(IScriptManager* pScriptManager, CTopicsWindow* pTopicsWindow)

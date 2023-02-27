@@ -99,6 +99,11 @@ float CScriptManager::GetVariableValue(string variableName)
 	return m_pProc->GetVariableValue(variableName);
 }
 
+void CScriptManager::SetVariableValue(string sVariableName, float value)
+{
+	m_pProc->SetVariableValue(sVariableName, value);
+}
+
 float CScriptManager::GetRegisterValue(string sRegisterName)
 {
 	return m_pProc->GetRegisterValue(m_mRegisterFromName[sRegisterName]);

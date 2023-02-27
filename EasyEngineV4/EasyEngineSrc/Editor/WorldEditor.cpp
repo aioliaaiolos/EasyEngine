@@ -602,7 +602,8 @@ int CWorldEditor::SpawnArea(string areaName)
 int CWorldEditor::SpawnItem(string sItemName)
 {
 	if (!m_bEditionMode)
-		SetEditionMode(true);
+		throw CEException("You first have to setup in editor mode by editing a world before to spawn an item");
+	//	SetEditionMode(true);
 	IItem* pItem = m_oEntityManager.CreateItemEntity(sItemName);
 	if (pItem) {
 		pItem->Load();
@@ -675,7 +676,7 @@ void CWorldEditor::OnSceneLoaded()
 		if (pEntity) {
 			pEntity->SetLocalMatrix(itCharacter->second.first);
 			if(!itCharacter->second.second.empty())
-				pEntity->AttachScript(itCharacter->second.second);
+				pEntity->AttachScriptFunction(itCharacter->second.second);
 			pEntity->SetWeight(1);
 			m_vEntities.push_back(pEntity);
 		}

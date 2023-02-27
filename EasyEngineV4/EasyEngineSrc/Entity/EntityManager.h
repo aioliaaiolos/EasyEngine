@@ -43,7 +43,7 @@ public:
 	void													SetPlayer(IPlayer* player);
 	IPlayer*												GetPlayer();
 	IEntity*												GetEntity( int nEntityID );
-	IEntity*												GetEntity( string sEntityName );
+	IEntity*												GetEntity( string sEntityID);
 	int														GetEntityID( IEntity* pEntity );
 	int														GetEntityCount();
 	CEntity*												CreateLightEntity();
@@ -131,9 +131,6 @@ private:
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
 	map<string, CItem*>										m_mItems;
-
-	static void												HandleEditorManagerCreation(CPlugin* plugin);
-	static void												HandleEntityManagerCreation(CPlugin* plugin);
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

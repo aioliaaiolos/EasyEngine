@@ -22,7 +22,6 @@ public:
 	void					SetEditionMode(bool bEditionMode) override;
 	void					Load(string sCharacterId) override;
 	void					Save() override;
-	void					HandleEditorManagerCreation(IEditorManager* pEditor) override;
 	string					GetName() override;
 	bool					IsEnabled() override;
 	void					SpawnEntity(string sEntityFileName) override;

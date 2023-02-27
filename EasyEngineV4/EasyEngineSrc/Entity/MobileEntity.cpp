@@ -666,7 +666,7 @@ void CCharacter::RemoveItem(string sItemID)
 			m_mItems.erase(itItem);
 	}
 	else
-		throw CEException(string("Error in CCharacter::RemoveItem() : item '") + sItemID + "' not exists");
+		throw CEException(string("Error in CCharacter::RemoveItem() : character '" + m_sID + "' does not have  item '" + sItemID + "' in his inventory"));
 }
 
 void CCharacter::WearItem(string sItemID)
@@ -793,6 +793,16 @@ void CCharacter::Link(INode* pParent)
 IBox* CCharacter::GetBoundingBox()
 {
 	return m_pBBox;
+}
+
+const string& CCharacter::GetClass()
+{
+	return m_sClass;
+}
+
+void CCharacter::SetClass(string sClassName)
+{
+	m_sClass = sClassName;
 }
 
 const map<string, vector<IItem*>>& CCharacter::GetItems() const
@@ -1196,6 +1206,7 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 		for (map<string, float>::const_iterator it = pAnimatedEntityInfos->m_mAnimationSpeed.begin(); it != pAnimatedEntityInfos->m_mAnimationSpeed.end(); it++)
 			SetMovmentSpeed(CCharacter::s_mStringToAnimation[it->first], it->second);
 		Stand();
+		m_sClass = pAnimatedEntityInfos->m_sClass;
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
 			m_mItems[item.first].push_back(pItem);

@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include <codecvt>
+#include <regex>
 
 using namespace std;
 
@@ -48,6 +49,18 @@ bool CStringUtils::IsFloat(char c)
 bool CStringUtils::IsInteger(char c)
 {
 	return ( (c >= '0') && (c <= '9') );
+}
+
+bool CStringUtils::IsInteger(string s)
+{
+	std::regex r("^\\d+$");
+	return std::regex_match(s, r);
+}
+
+bool CStringUtils::IsFloat(string s)
+{
+	std::regex r("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
+	return std::regex_match(s, r);
 }
 
 int CStringUtils::FindEndOf( const string& sString, const string& sWord )

@@ -121,11 +121,6 @@ void CCharacterEditor::Save()
 	}
 }
 
-void CCharacterEditor::HandleEditorManagerCreation(IEditorManager* pEditor)
-{
-
-}
-
 string CCharacterEditor::GetName()
 {
 	return "CharacterEditor";

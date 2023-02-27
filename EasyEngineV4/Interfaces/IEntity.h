@@ -28,6 +28,7 @@ class IGUIManager;
 class IPhysic;
 class ICharacter;
 class CTimeManager;
+struct IValue;
 
 using namespace std;
 
@@ -139,9 +140,17 @@ public:
 	virtual int							GetCellSize() = 0;
 	virtual void						CreateCollisionMaps(float fBias, int nCellSize) = 0;
 	virtual void						SetSkinOffset(float x, float y, float z) = 0;
-	virtual void						AttachScript(string sScript) = 0;
+	virtual void						AttachScriptFunction(string sScript) = 0;
+	virtual void						DetachScriptFunction(string sScript) = 0;
 	virtual bool						TestCollision(INode* pEntity) = 0;
 	virtual const string&				GetAttachedScript() const = 0;
+	virtual IValue*						GetLocalVariableValue(string sVariableName) = 0;
+	virtual bool						GetLocalVariableValue(string sVariableName, string& sValue) = 0;
+	virtual bool						GetLocalVariableValue(string sVariableName, int& nValue) = 0;
+	virtual bool						GetLocalVariableValue(string sVariableName, float& fValue) = 0;
+	virtual void						SetLocalVariableValue(string sVariableName, string sValue) = 0;
+	virtual void						SetLocalVariableValue(string sVariableName, int nValue) = 0;
+	virtual void						SetLocalVariableValue(string sVariableName, float fValue) = 0;
 };
 
 class IItem : public virtual IEntity
@@ -189,6 +198,7 @@ public:
 	virtual void									Save() = 0;
 	virtual void									SetFightMode(bool fightMode) = 0;
 	virtual bool									GetFightMode() = 0;
+	virtual const string&							GetClass() = 0;
 };
 
 class IScene : public virtual IEntity
@@ -279,7 +289,7 @@ public:
 	virtual IEntity*			CreateTestEntity(string sFileName, IFileSystem* pFileSystem) = 0;
 	virtual void				GetCharactersName(vector<string>& vCharactersName) = 0;
 	virtual IEntity*			GetEntity( int nEntityID ) = 0;
-	virtual IEntity*			GetEntity( string sEntityName ) = 0;
+	virtual IEntity*			GetEntity(string sEntityID) = 0;
 	virtual int					GetEntityID( IEntity* pEntity ) = 0;
 	virtual int					GetEntityCount() = 0;
 	virtual ILightEntity*		CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity ) = 0;

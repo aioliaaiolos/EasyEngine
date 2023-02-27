@@ -91,10 +91,14 @@ void CItem::Load()
 					if (pModel) {
 						m_pModel = pModel;
 						pModel->SetBoundingGeometry(m_pBoundingGeometry);
+						if(!m_sDiffuse.empty())
+							pModel->SetDiffuseTexture(m_sDiffuse);
 					}
 				}
 			}
-
+			else
+				if (!m_sDiffuse.empty())
+					SetDiffuseTexture(m_sDiffuse);
 		}
 	}
 }
@@ -135,7 +139,10 @@ bool CItem::IsWear()
 
 void CItem::DrawBoundingBox(bool bDraw)
 {
-	m_pModel->DrawBoundingBox(bDraw);
+	if (m_pModel)
+		m_pModel->DrawBoundingBox(bDraw);
+	else
+		CObject::DrawBoundingBox(bDraw);
 }
 
 const CMatrix& CItem::GetWorldMatrix() const

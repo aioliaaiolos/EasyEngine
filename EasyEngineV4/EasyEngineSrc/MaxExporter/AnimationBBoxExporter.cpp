@@ -85,7 +85,7 @@ void CAnimationBBoxExporter::StoreMeshToMeshInfos(Interface* pInterface, INode* 
 	//const int fps = 30;
 	for (int iFrame = m_nAnimationStart; iFrame <= m_nAnimationEnd; iFrame++) {
 		Box3 box;
-		pMesh->ResetTransform(iFrame * 160, FALSE);
+		//pMesh->ResetTransform(iFrame * 160, FALSE);
 		pMesh->EvalWorldState(iFrame * 160).obj->GetDeformBBox(0, box);
 		IBox* pBox = m_pGeometryManager->CreateBox();
 		CVector dim = CVector(box.pmax.x - box.pmin.x, box.pmax.y - box.pmin.y, box.pmax.z - box.pmin.z);
