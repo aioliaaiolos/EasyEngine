@@ -110,10 +110,15 @@ private:
 	IRenderer::TDrawStyle				m_eDrawStyle;
 	int									m_nEntityMatricesBufferID;
 	IRenderer&							m_oRenderer;
+	vector< float >						m_vMaterialArray;
+	vector<float>						m_vShininessArray;
+	vector<ITexture*>					m_vTextureArray;
+	vector<int>							m_vUnitTextures;
 
 	void								CreateMaterialTexture(const std::map< int, CMaterial* >&);
 	void								DisplaySkeletonInfo(INode* pRoot, bool bRecurse = true);
-	void								CreateNonIndexedMaterialVertexArray(const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector< float >& vOut);
+	void								CreateNonIndexedMaterialVertexArray(const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector<float>& vOut);
+	void								CreateNonIndexedMaterialVertexArray(const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector<unsigned int>& vOut);
 
 };
 

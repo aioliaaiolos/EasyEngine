@@ -383,6 +383,7 @@ void CMaxExporter::StoreMaxMaterialToMaterialInfos(Mtl* pMaterial, ILoader::CMat
 		int nID = (int)(sSlotName[1] - '0');
 		pSubMtl = pMaterial->GetSubMtl(iMtl);
 		StoreMaxMaterialToMaterialInfos(pSubMtl, mi.m_vSubMaterials[iMtl]);
+		mi.m_vSubMaterials[iMtl].m_nID = iMtl;
 	}
 }
 

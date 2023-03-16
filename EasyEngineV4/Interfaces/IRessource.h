@@ -72,6 +72,7 @@ class ILight : public IRessource
 public:
 	virtual void SetIntensity(float fIntensity) = 0;
 	virtual void SetAmbient(float fAmbient) = 0;
+	virtual void SetSpecular(float fAmbient) = 0;
 	virtual void Enable(bool enable) = 0;
 };
 
@@ -80,8 +81,10 @@ class ITexture : public IRessource
 public:
 	virtual void			GetDimension( int& nWidth, int& nHeight ) = 0;
 	virtual unsigned int	GetFrameBufferObjectId() = 0;
+	virtual int				GetUnitTexture() = 0;
 	virtual void			SetUnitTexture(int nUnitTexture) = 0;
 	virtual void			SetUnitName(string sUnitName) = 0;
+	virtual int				GetID() = 0;
 	virtual void			SetShader(IShader* pShader) = 0;
 };
 
@@ -128,6 +131,7 @@ public:
 	virtual void SetDiffuse(float r, float g, float b, float a) = 0;
 	virtual void SetSpecular(float r, float g, float b, float a) = 0;
 	virtual void SetSpecular(const CVector& pos) = 0;
+	virtual float GetShininess() = 0;
 	virtual void SetShininess(float shininess) = 0;
 	virtual void SetAdditionalColor(float r, float g, float b, float a) = 0;
 	virtual CVector GetSpecular() = 0;

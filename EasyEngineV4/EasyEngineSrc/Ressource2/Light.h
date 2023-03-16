@@ -40,6 +40,7 @@ public:
 	void						SetShader( IShader* pShader );
 	void						SetIntensity( float fIntensity ) override;
 	void						SetAmbient(float fAmbient) override;
+	void						SetSpecular(float fAmbient) override;
 	float						GetIntensity();
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }

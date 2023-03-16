@@ -105,8 +105,16 @@ void CLight::SetIntensity(float fIntensity)
 
 void CLight::SetAmbient(float fAmbient)
 {
+	m_Ambient = CVector(fAmbient, fAmbient, fAmbient, 1.f);
 	GLfloat ambient[] = { m_fIntensity * fAmbient, m_fIntensity * fAmbient, m_fIntensity * fAmbient, 1.f };
 	m_oRenderer.SetLightAmbient(m_ID, ambient[0], ambient[1], ambient[2], ambient[3]);
+}
+
+void CLight::SetSpecular(float fSpecular)
+{
+	m_Specular = CVector(fSpecular, fSpecular, fSpecular, 1.f);
+	GLfloat specular[] = { m_fIntensity * fSpecular, m_fIntensity * fSpecular, m_fIntensity * fSpecular, 1.f };
+	m_oRenderer.SetLightSpecular(m_ID, specular[0], specular[1], specular[2], specular[3]);
 }
 
 float CLight::GetIntensity()

@@ -6,19 +6,20 @@ varying vec3 V;
 varying vec2 Texcoord;
 
 #ifdef MULTIMATERIAL
-attribute float nMatID;
-varying float nPSMatID;
+attribute int nMatID;
+varying float fPSMatID;
 #endif // MULTIMATERIAL
+
 
 void main()
 {
 #ifdef MULTIMATERIAL
-	nPSMatID = nMatID;
+	fPSMatID = nMatID;
 #endif // MULTIMATERIAL
 	vModelVertexPos = gl_ModelViewMatrix * gl_Vertex;
 	vec4 vViewVertexPos = gl_ProjectionMatrix * vModelVertexPos;
 	N = normalize(gl_NormalMatrix * gl_Normal);
 	V = -normalize(vModelVertexPos.xyz);
-	Texcoord    = gl_MultiTexCoord0.xy;
+	Texcoord    = gl_MultiTexCoord0.xy;	
 	gl_Position = vViewVertexPos;
 }

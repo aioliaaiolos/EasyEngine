@@ -35,9 +35,19 @@ unsigned int CTextureBase::GetFrameBufferObjectId()
 	return m_nFrameBufferObjectId;
 }
 
+int CTextureBase::GetUnitTexture()
+{
+	return m_nUnitTexture;
+}
+
 void CTextureBase::SetUnitTexture(int nUnitTexture)
 {
 	m_nUnitTexture = nUnitTexture;
+}
+
+int CTextureBase::GetID()
+{
+	return m_nID;
 }
 
 void CTextureBase::SetUnitName(string sUnitName)
@@ -141,7 +151,7 @@ void CTexture2D::Update()
 	m_pShader->SendUniformValues(m_sUnitName, m_nUnitTexture);
 	try
 	{
-		m_pShader->SendUniformValues( "ValueTexture0", m_nID );
+		m_pShader->SendUniformValues( "TextureCount", m_nID );
 	}
 	catch( exception& e )
 	{

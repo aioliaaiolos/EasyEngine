@@ -12,7 +12,7 @@ varying float nPSMatID;
 attribute vec4 vVertexWeight;
 attribute vec4 vWeightedVertexID;
 #ifdef MULTIMATERIAL
-attribute float nMatID;
+attribute int nMatID;
 #endif // MULTIMATERIAL
 
 uniform mat4 matBones[80];

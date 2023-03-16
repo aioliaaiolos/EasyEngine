@@ -83,7 +83,8 @@ public:
 	virtual unsigned int	CreateVertexBuffer( const std::vector< float >& vData ) const = 0;
 	virtual unsigned int	CreateVertexBuffer( const std::vector< int >& vData ) const = 0;
 	virtual int				CreateBuffer( int nElementCount ) = 0;
-	virtual void			FillBuffer( const std::vector< float >& vData, int nBufferID, int nOffset = 0 ) = 0;
+	virtual void			FillBuffer(const std::vector< float >& vData, int nBufferID, int nOffset = 0 ) = 0;
+	virtual void			FillBuffer(const std::vector< unsigned int >& vData, int nBufferID, int nOffset = 0) = 0;
 	virtual void			FillBuffer(const vector< CMatrix >& vMatrix, int nBufferID, int nOffset = 0) = 0;
 	virtual void			AppendBuffer( const std::vector< float >& vData ) = 0;
 	virtual void			GetNonIndexedVertexBuffer( const std::vector< float >& vVertexBuffer, const std::vector< unsigned int >& vIndexBuffer, std::vector< float >& vOutVertexBuffer ) = 0;

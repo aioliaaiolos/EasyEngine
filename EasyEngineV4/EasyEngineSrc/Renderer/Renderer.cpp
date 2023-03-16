@@ -467,8 +467,9 @@ void CRenderer::DrawGeometry( const IBuffer* pBuffer )
 	}
 	
 	glEnableClientState (GL_VERTEX_ARRAY);
-  	glEnableClientState(GL_NORMAL_ARRAY);	
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  	glEnableClientState(GL_NORMAL_ARRAY);
+	if (pGeometryBuffer->GetUVIndexCount() > 0)
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	int nVertexBufferSize = pGeometryBuffer->GetIndexCount() > 0 ? pGeometryBuffer->GetIndexCount() * 3 * sizeof(float) : pGeometryBuffer->GetVertexCount() * 3 * sizeof(float);
 	int nNormalVertexBufferSize = pGeometryBuffer->GetIndexCount() * 3 * sizeof(float);
@@ -485,7 +486,8 @@ void CRenderer::DrawGeometry( const IBuffer* pBuffer )
 	
   	glDisableClientState (GL_VERTEX_ARRAY);
   	glDisableClientState (GL_NORMAL_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	if (pGeometryBuffer->GetUVIndexCount() > 0)
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void CRenderer::DrawGeometryInstanced(const IBuffer* pBuffer, int instanceCount)
@@ -546,6 +548,9 @@ void CRenderer::DrawIndexedGeometry( const IBuffer* pBuffer, TDrawStyle style )
 
 	GLenum glDrawStyle = m_mDrawStyle[ style ];
 	glDrawElements( glDrawStyle, pIndexedBuffer->m_nIndexCount, GL_UNSIGNED_INT, 0 );
+
+	if (pIndexedBuffer->m_nUVVertexBufferID != 0)
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   	glDisableClientState (GL_VERTEX_ARRAY);
 	glDisableClientState( GL_NORMAL_ARRAY );
 }
@@ -684,6 +689,15 @@ void CRenderer::FillBuffer( const std::vector< float >& vData, int nBufferID, in
 	if( error != 0 )
 		throw 1;
 	m_nCurrentBufferOffset += static_cast< int >( vData.size() ) * sizeof(float) + nOffset * sizeof(float);
+}
+
+void CRenderer::FillBuffer(const std::vector< unsigned int>& vData, int nBufferID, int nOffset)
+{
+	glBufferSubData(GL_ARRAY_BUFFER_ARB, nOffset, vData.size() * sizeof(unsigned int), &vData[0]);
+	GLenum error = glGetError();
+	if (error != 0)
+		throw 1;
+	m_nCurrentBufferOffset += static_cast< int >(vData.size()) * sizeof(unsigned int) + nOffset * sizeof(unsigned int);
 }
 
 void CRenderer::FillBuffer(const vector< CMatrix >& vMatrix, int nBufferID, int nOffset)
@@ -1098,8 +1112,14 @@ void CRenderer::LoadShaderDirectory( const string& sShaderDirectory)
 		while ( FindNextFileA( hFile, &data ) == TRUE );
 	}
 
-	for ( map< string, CShader* >::iterator itShader = m_mShader.begin(); itShader != m_mShader.end(); ++itShader )
-		itShader->second->Link();
+	try {
+		for (map< string, CShader* >::iterator itShader = m_mShader.begin(); itShader != m_mShader.end(); ++itShader)
+			itShader->second->Link();
+	}
+	catch (CEException& e)
+	{
+		MessageBoxA(NULL, e.what(), "Shader compilation error", MB_ICONERROR);
+	}
 }
 
 void CRenderer::ReloadShaders(IEventDispatcher& oEventDispatcher)
@@ -1251,7 +1271,7 @@ void CRenderer::CompileShader( unsigned int nShaderID ) const
 		glGetShaderiv( nShaderID, GL_INFO_LOG_LENGTH, &LogSize );
 		char* szLog = new char[ LogSize + 1 ];
 		glGetShaderInfoLog( nShaderID, LogSize, &LogSize, szLog );
-		exception e( szLog );
+		CEException e( szLog );
 		throw e;
 	}
 }
@@ -1272,7 +1292,7 @@ void CRenderer::LinkProgram( unsigned int nProgramID ) const
 		glGetProgramiv( nProgramID, GL_INFO_LOG_LENGTH, &LogSize );
 		char* szLog = new char[ LogSize + 1 ];
 		glGetProgramInfoLog( nProgramID, LogSize, &LogSize, szLog );
-		exception e( szLog );
+		CEException e(szLog);
 		throw e;
 	}
 }
@@ -1306,6 +1326,32 @@ unsigned int CRenderer::GetAttributeID( unsigned int nProgramID, const std::stri
 		throw e;
 	}
 	return id;
+}
+
+void CRenderer::SendUniform1iv(unsigned int id, int nValueCount, std::vector<int>& vVector) const
+{
+	if ((float)vVector.size() == (float)nValueCount)
+		glUniform1iv (id, nValueCount, &vVector[0]);
+	else {
+		ostringstream oss;
+		oss << "CRenderer::SendUniform1iv() : le nombre d'entier envoyés (" << vVector.size()
+			<< ") ne correspond pas au nombre de vecteurs (" << nValueCount << ") qu'il devrait contenir";
+		exception e(oss.str().c_str());
+		throw e;
+	}
+}
+
+void CRenderer::SendUniform1fv(unsigned int id, int nValueCount, std::vector<float>& vVector) const
+{
+	if ((float)vVector.size() == (float)nValueCount)
+		glUniform1fv(id, nValueCount, &vVector[0]);
+	else {
+		ostringstream oss;
+		oss << "CRenderer::SendUniform1iv() : le nombre d'entier envoyés (" << vVector.size()
+			<< ") ne correspond pas au nombre de vecteurs (" << nValueCount << ") qu'il devrait contenir";
+		exception e(oss.str().c_str());
+		throw e;
+	}
 }
 
 void CRenderer::SendUniform3f( unsigned int nUniformID, float f1, float f2, float f3 )

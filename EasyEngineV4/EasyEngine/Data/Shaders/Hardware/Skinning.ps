@@ -1,9 +1,9 @@
 #define MULTIMATERIAL
 
 uniform sampler2D baseMap;
-uniform int ValueTexture0;
+uniform int TextureCount;
 #ifdef MULTIMATERIAL
-uniform float fMultimaterial;
+uniform int nMaterialCount;
 #endif // MULTIMATERIAL
 
 varying vec4 vVertexPos;
@@ -23,7 +23,7 @@ void main()
 	gl_FragColor = vec4( 0,0,0,0);
 	
 	vec4 diffuseColor;
-	if ( ValueTexture0 != 0 )
+	if ( TextureCount != 0 )
 		diffuseColor = texture2D( baseMap, Texcoord );
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;
@@ -31,8 +31,8 @@ void main()
 		gl_FragColor += GetLightInfluence( gl_LightSource[i], vVertexPos, N, V, diffuseColor );
 		
 #ifdef MULTIMATERIAL
-	int bMultimaterial = int( fMultimaterial );
-	if( bMultimaterial == 1 )
+	int bMultimaterial = int( nMaterialCount );
+	if( bMultimaterial > 1 )
 	{
 		int nID = int(nPSMatID);
 		switch( nID )
@@ -50,7 +50,7 @@ void main()
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
-	vec4 vAmbient = gl_FrontMaterial.ambient * light.ambient;
+	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
 	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
 	vec3 R = reflect( -L, N );

@@ -52,15 +52,7 @@ void CShader::Attach( string sShaderFileName, IRenderer::TShaderType type, IFile
 		throw e;
 	}
 	m_oRenderer.SetShaderSource( nShaderID, pSource );
-	try {
-		m_oRenderer.CompileShader(nShaderID);
-	}
-	catch (exception& e) {		
-		string message = "\"" + sShaderFileName + "\" : " + e.what();
-		exception e2(message.c_str());
-		throw e2;
-	}
-	
+	m_oRenderer.CompileShader(nShaderID);
 	m_mShaderName[ sShaderFileName ] = nShaderID;
 	m_oRenderer.AttachShaderToProgram( m_nProgram, nShaderID );
 	delete pSource;
@@ -213,13 +205,25 @@ void CShader::SendUniformValues( const std::string& sVariableName, float f ) con
 	m_oRenderer.SendUniform1f( id, f );
 }
 
-void CShader::SendVector4Array( const string& sVariableName, vector< float >& vVector )
+void CShader::SendUniformVectorArray(const string& sVariableName, vector< int >& vVector) const
+{
+	int id = GetUniformID(sVariableName);
+	m_oRenderer.SendUniform1iv(id, (int)vVector.size(), vVector);
+}
+
+void CShader::SendUniformVectorArray(const string& sVariableName, vector< float >& vVector) const
+{
+	int id = GetUniformID(sVariableName);
+	m_oRenderer.SendUniform1fv(id, (int)vVector.size(), vVector);
+}
+
+void CShader::SendUniformVector4Array( const string& sVariableName, vector< float >& vVector )
 {
 	int id = GetUniformID( sVariableName );
 	m_oRenderer.SendUniform4fv( id, (int)vVector.size() / 4, vVector ); 
 }
 
-void CShader::SendVector4Array( const string& sVariableName, vector< int >& vVector )
+void CShader::SendUniformVector4Array( const string& sVariableName, vector< int >& vVector )
 {
 	int id = GetUniformID( sVariableName );
 	m_oRenderer.SendUniform4iv( id, (int)vVector.size() / 4, vVector );

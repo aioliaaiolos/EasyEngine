@@ -22,7 +22,6 @@ public:
 	virtual			~IEditor() = 0 {}
 	virtual void	Edit(string sID) = 0;
 	virtual void	Load(string sID) = 0;
-	//virtual void	HandleEditorManagerCreation(IEditorManager* pEditor) = 0;
 	virtual bool	IsEnabled() = 0;
 	virtual void	SpawnEntity(string sEntityFileName) = 0;
 	virtual void	SetEditionMode(bool bEditionMode) = 0;

@@ -103,7 +103,7 @@ public:
 		TSkeletonMap				m_mBones; // associe à chaque identifiant d'un bone une pair (nom , matrice )
 		map< int, int >				m_mHierarchyBones;
 		vector< CMeshInfos >		m_vMeshes;
-		bool						m_bMultiMaterialActivated;
+		bool						m_bMultiMaterialActivated = true;
 	};
 
 	struct CAnimationBBoxInfos : public IRessourceInfos

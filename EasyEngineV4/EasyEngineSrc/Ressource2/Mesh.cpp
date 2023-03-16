@@ -90,33 +90,42 @@ m_oRenderer(oDesc.m_oRenderer)
 
 			m_bSkinned = true;
 		}
-		if( oDesc.m_vFaceMaterialID.size() > 0 )
-		{
-			vector< float > vNonIndexedFaceMaterialID;
-			CreateNonIndexedMaterialVertexArray( oDesc.m_vFaceMaterialID, oDesc.m_vIndexArray, vNonIndexedFaceMaterialID );
-			m_nFaceMaterialBufferID = m_oRenderer.CreateBuffer( (int)vNonIndexedFaceMaterialID.size() );
-			m_oRenderer.FillBuffer( vNonIndexedFaceMaterialID, m_nFaceMaterialBufferID );
 
-			vector< float > vTextureMaterialData;
+		if (oDesc.m_vFaceMaterialID.size() > 0)
+		{
 			CMatrix m;
-			for( map< int, CMaterial* >::const_iterator itMat = oDesc.m_mMaterials.begin(); itMat != oDesc.m_mMaterials.end(); ++itMat )
-			{
-				itMat->second->GetMaterialMatrix( m );
-				m.Get( vTextureMaterialData );
+			int nUnitTexture = 3;
+			int nMaterialIndex = 0;
+			map<unsigned int, int> mMaterialIdToIndex;
+			for (map< int, CMaterial* >::const_iterator itMat = oDesc.m_mMaterials.begin(); itMat != oDesc.m_mMaterials.end(); ++itMat) {
+				CMaterial* pMaterial = itMat->second;
+				pMaterial->GetMaterialMatrix(m);
+				ITexture* pTexture = itMat->second->GetTexture();
+				if (pTexture) {
+					mMaterialIdToIndex[itMat->second->GetID()] = nMaterialIndex++;
+					m.Get(m_vMaterialArray);
+					m_vShininessArray.push_back(pMaterial->GetShininess());
+					pTexture->SetUnitTexture(nUnitTexture++);
+					m_vTextureArray.push_back(pTexture);
+					m_vUnitTextures.push_back(pTexture->GetUnitTexture());
+				}
 			}
-			float k = 0.f;
-			while ( pow(2.f, k) < vTextureMaterialData.size()) k++;
-			vTextureMaterialData.resize(pow(2.f, k));
-			CTexture1D::CDesc oTextureDesc(m_oRenderer, m_pShader, 0 );
-			oTextureDesc.m_eFormat = IRenderer::T_RGBA;
-			oTextureDesc.m_nSize = (int)vTextureMaterialData.size();
-			oTextureDesc.m_pData = &vTextureMaterialData[ 0 ];
-			oTextureDesc.m_sName = "Material texture";
-			m_pMaterialTexture = new CTexture1D( oTextureDesc );
+
+			vector<unsigned short> vFaceMaterialID = oDesc.m_vFaceMaterialID;
+			for (int i = 0; i < vFaceMaterialID.size(); i++) {
+				int id = vFaceMaterialID[i];
+				vFaceMaterialID[i] = mMaterialIdToIndex[id];
+			}
+
+			vector<unsigned int> vNonIndexedFaceMaterialID;
+			CreateNonIndexedMaterialVertexArray(vFaceMaterialID, oDesc.m_vIndexArray, vNonIndexedFaceMaterialID);
+			m_nFaceMaterialBufferID = m_oRenderer.CreateBuffer((int)vNonIndexedFaceMaterialID.size());
+			m_oRenderer.FillBuffer(vNonIndexedFaceMaterialID, m_nFaceMaterialBufferID);
 		}
-		m_pBuffer = m_oRenderer.CreateGeometry( oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray,
-													oDesc.m_vUVIndexArray, oDesc.m_vNormalFaceArray, oDesc.m_vNormalVertexArray );
-	}	
+		m_pBuffer = m_oRenderer.CreateGeometry(oDesc.m_vVertexArray, oDesc.m_vIndexArray, oDesc.m_vUVVertexArray,
+			oDesc.m_vUVIndexArray, oDesc.m_vNormalFaceArray, oDesc.m_vNormalVertexArray);
+	}
+	
 }
 
 CMesh::~CMesh(void)
@@ -142,11 +151,18 @@ void CMesh::DrawBoundingSphere( bool bDraw )
 
 }
 
-void CMesh::CreateNonIndexedMaterialVertexArray( const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector< float >& vOut )
+void CMesh::CreateNonIndexedMaterialVertexArray( const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector<float>& vOut )
 {
 	for (unsigned int iFace = 0; iFace < vIndexArray.size() / 3; iFace++ )
 		for (unsigned int iVertex = 0; iVertex < 3; iVertex++ )
-			vOut.push_back( (float)vMtlFace[ iFace ] + 1 );
+			vOut.push_back( (float)vMtlFace[ iFace ]);
+}
+
+void CMesh::CreateNonIndexedMaterialVertexArray(const std::vector< unsigned short >& vMtlFace, const std::vector< unsigned int >& vIndexArray, std::vector<unsigned int>& vOut)
+{
+	for (unsigned int iFace = 0; iFace < vIndexArray.size() / 3; iFace++)
+		for (unsigned int iVertex = 0; iVertex < 3; iVertex++)
+			vOut.push_back(vMtlFace[iFace]);
 }
 
 void CMesh::SetDrawStyle(IRenderer::TDrawStyle style)
@@ -168,14 +184,24 @@ void CMesh::Update()
 {
 	m_pShader->Enable( true );
 	m_oRenderer.SetRenderType( m_eRenderType );
-	if( m_mMaterials.size() == 1 )
-	{
+	
+	m_pShader->SendUniformValues("nMaterialCount", (int)m_mMaterials.size());
+	if(m_mMaterials.size() == 1 ) {
 		map< int, CMaterial* >::iterator itMat = m_mMaterials.begin();
 		itMat->second->Update();
 	}
-	else
-	{
-		m_pMaterialTexture->Update();
+	else {
+		int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
+		m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
+		m_pShader->VertexAttributePointerf(nMatID, 1, 0);
+		if (!m_vTextureArray.empty()) {
+			m_pShader->SendUniformVector4Array("MaterialArray", m_vMaterialArray);
+			m_pShader->SendUniformVectorArray("ShininessArray", m_vShininessArray);
+			for (ITexture* pTexture : m_vTextureArray)
+				m_oRenderer.BindTexture(pTexture->GetID(), pTexture->GetUnitTexture(), IRenderer::T_2D);
+			m_pShader->SendUniformVectorArray("baseMapArray", m_vUnitTextures);
+			m_pShader->SendUniformValues("TextureCount", (int)m_vTextureArray.size());
+		}
 	}
 		
 	unsigned int nVertexWeightID = -1;
@@ -184,8 +210,7 @@ void CMesh::Update()
 	m_pShader->GetName(shaderName);
 	transform(shaderName.begin(), shaderName.end(), shaderName.begin(), tolower);
 	
-	if (shaderName=="skinning")
-	{
+	if (shaderName=="skinning") {
 		nVertexWeightID = m_pShader->EnableVertexAttribArray( "vVertexWeight" );
 		m_oRenderer.BindVertexBuffer( m_nVertexWeightBufferID );
 		m_pShader->VertexAttributePointerf( nVertexWeightID, 4, 0 );
@@ -198,46 +223,9 @@ void CMesh::Update()
 	if ( m_bIndexedGeometry )
 		m_oRenderer.DrawIndexedGeometry( m_pBuffer, m_eDrawStyle);
 	else
-	{
-		if ( m_mMaterials.size() > 1 )
-		{
-			try
-			{
-				int nMatID = m_pShader->EnableVertexAttribArray( "nMatID" );
-				m_oRenderer.BindVertexBuffer( m_nFaceMaterialBufferID );
-				m_pShader->VertexAttributePointerf( nMatID, 1, 0 );
-				m_pShader->SendUniformValues( "fMultimaterial", 1.f );
-			}
-			catch( exception& )
-			{
-				if( m_bFirstUpdate )
-				{
-					string s = string( "Attribut \"nMatID\" et/ou variable uniform \"fMultimaterial\" non défini(s) dans \"" ) + m_sShaderName + "\"";
-					MessageBox( NULL, s.c_str(), "CMesh::Update()", MB_ICONEXCLAMATION);
-				}
-			}
-		}
-		else
-		{
-			try
-			{
-				m_pShader->SendUniformValues( "fMultimaterial", 0.f );
-			}
-			catch( exception& e )
-			{
-				if( m_nReponse != 6 )
-				{
-					string sMessage = e.what();
-					sMessage += "\nVoulez vous continuer et ignorer tous les avertissements de ce type ?";
-					m_nReponse = MessageBox( NULL, sMessage.c_str(), "", MB_YESNO );
-				}
-			}
-		}
 		m_oRenderer.DrawGeometry( m_pBuffer );
-	}
 
-	if (shaderName == "skinning")
-	{
+	if (shaderName == "skinning") {
 		m_pShader->DisableVertexAttribArray( nVertexWeightID );
 		m_pShader->DisableVertexAttribArray( nWeightedVertexID );
 	}
@@ -301,39 +289,19 @@ void CMesh::UpdateInstances(int instanceCount)
 	}
 	else
 	{
-		if (m_mMaterials.size() > 1)
-		{
-			try
-			{
-				int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
-				m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
-				m_pShader->VertexAttributePointerf(nMatID, 1, 0);
-				m_pShader->SendUniformValues("fMultimaterial", 1.f);
-			}
-			catch (exception&)
-			{
-				if (m_bFirstUpdate)
-				{
-					string s = string("Attribut \"nMatID\" et/ou variable uniform \"fMultimaterial\" non défini(s) dans \"") + m_sShaderName + "\"";
-					MessageBox(NULL, s.c_str(), "CMesh::Update()", MB_ICONEXCLAMATION);
-				}
+		try {
+			m_pShader->SendUniformValues("nMaterialCount", (float)m_mMaterials.size());
+		}
+		catch (exception&) {
+			if (m_bFirstUpdate) {
+				string s = string("Attribut \"nMatID\" et/ou variable uniform \"nMaterialCount\" non défini(s) dans \"") + m_sShaderName + "\"";
+				MessageBox(NULL, s.c_str(), "CMesh::Update()", MB_ICONEXCLAMATION);
 			}
 		}
-		else
-		{
-			try
-			{
-				m_pShader->SendUniformValues("fMultimaterial", 0.f);
-			}
-			catch (exception& e)
-			{
-				if (m_nReponse != 6)
-				{
-					string sMessage = e.what();
-					sMessage += "\nVoulez vous continuer et ignorer tous les avertissements de ce type ?";
-					m_nReponse = MessageBox(NULL, sMessage.c_str(), "", MB_YESNO);
-				}
-			}
+		if (m_mMaterials.size() > 1) {
+			int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
+			m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
+			m_pShader->VertexAttributePointerf(nMatID, 1, 0);
 		}
 		m_oRenderer.DrawGeometryInstanced(m_pBuffer, instanceCount);
 	}

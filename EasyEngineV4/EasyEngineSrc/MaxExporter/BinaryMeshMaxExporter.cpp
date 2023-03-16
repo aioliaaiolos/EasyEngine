@@ -228,8 +228,19 @@ void CBinaryMeshMaxExporter::StoreMeshToMeshInfos( Interface* pInterface, INode*
 		if( m_nMaterialCount > 1 ) 
 			mi.m_bMultiMaterial = true;
 		mi.m_oMaterialInfos.m_bExists = true;
+		for (ILoader::CMaterialInfos& oSubMat : mi.m_oMaterialInfos.m_vSubMaterials) {
+			oSubMat.m_bExists = true;
+		}
 		string sDiffuseMapName;
-		bIsTextured = ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" );
+		bIsTextured = ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE");
+		if (!bIsTextured) {
+			for (ILoader::CMaterialInfos& subMi : mi.m_oMaterialInfos.m_vSubMaterials) {
+				if (subMi.m_sDiffuseMapName != "NONE") {
+					bIsTextured = true;
+					break;
+				}
+			}
+		}
 	}
 	else
 		mi.m_oMaterialInfos.m_bExists = false;
@@ -265,21 +276,34 @@ void CBinaryMeshMaxExporter::StoreMeshToMeshInfos( Interface* pInterface, INode*
 	GetNormals( oMesh, mi.m_vNormalFace, mi.m_vNormalVertex );
 	if ( bIsTextured )
 	{
-		Texmap* pTexmap = pMaterial ? pMaterial->GetSubTexmap(1) : NULL;
-		BitmapTex *bmt = (BitmapTex*)pTexmap;
-		StdUVGen *uv = bmt->GetUVGen();
-		int utile = uv->GetUScl(0);
-		int vtile = uv->GetVScl(0);
-		for ( int iTVertex = 0; iTVertex < oMesh.getNumTVerts(); iTVertex++ )
-		{					
-			UVVert& oTVert = oMesh.getTVert( iTVertex );
-			mi.m_vUVVertex.push_back( oTVert.x * utile );
-			mi.m_vUVVertex.push_back( oTVert.y * vtile);
-		}				
-		for ( int iTFace = 0; iTFace < oMesh.getNumFaces(); iTFace++ )
-			for ( int iTIndex = 0; iTIndex < 3; iTIndex++ )
-				mi.m_vUVIndex.push_back( oMesh.tvFace[ iTFace ].t[ iTIndex ] );
-	}
+		if (!mi.m_oMaterialInfos.m_vSubMaterials.empty()) {
+			for (int j = 0; j < oMesh.getNumMapVerts(1); j++) {
+				UVVert uv = oMesh.mapVerts(1)[j];
+				mi.m_vUVVertex.push_back(uv.x);
+				mi.m_vUVVertex.push_back(uv.y);
+			}
+		}
+		else {
+			Texmap* pTexmap = pMaterial ? pMaterial->GetSubTexmap(1) : NULL;
+			int utile = 1;
+			int vtile = 1;
+			if (pTexmap) {
+				BitmapTex *bmt = (BitmapTex*)pTexmap;
+				StdUVGen *uv = bmt->GetUVGen();
+				utile = uv->GetUScl(0);
+				vtile = uv->GetVScl(0);
+			}
+			for (int iTVertex = 0; iTVertex < oMesh.getNumTVerts(); iTVertex++)
+			{
+				UVVert& oTVert = oMesh.getTVert(iTVertex);
+				mi.m_vUVVertex.push_back(oTVert.x * utile);
+				mi.m_vUVVertex.push_back(oTVert.y * vtile);
+			}
+		}
+		for (int iTFace = 0; iTFace < oMesh.getNumFaces(); iTFace++)
+			for (int iTIndex = 0; iTIndex < 3; iTIndex++)
+				mi.m_vUVIndex.push_back(oMesh.tvFace[iTFace].t[iTIndex]);
+	}	
 
 	vector< float > vIndexedNormal;
 	bool bIsolatedVertex = true;

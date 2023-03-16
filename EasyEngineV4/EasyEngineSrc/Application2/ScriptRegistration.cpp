@@ -2382,7 +2382,23 @@ void SetLightAmbient(IScriptState* pState)
 		oss << "Erreur : " << pID->m_nValue << " n'est pas un identifiant de lumière";
 		m_pConsole->Println(oss.str());
 	}
+}
 
+void SetLightSpecular(IScriptState* pState)
+{
+	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* pSpecular = static_cast< CValueFloat* >(pState->GetArg(1));
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = dynamic_cast<ILight*>(pLightEntity->GetRessource());
+		if (pLight)
+			pLight->SetSpecular (pSpecular->m_fValue);
+	}
+	else {
+		ostringstream oss;
+		oss << "Erreur : " << pID->m_nValue << " n'est pas un identifiant de lumière";
+		m_pConsole->Println(oss.str());
+	}
 }
 
 void CreateLight(IScriptState* pState)
@@ -4200,6 +4216,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
 	m_pScriptManager->RegisterFunction("SetLightAmbient", SetLightAmbient, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetLightSpecular", SetLightSpecular, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);

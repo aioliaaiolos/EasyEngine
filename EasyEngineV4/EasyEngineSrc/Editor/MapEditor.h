@@ -59,6 +59,7 @@ private:
 	void							SetEditionMode(bool bEditionMode) override;
 	void							CollectSelectableEntity(vector<IEntity*>& entities) override;
 	void							OnEntityRemoved(IEntity* pEntity) override;
+	void							ExportToJson(string sFileName, ILoader::CSceneInfos& infos);
 
 	struct AdaptGroundThreadStruct
 	{

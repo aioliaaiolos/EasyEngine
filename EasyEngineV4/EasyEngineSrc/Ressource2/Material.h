@@ -37,6 +37,7 @@ public:
 		string					m_sName;
 		IShader*				m_pShader = nullptr;
 		IRenderer&				m_oRenderer;
+		int						m_nID;
 		Desc(IRenderer& oRenderer, IShader* pShader);
 	};
 								CMaterial(const Desc& oDesc);
@@ -53,8 +54,11 @@ public:
 	void						SetDiffuse(float r, float g, float b, float a) override;
 	void						SetSpecular(float r, float g, float b, float a) override;
 	void						SetSpecular(const CVector& pos) override;
+	float						GetShininess() override;
 	void						SetShininess(float shininess) override;
 	CVector						GetSpecular() override;
+	int							GetID();
+	void						SetID(int nID);
 
 private:
 	std::vector< float >		m_vAmbient;
@@ -67,6 +71,7 @@ private:
 	vector<float>				m_vAdditionalColor;
 	bool						m_bUseAdditiveColor;
 	IRenderer&					m_oRenderer;
+	int							m_nID = -1;
 };
 
 

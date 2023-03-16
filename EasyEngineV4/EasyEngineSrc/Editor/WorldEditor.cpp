@@ -24,7 +24,8 @@ CWorldEditor::CWorldEditor(EEInterface& oInterface, ICameraManager::TCameraType 
 	IWorldEditor(oInterface),
 	CSpawnableEditor(oInterface, cameraType),
 	m_oSceneManager(static_cast<ISceneManager&>(*oInterface.GetPlugin("SceneManager"))),
-	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem")))	
+	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
+	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager")))
 {
 	m_eEditingMode = TEditingType::eXForm;
 	m_pScene = m_oSceneManager.GetScene("Game");
@@ -431,9 +432,7 @@ void CWorldEditor::SaveToJson(string sFileName)
 		doc.ParseStream(isw);
 
 		if (!doc.IsObject())
-		{
 			doc.SetObject();
-		}
 		Value world(kObjectType);
 
 		Value maps(kArrayType);
@@ -603,7 +602,6 @@ int CWorldEditor::SpawnItem(string sItemName)
 {
 	if (!m_bEditionMode)
 		throw CEException("You first have to setup in editor mode by editing a world before to spawn an item");
-	//	SetEditionMode(true);
 	IItem* pItem = m_oEntityManager.CreateItemEntity(sItemName);
 	if (pItem) {
 		pItem->Load();
@@ -671,6 +669,17 @@ void CWorldEditor::GetRelativeDatabasePath(string worldName, string& path, strin
 
 void CWorldEditor::OnSceneLoaded()
 {
+	if (!m_bLoadMapLights) {
+		for (unsigned int i = 0; i < m_pScene->GetChildCount(); i++) {
+			ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pScene->GetChild(i));
+			if (pLightEntity) {
+				pLightEntity->Unlink();
+				delete pLightEntity;
+			}
+		}
+		m_oRessourceManager.RemoveAllLights(m_oRenderer);
+	}
+
 	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
 		IEntity* pEntity = m_oEntityManager.BuildCharacterFromDatabase(itCharacter->first, m_pScene);
 		if (pEntity) {

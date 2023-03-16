@@ -16,6 +16,13 @@
 
 #include <algorithm>
 
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+#include <rapidjson/prettywriter.h>
+using namespace rapidjson;
 
 CMapEditor::CMapEditor(EEInterface& oInterface, ICameraManager::TCameraType cameraType) :
 ISpawnableEditor(oInterface),
@@ -288,6 +295,41 @@ void CMapEditor::SaveMap(string sFileName, float fBias)
 	ClearCharacters(si.m_vObject);
 	m_oLoaderManager.Export(sFileName, si);
 	m_pScene->CreateCollisionMaps(fBias, 200);
+}
+
+void CMapEditor::ExportToJson(string sFileName, ILoader::CSceneInfos& infos)
+{
+	rapidjson::Document doc;
+	std::ifstream ifs(sFileName);
+	if (!ifs.eof())
+	{
+		rapidjson::IStreamWrapper isw(ifs);
+		doc.ParseStream(isw);
+
+		if (!doc.IsObject())
+			doc.SetObject();
+		Value map(kObjectType);
+		Value sceneFileName(kStringType), originalSceneFileName(kStringType), name(kStringType), useDisplacementMap(kNumberType), diffuseFileName(kStringType), objectCount(kNumberType), mapLength(kNumberType), mapHeight(kNumberType);
+		sceneFileName.SetString(infos.m_sSceneFileName.c_str(), doc.GetAllocator());
+		originalSceneFileName.SetString(infos.m_sOriginalSceneFileName.c_str(), doc.GetAllocator());
+		name.SetString(infos.m_sName.c_str(), doc.GetAllocator());
+		useDisplacementMap.SetBool(infos.m_bUseDisplacementMap);
+		diffuseFileName.SetString(infos.m_sDiffuseFileName.c_str(), doc.GetAllocator());
+		objectCount.SetInt(infos.m_vObject.size());
+		mapLength.SetInt(infos.m_nMapLength);
+		mapHeight.SetDouble(infos.m_fMapHeight);
+		for (int i = 0; i < infos.m_vObject.size(); i++) {
+			//ExportToJson()
+		}
+	}
+
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	writer.SetIndent('\t', 1);
+	doc.Accept(writer);
+	std::ofstream ofs(sFileName);
+	ofs << buffer.GetString();
+	ofs.close();
 }
 
 void CMapEditor::Load(string sFileName)

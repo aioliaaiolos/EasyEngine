@@ -142,7 +142,6 @@ public:
 	CTopicInfo&	GetTopicInfos();
 	void		SetTopicInfos(const CTopicInfo& oTopicInfos);
 	int			GetChoiceNumber();
-	//void		SetChoiceNumber(int nChoiceNumber);
 
 private:
 	CTopicInfo	m_oTopicInfos;

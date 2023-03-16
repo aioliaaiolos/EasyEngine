@@ -147,7 +147,9 @@ void CItem::DrawBoundingBox(bool bDraw)
 
 const CMatrix& CItem::GetWorldMatrix() const
 {
-	return m_pModel->GetWorldMatrix();
+	if(m_pModel)
+		return m_pModel->GetWorldMatrix();
+	return CObject::GetWorldMatrix();
 }
 
 CEntity* CItem::GetModel()

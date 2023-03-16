@@ -18,6 +18,7 @@ PFNGLGETPROGRAMIVARBPROC glGetProgramiv = NULL;
 PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog = NULL;
 PFNGLGETSHADERIVPROC glGetShaderiv = NULL;
 PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = NULL;
+PFNGLUNIFORM1IVPROC glUniform1iv = NULL;
 PFNGLUNIFORM2FVPROC glUniform2fv = NULL;
 PFNGLUNIFORM3FVPROC glUniform3fv = NULL;
 PFNGLUNIFORM4FVPROC glUniform4fv = NULL;
@@ -96,6 +97,7 @@ void InitExtensions()
 	glGetProgramiv	= reinterpret_cast< PFNGLGETPROGRAMIVARBPROC >			( wglGetProcAddress( "glGetProgramiv" ) );
 	glGetProgramInfoLog = reinterpret_cast< PFNGLGETPROGRAMINFOLOGPROC >	( wglGetProcAddress( "glGetProgramInfoLog" ) );
 	glGetUniformLocation = reinterpret_cast< PFNGLGETUNIFORMLOCATIONPROC >	( wglGetProcAddress( "glGetUniformLocation" ) );
+	glUniform1iv = reinterpret_cast<PFNGLUNIFORM1IVPROC>					( wglGetProcAddress( "glUniform1iv"));
 	glUniform2fv = reinterpret_cast< PFNGLUNIFORM2FVPROC >					( wglGetProcAddress( "glUniform2fv" ) );
 	glUniform3fv = reinterpret_cast< PFNGLUNIFORM3FVPROC >					( wglGetProcAddress( "glUniform3fv" ) );
 	glUniform4fv = reinterpret_cast< PFNGLUNIFORM4FVPROC >					( wglGetProcAddress( "glUniform4fv" ) );
@@ -109,6 +111,6 @@ void InitExtensions()
 	glEnableVertexAttribArray = reinterpret_cast< PFNGLENABLEVERTEXATTRIBARRAYPROC > ( wglGetProcAddress( "glEnableVertexAttribArray" ) );
 	glDisableVertexAttribArray = reinterpret_cast< PFNGLDISABLEVERTEXATTRIBARRAYPROC > ( wglGetProcAddress( "glDisableVertexAttribArray" ) );
 	glVertexAttribPointer = reinterpret_cast< PFNGLVERTEXATTRIBPOINTERPROC > ( wglGetProcAddress( "glVertexAttribPointer" ) );
-	glUniform1fv = reinterpret_cast< PFNGLUNIFORM1FVPROC  > ( wglGetProcAddress( " glUniform1fv" ) );	
+	glUniform1fv = reinterpret_cast< PFNGLUNIFORM1FVPROC  > ( wglGetProcAddress( "glUniform1fv" ) );	
 	glActiveTexture = reinterpret_cast< PFNGLACTIVETEXTUREPROC > ( wglGetProcAddress( "glActiveTexture" ) );
 }

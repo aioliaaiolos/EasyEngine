@@ -164,7 +164,11 @@
 					"Comp": "=="
 				}
 			],
-			"Actions":["AddCharacterItem(\"Player\", \"Pass-Hospital\")"]
+			"Actions":[
+				"AddCharacterItem(\"ranja\", \"Opium_Fiole\")",
+				"RemoveCharacterItem(\"Player\", \"Opium_Fiole\")",
+				"AddCharacterItem(\"Player\", \"Pass-Hospital\")"
+			]
 		},
 		
 		{

@@ -54,7 +54,7 @@ function onLoadingGame()
 	SetBkgColor(0, 0, 0);
 	r=CreateRepere();
 
-	l=CreateLightw("omni", 1.0)
+	l=CreateLightw("omni", 1.0);
 	SetEntityPos(l, 0.0, 700.0, 0.0);
 	SetCameraType("free");
 
@@ -73,7 +73,7 @@ function onLoadingGame()
 	//LoadWorld("TestHopital");
 	
 	//EditWorld("testLoot");	
-	LoadWorld("", "OnWorldLoaded");
+	//LoadWorld("", "OnWorldLoaded");
 	//LoadWorld("empty", "OnWorldLoaded");
 	//EditWorld("empty");
 	

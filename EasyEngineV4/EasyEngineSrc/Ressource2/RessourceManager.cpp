@@ -224,6 +224,10 @@ IAnimatableMesh* CRessourceManager::CreateMesh( ILoader::CAnimatableMeshData& oD
 			CollectMaterials(m_oInterface, mi.m_oMaterialInfos, pShader, oDesc.m_mMaterials );
 		else
 			oDesc.m_mMaterials[ 0 ] = static_cast< CMaterial* >( pMaterial );
+
+		if (oDesc.m_mMaterials.size() > 8) {
+			throw CEException("Error in IAnimatableMesh* CRessourceManager::CreateMesh() : material count cannot be higher than 8");
+		}
 		if (pMaterial && !static_cast< CMaterial* >(pMaterial)->GetShader())
 			pMaterial->SetShader(pShader);
 		if( oData.m_bMultiMaterialActivated )
@@ -526,7 +530,8 @@ CMaterial* CRessourceManager::CreateMaterial(EEInterface& oInterface, const ILoa
 			}
 			pTexture->SetShader( pShader );
 			oMatDesc.m_pDiffuseTexture = pTexture;
-		}		
+		}
+		oMatDesc.m_nID = pMaterialInfos->m_nID;
 	}
 	return new CMaterial(oMatDesc);
 }

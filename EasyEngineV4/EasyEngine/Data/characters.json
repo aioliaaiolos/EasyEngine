@@ -87,9 +87,9 @@
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
 			"Specular": [
-				0.0,
-				0.0,
-				0.0
+				0.20000000298023224,
+				0.20000000298023224,
+				0.20000000298023224
 			],
 			"AnimationSpeeds": [
 				{

@@ -33,7 +33,9 @@ public:
 	virtual void		Update() = 0;
 	void				SetShader(IShader* pShader);
 	unsigned int		GetFrameBufferObjectId();
-	void				SetUnitTexture(int nUnitTexture);
+	int					GetUnitTexture() override;
+	void				SetUnitTexture(int nUnitTexture) override;
+	int					GetID() override;
 	void				SetUnitName(string sUnitName);
 
 protected:

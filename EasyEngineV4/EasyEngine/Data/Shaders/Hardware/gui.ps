@@ -1,5 +1,5 @@
 uniform sampler2D baseMap;
-uniform int ValueTexture0;
+uniform int TextureCount;
 varying vec2 Texcoord;
 
 uniform float fMultimaterial;
@@ -8,7 +8,7 @@ void main()
 {
 	if( fMultimaterial != 1 )
 	{
-		if ( ValueTexture0 != 0 )
+		if ( TextureCount != 0 )
 			gl_FragColor = texture2D( baseMap, Texcoord );
 	}
 	else

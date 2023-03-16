@@ -40,6 +40,7 @@ private:
 	void																CollectSelectableEntity(vector<IEntity*>& entities) override;
 	void																GetRelativeDatabasePath(string worldName, string& path, string sExtension);
 	void																OnSceneLoaded();
+	IRessourceManager&													m_oRessourceManager;
 	static void															HandleSceneLoadingComplete(IScene::TSceneState state, CPlugin* pWorldEditor);
 
 	IFileSystem&														m_oFileSystem;
@@ -52,4 +53,5 @@ private:
 	vector<IEntity*>													m_vEntities;
 	string																m_sCurrentWorldName;
 	const string														m_sDatabaseFileName = "world";
+	bool																m_bLoadMapLights = true;
 };

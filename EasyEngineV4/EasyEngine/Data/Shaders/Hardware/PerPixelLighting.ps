@@ -1,11 +1,14 @@
-#define MULTIMATERIAL
+#extension GL_EXT_gpu_shader4 : enable
 
 uniform sampler2D baseMap;
-uniform int ValueTexture0;
+uniform int TextureCount;
 uniform float LightCount;
 
-uniform float fMultimaterial;
+uniform int nMaterialCount;
 uniform sampler1D MaterialMap;
+uniform vec4 MaterialArray[16];
+uniform float ShininessArray[4];
+uniform sampler2D baseMapArray[16];
 uniform float ArraySize;
 
 varying vec4 vModelVertexPos;
@@ -13,61 +16,69 @@ varying vec3 N;
 varying vec3 V;
 varying vec2 Texcoord;
 
-varying float nPSMatID;
+varying float fPSMatID;
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor );
 vec4 GetLightInfluence2( gl_LightSourceParameters light, vec4 vMatAmbient, vec4 vMatDiffuse, vec4 vMatSpecular, vec4 vMatEmissive, float fMatShininess, vec4 vModelVertexPos, vec3 N, vec3 V);
 float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light );
+vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor);
 
 void main()
 {
 	gl_FragColor = vec4( 0,0,0,0);
-	int bMultimaterial = int( fMultimaterial );
-	if ( bMultimaterial != 1 )
+	if ( nMaterialCount == 1 )
 	{
 		vec4 diffuseColor;
-		if ( ValueTexture0 != 0 )
+		if ( TextureCount != 0 )
 			diffuseColor = texture2D( baseMap, Texcoord );
 		else
 			diffuseColor = gl_FrontMaterial.diffuse;
 		for ( int i = 0; i < 8; i++ )
 			gl_FragColor += GetLightInfluence( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
 	}
-	
 	else
-	{	
-		float fID = round(nPSMatID);
-		vec4 vAmbient = texture1D(MaterialMap, (fID*4. ) / ArraySize);
-		vec4 vDiffuse = texture1D(MaterialMap, (fID*4. + 1.) / ArraySize);
-		vec4 vSpecular = texture1D(MaterialMap, (fID*4. + 2.) / ArraySize);
-		vec4 vEmissive = texture1D(MaterialMap, (fID*4. + 3.) / ArraySize);
+	{
+		vec4 diffuseColor;
+		int nPSMatID = int(round(fPSMatID));
 		
-		gl_FragColor = vec4(0.);
-		for ( int i = 0; i < 1; i++ )
-			gl_FragColor += GetLightInfluence2( gl_LightSource[i], vAmbient, vDiffuse, vSpecular, vEmissive, 10000., vModelVertexPos, N, V );
+		if(nPSMatID < nMaterialCount) {
+			if ( TextureCount != 0 )
+				diffuseColor = texture2D( baseMapArray[nPSMatID], Texcoord );
+		}
+		
+		for ( int i = 0; i < 8; i++ ) {
+			gl_FragColor += GetLightInfluenceMultiMaterial( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
+		}
 	}
+}
+
+vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor)
+{
+	const int MATERIAL_SIZE = 16;
+	int nPSMatID = int(round(fPSMatID));	
+	vec4 matSpecular = MaterialArray[nPSMatID * 4 + 2];
+	float shininess = ShininessArray[nPSMatID];
+	
+	vec4 vAmbient = diffuseColor * light.ambient;
+	vec3 L = normalize(light.position - vPos).xyz;
+	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
+	vec3 R = reflect( -L, N );
+	float factor = pow(max(dot(R,V),0.), shininess);
+	
+	vec4 vSpecular = factor * matSpecular * light.specular;
+	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
+	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
 }
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
-	vec4 vAmbient = gl_FrontMaterial.ambient * light.ambient;
+vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
 	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
 	vec3 R = reflect( -L, N );
 	vec4 vSpecular = pow(max(dot(R,V),0.), gl_FrontMaterial.shininess) * gl_FrontMaterial.specular * light.specular;
 	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
 	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
-}
-
-vec4 GetLightInfluence2(gl_LightSourceParameters light, vec4 vMatAmbient, vec4 vMatDiffuse, vec4 vMatSpecular, vec4 vMatEmissive, float fMatShininess, vec4 vPos, vec3 N, vec3 V)
-{
-	vec4 vAmbient = vMatAmbient * light.ambient;
-	vec3 L = normalize(light.position - vPos).xyz;
-	vec4 vDiffuse = max(dot(L,N), 0.) * vMatDiffuse * light.diffuse;
-	vec3 R = reflect( -L, N );
-	vec4 vSpecular = pow(max(dot(R,V),0.), fMatShininess) * vMatSpecular * light.specular;
-	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
-	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );	
 }
 
 float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light )

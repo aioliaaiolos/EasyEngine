@@ -52,7 +52,6 @@ void CBMELoader::Load(string sFileName, ILoader::IRessourceInfos& ri, IFileSyste
 		exception e(sMessage.c_str());
 		throw e;
 	}
-	pData->m_bMultiMaterialActivated = false;
 	m_nFileOffset = 0;
 	FILE* pFile = oFileSystem.OpenFile(sFileName, "rb");
 	if (!pFile)
@@ -84,8 +83,8 @@ void CBMELoader::Load(string sFileName, ILoader::IRessourceInfos& ri, IFileSyste
 		for (int iMesh = 0; iMesh < nObjectCount; iMesh++)
 		{
 			CMeshInfos mi;
-			LoadMesh(fs, mi);
 			mi.m_sFileName = sFileName;
+			LoadMesh(fs, mi);
 			pData->m_vMeshes.push_back(mi);
 		}
 
@@ -95,7 +94,7 @@ void CBMELoader::Load(string sFileName, ILoader::IRessourceInfos& ri, IFileSyste
 
 void CBMELoader::LoadMesh( CBinaryFileStorage& fs, CMeshInfos& mi )
 {
-	fs >> mi.m_nParentBoneID ;	
+	fs >> mi.m_nParentBoneID;
 	fs >> mi.m_sName;
 	fs >> mi.m_oOrgMaxPosition;
 	LoadMaterial( fs, mi.m_oMaterialInfos );
@@ -107,7 +106,7 @@ void CBMELoader::LoadMesh( CBinaryFileStorage& fs, CMeshInfos& mi )
 	int geomType;
 	fs >> geomType;
 	if (geomType != IGeometry::eBox) {
-		CEException e("CBMELoader::LoadMesh() : Bad file format, box type expected");
+		CEException e("Error in CBMELoader::LoadMesh() : Bad file format for '" + mi.m_sFileName + "', box type expected");
 		throw e;
 	}
 	fs >> *mi.m_pBoundingBox;
@@ -141,13 +140,14 @@ void CBMELoader::LoadGeometry( CBinaryFileStorage& fs, CMeshInfos& mi )
 	fs >> mi.m_vVertex >> mi.m_vIndex;
 	int nMultiMaterial;	
 	fs >> nMultiMaterial;
+	int buff;
 	if( nMultiMaterial == 1 )
 	{
 		int nFaceCount = mi.m_vIndex.size() / 3;
-		fs.Load( mi.m_vFaceMaterialID, nFaceCount );
+		fs >> mi.m_vFaceMaterialID;
 	}	
 	fs >> mi.m_vNormalFace >> mi.m_vNormalVertex;
-	if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" )
+	if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists)
 		fs >> mi.m_vUVVertex >> mi.m_vUVIndex;
 }
 
@@ -597,7 +597,7 @@ void CBMELoader::ExportMeshInfos( const ILoader::CMeshInfos& mi, CBinaryFileStor
 			fs << nMultiMaterial;
 		fs << mi.m_vNormalFace << mi.m_vNormalVertex;
 
-		if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" && mi.m_oMaterialInfos.m_bExists )
+		if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists )
 			fs << mi.m_vUVVertex << mi.m_vUVIndex;
 		fs << *mi.m_pBoundingBox;
 		ExportSkinningInfos( mi, fs );
@@ -623,7 +623,7 @@ void CBMELoader::ExportMaterialInfos( const ILoader::CMaterialInfos& mi, CBinary
 		if( mi.m_vSubMaterials.size() > 0 )
 			fs << 1 << mi.m_nID;
 		else
-			fs << 0;
+			fs << 1 << mi.m_nID;
 		fs << mi.m_vAmbient << mi.m_vDiffuse << mi.m_vSpecular << mi.m_fShininess;
 		fs <<  mi.m_sName << mi.m_sDiffuseMapName;
 		fs << (unsigned int)mi.m_vSubMaterials.size();

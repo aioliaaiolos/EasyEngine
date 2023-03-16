@@ -1,12 +1,9 @@
 #define MULTIMATERIAL
 
 uniform sampler2D baseMap;
-uniform sampler2D heightMap;
-uniform int ValueTexture0;
+uniform int TextureCount;
 uniform float LightCount;
 
-uniform sampler1D MaterialMap;
-uniform float ArraySize;
 uniform float tiling;
 
 varying vec4 vModelVertexPos;
@@ -27,7 +24,7 @@ void main()
 	gl_FragColor = vec4( 0,0,0,0);
 	
 	vec4 diffuseColor;
-	if ( ValueTexture0 != 0 )
+	if ( TextureCount > 0 )
 		diffuseColor = texture2D( baseMap, tiling * Texcoord );
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;

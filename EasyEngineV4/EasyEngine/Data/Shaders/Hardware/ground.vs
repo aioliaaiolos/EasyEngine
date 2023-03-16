@@ -20,13 +20,14 @@ void main()
 	tVertex.y = groundHeight * (texture2D( heightMap, gl_MultiTexCoord0.xy )-0.5);
 	
 	// test	
+	/*
 	if( (gl_MultiTexCoord0.x > 1.) || (gl_MultiTexCoord0.x < 0.)){
 		tVertex.y = -999999999;
 	}
 	
 	if(gl_MultiTexCoord0.y > 1. || gl_MultiTexCoord0.y < 0.){
 		tVertex.y = -999999999;
-	}
+	}*/
 	// fin test
 	
 	

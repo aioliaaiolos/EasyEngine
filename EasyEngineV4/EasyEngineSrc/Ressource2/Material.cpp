@@ -29,7 +29,8 @@ CMaterial::CMaterial(const Desc& oDesc) :
 m_pDiffuseTexture(NULL),
 m_pShader( oDesc.m_pShader ),
 m_bUseAdditiveColor(false),
-m_oRenderer(oDesc.m_oRenderer)
+m_oRenderer(oDesc.m_oRenderer),
+m_nID(oDesc.m_nID)
 {
 	m_vAmbient = oDesc.m_vAmbient;
 	m_vDiffuse = oDesc.m_vDiffuse;
@@ -58,7 +59,7 @@ void CMaterial::Update()
 	else
 	{
 		m_oRenderer.BindTexture( 0, 0, IRenderer::T_2D );
-		m_pShader->SendUniformValues( "ValueTexture0", 0 );
+		m_pShader->SendUniformValues( "TextureCount", 0 );
 	}	
 #ifdef OLD_VERSION
 	if (!m_bUseAdditiveColor) {
@@ -181,6 +182,11 @@ void CMaterial::SetSpecular(const CVector& pos)
 	m_vSpecular.push_back(1.f);
 }
 
+float CMaterial::GetShininess()
+{
+	return m_fShininess;
+}
+
 void CMaterial::SetShininess(float shininess)
 {
 	m_fShininess = shininess;
@@ -189,4 +195,14 @@ void CMaterial::SetShininess(float shininess)
 CVector CMaterial::GetSpecular()
 {
 	return CVector(m_vSpecular[0], m_vSpecular[1], m_vSpecular[2], 1.f);
+}
+
+int CMaterial::GetID()
+{
+	return m_nID;
+}
+
+void CMaterial::SetID(int nID)
+{
+	m_nID = nID;
 }

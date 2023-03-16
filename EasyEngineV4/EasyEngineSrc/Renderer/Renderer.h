@@ -171,6 +171,7 @@ public:
 	void						GetNonIndexedVertexBuffer( const std::vector< float >& vVertexBuffer, const std::vector< unsigned int >& vIndexBuffer, std::vector< float >& vOutVertexBuffer );
 	void						SetCurrentBuffer( int nBufferID );
 	void						FillBuffer(const std::vector< float >& vData, int nBufferID, int nOffset = 0 ) override;
+	void						FillBuffer(const std::vector< unsigned int>& vData, int nBufferID, int nOffset = 0) override;
 	void						FillBuffer(const vector< CMatrix >& vMatrix, int nBufferID, int nOffset = 0) override;
 	void						AppendBuffer( const std::vector< float >& vData );
 
@@ -190,6 +191,8 @@ public:
 	virtual void				UseProgram( unsigned int nProgramID ) const;
 	virtual unsigned int		GetUniformID( unsigned int nProgramID, const std::string& sVariableName ) const;
 	virtual unsigned int		GetAttributeID( unsigned int nProgramID, const std::string& sVariableName ) const;
+	void						SendUniform1fv(unsigned int id, int nValueCount, std::vector<float>& vVector) const;
+	void						SendUniform1iv(unsigned int id, int nValueCount, std::vector<int>& vVector) const;
 	void						SendUniform3f( unsigned int nUniformID, float f1, float f2, float f3 );
 	void						SendUniform4f( unsigned int nUniformID, float f1, float f2, float f3, float f4 );
 	void						SendUniform2fv( unsigned int nUniformID, int nCount, std::vector< float >& vValues ) const;
