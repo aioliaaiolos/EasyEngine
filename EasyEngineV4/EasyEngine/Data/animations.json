@@ -60,7 +60,7 @@
 				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon-m-Part2"},
 				{"Original": "Original-m"},
 				{"Punished": "Original-m"},
-				{"Run": "run-m", "Speed": 1.5},
+				{"Run": "run-m", "Speed": 2.0},
 				{"Sexy": "Original-m"},
 				{"Seat": "Original-m"},
 				{"Stand": "stand-m"},

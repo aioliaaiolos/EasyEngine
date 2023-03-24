@@ -2,6 +2,7 @@
 
 uniform sampler2D baseMap;
 uniform int TextureCount;
+uniform int LightCount;
 #ifdef MULTIMATERIAL
 uniform int nMaterialCount;
 #endif // MULTIMATERIAL
@@ -27,7 +28,7 @@ void main()
 		diffuseColor = texture2D( baseMap, Texcoord );
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;
-	for ( int i = 0; i < 8; i++ )
+	for ( int i = 0; i < LightCount; i++ )
 		gl_FragColor += GetLightInfluence( gl_LightSource[i], vVertexPos, N, V, diffuseColor );
 		
 #ifdef MULTIMATERIAL

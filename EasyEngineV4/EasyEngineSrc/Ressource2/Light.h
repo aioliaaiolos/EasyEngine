@@ -1,9 +1,3 @@
-#ifndef LIGHT_CPP
-#ifndef RESSOURCEMANAGER_CPP
-#error
-#endif
-#endif
-
 #ifndef LIGHT_H
 #define LIGHT_H
 
@@ -38,13 +32,15 @@ public:
 	bool						IsEnabled();
 	void						Enable(bool enable);
 	void						SetShader( IShader* pShader );
+	float						GetIntensity() override;
 	void						SetIntensity( float fIntensity ) override;
+	float						GetAmbient() override;
 	void						SetAmbient(float fAmbient) override;
 	void						SetSpecular(float fAmbient) override;
-	float						GetIntensity();
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }
 	static void					RemoveAllLights(IRenderer& oRenderer);
+	static int					GetLightCount();
 
 private:
 	static unsigned int			s_nCurrentLightID;

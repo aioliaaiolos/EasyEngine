@@ -50,6 +50,7 @@ void CWorldEditor::ClearWorld()
 	m_mAreaMatrices.clear();
 	m_mItemMatrices.clear();
 	m_oEntityManager.Clear();
+	m_vLights.clear();
 	m_pEditingEntity = nullptr;
 	m_mMaps.clear();
 }
@@ -410,6 +411,18 @@ void CWorldEditor::LoadFromJson(string sFileName)
 				}
 			}
 		}
+		
+		if (world.HasMember("Lights")) {
+			Value& lights = world["Lights"];
+			for (unsigned int iLight = 0; iLight < lights.Size(); iLight++) {
+				Value& light = lights[iLight];
+				Value& position = light["Position"];
+				Value& intensity = light["Intensity"];
+				Value& ambient = light["Ambient"];
+				CVector pos(position["x"].GetFloat(), position["y"].GetFloat(), position["z"].GetFloat());
+				m_vLights.push_back(pair<CVector, pair<float, float>>{ pos, { intensity.GetDouble(), ambient.GetFloat() } });
+			}
+		}
 	}
 
 	m_pEditorCamera->Link(m_pScene);
@@ -512,11 +525,35 @@ void CWorldEditor::SaveToJson(string sFileName)
 			items.PushBack(item, doc.GetAllocator());
 		}
 
+		Value lights(kArrayType);
+		for (unsigned int i = 0; i < m_pScene->GetChildCount(); i++) {
+			Value light(kObjectType);
+			ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pScene->GetChild(i));
+			if (pLightEntity) {
+				Value position(kObjectType);
+				CVector pos;
+				pLightEntity->GetWorldPosition(pos);
+				position.AddMember("x", pos.m_x, doc.GetAllocator());
+				position.AddMember("y", pos.m_y, doc.GetAllocator());
+				position.AddMember("z", pos.m_z, doc.GetAllocator());
+				Value intensity(kNumberType);
+				ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
+				intensity.SetDouble(pLight->GetIntensity());
+				Value ambient(kNumberType);
+				ambient.SetDouble(pLight->GetAmbient());
+				light.AddMember("Position", position, doc.GetAllocator());
+				light.AddMember("Intensity", intensity, doc.GetAllocator());
+				light.AddMember("Ambient", ambient, doc.GetAllocator());
+				lights.PushBack(light, doc.GetAllocator());
+			}
+		}
+
 		world.AddMember("Maps", maps, doc.GetAllocator());
 		world.AddMember("Characters", characters, doc.GetAllocator());
 		world.AddMember("StaticEntities", entities, doc.GetAllocator());
 		world.AddMember("Areas", areas, doc.GetAllocator());
 		world.AddMember("Items", items, doc.GetAllocator());
+		world.AddMember("Lights", lights, doc.GetAllocator());
 
 		if (doc.HasMember("World"))
 			doc["World"] = world;
@@ -736,6 +773,15 @@ void CWorldEditor::OnSceneLoaded()
 			}
 		}
 	}
+	for (pair<CVector, pair<float, float>>& light : m_vLights) {
+		ILightEntity* pLightEntity = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1, 1), IRessource::TLight::OMNI, light.second.first);
+		pLightEntity->Link(m_pScene);
+		pLightEntity->SetLocalPosition(light.first);
+		ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
+		pLight->SetAmbient(light.second.second);
+		m_vEntities.push_back(pLightEntity);
+	}
+	
 	if(m_bEditionMode)
 		m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 }

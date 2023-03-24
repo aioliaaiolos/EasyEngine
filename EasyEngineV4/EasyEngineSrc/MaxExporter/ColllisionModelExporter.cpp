@@ -155,22 +155,13 @@ void CollisionModelExporter::StoreBoxInfos(INode* pMesh, IBox& box)
 	Box3 bbox = mesh.getBoundingBox();
 	CMatrix tm;
 	MaxMatrixToEngineMatrix(pMesh->GetObjectTM(0), tm);
-	CMatrix m = m_oMaxToOpenglMatrix * tm, mInv;
+	CMatrix m = tm;
 	CVector boxMin(bbox.Min().x, bbox.Min().y, bbox.Min().z);
 	CVector boxDim;
 	ConvertPoint3ToCVector(bbox.Max() - bbox.Min(), boxDim);
 	
-	CVector dim;
-	dim.m_x = boxDim.m_x;
-	float h = boxDim.m_y;
-	dim.m_y = boxDim.m_z;
-	dim.m_z = h;
-	
-	CVector vMin(boxMin.m_x, boxMin.m_z - dim.m_y/2.f, boxMin.m_y);
-	box.Set(vMin, dim);
-	float temp = tm.m_13;
-	tm.m_13 = tm.m_23 + dim.m_y / 2.f;
-	tm.m_23 = temp;
+	CVector vMin(-boxDim.m_x / 2.f, -boxDim.m_y / 2.f, -boxDim.m_z / 2.f);
+	box.Set(vMin, boxDim);
 	box.SetTM(tm);
 }
 
@@ -180,7 +171,11 @@ void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 	const wchar_t* wName = pMesh->GetName();
 	string sName;
 	CStringUtils::ConvertWStringToString(wName, sName);
-	if (sName.find("Wall") == -1 && sName.find("Door") == -1 && sName.find("Roof") == -1 && sName.find("Floor") == -1)
+	if ( (sName.find("Wall") == -1) && 
+		(sName.find("Door") == -1) && 
+		(sName.find("Roof") == -1) && 
+		(sName.find("Floor") == -1) && 
+		(sName.find("Ground") == -1))
 		return;
 	box.SetName(sName);
 
@@ -192,17 +187,7 @@ void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 	CVector boxMin(bbox.Min().x, bbox.Min().y, bbox.Min().z);
 	CVector boxDim;
 	ConvertPoint3ToCVector(bbox.Max() - bbox.Min(), boxDim);
-
-	CVector dim;
-	dim.m_x = boxDim.m_x;
-	float h = boxDim.m_y;
-	dim.m_y = boxDim.m_z;
-	dim.m_z = h;
-
-	CVector vMin(boxMin.m_x, boxMin.m_z, boxMin.m_y);
-	box.Set(vMin, dim);
-	float temp = tm.m_13;
-	tm.m_13 = tm.m_23;
-	tm.m_23 = temp;
+	CVector vMin(boxMin.m_x, boxMin.m_y, boxMin.m_z);
+	box.Set(vMin, boxDim);	
 	box.SetTM(tm);
 }

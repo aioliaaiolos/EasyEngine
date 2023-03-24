@@ -437,7 +437,11 @@ bool IsIntoYPlanGeneratrice(const CVector& oEntityPos, const CVector& oEntityDim
 
 bool IsCollisionWithPlanYUp(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)
 {
-	return ((oEntityPos.m_y + oEntityDim.m_y / .2f > oObstacleHalfDim.m_y) && (oEntityPos.m_y - oEntityDim.m_y / 2.f > -oObstacleHalfDim.m_y));
+	float bottomEntity = oEntityPos.m_y - oEntityDim.m_y / 2.f;
+	float bottomPart = bottomEntity + oObstacleHalfDim.m_y;
+	float upPart = oEntityPos.m_y + oEntityDim.m_y / 2.f - oObstacleHalfDim.m_y;
+	const float margin = 1.f;
+	return ( ((upPart > 0) && (bottomPart > 0)) || (upPart > bottomPart) );
 }
 
 bool IsCollisionWithPlanYDown(const CVector& oEntityPos, const CVector& oEntityDim, CVector& oObstacleHalfDim)

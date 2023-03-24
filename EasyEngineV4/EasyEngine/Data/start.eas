@@ -74,13 +74,14 @@ function onLoadingGame()
 	
 	//EditWorld("testLoot");	
 	//LoadWorld("", "OnWorldLoaded");
-	//LoadWorld("empty", "OnWorldLoaded");
 	//EditWorld("empty");
+	//LoadWorld("empty", "");
 	
 	//EditWorld("");
 	//LoadWorld("", "OnWorldLoaded");
 	//LoadWorld("empty", "OnWorldLoaded");
-	
+	LoadWorld("emptyHopital", "");
+	//EditWorld("emptyHopital");
 	
 	
 	//SetAnimationSpeed(GetEntityID("Player"), "run", 4.0);

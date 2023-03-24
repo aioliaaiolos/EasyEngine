@@ -131,6 +131,7 @@ private:
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
 	map<string, CItem*>										m_mItems;
+	vector<ILight*>											m_vLights;
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

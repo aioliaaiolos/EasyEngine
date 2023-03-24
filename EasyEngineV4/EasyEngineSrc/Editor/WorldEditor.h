@@ -50,8 +50,9 @@ private:
 	map<string, vector<pair<IEntity*, CMatrix>>>						m_mEntityMatrices;
 	map<string, pair<IBoxEntity*, pair<CMatrix, CVector>>>				m_mAreaMatrices;
 	map<string, vector<pair<IItem*, CMatrix>>>							m_mItemMatrices;
+	vector<pair<CVector, pair<float, float>>>							m_vLights;
 	vector<IEntity*>													m_vEntities;
 	string																m_sCurrentWorldName;
 	const string														m_sDatabaseFileName = "world";
-	bool																m_bLoadMapLights = true;
+	bool																m_bLoadMapLights = false;
 };

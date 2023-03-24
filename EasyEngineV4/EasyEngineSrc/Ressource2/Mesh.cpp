@@ -9,6 +9,7 @@
 #include "IDrawTool.h"
 #include "RessourceManager.h"
 #include "Animation.h"
+#include "Light.h"
 #include "IShader.h"
 #include "define.h"
 #include "../Utils2/RenderUtils.h"
@@ -184,6 +185,8 @@ void CMesh::Update()
 {
 	m_pShader->Enable( true );
 	m_oRenderer.SetRenderType( m_eRenderType );
+
+	m_pShader->SendUniformValues("LightCount", CLight::GetLightCount());
 	
 	m_pShader->SendUniformValues("nMaterialCount", (int)m_mMaterials.size());
 	if(m_mMaterials.size() == 1 ) {

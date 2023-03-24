@@ -288,18 +288,20 @@ void CEntity::CreateAndLinkCollisionChildren(string sFileName)
 		for (int i = 0; i < m_pCollisionMesh->GetGeometryCount(); i++) {
 			IGeometry* pGeometry = m_pCollisionMesh->GetGeometry(i);
 			string sName;
-			pGeometry->GetName(sName);
-			CCollisionEntity* pChild = m_pEntityManager->CreateCollisionEntity(sName);
-			pChild->SetLocalMatrix(pGeometry->GetTM());
-			pChild->SetWorldMatrix(pGeometry->GetTM());
-			pChild->ForceAssignBoundingGeometry(pGeometry);
-			pChild->m_fBoundingSphereRadius = pGeometry->ComputeBoundingSphereRadius();
-			pChild->Link(this);
-			pChild->SetEntityID(sName);
-			if (sName.find("Door") != -1)
-				doors.push_back(pChild);
-			else if (sName.find("Wall") != -1)
-				walls.push_back(pChild);
+			pGeometry->GetName(sName);				
+			if (!sName.empty()) {
+				CCollisionEntity* pChild = m_pEntityManager->CreateCollisionEntity(sName);
+				pChild->SetLocalMatrix(pGeometry->GetTM());
+				pChild->SetWorldMatrix(pGeometry->GetTM());
+				pChild->ForceAssignBoundingGeometry(pGeometry);
+				pChild->m_fBoundingSphereRadius = pGeometry->ComputeBoundingSphereRadius();
+				pChild->Link(this);
+				pChild->SetEntityID(sName);
+				if (sName.find("Door") != -1)
+					doors.push_back(pChild);
+				else if (sName.find("Wall") != -1)
+					walls.push_back(pChild);
+			}
 		}
 		m_sTypeName = "building";
 		LinkDoorsToWalls(walls, doors);

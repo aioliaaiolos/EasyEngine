@@ -70,7 +70,9 @@ protected:
 class ILight : public IRessource
 {
 public:
+	virtual float GetIntensity() = 0;
 	virtual void SetIntensity(float fIntensity) = 0;
+	virtual float GetAmbient() = 0;
 	virtual void SetAmbient(float fAmbient) = 0;
 	virtual void SetSpecular(float fAmbient) = 0;
 	virtual void Enable(bool enable) = 0;

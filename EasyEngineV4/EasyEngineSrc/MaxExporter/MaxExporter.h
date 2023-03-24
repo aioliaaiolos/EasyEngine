@@ -87,6 +87,7 @@ protected:
 	void				GetMaterialTextureName(Mtl* pMaterial, std::string& sTextureName, int nMapIndex)const;
 	virtual void		StoreMeshToMeshInfos(Interface* pInterface, INode* pMesh, ILoader::CMeshInfos& mi) {}
 	virtual void		GetSkeleton(INode* pRoot, map< string, INode* >& mBone);
+	bool				IsCollisionMesh(string sObjectName);
 
 	static bool			IsBone(Object* pObject);
 	static bool			IsBone(INode* pNode);

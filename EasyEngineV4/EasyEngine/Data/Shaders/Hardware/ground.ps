@@ -2,7 +2,7 @@
 
 uniform sampler2D baseMap;
 uniform int TextureCount;
-uniform float LightCount;
+uniform int LightCount;
 
 uniform float tiling;
 
@@ -28,13 +28,13 @@ void main()
 		diffuseColor = texture2D( baseMap, tiling * Texcoord );
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;
-	for ( int i = 0; i < 8; i++ )
+	for ( int i = 0; i < LightCount; i++ )
 		gl_FragColor += GetLightInfluence( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
 }
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
-	vec4 vAmbient = gl_FrontMaterial.ambient * light.ambient;
+	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
 	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
 	vec3 R = reflect( -L, N );

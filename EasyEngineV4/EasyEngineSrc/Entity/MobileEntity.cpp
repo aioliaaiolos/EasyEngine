@@ -100,6 +100,7 @@ void CObject::ManageGravity()
 
 void CObject::UpdateCollision()
 {
+	const float MAX_HEIGHT_ABLE_TO_CLIMB = 50.f;
 	if (GetWeight() > 0) {
 		float h = GetHeight();
 
@@ -112,7 +113,7 @@ void CObject::UpdateCollision()
 		CMatrix oLocalMatrix = m_oLocalMatrix;
 
 		vector<INode*> entities;
-		GetEntitiesCollision(entities);		
+		GetEntitiesCollision(entities);
 
 		CVector localPos;
 		oLocalMatrix.GetPosition(localPos);
@@ -142,41 +143,55 @@ void CObject::UpdateCollision()
 				if (collisionFace != IBox::eNone) {
 					lastBottom = R;
 					last = R;
+					if (last.m_y < fMaxHeight)
+						last.m_y = fMaxHeight;
 					bCollision = true;
 					if (collisionFace == IBox::eYPositive) {
-						last.m_y += h / 2.f;
 						if (fMaxHeight < last.m_y)
 							fMaxHeight = last.m_y;
 						else
 							last.m_y = fMaxHeight;
+						last.m_y += h / 2.f;
 						m_pBody->m_oSpeed.m_y = 0;
 						oLocalMatrix.m_13 = last.m_y;
 						GetBoundingGeometry()->SetTM(oLocalMatrix);
 					}
 					else {
-						oLocalMatrix.m_03 = last.m_x;
-						oLocalMatrix.m_23 = last.m_z;
-						GetBoundingGeometry()->SetTM(oLocalMatrix);
-						m_bCollideOnObstacle = true;
+						IBox* pBox = static_cast<IBox*>(pEntity->GetBoundingGeometry());
+						float fObstacleHeight = pEntity->GetBoundingGeometry()->GetBBoxDimension().m_y;
+						if (fObstacleHeight > MAX_HEIGHT_ABLE_TO_CLIMB) {
+							oLocalMatrix.m_03 = last.m_x;
+							oLocalMatrix.m_23 = last.m_z;
+							GetBoundingGeometry()->SetTM(oLocalMatrix);
+							m_bCollideOnObstacle = true;
+						}
+						else {
+							m_bCollideOnObstacle = false;
+							last = localPos;
+							last.m_y += fObstacleHeight - h / 2.f;
+							if (fMaxHeight < last.m_y)
+								fMaxHeight = last.m_y;
+						}
 					}
 				}
-				else {
+				else
 					bCollision = true;
-				}
 			}
 		}
 		// Ground collision
-		const float margin = 10.f;
-		CVector nextPosition = m_oLocalMatrix * CVector(0, 0, 100);
-		float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
-		float fGroundHeightNext = m_pParent->GetGroundHeight(nextPosition.m_x, nextPosition.m_z) + margin;
-		float fEntityY = last.m_y - h / 2.f;
-		if (fEntityY <= fGroundHeight + m_pPhysic->GetEpsilonError()) {
-			m_pBody->m_oSpeed.m_x = 0;
-			m_pBody->m_oSpeed.m_y = 0;
-			m_pBody->m_oSpeed.m_z = 0;
-			float newY = fGroundHeight + h / 2.f;
-			last.m_y = newY;
+		if (m_pParent == m_pScene) {
+			const float margin = 10.f;
+			CVector nextPosition = m_oLocalMatrix * CVector(0, 0, 100);
+			float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
+			float fGroundHeightNext = m_pParent->GetGroundHeight(nextPosition.m_x, nextPosition.m_z) + margin;
+			float fEntityY = last.m_y - h / 2.f;
+			if (fEntityY <= fGroundHeight + m_pPhysic->GetEpsilonError()) {
+				m_pBody->m_oSpeed.m_x = 0;
+				m_pBody->m_oSpeed.m_y = 0;
+				m_pBody->m_oSpeed.m_z = 0;
+				float newY = fGroundHeight + h / 2.f;
+				last.m_y = newY;
+			}
 		}
 		SetLocalPosition(last);
 
@@ -192,7 +207,6 @@ void CObject::UpdateCollision()
 		}
 	}
 }
-
 
 CCharacter::CCharacter(EEInterface& oInterface, string sFileName, string sID):
 CObject(oInterface, sFileName),

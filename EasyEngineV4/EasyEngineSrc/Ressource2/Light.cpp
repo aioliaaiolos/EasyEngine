@@ -51,6 +51,11 @@ void CLight::RemoveAllLights(IRenderer& oRenderer)
 	}
 }
 
+int CLight::GetLightCount()
+{
+	return (s_nCurrentLightID - GL_LIGHT0);
+}
+
 CLight::~CLight(void)
 {
 }
@@ -91,6 +96,11 @@ CLight::TLight CLight::GetType()
 	return m_Type;
 }
 
+float CLight::GetIntensity()
+{
+	return m_fIntensity;
+}
+
 void CLight::SetIntensity(float fIntensity)
 {
 	m_fIntensity = fIntensity;
@@ -101,6 +111,11 @@ void CLight::SetIntensity(float fIntensity)
 	m_oRenderer.SetLightAmbient( m_ID, ambient[0], ambient[1], ambient[2], ambient[3] );
 	m_oRenderer.SetLightDiffuse(m_ID, diffuse[0], diffuse[1], diffuse[2], diffuse[3] );
 	m_oRenderer.SetLightSpecular( m_ID, specular[0], specular[1], specular[2], specular[3] );
+}
+
+float CLight::GetAmbient()
+{
+	return m_Ambient.m_x;
 }
 
 void CLight::SetAmbient(float fAmbient)
@@ -115,11 +130,6 @@ void CLight::SetSpecular(float fSpecular)
 	m_Specular = CVector(fSpecular, fSpecular, fSpecular, 1.f);
 	GLfloat specular[] = { m_fIntensity * fSpecular, m_fIntensity * fSpecular, m_fIntensity * fSpecular, 1.f };
 	m_oRenderer.SetLightSpecular(m_ID, specular[0], specular[1], specular[2], specular[3]);
-}
-
-float CLight::GetIntensity()
-{
-	return m_fIntensity;
 }
 
 bool CLight::IsEnabled()

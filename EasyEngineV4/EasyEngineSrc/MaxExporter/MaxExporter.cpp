@@ -341,22 +341,24 @@ void CMaxExporter::GetGeometry(Interface* pInterface, vector< ILoader::CMeshInfo
 	{
 		INode* pNode = pRoot->GetChildNode(iNode);
 		int hidden = pNode->IsHidden();
-		if (hidden == 0) { // pNode->IsVisible() {
-			wstring wTest = pNode->GetName();
-			Object* pObject = pNode->EvalWorldState(0).obj;
-
-			if (IsBone(pObject))
-			{
-				GetMeshesIntoHierarchy(pInterface, pNode, vMeshInfos);
-				continue;
-			}
-			if (pObject->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)) == TRUE)
-			{
-				ILoader::CMeshInfos mi;
-				StoreMeshToMeshInfos(pInterface, pNode, mi);
-				if (g_bInterruptExport)
-					break;
-				vMeshInfos.push_back(mi);
+		if (hidden == 0) {
+			wstring wName = pNode->GetName();
+			std::string sName(wName.begin(), wName.end());
+			if (!IsCollisionMesh(sName)) {
+				Object* pObject = pNode->EvalWorldState(0).obj;
+				if (IsBone(pObject))
+				{
+					GetMeshesIntoHierarchy(pInterface, pNode, vMeshInfos);
+					continue;
+				}
+				if (pObject->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)) == TRUE)
+				{
+					ILoader::CMeshInfos mi;
+					StoreMeshToMeshInfos(pInterface, pNode, mi);
+					if (g_bInterruptExport)
+						break;
+					vMeshInfos.push_back(mi);
+				}
 			}
 		}
 	}
@@ -483,6 +485,17 @@ void CMaxExporter::GetSkeleton(INode* pRoot, map< string, INode* >& mBone)
 		}
 		GetSkeleton(pNode, mBone);
 	}
+}
+
+bool CMaxExporter::IsCollisionMesh(string sObjectName)
+{
+	if ((sObjectName.find("Wall") == -1) &&
+		(sObjectName.find("Door") == -1) &&
+		(sObjectName.find("Roof") == -1) &&
+		(sObjectName.find("Floor") == -1) &&
+		(sObjectName.find("Ground") == -1) )
+		return false;
+	return true;
 }
 
 void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string, int >& mBoneID, string sObjectName, IGameNode* pGameNode)
