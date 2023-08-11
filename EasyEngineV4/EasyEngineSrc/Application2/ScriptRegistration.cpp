@@ -2847,7 +2847,8 @@ void GetSpeakerLocalVarInt(IScriptState* pState)
 {
 	CValueString* pVarName = static_cast<CValueString*>(pState->GetArg(0));
 	CValueInt* pValue = static_cast<CValueInt*>(m_pGUIManager->GetTopicsWindow()->GetSpeakerLocalVar(pVarName->m_sValue));
-	pState->SetReturnValue(pValue->m_nValue);
+	if(pValue)
+		pState->SetReturnValue(pValue->m_nValue);
 }
 
 void SetSpeakerLocalVarInt(IScriptState* pState)

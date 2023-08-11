@@ -80,7 +80,7 @@ function onLoadingGame()
 	//EditWorld("");
 	//LoadWorld("", "OnWorldLoaded");
 	//LoadWorld("empty", "OnWorldLoaded");
-	LoadWorld("emptyHopital", "");
+	//LoadWorld("emptyHopital", "");
 	//EditWorld("emptyHopital");
 	
 	

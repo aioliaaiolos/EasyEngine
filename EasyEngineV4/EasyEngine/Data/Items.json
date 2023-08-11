@@ -101,56 +101,104 @@
 			"Model": "armors/2/BrassiereG.bme",
 			"Class": "Armor",
 			"Type": "Left-Forearm",
-			"Preview": "Base_Gauntlet_Left.bmp"
+			"Preview": "Base_Gauntlet_Left.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Gauntlet_Right",
 			"Model": "armors/2/BrassiereD.bme",
 			"Class": "Armor",
 			"Type": "Right-Forearm",
-			"Preview": "Base_Gauntlet_Right.bmp"
+			"Preview": "Base_Gauntlet_Right.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Cuirass",
 			"Model": "armors/2/cuirasse.bme",
 			"Class": "Armor",
 			"Type": "Chest",
-			"Preview": "Base_Cuirass.bmp"
+			"Preview": "Base_Cuirass.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Pauldron_Left",
 			"Model": "armors/2/epauletteG.bme",
 			"Class": "Armor",
 			"Type": "Left-Shoulder",
-			"Preview": "Base_Pauldron_Left.bmp"
+			"Preview": "Base_Pauldron_Left.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Pauldron_Right",
 			"Model": "armors/2/epauletteD.bme",
 			"Class": "Armor",
 			"Type": "Right-Shoulder",
-			"Preview": "Base_Pauldron_Right.bmp"
+			"Preview": "Base_Pauldron_Right.bmp",
+			"Armor": 5
+		},
+		{
+			"ID": "Legion_Pauldron_Left",
+			"Model": "armors/01m/LPauldron.bme",
+			"Class": "Armor",
+			"Type": "Left-Shoulder",
+			"Preview": "Base_Pauldron_Left.bmp",
+			"Armor": 10
+		},
+		{
+			"ID": "Legion_Pauldron_Right",
+			"Model": "armors/01m/RPauldron.bme",
+			"Class": "Armor",
+			"Type": "Right-Shoulder",
+			"Preview": "Base_Pauldron_Right.bmp",
+			"Armor": 10
+		},
+		{
+			"ID": "Legion_Boot_Left",
+			"Model": "armors/01m/LBoot.bme",
+			"Class": "Armor",
+			"Type": "Left-Calf",
+			"Preview": "Base_Pauldron_Right.bmp",
+			"Armor": 10
+		},
+		{
+			"ID": "Legion_Boot_Right",
+			"Model": "armors/01m/RBoot.bme",
+			"Class": "Armor",
+			"Type": "Right-Calf",
+			"Preview": "Base_Pauldron_Right.bmp",
+			"Armor": 10
 		},
 		{
 			"ID": "Base_Boot_Right",
 			"Model": "armors/2/jambiereD.bme",
 			"Class": "Armor",
 			"Type": "Right-Calf",
-			"Preview": "Base_Boot_Right.bmp"
+			"Preview": "Base_Boot_Right.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Boot_Left",
 			"Model": "armors/2/jambiereG.bme",
 			"Class": "Armor",
 			"Type": "Left-Calf",
-			"Preview": "Base_Boot_Left.bmp"
+			"Preview": "Base_Boot_Left.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Base_Greave",
 			"Model": "armors/2/jupe.bme",
 			"Class": "Armor",
 			"Type": "Belt",
-			"Preview": "base-greaves.bmp"
+			"Preview": "base-greaves.bmp",
+			"Armor": 5
+		},
+		{
+			"ID": "Captain_Greaves",
+			"Model": "armors/01m/greaves.bme",
+			"Class": "Armor",
+			"Type": "Belt",
+			"Preview": "base-greaves.bmp",
+			"Armor": 5
 		},
 		{
 			"ID": "Vase",
@@ -180,6 +228,14 @@
 			"Diffuse": "items/pass.bmp",
 			"Preview": "pass-hospital.bmp",
 			"Value": 20
+		},
+		{
+			"ID": "Cuirass_Captain",
+			"Model": "armors/01m/cuirasse.bme",
+			"Class": "Armor",
+			"Type": "Chest",
+			"Preview": "Base_Cuirass.bmp",
+			"Armor": 5
 		}
 	]
 }

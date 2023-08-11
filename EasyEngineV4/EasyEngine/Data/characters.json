@@ -410,6 +410,106 @@
 			],
 			"Items": [],
 			"Hairs": ""
+		},
+		{
+			"EntityID": "capitaine",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 16.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Captain_Greaves",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Cuirass_Captain",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legion_Boot_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legion_Boot_Right",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legion_Pauldron_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legion_Pauldron_Right",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "test",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 2.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Legion_Boot_Left",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legion_Boot_Right",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
 		}
 	]
 }

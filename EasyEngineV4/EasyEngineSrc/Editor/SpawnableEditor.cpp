@@ -45,7 +45,7 @@ void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKe
 {
 	CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
 	if (e == IEventDispatcher::T_KEYUP) {
-		if (key == VK_SPACE) {
+		if (!pEditor->m_oConsole.IsOpen() && (key == VK_SPACE)) {
 			pEditor->m_eEditingMode = (pEditor->m_eEditingMode == TEditingType::eScale) ? TEditingType::eXForm : TEditingType::eScale;
 			return;
 		}
