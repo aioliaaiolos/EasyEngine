@@ -32,7 +32,9 @@ public:
 		eLeftShoulder,
 		eRightShoulder,
 		eLeftCalf,
-		eRightCalf		
+		eRightCalf,
+		eLeftFoot,
+		eRightFoot
 	};
 
 	enum TClass

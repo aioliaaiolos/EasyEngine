@@ -51,6 +51,14 @@
 	  {
 		  "Type": "Right-Calf", 
 		  "Dummies": ["BodyDummyJambiereD"]
+	  },
+	  {
+		  "Type": "Left-Foot", 
+		  "Dummies": ["BodyDummyLFoot"]
+	  },
+	  {
+		  "Type": "Right-Foot", 
+		  "Dummies": ["BodyDummyRFoot"]
 	  }
 	],
 	"Items": [
@@ -194,7 +202,7 @@
 		},
 		{
 			"ID": "Captain_Greaves",
-			"Model": "armors/01m/greaves.bme",
+			"Model": "armors/01m/greaves02.bme",
 			"Class": "Armor",
 			"Type": "Belt",
 			"Preview": "base-greaves.bmp",
@@ -230,10 +238,26 @@
 			"Value": 20
 		},
 		{
-			"ID": "Cuirass_Captain",
+			"ID": "Legio_SolidCuirass",
 			"Model": "armors/01m/cuirasse.bme",
 			"Class": "Armor",
 			"Type": "Chest",
+			"Preview": "Base_Cuirass.bmp",
+			"Armor": 5
+		},
+		{
+			"ID": "Legio_LSandal",
+			"Model": "Clothes/Shoes/01m/LSandal.BME",
+			"Class": "Cloth",
+			"Type": "Left-Foot",
+			"Preview": "Base_Cuirass.bmp",
+			"Armor": 5
+		},
+		{
+			"ID": "Legio_RSandal",
+			"Model": "Clothes/Shoes/01m/RSandal.BME",
+			"Class": "Cloth",
+			"Type": "Right-Foot",
 			"Preview": "Base_Cuirass.bmp",
 			"Armor": 5
 		}

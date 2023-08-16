@@ -101,7 +101,7 @@
 		{
 			"Title" : "Flacon",
 			"Text" : [
-				"Avez-vous trouvé mon flacon ? Non ? Ne me dérangez plus jusqu'à ce que vous l'ayez retrouvé."
+				"Avez-vous trouvé mon flacon ? Non ? Ne me dérangez plus jusqu'à ce que vous ayez du nouveau."
 			],
 			"Conditions": [
 				{
@@ -1406,6 +1406,75 @@
 					"Comp": "=="
 				}
 			]
+		},		
+		{
+			"Text": [
+				"Bonjour étranger, que voulez-vous ?"
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "21",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Choice(\"{1}Je viens de l'infirmerie, Hasna m'a dit de passer vous voir avant de partir d'ici{2}Je me suis trompé de personne, désolé pour le dérangement\");"]
+		},
+		{
+			"Text": [
+				"Tres bien, montrez-moi votre laissez-passer... Voyons voir... Hmm tres bien, nous faisons toujours une vérification avant de laisser quelqu'un quitter l'hopital au cas ou il s'agirait d'une personne recherchée, mais d'apres ce que je vois vous n'etes pas inscrit dans nos registres. Vous etes libre de partir, je viens d'apposer mon sceau sur vos papiers. A moins que... souhaiteriez-vous intégrer l'armée républicaine ? Nous recrutons en ce moment et nous manquons cruellement de volontaires."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "21",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Choice(\"{1}J'Oui bien sur, j'accepte votre proposition{2}Je vais devoir y réfléchir{3}En quoi consisterait ma tache ?{4}Non merci\")"]
+		},
+		{
+			"Text": [
+				"Je dois vous laisser, j'ai du travail."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Infirmerie",
+					"Value": "21",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Goodbye()"]
 		}
 	]
 }

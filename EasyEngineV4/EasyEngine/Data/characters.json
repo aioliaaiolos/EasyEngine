@@ -430,7 +430,7 @@
 			"AnimationSpeeds": [
 				{
 					"Name": "Run",
-					"Speed": 16.0
+					"Speed": 64.0
 				}
 			],
 			"Items": [
@@ -441,19 +441,19 @@
 					]
 				},
 				{
-					"ItemName": "Cuirass_Captain",
+					"ItemName": "Legio_SolidCuirass",
 					"IsWearArray": [
 						1
 					]
 				},
 				{
-					"ItemName": "Legion_Boot_Left",
+					"ItemName": "Legio_LSandal",
 					"IsWearArray": [
 						1
 					]
 				},
 				{
-					"ItemName": "Legion_Boot_Right",
+					"ItemName": "Legio_RSandal",
 					"IsWearArray": [
 						1
 					]
@@ -504,6 +504,38 @@
 				},
 				{
 					"ItemName": "Legion_Boot_Right",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "mepstet",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 2.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Legio_SolidCuirass",
 					"IsWearArray": [
 						1
 					]
