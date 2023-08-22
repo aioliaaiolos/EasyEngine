@@ -84,6 +84,13 @@
 			"Preview": "Tunique_Hospital.bmp"
 		},
 		{
+			"ID": "Legio-Tunique-m",
+			"Model": "clothes/legio-tunique-m.bme",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
 			"ID": "Dress_LongueWide",
 			"Model": "clothes/robe5.bme",
 			"Class": "Cloth",
@@ -251,7 +258,8 @@
 			"Class": "Cloth",
 			"Type": "Left-Foot",
 			"Preview": "Base_Cuirass.bmp",
-			"Armor": 5
+			"Armor": 5,
+			"OffsetY": 5
 		},
 		{
 			"ID": "Legio_RSandal",
@@ -259,7 +267,8 @@
 			"Class": "Cloth",
 			"Type": "Right-Foot",
 			"Preview": "Base_Cuirass.bmp",
-			"Armor": 5
+			"Armor": 5,
+			"OffsetY": 5
 		}
 	]
 }

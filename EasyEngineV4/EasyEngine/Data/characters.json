@@ -387,14 +387,14 @@
 			"Hairs": "hairs01"
 		},
 		{
-			"EntityID": "Player",
+			"EntityID": "player",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "Player",
 			"Weight": 0.0,
-			"Strength": 10,
+			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
 			"Specular": [
@@ -408,7 +408,14 @@
 					"Speed": 1.0
 				}
 			],
-			"Items": [],
+			"Items": [
+				{
+					"ItemName": "Legio-Tunique-m",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
 			"Hairs": ""
 		},
 		{
@@ -430,7 +437,7 @@
 			"AnimationSpeeds": [
 				{
 					"Name": "Run",
-					"Speed": 64.0
+					"Speed": 128.0
 				}
 			],
 			"Items": [
@@ -441,7 +448,7 @@
 					]
 				},
 				{
-					"ItemName": "Legio_SolidCuirass",
+					"ItemName": "Legio-Tunique-m",
 					"IsWearArray": [
 						1
 					]
@@ -454,6 +461,12 @@
 				},
 				{
 					"ItemName": "Legio_RSandal",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legio_SolidCuirass",
 					"IsWearArray": [
 						1
 					]

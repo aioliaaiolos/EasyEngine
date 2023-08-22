@@ -122,6 +122,16 @@ CItem* CEntityManager::GetItem(string sItemID)
 	return nullptr;
 }
 
+void CEntityManager::EnableCollisions(bool bEnable)
+{
+	m_bAreCollisionsEnabled = bEnable;
+}
+
+bool CEntityManager::AreCollisionsEnabled()
+{
+	return m_bAreCollisionsEnabled;
+}
+
 IItem* CEntityManager::CreateItemEntity(string sItemID)
 {
 	CItem* pItem = GetItem(sItemID);
@@ -134,6 +144,13 @@ IItem* CEntityManager::CreateItemEntity(string sItemID)
 			return new CItem(*pItem);
 	}
 	return nullptr;
+}
+
+void CEntityManager::CloseArea(string sAreaID, bool bClose)
+{
+	CAreaEntity* pAreaEntity = dynamic_cast<CAreaEntity*>(GetEntity(sAreaID));
+	if(pAreaEntity)
+		pAreaEntity->Close(bClose);
 }
 
 void CEntityManager::LoadItems()

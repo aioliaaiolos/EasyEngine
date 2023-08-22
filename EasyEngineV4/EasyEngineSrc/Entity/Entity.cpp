@@ -330,6 +330,8 @@ CEntity* CEntity::CreateEmptyEntity(string sName)
 
 void CEntity::UpdateCollision()
 {
+	if (!m_pEntityManager->AreCollisionsEnabled())
+		return;
 	m_pBody->Update();
 	if( m_pBody->m_fWeight > 0.f )
 	{
@@ -978,6 +980,11 @@ void CEntity::SetWeight( float fWeight )
 {
 	m_pBody->m_fWeight = fWeight;
 	m_bIsOnTheGround = false;
+}
+
+void CEntity::SetCollidable(bool bCollidable)
+{
+	m_bIsCollidable = bCollidable;
 }
 
 void CEntity::SetMesh( IMesh* pMesh )

@@ -237,6 +237,13 @@ void SpawnArea(IScriptState* pState)
 	m_pWorldEditor->SpawnArea(pAreaName->m_sValue);
 }
 
+void CloseArea(IScriptState* pState)
+{
+	CValueString* pAreaName = static_cast< CValueString* >(pState->GetArg(0));
+	CValueInt* pClose = static_cast< CValueInt* >(pState->GetArg(1));
+	m_pEntityManager->CloseArea(pAreaName->m_sValue, pClose->m_nValue == 0 ? false : true);
+}
+
 void SpawnItem(IScriptState* pState)
 {
 	CValueString* pItemId = static_cast< CValueString* >(pState->GetArg(0));
@@ -247,6 +254,19 @@ void LockEntity(IScriptState* pState)
 {
 	CValueString* pEntityId = static_cast< CValueString* >(pState->GetArg(0));
 	m_pWorldEditor->LockEntity(pEntityId->m_sValue);
+}
+
+void EnableCollisions(IScriptState* pState)
+{
+	CValueInt* pEnable = static_cast<CValueInt*>(pState->GetArg(0));
+	m_pEntityManager->EnableCollisions(pEnable->m_nValue == 0 ? false : true);
+}
+
+void SetEditionSpeed(IScriptState* pState)
+{
+	CValueFloat* pSpeed = static_cast< CValueFloat* >(pState->GetArg(0));
+	IWorldEditor* pEditor = dynamic_cast<IWorldEditor*>(m_pEditorManager->GetEditor(IEditor::eWorld));
+	pEditor->SetEditionSpeed(pSpeed->m_fValue);
 }
 
 void EditCharacter(IScriptState* pState)
@@ -2607,7 +2627,7 @@ void ColorizeEntity(IScriptState* pState)
 	}
 }
 
-void GetNodeInfos( INode* pNode, int nLevel = 0 )
+void GetNodeInfos( INode* pNode, string sNameFilter = "", int nLevel = 0 )
 {
 	IEntity* pEntity = dynamic_cast< IEntity* >( pNode );
 	if( pEntity ) {
@@ -2619,12 +2639,14 @@ void GetNodeInfos( INode* pNode, int nLevel = 0 )
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		if (sEntityName.find("CollisionPrimitive") == -1) {
-			sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
-			g_vStringsResumeMode.push_back(sLine.str());
+			if (sEntityName.find(sNameFilter) != -1) {
+				sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
+				g_vStringsResumeMode.push_back(sLine.str());
+			}
 		}
 	}
 	for( unsigned int i = 0; i < pNode->GetChildCount(); i++ )
-		GetNodeInfos( pNode->GetChild( i ), nLevel + 1 );
+		GetNodeInfos( pNode->GetChild( i ), sNameFilter, nLevel + 1 );
 }
 
 void GetCollisionNodeInfos(INode* pNode, int nLevel = 0)
@@ -2923,6 +2945,14 @@ void DisplayEntities( IScriptState* pState )
 {
 	g_vStringsResumeMode.clear();
 	GetNodeInfos( m_pScene );
+	DisplayEntitiesResume(nullptr);
+}
+
+void DisplayEntitiesByName(IScriptState* pState)
+{
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
+	g_vStringsResumeMode.clear();
+	GetNodeInfos(m_pScene, pName->m_sValue);
 	DisplayEntitiesResume(nullptr);
 }
 
@@ -4010,11 +4040,24 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eString);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("CloseArea", CloseArea, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("SpawnItem", SpawnItem, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
 	m_pScriptManager->RegisterFunction("LockEntity", LockEntity, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("EnableCollisions", EnableCollisions, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetEditionSpeed", SetEditionSpeed, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4167,6 +4210,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction( "DisplayEntities", DisplayEntities, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DisplayEntitiesByName", DisplayEntitiesByName, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);

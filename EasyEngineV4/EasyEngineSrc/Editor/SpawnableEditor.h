@@ -42,6 +42,7 @@ protected:
 	void							EnableDisplayPickingRayMouseMove(bool enable) override;
 	void							EnableDisplayPickingIntersectPlane (bool enable) override;
 	void							SetEditionMode(bool bEnable) override;
+	void							SetEditionSpeed(float fSpeed) override;
 	void							DisplayPickingRay(const CVector& camPos, const CVector& far);
 	void							InitCamera();
 	void							OnMouseMove(int x, int y);
@@ -56,6 +57,7 @@ protected:
 	
 	IEventDispatcher&				m_oEventDispatcher;
 	IEntity*						m_pEditingEntity;
+	bool							m_bIsCurrentSpawningCollidable = false;
 	IScene*							m_pScene;
 	bool							m_bDisplayPickingRaySelected;
 	bool							m_bDisplayPickingRayMouseMove;
@@ -65,4 +67,5 @@ protected:
 	IEventDispatcher::TKeyEvent		m_eLastKeyEvent;
 	TEditorMode						m_eEditorMode;
 	TEditingType					m_eEditingMode;
+	float							m_fEditionSpeed = 1.f;
 };

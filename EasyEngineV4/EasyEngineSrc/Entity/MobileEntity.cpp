@@ -16,6 +16,7 @@
 #include "Weapon.h"
 #include "BoxEntity.h"
 #include "Utils2/StringUtils.h"
+#include "AreaEntity.h"
 
 map< IEntity::TAnimation, string> CCharacter::s_mAnimationTypeToString;
 
@@ -37,7 +38,7 @@ vector< CCharacter* >							CCharacter::s_vHumans;
 map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
 map<string, map<string, pair<string, float>>> CCharacter::s_mBodiesAnimations;
 
-CObject::CObject(EEInterface& oInterface):
+CObject::CObject(EEInterface& oInterface) :
 	CEntity(oInterface)
 {
 	m_pfnCollisionCallback = OnCollision;
@@ -79,10 +80,16 @@ void CObject::OnCollision(CEntity* pThis, vector<INode*> entities)
 {
 	for (int i = 0; i < entities.size(); i++) {
 		CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-		IMesh* pMesh = static_cast<IMesh*>(pThis->GetRessource());
-		ICollisionMesh* pCollisionMesh = pEntity ? pEntity->GetCollisionMesh() : NULL;
-		if (pCollisionMesh)
-			pThis->LinkAndUpdateMatrices(pEntity);
+		if (pEntity->GetTypeName() == "AreaEntity") {
+			CAreaEntity* pAreaEntity = static_cast<CAreaEntity*>(pEntity);
+			if(pAreaEntity->IsClosed())
+				pThis->LinkAndUpdateMatrices(pEntity);
+		}
+		else {
+			ICollisionMesh* pCollisionMesh = pEntity ? pEntity->GetCollisionMesh() : NULL;
+			if (pCollisionMesh)
+				pThis->LinkAndUpdateMatrices(pEntity);
+		}
 	}
 }
 
@@ -100,6 +107,8 @@ void CObject::ManageGravity()
 
 void CObject::UpdateCollision()
 {
+	if (!m_pEntityManager->AreCollisionsEnabled())
+		return;
 	const float MAX_HEIGHT_ABLE_TO_CLIMB = 50.f;
 	if (GetWeight() > 0) {
 		float h = GetHeight();
@@ -132,6 +141,10 @@ void CObject::UpdateCollision()
 				INode* pEntity = entities[i];
 				if (pEntity->GetTypeName() == "Item")
 					continue;
+				if (pEntity->GetTypeName() == "AreaEntity") {
+					bCollision = true;
+					continue;
+				}
 				pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
 				IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
 				firstBox->SetTM(backupLocal);

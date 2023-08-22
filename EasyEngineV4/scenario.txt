@@ -140,3 +140,12 @@ Etats :
 11. Asna est énervée contre le joueur, elle refuse de l'aider
 12. On a dit à Asna que Mirabelle nous avait informé qu'elle lui avait donné son parfum et on demande à le voir
 13. On vient de répondre à la demande de précision d'Asna au sujet de la raison pour laquelle on veut son parfum
+
+
+
+
+Guildes :
+
+. Confrérie des guerriers
+. Guilde des voleurs
+. 

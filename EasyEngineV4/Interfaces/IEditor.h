@@ -35,6 +35,7 @@ public:
 	virtual void	EnableDisplayPickingRayMouseMove(bool enable) = 0;
 	virtual void	EnableDisplayPickingIntersectPlane(bool enable) = 0;
 	virtual void	Save(string fileName) = 0;
+	virtual void	SetEditionSpeed(float fSpeed) = 0;
 };
 
 class IMapEditor : virtual public ISpawnableEditor

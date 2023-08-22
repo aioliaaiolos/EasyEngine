@@ -10,10 +10,11 @@ CAreaEntity::CAreaEntity(string areaName, EEInterface& oInterface, IBox& oBox) :
 	m_oCurrentMinPoint(m_oInitialMinPoint),
 	m_oCurrentDimension(m_oInitialDimension)
 {
-	m_sEntityID = areaName;
+	m_sID = areaName;
 	GetWorldPosition(m_oLastPosition);
 	m_pBody->m_fWeight = 0.f;
-	m_bIsCollidable = false;
+	m_bIsCollidable = true;
+	m_sTypeName = "AreaEntity";
 }
 
 void CAreaEntity::Update()
@@ -58,7 +59,7 @@ void CAreaEntity::UpdateCollision()
 		GetEntitiesCollision(entities);
 	else
 		m_bFirstUpdate = false;
-
+	/*
 	CVector localPos;
 	oLocalMatrix.GetPosition(localPos);
 
@@ -66,9 +67,10 @@ void CAreaEntity::UpdateCollision()
 	CVector last = localPos;
 	CVector firstBottom = first;
 	CVector lastBottom = last;
-	CVector R = last;
-	bool bCollision = false;
-	float fMaxHeight = -999999.f;
+	CVector R = last;*/
+	bool bCollision = !entities.empty();
+	// float fMaxHeight = -999999.f;
+	/*
 	for (int i = 0; i < entities.size(); i++) {
 		INode* pEntity = entities[i];
 		pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
@@ -82,7 +84,6 @@ void CAreaEntity::UpdateCollision()
 		if (collisionFace != IBox::eNone) {
 			lastBottom = R;
 			last = R;
-			bCollision = true;
 			if (collisionFace == IBox::eYPositive) {
 				last.m_y += h / 2.f;
 				if (fMaxHeight < last.m_y)
@@ -91,12 +92,11 @@ void CAreaEntity::UpdateCollision()
 					last.m_y = fMaxHeight;
 				m_pBody->m_oSpeed.m_y = 0;
 			}
-		}
-		else {
-			bCollision = true;
-		}
-	}
+		
+		bCollision = true;
+	}*/
 	// Ground collision
+	/*
 	const float margin = 10.f;
 	CVector nextPosition = m_oLocalMatrix * CVector(0, 0, 100);
 	float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
@@ -109,7 +109,7 @@ void CAreaEntity::UpdateCollision()
 		float newY = fGroundHeight + h / 2.f;
 		last.m_y = newY;
 	}
-	SetLocalPosition(last);
+	SetLocalPosition(last);*/
 
 	// Still into parent ?	
 	if (!TestWorldCollision(m_pParent)) {
@@ -121,5 +121,15 @@ void CAreaEntity::UpdateCollision()
 	if (bCollision && m_pfnCollisionCallback) {
 		m_pfnCollisionCallback(this, entities);
 	}
+}
+
+bool CAreaEntity::IsClosed()
+{
+	return m_bClosed;
+}
+
+void CAreaEntity::Close(bool bClose)
+{
+	m_bClosed = bClose;
 }
 

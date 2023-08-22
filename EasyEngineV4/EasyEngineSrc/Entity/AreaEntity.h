@@ -14,6 +14,8 @@ public:
 	void							GetScaleFactor(CVector& scale) override;
 	void							ManageGravity() override;
 	void							UpdateCollision() override;
+	bool							IsClosed();
+	void							Close(bool bClose);
 
 protected:
 
@@ -22,4 +24,5 @@ protected:
 	CVector							m_oCurrentMinPoint;
 	CVector							m_oCurrentDimension;
 	CVector							m_oLastPosition;
+	bool							m_bClosed = false;
 };

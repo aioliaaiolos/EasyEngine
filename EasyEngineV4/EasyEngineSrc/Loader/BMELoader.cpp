@@ -505,8 +505,16 @@ void ExportVector( const vector< T >& vData, int nComponantCount, string sName, 
 		float n4 = 0;
 		if( nComponantCount > 3 )
 			n4 = (float)vData.at( nComponantCount * i + 4 );
-		CVector v( vData.at( nComponantCount * i ), vData.at( nComponantCount * i  + 1 ), vData.at( nComponantCount * i + 2 ), n4 );
-		fs << sName << " " << i <<" : " << v << "\n";
+		
+		if (nComponantCount >= 3) {
+			CVector v(vData.at(nComponantCount * i), vData.at(nComponantCount * i + 1), vData.at(nComponantCount * i + 2), n4);
+			fs << sName << " " << i << " : " << v << "\n";
+		}
+		else if (nComponantCount == 2) {
+			CVector2D v(vData.at(nComponantCount * i), vData.at(nComponantCount * i + 1));
+			fs << sName << " " << i << " : " << v << "\n";
+		}
+		
 	}
 }
 
@@ -536,9 +544,9 @@ void CBMELoader::ExportMeshInfos( const CMeshInfos& mi, CAsciiFileStorage& fs )
 		ExportVector( mi.m_vNormalFace, 3, "Face normale", fs );
 		ExportVector( mi.m_vNormalVertex, 3, "Vertex normale", fs );
 
-		if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" && mi.m_oMaterialInfos.m_bExists )
+		//if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" && mi.m_oMaterialInfos.m_bExists )
 		{
-			ExportVector( mi.m_vUVVertex, 3, "UVVertex", fs );
+			ExportVector( mi.m_vUVVertex, 2, "UVVertex", fs );
 			ExportVector( mi.m_vUVIndex, 3, "UVIndex", fs );
 		}
 		fs << "\n\nBounding box du modèle : \n" << *mi.m_pBoundingBox;

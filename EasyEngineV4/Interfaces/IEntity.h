@@ -109,6 +109,7 @@ public:
 	virtual IRessource*					GetRessource() = 0;
 	virtual void						SetDiffuseTexture(string sFileName) = 0;
 	virtual void						SetWeight( float fWeight ) = 0;
+	virtual void						SetCollidable(bool bCollidable) = 0;
 	virtual float						GetWeight() = 0;
 	virtual void						AddAnimation( std::string sAnimationFile ) = 0;
 	virtual void						SetCurrentAnimation( std::string sAnimation ) = 0;
@@ -329,6 +330,9 @@ public:
 	virtual void				RemoveCharacterFromDB(string sID) = 0;
 	virtual void				EnableInstancing(bool enable) = 0;
 	virtual void				ChangeCharacterName(string sOldName, string sNewName) = 0;
+	virtual void				CloseArea(string sAreaID, bool bClose) = 0;
+	virtual void				EnableCollisions(bool bEnable) = 0;
+	virtual bool				AreCollisionsEnabled() = 0;
 };
 
 class ISceneManager : public CPlugin

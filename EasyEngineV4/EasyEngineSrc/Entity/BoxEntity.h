@@ -9,13 +9,11 @@ public:
 
 	void				Update();
 	IBox&				GetBox();
-	void				GetEntityName(string& sName);
 	IGeometry*			GetBoundingGeometry();
 	void				SetWeight(float fWeight) override;
 
 protected:
 	IBox&				m_oBox;
-	string				m_sEntityID;
 	CVector				m_oColor;
 	IShader*			m_pShader;
 };

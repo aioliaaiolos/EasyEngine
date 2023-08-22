@@ -321,11 +321,15 @@ IBuffer* CRenderer::CreateGeometry( const vector< float >&	vVertexArray, const v
 	glGenBuffers( 1, &nVertexBufferID );
 	glBindBuffer( GL_ARRAY_BUFFER_ARB, nVertexBufferID );
 	glBufferData( GL_ARRAY_BUFFER_ARB, nVertexBufferSize*2 + nUVVertexBufferSize , NULL , GL_STATIC_DRAW_ARB );
-	glBufferSubData( GL_ARRAY_BUFFER_ARB, 0, nVertexBufferSize, &vNewVertexArray[ 0 ] );
-	if(vNormalVertexArray.size() > 0)
-		glBufferSubData( GL_ARRAY_BUFFER_ARB, nVertexBufferSize, nVertexBufferSize, &vNonIndexedNormal[ 0 ] );
+	int offset = 0;
+	glBufferSubData( GL_ARRAY_BUFFER_ARB, offset, nVertexBufferSize, &vNewVertexArray[ 0 ] );
+	offset += nVertexBufferSize;
+	if (vNormalVertexArray.size() > 0) {
+		glBufferSubData(GL_ARRAY_BUFFER_ARB, nVertexBufferSize, nVertexBufferSize, &vNonIndexedNormal[0]);
+		offset += nVertexBufferSize;
+	}
 	if ( vNewUVVertexArray.size() > 0 )
-		glBufferSubData( GL_ARRAY_BUFFER_ARB, nVertexBufferSize * 2, nUVVertexBufferSize, &vNewUVVertexArray[ 0 ] );
+		glBufferSubData( GL_ARRAY_BUFFER_ARB, offset, nUVVertexBufferSize, &vNewUVVertexArray[ 0 ] );
 
 	glDisableClientState ( GL_VERTEX_ARRAY );
 	if (vNormalVertexArray.size() > 0)

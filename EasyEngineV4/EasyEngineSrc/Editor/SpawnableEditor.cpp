@@ -41,6 +41,11 @@ void CSpawnableEditor::OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::T
 	}
 }
 
+void CSpawnableEditor::SetEditionSpeed(float fSpeed)
+{
+	m_fEditionSpeed = fSpeed;
+}
+
 void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
 {
 	CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
@@ -60,7 +65,7 @@ void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKe
 				}
 				else if (pEditor->m_eEditingMode == TEditingType::eXForm && pEditor->m_pEditingEntity) {
 					float yawStep = (pEditor->m_oInputManager.GetKeyState(VK_CONTROL) == IInputManager::KEY_STATE::PRESSED) ? 1.f : 10.f;
-					float translateValue = 10.f;
+					float translateValue = pEditor->m_fEditionSpeed * 10.f;
 					
 					if (key == VK_LEFT) {
 						if (pEditor->m_oInputManager.GetKeyState(VK_SHIFT) == IInputManager::KEY_STATE::PRESSED)
@@ -135,6 +140,7 @@ void CSpawnableEditor::OnLeftMouseDown(int x, int y)
 {
 	if (m_pEditingEntity) {
 		m_pEditingEntity->SetWeight(1.f);
+		m_pEditingEntity->SetCollidable(m_bIsCurrentSpawningCollidable);
 		m_pScene->UpdateMapEntities();
 		OnEntityAdded();
 		m_pEditingEntity->DrawBoundingBox(false);
@@ -154,6 +160,7 @@ void CSpawnableEditor::OnLeftMouseDown(int x, int y)
 				m_pEditingEntity->Update();
 			}
 			m_pEditingEntity->SetWeight(0.f);
+			m_bIsCurrentSpawningCollidable = m_pEditingEntity->IsCollidable();
 			OnEntitySelected();
 		}
 	}
@@ -308,6 +315,8 @@ void CSpawnableEditor::InitSpawnedEntity()
 	m_pEditingEntity->Link(m_pScene);
 	m_pEditingEntity->SetLocalPosition(0, GetPlanHeight(), 0);
 	m_pEditingEntity->SetWeight(0.f);
+	m_bIsCurrentSpawningCollidable = m_pEditingEntity->IsCollidable();
+	m_pEditingEntity->SetCollidable(false);
 	m_pEditingEntity->Update();
 }
 

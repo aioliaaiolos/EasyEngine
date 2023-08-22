@@ -44,6 +44,7 @@ public:
 	void							SetDiffuseTexture(string sFileName);
 	float							GetWeight();
 	void							SetWeight( float fWeight ) override;
+	void							SetCollidable(bool bCollidable) override;
 	void							SetMesh( IMesh* pMesh );
 	void							AddAnimation( std::string sAnimationFile );
 	void							AddAnimation(string sAnimationName, IAnimation* pAnimation);

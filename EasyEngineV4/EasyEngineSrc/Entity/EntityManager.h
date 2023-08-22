@@ -56,8 +56,9 @@ public:
 	IEntity*												CreateSphere( float fSize );
 	IEntity*												CreateQuad(float lenght, float width);
 	IEntity*												CreateBox(const CVector& oDimension ) override;
-	IBoxEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;
+	IBoxEntity*												CreateAreaEntity(string sAreaName, const CVector& oDimension) override;	
 	IItem*													CreateItemEntity(string sItemID) override;
+	void													CloseArea(string sAreaID, bool bClose) override;
 	void													AddCollideEntity( CEntity* pEntity );
 	void													RemoveCollideEntity( CEntity* pEntity );
 	CEntity*												GetFirstCollideEntity();
@@ -95,6 +96,8 @@ public:
 	void													AddEntity(IEntity* pEntity, string sName = "noname", int id = -1) override;
 	void													ChangeCharacterName(string sOldName, string sNewName);
 	CItem*													GetItem(string sItemID);
+	void													EnableCollisions(bool bEnable) override;
+	bool													AreCollisionsEnabled() override;
 
 private:
 
@@ -132,6 +135,7 @@ private:
 	bool													m_bUseInstancing;
 	map<string, CItem*>										m_mItems;
 	vector<ILight*>											m_vLights;
+	bool													m_bAreCollisionsEnabled = true;
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

@@ -69,6 +69,7 @@ public:
 	void			SetLocalVariableValue(string sVariableName, int nValue) override {}
 	void			SetLocalVariableValue(string sVariableName, float fValue) override {}
 	void			DetachScriptFunction(string sScript) override {}
+	void			SetCollidable(bool bCollidable) override { m_bIsCollidable = bCollidable; }
 };
 
 #endif // SHAPE_H
