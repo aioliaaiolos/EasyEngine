@@ -67,7 +67,7 @@ public:
 	IRessource::TLight	GetLightType( IRessource* pRessource );
 	void				PopErrorMessage( string& sMessage );
 	void				DestroyAllRessources();
-	ITexture*			CreateRenderTexture(int width, int height, string sShaderName);
+	ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type);
 	string				GetName() override;
 	void				RemoveAllLights(IRenderer& oRenderer) override;
 	void				Reset() override;
@@ -103,6 +103,7 @@ private:
 	int												m_nLightCount;
 	IRenderer*										m_pCurrentRenderer;
 	bool											m_bCatchException;
+	bool											m_bUseDefaultTextureIfNotExists = true;
 
 	IDrawTool*										m_pDrawTool;
 };

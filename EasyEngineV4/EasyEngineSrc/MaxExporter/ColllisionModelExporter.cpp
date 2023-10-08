@@ -107,7 +107,10 @@ void CollisionModelExporter::GetPrimitives(Interface* pInterface, vector<IGeomet
 		}
 		else {
 			pGeometry = m_pGeometryManager->CreateBox();
-			StoreMeshInfos(pNode, *(IBox*)pGeometry);
+			if (!StoreMeshInfos(pNode, *(IBox*)pGeometry)) {
+				delete pGeometry;
+				pGeometry = nullptr;
+			}
 			if (g_bInterruptExport)
 				break;
 		}
@@ -166,7 +169,7 @@ void CollisionModelExporter::StoreBoxInfos(INode* pMesh, IBox& box)
 }
 
 
-void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
+bool CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 {
 	const wchar_t* wName = pMesh->GetName();
 	string sName;
@@ -176,7 +179,7 @@ void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 		(sName.find("Roof") == -1) && 
 		(sName.find("Floor") == -1) && 
 		(sName.find("Ground") == -1))
-		return;
+		return false;
 	box.SetName(sName);
 
 	Mesh& mesh = GetMeshFromNode(pMesh);
@@ -190,4 +193,5 @@ void CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 	CVector vMin(boxMin.m_x, boxMin.m_y, boxMin.m_z);
 	box.Set(vMin, boxDim);	
 	box.SetTM(tm);
+	return true;
 }

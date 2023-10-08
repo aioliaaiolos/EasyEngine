@@ -216,7 +216,11 @@ public:
 	typedef void(*StateChangedCallback)(TSceneState, CPlugin*);
 	virtual void				RenderMinimap() = 0;
 	virtual ITexture*			GetMinimapTexture() = 0;
+	virtual ITexture*			GetMinimapTexture2() = 0;
+	virtual ITexture*			GetShadowMapTexture() = 0;
 	virtual void				DisplayMinimap(bool display) = 0;
+	virtual void				DisplayMinimap2(bool display) = 0;
+	virtual void				DisplayShadowMap(bool display) = 0;
 	virtual void				UpdateMapEntities() = 0;
 	virtual void				CollectMinimapEntities(vector<IEntity*>& entities) = 0;
 	virtual void				SetGroundMargin(float margin) = 0;

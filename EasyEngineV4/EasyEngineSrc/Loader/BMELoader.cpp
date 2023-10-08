@@ -147,7 +147,7 @@ void CBMELoader::LoadGeometry( CBinaryFileStorage& fs, CMeshInfos& mi )
 		fs >> mi.m_vFaceMaterialID;
 	}	
 	fs >> mi.m_vNormalFace >> mi.m_vNormalVertex;
-	if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists)
+	if (!mi.m_oMaterialInfos.m_sDiffuseMapName.empty() && mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists)
 		fs >> mi.m_vUVVertex >> mi.m_vUVIndex;
 }
 
@@ -605,7 +605,7 @@ void CBMELoader::ExportMeshInfos( const ILoader::CMeshInfos& mi, CBinaryFileStor
 			fs << nMultiMaterial;
 		fs << mi.m_vNormalFace << mi.m_vNormalVertex;
 
-		if ( mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists )
+		if (!mi.m_oMaterialInfos.m_sDiffuseMapName.empty() && mi.m_oMaterialInfos.m_sDiffuseMapName != "NONE" || mi.m_oMaterialInfos.m_bExists )
 			fs << mi.m_vUVVertex << mi.m_vUVIndex;
 		fs << *mi.m_pBoundingBox;
 		ExportSkinningInfos( mi, fs );

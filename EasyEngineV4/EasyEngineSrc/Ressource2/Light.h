@@ -28,7 +28,7 @@ public:
 								CLight( const Desc& oDesc );
 	virtual 					~CLight();
 	void 						Update();
-	TLight						GetType();
+	TLight						GetType() override;
 	bool						IsEnabled();
 	void						Enable(bool enable);
 	void						SetShader( IShader* pShader );
@@ -39,6 +39,8 @@ public:
 	void						SetSpecular(float fAmbient) override;
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }
+	void						SetSpotDirection(CVector dir) override;
+	void						SetSpotAngle(float angle) override;
 	static void					RemoveAllLights(IRenderer& oRenderer);
 	static int					GetLightCount();
 
@@ -55,6 +57,8 @@ private:
 	unsigned int				m_ID;
 	bool						m_bIsEnabled;
 	GLUquadricObj*				m_pDebugQuadricObj;
+	CVector						m_oSpotDirection;
+	float						m_fSpotAngle = 10.f;
 };
 
 #endif //LIGHT_H

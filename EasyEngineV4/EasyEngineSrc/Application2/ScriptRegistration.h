@@ -21,7 +21,7 @@ void DisplayCamPos( IScriptState* pState );
 void SetBkgColor( IScriptState* pState );
 void DisplayBkgColor( IScriptState* pState );
 void DisplayBBox( IScriptState* pState );
-void DisplayEntities( IScriptState* pState );
+void DisplayEntitiesForMiniMap( IScriptState* pState );
 void GetEntityID( IScriptState* pState );
 void SetEntityShader( IScriptState* pState );
 void YawEntity( IScriptState* pState );

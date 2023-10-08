@@ -10,7 +10,6 @@ attribute int nMatID;
 varying float fPSMatID;
 #endif // MULTIMATERIAL
 
-
 void main()
 {
 #ifdef MULTIMATERIAL

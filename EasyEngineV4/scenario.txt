@@ -101,8 +101,9 @@ Guerriers Eran :
 . Touga Leto
 . Ater Vanos 
 . Beliocandos 
-. Blatoa Maruos
+. Bratoa Maruos
 . Gulat Ramsour
+. Sharbat
 
 Chefs Eran
 . Amunaryan
@@ -149,3 +150,90 @@ Guildes :
 . Confrérie des guerriers
 . Guilde des voleurs
 . 
+
+
+
+
+Dialoogues :
+
+
+. Vous etes en retard Zaarna, pensez-vous qu'il m'est agréable de vous attendre pendant des heures sous ce soleil de plomb ?
+. Xiam ? Je ne vous avais pas reconnue, que faites vous dans cet accoutrement ?
+. Vous attendiez-vous à me voir en territoire ennemi dans ma tenue de grande pretresse ? Notre survie dépend de notre discrétion, si quelqu'un découvrait ma véritable identité notre plan tomberait à l'eau. 
+. Oui bien sur, pas de probleme, ca vous va plutot bien.
+. Ne soyez pas ridicule, seules des circonstances aussi graves que celles que nous vivons actuellement peuvent justifier que j'enfile une de ces indécentes tenues locales. Mais assez parlé de mes vetements à présent, nous avons une importe mission à accomplir en ces lieux. Conduisez-moi au palais républicain je vous prie, si on vous interroge sur ma présence vous me ferez passer pour votre servante. De plus, ne m'appelez jamais par mon véritable nom, à partir de maintenant je serai Nouria.
+
+1 .(Pouffer de rire)
+. Est-ce que cela vous amuse ? Pensez-vous que nous sommes venus jusqu'ici ici dans le but de nous divertir ? N'oubliez pas votre rang, soldat, je suis peut-etre en haillon mais je reste votre grande pretresse et vous me devez le respect.
+. Pardonnez-moi grande pr... heu je veux dire Nouria.
+2 . Nouria ? Heu... tres bien Nouria.
+
+. Si vous avez un meilleur plan n'hésitez surtout pas à m'en faire part, en attendant nous ferons comme je l'ai décidé.
+
+. Ravi d'avoir de vos nouvelles Zaarna, mais... quelle est cette personne qui vous accompagne ?
+. C'est ma servante, je l'ai engagée ce matin
+. Une servante ? Rencontrée ce matin ? Hmm... elle me semble avoir des traits bien nobles pour une simple servante, vous devriez etre plus méfiant avant d'introduire une inconnue dans le palais.
+. Veuillez me pardonner, j'ai effectivement manqué de jugement. Je tacherai d'etre plus prudent à l'avenir.
+. J'ai rarement vu ce type de visage dans les environs, etes vous certain qu'elle est bien d'ici ? Ne serait-ce pas une étrangere qui chercherait à espionner ? Elle ressemble à une Erane.
+. Heu... une espionne ? Je ne pense pas, c'est moi-meme qui suis venu la soliciter pour m'aider dans mes taches.
+. Je vous fais confiance, mais les espions sont nombreux par ici et je ne peux m'empecher d'avoir un doute. Pourriez-vous lui demander de nous faire une danse de chez nous ? Si elle vient réellement d'ici cela ne devrait pas lui poser de probleme.
+. Une danse ? Attendez un instant, je vais lui demander.
+
+. Nouria ? heu...
+. Oui j'ai entendu, je ne suis pas sourde. 
+. (à voix basse) Mais... qu'allez vous faire ?
+. (à voix basse) Je n'ai pas le choix, je vais devoir m'executer pour ne pas eveiller les soupcons. Je m'inspirerai de ces danses obscenes que mes yeux ont du subir dans les gargottes locales.
+
+Xiam s'avance au centre de la piece, Les musiciens du ministre commencent à jouer une mélodie et Xiam execute une danse. Une fois la musique terminée, elle revient vers vous.
+
+. Ca y'est, une chose de faite, maintenant retournez voir le ministre et qu'on en finisse avec cette mascarade
+. J'y vais mais... à propos de cette danse, c'était... suprenant !
+. Ravie de voir que cela vous amuse, rien ne me sera décidemment épargné aujourd'hui.
+
+
+. Tres bien, je pense que je me suis inquieté pour rien. Je peux sembler un peu méfiant mais je dois rester sur mes gardes en ces temps troubles. 
+. Je comprend tout à fait et je reste à votre service monsieur le ministre, je suis ravi que la prestation de ma servante vous ai convaincu.
+. Et bien, disons qu'elle a du caractere mais semble familiere de nos coutumes. Elle a probablement été abandonnée par une famille érane et recueillie par la République qui s'est fait un devoir de la civiliser. Notre République a toujours proné la tolérance et l'ouverture à l'autre, bien que probablement d'origine érane votre servante est des notres et nous devons la traiter avec le respect et l'esprit d'inclusion qui nous anime.
+
+
+1. Allons-y Nouria, une longue route vous attend
+. (d'un air agacé) Oui maitre, je vous suis.
+
+2. Allons Nouria, on se réveille, en route espece de paresseuse !
+. A votre service, o maaaaitre ! (à voix basse) Espece de freluquet, vous ne perdez rien pour attendre.
+
+
+Une fois sortis de la chambre du ministre, Nouria vous parle :
+
+. Dites moi, cela vous amuse donc tant de me faire passer pour une imbécile devant cette assemblée de dégénérés ?
+. Allons, je n'ai fait que jouer le jeu devant le ministre pour ne pas éveiller ses soupcons
+. Prenez garde mon jeune ami, sachez que je ne goute que tres modérement à ce genre humour, tachez de vous tenir correctement à l'avenir face à une personne de mon rang ou vous aurez à faire à moi !
+. Allons Xiam, je voulais seulement détendre l'atmosphere pour vous dérider un peu, vous prenez les choses trop à coeur.
+. Cela semble etre un jeu pour vous, mais moi et les miens vivons depuis trop longtemps sous le joug de cette tyrannie, nous avons connu les pires souffrances et humiliations, qui plus est de la part d'une bande de parvenus qui seraient incapables de faire quoique ce soit sans l'aide des traitres à notre peuple ! 
+. Je suis désolé Xiam, mais malgré tout le temps que nous avons passé ensemble vous etes toujours aussi sérieuse et solennelle.
+. Ah oui, j'oubliais, veuillez également cesser vos familiarités avec moi, je ne suis pas votre amie et encore moins votre confidente ni votre compagnon de beuverie. Allons, prenez vos affaires et pressons le pas ! je ne supporterais pas de rester une journée de plus dans cette ville de débauche ! En avant et on se dépeche !
+1. A vos ordres chef !
+. Voila qui est mieux, bien que je sente une pointe d'ironie dans vos propos.
+2. Heuuuu...  ok je vois, tant pis j'aurais essayé.
+. Et bien essayez un peu moins et réussissez d'avantage !
+
+
+
+. Tres bien, nous en avons donc terminé avec toute cette histoire, il est temps de nous quitter.
+. De nous quitter ? Comment ca, vous comptez partir ?
+. Et bien oui, je ne vois pas pour quelle raison je resterai ici plus longtemps
+. Hmm... Vous pourriez avoir besoin de moi, je pourrais vous accompagner, qu'en dites-vous ?
+. 
+
+. Et bien je suis... hem... comment dites-vous déjà ? Ah oui, 'désolée', c'est le mot que je cherchais.
+
+
+. Rendez-vous dans la caverne et emparez vous de cette maudite relique !
+. Tres bien, à vos ordre Xiam.
+. Soyez prudent Zaarna, de nombreux dangers vous guetterons dans ce lieu.
+. Vous inquieteriez-vous donc pour moi ?
+. Cessez donc vos sotises, je ne veux simplement pas voir mon plan échouer.
+
+
+Une fois la mission accomplie, vous reprenez votre route en direction du conclave. La route est longue et difficile car vous devez la faire à pied. LE soir venu, Xiam vous propose de monter un campement pour passer la nuit. 
+

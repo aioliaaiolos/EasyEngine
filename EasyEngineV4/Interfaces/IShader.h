@@ -31,6 +31,7 @@ public:
 	virtual void			SendUniformValues( const std::string& sVariableName, int nValue ) const = 0;
 	virtual void			SendUniformVec2Array( const std::string& sVariableName, std::vector< float >& vArray ) = 0;
 	virtual void			GetName( string& sName ) = 0;
+	virtual const string&	GetName() = 0;
 	virtual void			AttribDivisor(unsigned int id, unsigned int nSize) = 0;
 };
 

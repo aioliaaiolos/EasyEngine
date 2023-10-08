@@ -455,10 +455,13 @@ void CRessourceManager::DestroyAllRessources()
 	m_mRessource.clear();
 }
 
-ITexture* CRessourceManager::CreateRenderTexture(int width, int height, string sShaderName)
+ITexture* CRessourceManager::CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type)
 {
 	unsigned int nTextureId, nFBOId;
-	m_oRenderer.CreateFrameBufferObject(width, height, nFBOId, nTextureId);
+	if(type == IRessourceManager::COLOR)
+		m_oRenderer.CreateColorFrameBufferObject(width, height, nFBOId, nTextureId);
+	else if (type == IRessourceManager::DEPTH)
+		m_oRenderer.CreateDepthFrameBufferObject(width, height, nFBOId, nTextureId);
 
 	IShader* pShader = m_oRenderer.GetShader(sShaderName);
 	CTexture2D* pTexture = NULL;	
@@ -576,12 +579,18 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 		if (sFileName.empty() || (sFileName[0] != '/' && sFileName[0] != '\\') )
 			sPrefix += "/";
 		sFileName = sPrefix + sFileName;
-		try {
-			m_oLoaderManager.LoadTexture(sFileName, ti);
+		m_bUseDefaultTextureIfNotExists = true;
+		if (m_bUseDefaultTextureIfNotExists) {
+			try {
+				m_oLoaderManager.LoadTexture(sFileName, ti);
+			}
+			catch (CFileNotFoundException& e)
+			{
+				m_oLoaderManager.LoadTexture("Textures/Default.bmp", ti);
+			}
 		}
-		catch (CFileNotFoundException& e)
-		{
-			m_oLoaderManager.LoadTexture("Textures/Default.bmp", ti);
+		else {
+			m_oLoaderManager.LoadTexture(sFileName, ti);
 		}
 	}
 	ti.m_sFileName = sFileName;
@@ -643,7 +652,11 @@ void CRessourceManager::SetLightIntensity( IRessource* pRessource, float fIntens
 float CRessourceManager::GetLightIntensity( IRessource* pRessource )
 {
 	CLight* pLight = dynamic_cast< CLight* >( pRessource );
-	return pLight->GetIntensity();
+	if(pLight)
+		return pLight->GetIntensity();
+	else {
+		throw CEException("Erreur : la lumiere selectionnée n'a pas de ressource associée");
+	}
 }
 
 CVector CRessourceManager::GetLightColor( IRessource* pRessource )

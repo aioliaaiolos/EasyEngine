@@ -19,7 +19,7 @@ class IScriptManager;
 class IConsole;
 class IPhysic;
 class IWorldEditor;
-class IValue;
+struct IValue;
 
 typedef std::map< std::string, std::map< int, const CBone* > > AnimationBonesMap;
 

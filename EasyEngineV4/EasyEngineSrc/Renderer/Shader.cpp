@@ -144,6 +144,11 @@ void CShader::GetName( string& sName )
 	sName = m_sName;
 }
 
+const string& CShader::GetName()
+{
+	return m_sName;
+}
+
 void CShader::GetFilePath(string& path)
 {
 	int idx = m_mShaderName.begin()->first.find(".");
@@ -258,7 +263,8 @@ void CShader::SendUniformVec2Array( const std::string& sVariableName, std::vecto
 unsigned int CShader::EnableVertexAttribArray( const std::string& sAttribName )
 {
 	int id = GetAttributeID( sAttribName );
-	m_oRenderer.EnableVertexAttribArray( id );
+	if(id != -1)
+		m_oRenderer.EnableVertexAttribArray( id );
 	return id;
 }
 

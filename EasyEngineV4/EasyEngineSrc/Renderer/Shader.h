@@ -55,7 +55,8 @@ public:
 	void			DisableVertexAttribArray( unsigned int nAttribID );
 	void 			VertexAttributePointerf( unsigned int id, int nSize, int nPos );
 	int				GetAttributeID( const std::string& sVariableName );
-	void			GetName(string& path);
+	void			GetName(string& path) override;
+	const			string&	GetName() override;
 	void			GetFilePath(string& path);
 	int				GetID();
 	void			AttribDivisor(unsigned int id, unsigned int nSize);

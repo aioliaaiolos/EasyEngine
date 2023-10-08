@@ -56,24 +56,26 @@ void main()
 vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor)
 {
 	const int MATERIAL_SIZE = 16;
-	int nPSMatID = int(round(fPSMatID));	
-	vec4 matSpecular = MaterialArray[nPSMatID * 4 + 2];
-	float shininess = ShininessArray[nPSMatID];
-	
-	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
-	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
-	vec3 R = reflect( -L, N );
-	float factor = pow(max(dot(R,V),0.), shininess);
-	
-	vec4 vSpecular = factor * matSpecular * light.specular;
-	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
-	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+	float alpha = acos(dot(L, light.spotDirection));
+	if(alpha < light.spotCutoff) {
+		int nPSMatID = int(round(fPSMatID));
+		vec4 matSpecular = MaterialArray[nPSMatID * 4 + 2];
+		float shininess = ShininessArray[nPSMatID];
+		vec4 vAmbient = diffuseColor * light.ambient;
+		vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
+		vec3 R = reflect( -L, N );
+		float factor = pow(max(dot(R,V),0.), shininess);
+		vec4 vSpecular = factor * matSpecular * light.specular;
+		float fAttenuationFactor = GetAttenuationFactor( vPos, light );
+		return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+	}
+	return vec4(0, 0, 0, 1);
 }
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
-vec4 vAmbient = diffuseColor * light.ambient;
+	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
 	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
 	vec3 R = reflect( -L, N );

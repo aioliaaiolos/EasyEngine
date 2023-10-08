@@ -2325,6 +2325,25 @@ void CreateHMFromFile(IScriptState* pState)
 	}
 }
 
+void DepthCapture(IScriptState* pState)
+{
+	ostringstream ossFile;
+	int i = 0;
+	FILE* pFile = NULL;
+	do
+	{
+		ossFile << "../Data/DepthCapture_" << i << ".bmp";
+		fopen_s(&pFile, ossFile.str().c_str(), "r");
+		if (pFile)
+		{
+			fclose(pFile);
+			i++;
+			ossFile.str("");
+		}
+	} while (pFile);
+	CRenderUtils::DepthCapture(ossFile.str(), m_pInterface);
+}
+
 void ScreenCapture( IScriptState* pState )
 {
 	ostringstream ossFile;
@@ -2420,6 +2439,24 @@ void SetLightSpecular(IScriptState* pState)
 		m_pConsole->Println(oss.str());
 	}
 }
+
+void SetSpotAngle(IScriptState* pState)
+{
+	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* pAngle = static_cast< CValueFloat* >(pState->GetArg(1));
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = dynamic_cast<ILight*>(pLightEntity->GetRessource());
+		if (pLight)
+			pLight->SetSpotAngle(pAngle->m_fValue);
+	}
+	else {
+		ostringstream oss;
+		oss << "Erreur : " << pID->m_nValue << " n'est pas un identifiant de lumière";
+		m_pConsole->Println(oss.str());
+	}
+}
+
 
 void CreateLight(IScriptState* pState)
 {
@@ -2639,7 +2676,12 @@ void GetNodeInfos( INode* pNode, string sNameFilter = "", int nLevel = 0 )
 		if (sEntityName.empty())
 			pEntity->GetName(sEntityName);
 		if (sEntityName.find("CollisionPrimitive") == -1) {
-			if (sEntityName.find(sNameFilter) != -1) {
+			string sNameFilterLow = sNameFilter;
+			std::transform(sNameFilter.begin(), sNameFilter.end(), sNameFilterLow.begin(), tolower);
+			string sEntityNameLow = sEntityName;
+			std::transform(sNameFilter.begin(), sNameFilter.end(), sNameFilterLow.begin(), tolower);
+			std::transform(sEntityName.begin(), sEntityName.end(), sEntityNameLow.begin(), tolower);
+			if (sEntityNameLow.find(sNameFilterLow) != -1) {
 				sLine << "Entity name = " << sEntityName << ", ID = " << m_pEntityManager->GetEntityID(pEntity);
 				g_vStringsResumeMode.push_back(sLine.str());
 			}
@@ -2941,7 +2983,7 @@ void DisplayEntitiesResume(void* params)
 		m_pConsole->SetPauseModeOn(DisplayEntitiesResume, nullptr);
 }
 
-void DisplayEntities( IScriptState* pState )
+void DisplayEntitiesForMiniMap( IScriptState* pState )
 {
 	g_vStringsResumeMode.clear();
 	GetNodeInfos( m_pScene );
@@ -4209,7 +4251,7 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	m_pScriptManager->RegisterFunction( "DisplayBBox", DisplayBBox, vType, eVoid);
 
 	vType.clear();
-	m_pScriptManager->RegisterFunction( "DisplayEntities", DisplayEntities, vType, eVoid);
+	m_pScriptManager->RegisterFunction( "DisplayEntitiesForMiniMap", DisplayEntitiesForMiniMap, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4269,6 +4311,11 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eInt);
 	vType.push_back(eFloat);
 	m_pScriptManager->RegisterFunction("SetLightSpecular", SetLightSpecular, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetSpotAngle", SetSpotAngle, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eInt);

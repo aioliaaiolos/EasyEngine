@@ -61,7 +61,10 @@ m_pLoaderManager(nullptr)
 #endif // DISPLAYCURSOR
 	InitFontMap();
 	m_pTopicsWindow = new CTopicsWindow(oInterface, 900, 800);
-	m_pMapWindow = new CMinimapWindow(oInterface, *m_pScene, 512, 512);	
+	m_pMapWindow = new CMinimapWindow(oInterface, m_pScene->GetMinimapTexture() , 512, 512);
+	m_pMapWindow2 = new CMinimapWindow(oInterface, m_pScene->GetMinimapTexture2(), 512, 512);
+	m_pMapWindow2->SetPosition(0, 500);
+	m_pShadowMapWindow = new CShadowMapWindow(oInterface, *m_pScene, 512, 512);
 
 	m_pCurrentFont = &GetFontWidget(IGUIManager::TFontColor::eWhite);
 }
@@ -848,7 +851,7 @@ string CGUIManager::GetName()
 	return "GUIManager";
 }
 
-void CGUIManager::ToggleDisplayMap()
+void CGUIManager::ToggleDisplayMiniMap()
 {
 	m_bDisplayMap = !m_bDisplayMap;
 	if (m_bDisplayMap)
@@ -856,6 +859,26 @@ void CGUIManager::ToggleDisplayMap()
 	else
 		RemoveWindow(m_pMapWindow);
 	m_pScene->DisplayMinimap(m_bDisplayMap);
+}
+
+void CGUIManager::ToggleDisplayMiniMap2()
+{
+	m_bDisplayMap2 = !m_bDisplayMap2;
+	if (m_bDisplayMap2)
+		AddWindow(m_pMapWindow2);
+	else
+		RemoveWindow(m_pMapWindow2);
+	m_pScene->DisplayMinimap2(m_bDisplayMap2);
+}
+
+void CGUIManager::ToggleDisplayShadowMap()
+{
+	m_bDisplayShadowMap = !m_bDisplayShadowMap;
+	if (m_bDisplayShadowMap)
+		;// AddWindow(m_pShadowMapWindow);
+	else
+		RemoveWindow(m_pShadowMapWindow);
+	m_pScene->DisplayShadowMap(m_bDisplayShadowMap);
 }
 
 unsigned int CGUIManager::GetCurrentFontHeight() const

@@ -1,0 +1,36 @@
+
+void main()
+{
+    float depth = gl_FragCoord.z; // Récupère la valeur de profondeur normalisée du fragment
+	depth = (depth - 0.9) * 5.0;
+	gl_FragColor = vec4(vec3(depth), 1.0);
+}
+
+
+/*
+void main()
+{
+    float depth = gl_FragCoord.z;
+	
+	
+	if(depth > 0.99)
+		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // rouge
+	else if(depth > 0.9)
+		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); // vert
+	else if(depth > 0.8)
+		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); // bleu
+	else if(depth > 0.7)
+		gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); // jaune
+	else if(depth > 0.6)
+		gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); // rose
+	else if(depth > 0.5)
+		gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0); // turquoise
+	else
+		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // blanc
+}*/
+/*
+void main()
+{
+	gl_FragColor = vec4(vec3( gl_FragCoord.z / 2.0), 1.0);
+}
+*/

@@ -111,10 +111,14 @@ bool IFighterEntity::IsHitIntersectEnemySphere( IFighterEntity* pEnemy )
 	CVector oEnemyWorldPosition;
 	pEnemy->GetPosition( oEnemyWorldPosition );	
 	CVector oWeaponCenter;
-	GetAttackGeometry()->GetCenter(oWeaponCenter);
-	oWeaponCenter = GetWeaponTM() * oWeaponCenter;
-	float fBoneDistance = (oWeaponCenter - oEnemyWorldPosition ).Norm();
-	return fBoneDistance < (GetAttackGeometry()->GetRadius() + pEnemy->GetBoundingSphereRadius());
+	IGeometry* pAttackGeometry = GetAttackGeometry();
+	if (pAttackGeometry) {
+		pAttackGeometry->GetCenter(oWeaponCenter);
+		oWeaponCenter = GetWeaponTM() * oWeaponCenter;
+		float fBoneDistance = (oWeaponCenter - oEnemyWorldPosition).Norm();
+		return fBoneDistance < (GetAttackGeometry()->GetRadius() + pEnemy->GetBoundingSphereRadius());
+	}
+	return false;
 }
 
 bool IFighterEntity::IsHitIntersectEnemyBox( IFighterEntity* pEnemy )

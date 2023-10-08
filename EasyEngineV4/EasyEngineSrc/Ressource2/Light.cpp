@@ -34,12 +34,13 @@ m_oRenderer(oDesc.m_oRenderer)
 		oDesc.m_oRenderer.SetLightAttenuation( m_ID, 0.01f, 0.0001f, 0.000001f );
 
 	if (m_Type == CLight::SPOT)
-		oDesc.m_oRenderer.SetLightSpotProp( m_ID, 60.f, 1000 );
-	oDesc.m_oRenderer.EnableLight( m_ID );
+		m_oRenderer.SetLightSpotProp( m_ID, 10.f, 1 );
+	m_oRenderer.EnableLight( m_ID );
 	s_mEnabledLight[ m_ID ] = true;
 	ostringstream ossName;
 	ossName << "Light" << m_ID;
 	m_sName = ossName.str();
+	m_oRenderer.SetLightLocalPos(m_ID, 0.f, 0.f, 0.f, 1.f);
 }
 
 void CLight::RemoveAllLights(IRenderer& oRenderer)
@@ -74,8 +75,8 @@ void CLight::Update()
 		}
 		if (m_Type == CLight::SPOT)
 		{
-			m_oRenderer.SetLightLocalPos( m_ID, 0.f,0.f,0.f,1.f );
-			m_oRenderer.SetLightSpotDirection( m_ID, 0.f,0.f,1.f, 0.f );
+			m_oRenderer.SetLightLocalPos(m_ID, 0.f, 0.f, 0.f, 1.f);
+			m_oRenderer.SetLightSpotDirection(m_ID, m_oSpotDirection.m_x, m_oSpotDirection.m_y, m_oSpotDirection.m_z, 0.f);
 		}
 	}
 }
@@ -144,4 +145,15 @@ void CLight::SetShader( IShader* pShader )
 CVector CLight::GetColor()
 {
 	return m_Diffuse;
+}
+
+void CLight::SetSpotDirection(CVector dir)
+{
+	m_oSpotDirection = dir;
+}
+
+void CLight::SetSpotAngle(float angle)
+{
+	m_fSpotAngle = angle;
+	m_oRenderer.SetLightSpotProp(m_ID, m_fSpotAngle, 1);
 }

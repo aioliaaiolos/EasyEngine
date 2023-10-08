@@ -1,18 +1,16 @@
 #define MULTIMATERIAL
 
 uniform sampler2D baseMap;
+uniform sampler2D shadowMap;
 uniform int TextureCount;
 uniform int LightCount;
-
 uniform float tiling;
 
 varying vec4 vModelVertexPos;
 varying vec3 N;
 varying vec3 V;
 varying vec2 Texcoord;
-
 varying vec4 VertexColor;
-
 varying float nPSMatID;
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor );
@@ -24,8 +22,10 @@ void main()
 	gl_FragColor = vec4( 0,0,0,0);
 	
 	vec4 diffuseColor;
-	if ( TextureCount > 0 )
+	if ( TextureCount > 0 ) {
+		vec4 shadowColorColor = texture2D( shadowMap, Texcoord );
 		diffuseColor = texture2D( baseMap, tiling * Texcoord );
+	}
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;
 	for ( int i = 0; i < LightCount; i++ )
@@ -34,13 +34,17 @@ void main()
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
-	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
-	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
-	vec3 R = reflect( -L, N );
-	vec4 vSpecular = pow(max(dot(R,V),0.), gl_FrontMaterial.shininess) * gl_FrontMaterial.specular * light.specular;
-	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
-	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+	float alpha = acos(dot(L, light.spotDirection));
+	if(alpha < light.spotCutoff) {
+		vec4 vAmbient = diffuseColor * light.ambient;
+		vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
+		vec3 R = reflect( -L, N );
+		vec4 vSpecular = pow(max(dot(R,V),0.), gl_FrontMaterial.shininess) * gl_FrontMaterial.specular * light.specular;
+		float fAttenuationFactor = GetAttenuationFactor( vPos, light );
+		return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+	}
+	return vec4(0, 0, 0, 1);
 }
 
 float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light )

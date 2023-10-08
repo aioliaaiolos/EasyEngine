@@ -73,6 +73,11 @@ CRenderer::~CRenderer()
 	m_mShader.clear();
 }
 
+void CRenderer::SetViewPort(int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
 void CRenderer::TurnOffAllLight()
 {
 	for( int i = GL_LIGHT0; i <= GL_LIGHT7; i++ )
@@ -146,28 +151,27 @@ void CRenderer::EnableZTest( bool bEnable )
 		glDisable( GL_DEPTH_TEST );
 }
 
-void CRenderer::CalculProjectionMatrix( CMatrix& oMatrix, float l, float r, float b, float t, float n, float f )
+void CRenderer::CalcProjection( CMatrix& m, float Left, float Right, float Bottom, float Top, float Near, float Far )
 {
-	oMatrix.SetIdentity();
-	oMatrix.m_00 = 2*n / ( r - l );
-	oMatrix.m_02 = ( r + l ) / ( r - l );
-	oMatrix.m_11 = ( 2 * n ) / ( t - b );
-	oMatrix.m_12 = ( t + b ) / ( t - b );
-	oMatrix.m_22 = - ( f + n ) / ( f - n );
-	oMatrix.m_23 = - 2 * f * n / ( f - n );
-	oMatrix.m_32 = - 1;
-	oMatrix.m_33 = 0;
-	return;
+	m.SetIdentity();
+	m.m_00 = 2* Near / (Right - Left);
+	m.m_02 = (Right + Left) / (Right - Left);
+	m.m_11 = ( 2 * Near) / (Top - Bottom);
+	m.m_12 = (Top + Bottom) / (Top - Bottom);
+	m.m_22 = - (Far + Near) / (Far - Near);
+	m.m_23 = - 2 * abs(Far) * Near / (Far - Near);
+	m.m_32 = - 1;
+	m.m_33 = 0;
 }
 
-void CRenderer::CalculProjectionMatrix( CMatrix& oMatrix, float fov )
+void CRenderer::CalcProjection( CMatrix& oMatrix, float fov )
 {
 	unsigned int nWidth, nHeight;
 	m_oWindow.GetDimension( nWidth, nHeight );
 	float fRatio = (GLfloat)nWidth / (GLfloat)nHeight;
 	float fInvRatio = 1.f / fRatio;
 	float fovRad = fov * 3.1415927f / 180.f;
-	CalculProjectionMatrix( oMatrix, -fovRad, fovRad, -fovRad*fInvRatio, fovRad*fInvRatio, 1.f, 1000000.f );
+	CalcProjection( oMatrix, -fovRad, fovRad, -fovRad*fInvRatio, fovRad*fInvRatio, 1.f, 1000000.f );
 }
 
 void CRenderer::BeginRender()
@@ -187,6 +191,11 @@ void CRenderer::ClearFrameBuffer()
 {
 	glClearColor(m_vBackgroundColor.m_x, m_vBackgroundColor.m_y, m_vBackgroundColor.m_z, m_vBackgroundColor.m_w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void CRenderer::ClearDepthBuffer()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void CRenderer::DestroyContext()
@@ -209,7 +218,7 @@ void CRenderer::SetFov( float fov )
 
 void CRenderer::ApplySetFov()
 {
-	CalculProjectionMatrix( m_oProjectionMatrix, m_fFov );	
+	CalcProjection( m_oProjectionMatrix, m_fFov );	
 	SetProjectionMatrix( m_oProjectionMatrix );	
 }
 
@@ -1327,7 +1336,7 @@ unsigned int CRenderer::GetAttributeID( unsigned int nProgramID, const std::stri
 		ostringstream ossMessage; 
 		ossMessage << "CRenderer::GetAttributeID() : L'attribut \"" << sVariableName << "\" n'existe pas dans le program " << nProgramID;
 		exception e( ossMessage.str().c_str() );
-		throw e;
+		//throw e;
 	}
 	return id;
 }
@@ -1555,6 +1564,27 @@ void CRenderer::ReadPixels( int x, int y, int nWidth, int nHeight, vector< unsig
 	glReadPixels( x, y, nWidth, nHeight, m_mPixelFormat[ format ], GL_UNSIGNED_BYTE, &vPixels[ 0 ]);
 }
 
+void CRenderer::ReadDepth(int x, int y, int nWidth, int nHeight, vector< unsigned char >& vPixels, TPixelFormat format)
+{
+	int size = 0;
+	switch (format)
+	{
+	case TPixelFormat::T_RGB:
+	case TPixelFormat::T_BGR:
+		size = 3;
+		break;
+	case TPixelFormat::T_RGBA:
+	case TPixelFormat::T_BGRA:
+		size = 4;
+		break;
+	default:
+		throw 1;
+	}
+	vPixels.resize(nWidth * nHeight * size);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(x, y, nWidth, nHeight, GL_DEPTH_COMPONENT, GL_FLOAT, &vPixels[0]);
+}
+
 void CRenderer::LockCamera(bool lock)
 {
 	m_bCameraLocked = lock;
@@ -1570,7 +1600,7 @@ extern "C" _declspec(dllexport) IRenderer* CreateRenderer(EEInterface& oInterfac
 	return new CRenderer(oInterface);
 }
 
-void CRenderer::CreateFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId)
+void CRenderer::CreateColorFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId)
 {
 	glGenFramebuffers(1, &nFBOId);
 	glBindFramebuffer(GL_FRAMEBUFFER, nFBOId);
@@ -1588,7 +1618,7 @@ void CRenderer::CreateFrameBufferObject(int width, int height, unsigned int& nFB
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-#if 0
+#if 1
 	// The depth buffer
 	GLuint depthrenderbuffer;
 	glGenRenderbuffers(1, &depthrenderbuffer);
@@ -1604,11 +1634,54 @@ void CRenderer::CreateFrameBufferObject(int width, int height, unsigned int& nFB
 	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-								   // Always check that our framebuffer is ok
+	// Always check that our framebuffer is ok
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		CEException e("Error during CRenderer::Test()");
 		throw e;
 	}
+}
+
+void CRenderer::CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId)
+{
+# if 0
+	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	glGenFramebuffers(1, &nFBOId);
+	glBindFramebuffer(GL_FRAMEBUFFER, nFBOId);
+
+	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+	glGenTextures(1, &nTextureId);
+	glBindTexture(GL_TEXTURE_2D, nTextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, nTextureId, 0);
+
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		throw CEException("CRenderer::CreateDepthFrameBufferObject : glCheckFramebufferStatus() call fails");
+#else
+	glGenFramebuffers(1, &nFBOId);
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+	glGenTextures(1, &nTextureId);
+	glBindTexture(GL_TEXTURE_2D, nTextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glBindFramebuffer(GL_FRAMEBUFFER, nFBOId);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, nTextureId, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif // 0
 }
 
 void CRenderer::SetCurrentFBO(int fbo)

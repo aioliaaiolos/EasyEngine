@@ -63,7 +63,8 @@ public:
 	enum TNumberType{ T_FLOAT = 0, T_INT };
 	enum TDrawStyle{ T_POINTS = 0, T_LINES , T_TRIANGLES, T_LINE_LOOP, T_LINE_STRIP, T_QUADS };
 	enum TTextureDimension{ T_1D = 0, T_2D, T_3D };
-		
+	
+	virtual void			SetViewPort(int width, int height) = 0;
 	virtual void			SetRenderType( TRenderType t ) = 0;
 	virtual void			EnableZTest( bool bEnable ) = 0;
 	virtual void			SetLightAttenuation( unsigned int nLightID, float fConstant, float fLinear, float fQuadratic ) = 0;
@@ -116,7 +117,7 @@ public:
 	virtual void			BindTexture( int nTextureID, int nUnitTextureID, TTextureDimension texDim ) = 0;
 	virtual void			GetResolution( unsigned int& nWidth, unsigned int& nHeight ) = 0;
 	virtual void			EnableTextureBlend( bool bEnable ) = 0;
-	virtual void			CalculProjectionMatrix( CMatrix& oMatrix, float fov ) = 0;
+	virtual void			CalcProjection( CMatrix& oMatrix, float fov ) = 0;
 	virtual void			GetProjectionMatrix( CMatrix& oMatrix ) = 0;
 	virtual void			SetFov( float fov ) = 0;
 
@@ -151,6 +152,7 @@ public:
 	virtual void			SetBackgroundColor( float r, float g, float b, float a = 1.f ) = 0;
 	virtual void			GetBackgroundColor( CVector& vColor ) = 0;
 	virtual void			ReadPixels( int x, int y, int width, int height, vector< unsigned char >& vPixels, TPixelFormat format ) = 0;
+	virtual void			ReadDepth(int x, int y, int nWidth, int nHeight, vector< unsigned char >& vPixels, TPixelFormat format) = 0;
 
 	virtual void			AbonneToRenderEvent( TRenderEventCallback callback ) = 0;
 	virtual void			DesabonneToRenderEvent( TRenderEventCallback callback ) = 0;
@@ -165,11 +167,13 @@ public:
 	virtual bool			IsCullingEnabled() = 0;
 
 	virtual void			SetCurrentFBO(int fbo) = 0;
-	virtual void			CreateFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId) = 0;
+	virtual void			CreateColorFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId) = 0;
+	virtual void			CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId) = 0;
 	virtual void			ResizeScreen(int nWidth, int nHeight) = 0;
 	virtual float			GetScreenRatio() = 0;
 	virtual void			SetModelViewToIdentity() = 0;
 	virtual void			ClearFrameBuffer() = 0;
+	virtual void			ClearDepthBuffer() = 0;
 	virtual void			GetGlslVersion(string& sVersion) = 0;
 	virtual void			GetOpenglVersion(string& sVersion) = 0;
 	virtual int				GetLastError() = 0;

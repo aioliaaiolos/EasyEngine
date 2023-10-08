@@ -36,7 +36,7 @@ public:
 	int					GetUnitTexture() override;
 	void				SetUnitTexture(int nUnitTexture) override;
 	int					GetID() override;
-	void				SetUnitName(string sUnitName);
+	void				SetUnitName(string sUnitName) override;
 
 protected:
 	int							m_nID;

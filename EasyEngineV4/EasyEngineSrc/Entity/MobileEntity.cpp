@@ -12,6 +12,7 @@
 #include "Bone.h"
 #include "Interface.h"
 #include "IFileSystem.h"
+#include "IConsole.h"
 #include "Item.h"
 #include "Weapon.h"
 #include "BoxEntity.h"
@@ -254,12 +255,14 @@ m_fNeckRotV( 0 )
 		if (itBoxes == m_oKeyBoundingBoxes.end()) {
 			ostringstream oss;
 			oss << "Erreur : l'entite '" << sFileName << "' ne possede pas de bounding box pour '" + sAnimationNameLow + "'";
-			exception e(oss.str().c_str());
-			throw e;
+			throw CEException(oss.str());
 		}
 		m_pBoundingGeometry = itBoxes->second.begin()->second;
 	}
 	catch (CFileNotFoundException& e) {
+		ostringstream oss;
+		oss << "Avertissement : fichier '" << bboxFileName << "' manquant,  utilisation de la bounding box du modele";
+		m_oConsole.Println(oss.str());
 		m_pBoundingGeometry = m_pMesh->GetBBox();
 	}
 
@@ -282,18 +285,30 @@ m_fNeckRotV( 0 )
 
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
-	IBone* pBone = GetPreloadedBone(m_sAttackBoneName);
-	const IBox* pAttackBBox = static_cast<const IBox*>(pBone->GetBoundingBox());
-	IBox* pRHandBox = static_cast<IBox*>(pAttackBBox ? pAttackBBox->Duplicate() : nullptr);
-	if (pRHandBox) {
-		CVector oMinPoint;
-		pRHandBox->SetMinPoint(oMinPoint);
-		m_pRHandBoxEntity = new CBoxEntity(m_oInterface, *pRHandBox);
-		m_pRHandBoxEntity->Link(m_pDummyRHand);
-		m_pRHandBoxEntity->Hide(true);
+	if (!m_pDummyRHand) {
+		// throw CEException("Error : Dummy 'BodyDummyRHand' not found");
+		m_oConsole.Println("Error : Dummy 'BodyDummyRHand' not found");
 	}
-	else
-		throw CEException("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName);
+	IBone* pBone = GetPreloadedBone(m_sAttackBoneName);
+	if (!pBone) {
+		// throw CEException(string("Error : attack bone '") + m_sAttackBoneName + "' not found");
+		m_oConsole.Println(string("Error : attack bone '") + m_sAttackBoneName + "' not found");
+	}
+	else {
+		const IBox* pAttackBBox = static_cast<const IBox*>(pBone->GetBoundingBox());
+		IBox* pRHandBox = static_cast<IBox*>(pAttackBBox ? pAttackBBox->Duplicate() : nullptr);
+		if (pRHandBox && m_pDummyRHand) {
+			CVector oMinPoint;
+			pRHandBox->SetMinPoint(oMinPoint);
+			m_pRHandBoxEntity = new CBoxEntity(m_oInterface, *pRHandBox);
+			m_pRHandBoxEntity->Link(m_pDummyRHand);
+			m_pRHandBoxEntity->Hide(true);
+		}
+		else {
+			// throw CEException("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName);
+			m_oConsole.Println("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName);
+		}
+	}
 
 	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
 	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart1"].second);
@@ -1143,8 +1158,14 @@ void CCharacter::SetAnimationSpeed(TAnimation eAnimationType, float fSpeed)
 void CCharacter::SetMovmentSpeed(TAnimation eAnimationType, float fSpeed)
 {
 	IAnimation* pAnimation = GetAnimation(eAnimationType);
-	SetAnimationSpeed(eAnimationType, pAnimation->GetSpeed() * fSpeed);
-	m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
+	if (pAnimation) {
+		SetAnimationSpeed(eAnimationType, pAnimation->GetSpeed() * fSpeed);
+		m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
+	}
+	else {
+		CEException e("Error : animation '" + s_mAnimationTypeToString[eAnimationType] + "' not found for body '" + m_sCurrentBodyName + "'");
+		throw e;
+	}
 }
 
 float CCharacter::GetAnimationSpeed(IEntity::TAnimation eAnimationType)

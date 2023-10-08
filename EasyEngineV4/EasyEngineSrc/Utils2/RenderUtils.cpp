@@ -50,6 +50,43 @@ void CRenderUtils::ScreenCapture( string sFileName, EEInterface* pInterface, int
 	pLoaderManager->Export( sFileName, ti );
 }
 
+void CRenderUtils::DepthCapture(string sFileName, EEInterface* pInterface, int x, int y, unsigned int w, unsigned int h)
+{
+	vector< unsigned char > vPixels;
+
+	IRenderer* pRenderer = static_cast<IRenderer*>(pInterface->GetPlugin("Renderer"));
+	ISceneManager* pSceneManager = static_cast<ISceneManager*>(pInterface->GetPlugin("SceneManager"));
+	pRenderer->BeginRender();
+	pSceneManager->GetScene("Game")->Update();
+	IGUIManager* pGUIManager = static_cast<IGUIManager*>(pInterface->GetPlugin("GUIManager"));
+	ILoaderManager* pLoaderManager = static_cast<ILoaderManager*>(pInterface->GetPlugin("LoaderManager"));
+
+	int width = w;
+	int height = h;
+	if (pGUIManager)
+		pGUIManager->OnRender();
+	pRenderer->GetResolution(w, h);
+
+	if (width == -1)
+		width = w;
+	if (height == -1)
+		height = h;
+
+	pRenderer->ReadDepth(x, y, width, height, vPixels, IRenderer::T_BGR);
+	pRenderer->EndRender();
+
+	ILoader::CTextureInfos ti;
+	ti.m_ePixelFormat = ILoader::eRGB;
+	ti.m_vTexels.swap(vPixels);
+	ti.m_nWidth = width;
+	ti.m_nHeight = height;
+	if (sFileName.find(".bmp") == -1)
+		sFileName += ".bmp";
+	ti.m_sFileName = sFileName;
+	pLoaderManager->Export(sFileName, ti);
+}
+
+
 void CRenderUtils::IndexGeometry( vector< unsigned int >& vIndexArray, vector< float >& vVertexArray, vector< unsigned int >& vUVIndexArray,
 										 vector< float >& vUVVertexArray, vector< float >& vNormalVertexArray, vector< float >& vIndexedNormalVertexArray,
 										 vector< float >& vWeightVertex, vector< float >& vWeigtedVertexID, bool& bHasIsolatedVertex )

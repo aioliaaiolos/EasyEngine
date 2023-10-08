@@ -76,6 +76,9 @@ public:
 	virtual void SetAmbient(float fAmbient) = 0;
 	virtual void SetSpecular(float fAmbient) = 0;
 	virtual void Enable(bool enable) = 0;
+	virtual TLight GetType() = 0;
+	virtual void SetSpotDirection(CVector dir) = 0;
+	virtual void SetSpotAngle(float angle) = 0;
 };
 
 class ITexture : public IRessource
@@ -205,6 +208,12 @@ public:
 			m_oEngineInterface(oEngineInterface) {}
 	};
 
+	enum TRenderTextureType
+	{
+		COLOR = 0,
+		DEPTH
+	};
+
 	virtual IRessource*			GetRessource( const std::string& sRessourceFileName, bool bDuplicate = false ) = 0;
 	virtual IRessource*			CreateMaterial( ILoader::CMaterialInfos& mi, ITexture* pAlternative = NULL ) = 0;
 	virtual IAnimatableMesh*	CreateMesh( ILoader::CAnimatableMeshData& mi, IRessource* pMaterial ) = 0;
@@ -221,7 +230,7 @@ public:
 	virtual bool				IsCatchingExceptionEnabled() = 0;
 	virtual void				PopErrorMessage( string& sMessage ) = 0;
 	virtual void				DestroyAllRessources() = 0;
-	virtual ITexture*			CreateRenderTexture(int width, int height, string sShaderName) = 0;
+	virtual ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type) = 0;
 	virtual ITexture*			CreateTexture2D(IShader* pShader, int nUnitTexture, vector< unsigned char >& vData, int nWidth, int nHeight, IRenderer::TPixelFormat eFormat) = 0;
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
 	virtual void				RemoveAllLights(IRenderer& oRenderer) = 0;

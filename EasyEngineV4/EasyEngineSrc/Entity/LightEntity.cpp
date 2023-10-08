@@ -23,6 +23,39 @@ void CLightEntity::Update()
 	DispatchEntityEvent();
 }
 
+void CLightEntity::Yaw(float angle)
+{
+	if (m_pLight->GetType() == ILight::SPOT) {
+		CNode::Yaw(angle);
+		Update();
+		CVector dir;
+		m_oWorldMatrix.GetxBase(dir);
+		m_pLight->SetSpotDirection(dir);
+	}
+}
+
+void CLightEntity::Pitch(float angle)
+{
+	if (m_pLight->GetType() == ILight::SPOT) {
+		CNode::Pitch(angle);
+		Update();
+		CVector dir;
+		m_oWorldMatrix.GetxBase(dir);
+		m_pLight->SetSpotDirection(dir);
+	}	
+}
+
+void CLightEntity::Roll(float angle)
+{
+	if (m_pLight->GetType() == ILight::SPOT) {
+		CNode::Roll(angle);
+		Update();
+		CVector dir;
+		m_oWorldMatrix.GetxBase(dir);
+		m_pLight->SetSpotDirection(dir);
+	}
+}
+
 void CLightEntity::UpdateRessource()
 {
 	if (m_pRessource)

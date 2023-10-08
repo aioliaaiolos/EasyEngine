@@ -90,16 +90,19 @@ public:
 
 								CRenderer(EEInterface& oInterface);
 								~CRenderer();
+								
+	void						SetViewPort(int width, int height);
 	void						SetRenderType( TRenderType t );
 	void						ResizeScreen( int nWidth, int nHeight );
 	void						DestroyContext();
 	void						BeginRender();
 	void						ClearFrameBuffer();
+	void						ClearDepthBuffer();
 	void						EndRender();
 	void						EnableZTest( bool bEnable );
 	
-	void						CalculProjectionMatrix( CMatrix& oMatrix, float fLeft, float fRight, float fBottom, float fTop, float fNear, float fFar );
-	void						CalculProjectionMatrix( CMatrix& oMatrix, float fov );
+	void						CalcProjection( CMatrix& oMatrix, float fLeft, float fRight, float fBottom, float fTop, float fNear, float fFar );
+	void						CalcProjection( CMatrix& oMatrix, float fov );
 	void						GetProjectionMatrix( CMatrix& oMatrix );
 	void						GetModelViewMatrix(CMatrix& oMatrix);
 	void						GetModelViewProjectionMatrix(CMatrix& oMatrix);
@@ -226,6 +229,7 @@ public:
 	void						SetBackgroundColor( float r, float g, float b, float a = 1.f );
 	void						GetBackgroundColor( CVector& vColor );
 	void						ReadPixels( int x, int y, int width, int height, vector< unsigned char >& vPixels, TPixelFormat format );
+	void						ReadDepth(int x, int y, int nWidth, int nHeight, vector< unsigned char >& vPixels, TPixelFormat format);
 	void						LockCamera(bool lock);
 	void						SetLineWidth(int width);
 	void						ReloadShaders(IEventDispatcher& oEventDispatcher);
@@ -233,7 +237,8 @@ public:
 	void						CullFace(bool enable);
 	void						EnableDepthTest(bool enable);
 	bool						IsCullingEnabled();
-	void						CreateFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId);
+	void						CreateColorFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId);
+	void						CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId);
 	void						SetCurrentFBO(int fbo);
 	float						GetScreenRatio();
 	void						GetGlslVersion(string& sVersion);

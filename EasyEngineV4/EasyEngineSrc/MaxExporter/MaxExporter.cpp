@@ -543,7 +543,7 @@ void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string,
 				{
 					INode* pBone = pGameSkin->GetBone(iVertexIndex, iBoneIndex);
 					float fWeight = pGameSkin->GetWeight(iVertexIndex, iBoneIndex);
-					if (fWeight > 0.f)
+					if (fWeight > 0.01f)
 					{
 						wstring wName(pBone->GetName());
 						string sName(wName.begin(), wName.end());

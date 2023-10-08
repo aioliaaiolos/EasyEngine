@@ -417,7 +417,8 @@ bool CEntity::TestCollision(INode* pEntity)
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
 			ostringstream oss;
-			oss << "Error : entity '" << m_sID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box";
+			oss << "Error : entity '" << m_sID << "' with ID " << m_nID << " bounding geometry is null, check if its animation has a bounding box. To prevent issues, this entity will be unlinked";
+			Unlink();
 			throw CEException(oss.str());
 		}
 		IGeometry* pCurrentGeometry = pGeometry->Duplicate();

@@ -172,7 +172,11 @@ void OnKeyAction( CPlugin* pPlugin, unsigned int key, IInputManager::KEY_STATE s
 					player->ToggleDisplayPlayerWindow();
 			}
 			else if (key == 'M')
-				m_pGUIManager->ToggleDisplayMap();
+				m_pGUIManager->ToggleDisplayMiniMap();
+			else if (key == 'N')
+				m_pGUIManager->ToggleDisplayMiniMap2();
+			else if (key == 'H')
+				m_pGUIManager->ToggleDisplayShadowMap();
 			else if (key == 'E')
 			{
 				IPlayer* pPlayer = m_pEntityManager->GetPlayer();
@@ -277,7 +281,10 @@ void OnUpdateWindow()
 		UpdateCamera();
 	UpdatePerso();
 	m_pRenderer->BeginRender();
-	try {
+#ifdef CATCH_EXCEPTION
+	try 
+#endif // CATCH_EXCEPTION
+	{
 		if (m_bRenderScene)
 			m_pSceneManager->GetScene("Game")->Update();
 		m_pGUIManager->OnRender();
@@ -297,6 +304,8 @@ void OnUpdateWindow()
 			bCapture = false;
 		}
 	}
+
+#ifdef CATCH_EXCEPTION
 	catch (CRenderException& e) {
 		MessageBoxA(NULL, e.what(), "RenderException", MB_ICONERROR);
 	}
@@ -306,6 +315,7 @@ void OnUpdateWindow()
 	catch (CEException& e) {
 		m_pConsole->Println(e.what());
 	}
+#endif // CATCH_EXCEPTION
   	m_pRenderer->EndRender();
 }
 

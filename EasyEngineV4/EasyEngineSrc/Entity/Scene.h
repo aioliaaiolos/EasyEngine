@@ -60,9 +60,17 @@ public:
 	IGeometry*													GetBoundingGeometry();
 	void														RenderScene();
 	void														RenderMinimap();
+	void														RenderMinimap2();
+	void														RenderShadowMap();
 	ITexture*													CreateMinimapTexture();
+	ITexture*													CreateMinimap2Texture();
+	ITexture*													CreateShadowMapTexture();
 	ITexture*													GetMinimapTexture();
+	ITexture*													GetMinimapTexture2();
+	ITexture*													GetShadowMapTexture();
 	void														DisplayMinimap(bool display);
+	void														DisplayMinimap2(bool display);
+	void														DisplayShadowMap(bool display);
 	void														SetGroundMargin(float margin);
 	float														GetGroundMargin();
 	void														GetOriginalSceneFileName(string& sFileName);
@@ -86,7 +94,11 @@ private:
 	void														LoadSceneObject(const ILoader::CObjectInfos* pSceneObjInfos, CEntity* pParent);
 	void														CreateHeightMap();
 	void														CollectMinimapEntities(vector<IEntity*>& entities);
-	void														DisplayEntities(const vector<IEntity*>& entities);
+	void														CollectShadowMapEntities(vector<IEntity*>& entities);
+	void														DisplayEntitiesForMiniMap(const vector<IEntity*>& entities);
+	void														DisplayEntitiesForMiniMap2(const vector<IEntity*>& entities);
+	void														DisplayEntitiesForShadowMap(const vector<IEntity*>& entities);
+	void														DisplayEntitiesForShadowMapTest(const vector<IEntity*>& entities);
 	void														OnChangeSector() override;
 	void														UpdateMapEntities();
 	bool														IsLoadingComplete();
@@ -103,14 +115,23 @@ private:
 	string														m_sHMFileName;
 	ILoader::CTextureInfos										m_oCollisionMap;
 	bool														m_bHeightMapCreated;
-	ICamera*													m_pMapCamera;
-	const string												m_sMapFirstPassShaderName;
-	const string												m_sMapSecondPassShaderName;
+	ICamera*													m_pMiniMapCamera = nullptr;
+	ICamera*													m_pShadowMapCamera = nullptr;
+	const string												m_sMiniMapFirstPassShaderName;
+	const string												m_sMiniMap2FirstPassShaderName;
+	const string												m_sMiniMapSecondPassShaderName;
+	const string												m_sShadowMapFirstPassShaderName;
+	const string												m_sShadowMapSecondPassShaderName;
 	ITexture*													m_pMinimapTexture;
-	vector<IEntity*>											m_vMapEntities;
+	ITexture*													m_pMinimapTexture2;
+	ITexture*													m_pShadowMapTexture;
+	vector<IEntity*>											m_vMiniMapEntities;
+	vector<IEntity*>											m_vShadowMapEntities;
 	CEntity*													m_pPlayer;
 	CEntity*													m_pPlayerMapSphere;
 	bool														m_bDisplayMinimap;
+	bool														m_bDisplayMinimap2 = false;
+	bool														m_bDisplayShadowMap = false;
 	float														m_fGroundMargin;
 	string														m_sOriginalSceneFileName;
 	ITexture*													m_pHeightMaptexture;
@@ -125,6 +146,9 @@ private:
 	vector<pair<StateChangedCallback, CPlugin*>>				m_vStateChangedCallback;
 	string														m_sCurrentLevelName;
 	TSceneState													m_eSceneState;
+	CEntity*													m_pCastedLight = nullptr;
+
+	CMatrix														m_oCameraTM;
 };
 
 #endif // SCENE_NODE_H
