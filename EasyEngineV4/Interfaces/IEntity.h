@@ -43,6 +43,13 @@ struct CKey
 	CMatrix			m_oLocalTM;
 	CQuaternion		m_oQuat;
 	TKey			m_eType;
+
+	bool operator==(const CKey& oKey) const
+	{
+		return (oKey.m_nTimeValue == m_nTimeValue && oKey.m_oLocalTM == m_oLocalTM && oKey.m_eType == m_eType && oKey.m_oWorldTM == m_oWorldTM);
+	}
+
+
 };
 
 class CBody

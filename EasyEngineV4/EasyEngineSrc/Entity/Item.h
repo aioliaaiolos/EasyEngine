@@ -21,6 +21,7 @@ public:
 		eLeftArm,
 		eSkin,
 		eChest,
+		eShield,
 		eBelt,
 		eBeltWeapon,
 		eLeftBelt,
@@ -34,7 +35,8 @@ public:
 		eLeftCalf,
 		eRightCalf,
 		eLeftFoot,
-		eRightFoot
+		eRightFoot,
+		eHairs
 	};
 
 	enum TClass

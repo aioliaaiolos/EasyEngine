@@ -40,6 +40,8 @@ void CLinkedCamera::Link(INode* pNode)
 	if (pPerso) {
 		CNode::Link(pPerso);
 		m_pHeadNode = pPerso->GetSkeletonRoot()->GetChildBoneByName("Tete");
+		if(!m_pHeadNode)
+			m_pHeadNode = pPerso->GetSkeletonRoot()->GetChildBoneByName("mixamorig:HeadTop_End");
 		CMatrix heandTM;
 		m_pHeadNode->GetWorldMatrix(heandTM);
 		SetWorldMatrix(heandTM);

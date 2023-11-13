@@ -76,6 +76,8 @@ protected:
 	typedef void (*TAction)( CCharacter*, bool );
 
 	void													InitAnimations();
+	void													InitBoundingBox(string sFileName);
+	void													InitReverseAnimations();
 	void													SetPredefinedAnimation(string s, bool bLoop, int nFrameNumber = 0);
 	void 													Walk(bool bLoop);
 	void 													Stand(bool bLoop);
@@ -158,6 +160,7 @@ protected:
 	static map< TAnimation, float >							s_mOrgAnimationSpeedByType;
 	static vector< CCharacter* >							s_vHumans;
 	static map<string, map<string, pair<string,	float>>>	s_mBodiesAnimations;
+	map<string, string>										m_mOverridenAnimation;
 	static void												OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );
 	static void 											Walk( CCharacter*, bool bLoop );
 	static void 											Stand( CCharacter*, bool bLoop );

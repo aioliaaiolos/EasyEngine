@@ -773,8 +773,10 @@ INT_PTR CALLBACK CMaxExporter::OnExportAnim(HWND hWnd, UINT msg, WPARAM wParam, 
 	case WM_COMMAND:
 		if (lParam == (LPARAM)s_pExporter->m_hWndComboBox) {
 			s_pExporter->m_nSelectedAnimationIndex = SendMessageA(s_pExporter->m_hWndComboBox, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-			s_pExporter->m_sSelectedAnimation = s_pExporter->m_vPathList[s_pExporter->m_nSelectedAnimationIndex];
-			SetWindowTextA(hEditAnimName, s_pExporter->m_sSelectedAnimation.c_str());
+			if (s_pExporter->m_nSelectedAnimationIndex >= 0) {
+				s_pExporter->m_sSelectedAnimation = s_pExporter->m_vPathList[s_pExporter->m_nSelectedAnimationIndex];
+				SetWindowTextA(hEditAnimName, s_pExporter->m_sSelectedAnimation.c_str());
+			}
 		}
 		switch (wParam)
 		{

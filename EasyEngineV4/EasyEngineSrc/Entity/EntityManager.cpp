@@ -810,17 +810,26 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					infos.m_sTextureName = character["DiffuseTextureName"].GetString();
 					Value& specular = character["Specular"].GetArray();
 					infos.m_vSpecular = CVector(specular[0].GetFloat(), specular[1].GetFloat(), specular[2].GetFloat());
-					Value& animationSpeeds = character["AnimationSpeeds"];
-					for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
-						infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
-					Value& items = character["Items"];
-					for (int iItem = 0; iItem < items.Size(); iItem++) {
-						Value& item = items[iItem];
-						string itemName = item["ItemName"].GetString();
-						Value& isWearArray = item["IsWearArray"];							
-						for (int j = 0; j < isWearArray.Size(); j++) {
-							int isWear = isWearArray[j].GetInt();
-							infos.m_mItems[itemName].push_back(isWear);
+					if (character.HasMember("AnimationSpeeds")) {
+						Value& animationSpeeds = character["AnimationSpeeds"];
+						for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
+							infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
+					}
+					if (character.HasMember("AnimationOverriden")) {
+						Value& animationOverriden = character["AnimationOverriden"];
+						for (int iAnimation = 0; iAnimation < animationOverriden.Size(); iAnimation++)
+							infos.m_mAnimationOverriden[animationOverriden[iAnimation]["Action"].GetString()] = animationOverriden[iAnimation]["Animation"].GetString();
+					}
+					if (character.HasMember("Items")) {
+						Value& items = character["Items"];
+						for (int iItem = 0; iItem < items.Size(); iItem++) {
+							Value& item = items[iItem];
+							string itemName = item["ItemName"].GetString();
+							Value& isWearArray = item["IsWearArray"];
+							for (int j = 0; j < isWearArray.Size(); j++) {
+								int isWear = isWearArray[j].GetInt();
+								infos.m_mItems[itemName].push_back(isWear);
+							}
 						}
 					}
 					infos.m_sHairs = character["Hairs"].GetString();

@@ -404,11 +404,11 @@ IBone* CRessourceManager::LoadSkeleton( ILoader::CAnimatableMeshData& oData )
 	IBone* pRoot = NULL;
 	if (!m_pEntityManager)
 		m_pEntityManager = static_cast<IEntityManager*>(m_oInterface.GetPlugin("EntityManager"));
-	if ( oData.m_mHierarchyBones.size() > 0 )
+	if (oData.m_mHierarchyBones.size() > 0 )
 	{
 		map< int, IBone* > mBone;
 		map< int, int >::iterator itHierarchyBone = oData.m_mHierarchyBones.begin();
-		for (  itHierarchyBone; itHierarchyBone != oData.m_mHierarchyBones.end(); ++itHierarchyBone )
+		for (itHierarchyBone; itHierarchyBone != oData.m_mHierarchyBones.end(); ++itHierarchyBone )
 		{
 			int nBoneID = itHierarchyBone->first;
 			IBone* pBone = m_pEntityManager->CreateBone();
@@ -507,7 +507,7 @@ CMaterial* CRessourceManager::CreateMaterial(EEInterface& oInterface, const ILoa
 {
 	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	CMaterial::Desc oMatDesc(pRessourceManager->m_oRenderer, pShader );
-	if ( pMaterialInfos && pMaterialInfos->m_vAmbient.size() > 0 )
+	if (pMaterialInfos && pMaterialInfos->m_vAmbient.size() > 0 )
 	{
 		oMatDesc.m_vAmbient.resize( pMaterialInfos->m_vAmbient.size() );
 		memcpy( &oMatDesc.m_vAmbient[ 0 ], &pMaterialInfos->m_vAmbient[ 0 ], pMaterialInfos->m_vAmbient.size() * sizeof( float ) );		
@@ -540,30 +540,94 @@ CMaterial* CRessourceManager::CreateMaterial(EEInterface& oInterface, const ILoa
 }
 
 IRessource* CRessourceManager::CreateAnimation( string sFileName, EEInterface& oInterface)
-{	
+{
 	ILoader::CAnimationInfos ai;
 	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	pRessourceManager->m_oLoaderManager.Load( sFileName, ai );
-	
-	CAnimation* pAnimation = new CAnimation(oInterface);
-	pAnimation->SetStartAnimationTime( ai.m_nStartTime );
-	pAnimation->SetEndAnimationTime( ai.m_nEndTime );
-	pAnimation->SetName( ai.m_sName );
-	
-	unsigned int iKeyIndex = 0;
-	for ( int i = 0; i < ai.m_nBoneCount; i++ )
-	{
-		unsigned int nBoneID = ai.m_vBonesIDArray[ i ];
-		pAnimation->AddBone( nBoneID);
-		int nKeyCount = ai.m_vKeyCountArray[ i ];
-		for ( int iKey = 0; iKey < nKeyCount; iKey++ )
+
+	CAnimation* pAnimation = new CAnimation(oInterface);;
+	CAnimation* pTestAnimation = nullptr;
+
+	std::map< std::string, IRessource* >::iterator itAnimation = pRessourceManager->m_mRessource.find(sFileName);
+	if (false && itAnimation != pRessourceManager->m_mRessource.end()) {
+		CAnimation* pSimilarAnimation = static_cast<CAnimation*>(itAnimation->second);
+		map<int, vector<CKey>> mBoneKeyMap, mBoneKeyMap2;
+		pSimilarAnimation->GetBoneKeysMap(mBoneKeyMap);
+		mBoneKeyMap2.insert(mBoneKeyMap.begin(), mBoneKeyMap.end());
+		pAnimation->SetBoneKeysMap(mBoneKeyMap2);
+	}
+	else {
+#if 0
+		// test
+		if (itAnimation != pRessourceManager->m_mRessource.end()) {
+			CAnimation* pSimilarAnimation = static_cast<CAnimation*>(itAnimation->second);
+			pTestAnimation = new CAnimation(oInterface);
+			map<int, vector<CKey>> mBoneKeyMap, mBoneKeyMap2;
+			pSimilarAnimation->GetBoneKeysMap(mBoneKeyMap);
+			mBoneKeyMap2.insert(mBoneKeyMap.begin(), mBoneKeyMap.end());
+			pTestAnimation->SetBoneKeysMap(mBoneKeyMap2);
+		}
+		// fin test
+#endif // 0
+
+		pAnimation->SetStartAnimationTime(ai.m_nStartTime);
+		pAnimation->SetEndAnimationTime(ai.m_nEndTime);
+		pAnimation->SetName(ai.m_sName);
+
+		unsigned int iKeyIndex = 0;
+		for (int i = 0; i < ai.m_nBoneCount; i++)
 		{
-			int nTimeValue = ( int )ai.m_vTimeValueArray[ iKeyIndex ];
-			int nKeyType = ( int )ai.m_vKeyTypeArray[ iKeyIndex ];
-			pAnimation->AddKey( nBoneID, nTimeValue, (CKey::TKey)nKeyType, ai.m_vLocalTMArray[ iKeyIndex ], ai.m_vWorldTMArray[ iKeyIndex ], ai.m_vLocalQuatArray[ iKeyIndex ] );
-			iKeyIndex ++;
+			unsigned int nBoneID = ai.m_vBonesIDArray[i];
+			pAnimation->AddBone(nBoneID);
+			int nKeyCount = ai.m_vKeyCountArray[i];
+			for (int iKey = 0; iKey < nKeyCount; iKey++)
+			{
+				int nTimeValue = (int)ai.m_vTimeValueArray[iKeyIndex];
+				int nKeyType = (int)ai.m_vKeyTypeArray[iKeyIndex];
+				pAnimation->AddKey(nBoneID, nTimeValue, (CKey::TKey)nKeyType, ai.m_vLocalTMArray[iKeyIndex], ai.m_vWorldTMArray[iKeyIndex], ai.m_vLocalQuatArray[iKeyIndex]);
+				iKeyIndex++;
+			}
 		}
 	}
+
+	// comparaison
+#if 0
+	if (pTestAnimation) {
+		map<int, vector<CKey>> mBoneKeyGood, mBoneKeyBad;
+		pAnimation->GetBoneKeysMap(mBoneKeyGood);
+		pTestAnimation->GetBoneKeysMap(mBoneKeyBad);
+		if (!(mBoneKeyGood == mBoneKeyBad)) {
+			int test = 0;
+			test = test;
+		}
+
+		/*
+		map<int, vector<CKey>>::iterator itGood = mBoneKeyGood.begin();
+		map<int, vector<CKey>>::iterator itBad = mBoneKeyBad.begin();
+		for (; itGood != mBoneKeyGood.end(); itGood++, itBad++) {
+			int i = 0;
+			for (CKey& keyGood : itGood->second) {
+				CKey keyBad = itBad->second[i++];
+				if (!((keyGood.m_eType == keyBad.m_eType) && (keyGood.m_nTimeValue == keyBad.m_nTimeValue) && (keyGood.m_oLocalTM == keyBad.m_oLocalTM) && (keyGood.m_oWorldTM == keyBad.m_oWorldTM))) {
+					int test = 0;
+					test = test;
+				}
+			}
+		}*/
+	}
+#endif // 0
+	/*
+	if (mBoneKeyBad != mBoneKeyGood) {
+		int test = 0;
+		test = test;
+	}*/
+	
+	/*map<int, vector<CKey>> mBoneKeyMap, mBoneKeyMap2;
+	pAnimation->GetBoneKeysMap(mBoneKeyMap);
+	mBoneKeyMap2.insert(mBoneKeyMap.begin(), mBoneKeyMap.end());
+	pTestAnimation = new CAnimation(oInterface);
+	pTestAnimation->SetBoneKeysMap(mBoneKeyMap2);
+	return pTestAnimation;*/
 	return static_cast< IAnimation* > ( pAnimation );
 }
 

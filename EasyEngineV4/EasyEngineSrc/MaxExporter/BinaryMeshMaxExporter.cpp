@@ -124,8 +124,8 @@ int	CBinaryMeshMaxExporter::DoExport(const TCHAR *pName, ExpInterface *ei, Inter
 		map< int, INode* > mBoneByID;
 		INode* pRoot = pInterface->GetRootNode();
 		GetSkeleton( pRoot, mBones );
-		GetBonesIDByName( pRoot, m_mBoneIDByName );
-		GetBoneByID( mBones, m_mBoneIDByName, mBoneByID );
+		GetBonesIDByName( pRoot, m_mBoneIDByName, m_mDummyIDByName);
+		GetBoneByID( mBones, m_mBoneIDByName, m_mDummyIDByName, mBoneByID );
 		HWND hMaxDlg = pInterface->GetMAXHWnd();
 		INT_PTR iRet = DialogBoxParam( hInstance, MAKEINTRESOURCE( IDD_EXPORT ), hMaxDlg, ExportDlgProc, (LPARAM)this );
 		if( iRet == 1 )
@@ -151,25 +151,36 @@ int	CBinaryMeshMaxExporter::DoExport(const TCHAR *pName, ExpInterface *ei, Inter
 	return TRUE;
 }
 
-void CBinaryMeshMaxExporter::GetBonesIDByName(INode* pRoot, map< string, int >& mBoneIDByName) const
+void CBinaryMeshMaxExporter::GetBonesIDByName(INode* pRoot, map< string, int >& mBoneIDByName, map< string, int >& mDummyIDByName) const
 {
 	Object* pObject = pRoot->EvalWorldState(0).obj;
 	if (pObject && IsBone(pObject)) {//( pObject->CanConvertToType( Class_ID( BONE_CLASS_ID, 0 ) ) == TRUE || pObject->CanConvertToType( BONE_OBJ_CLASSID ) == TRUE ) )
 		wstring wname(pRoot->GetName());
 		string name(wname.begin(), wname.end());
-		mBoneIDByName[name] = (int)mBoneIDByName.size();
+		if (name.find("Dummy") != -1)
+			mDummyIDByName[name] = 1000 + (int)mDummyIDByName.size();
+		else 
+			mBoneIDByName[name] = (int)mBoneIDByName.size();
 	}
 	for( int i = 0; i < pRoot->NumberOfChildren(); i++ )
-		GetBonesIDByName( pRoot->GetChildNode( i ), mBoneIDByName );
+		GetBonesIDByName( pRoot->GetChildNode( i ), mBoneIDByName, mDummyIDByName);
 }
 
-void CBinaryMeshMaxExporter::GetBoneByID( const map< string, INode* >& mBoneByName, const map< string, int >& mBoneIDByName, map< int, INode* >& mBoneByID )
+void CBinaryMeshMaxExporter::GetBoneByID( const map< string, INode* >& mBoneByName, const map< string, int >& mBoneIDByName, const map< string, int >& mDummyIDByName, map< int, INode* >& mBoneByID )
 {
 	for ( map< string, int >::const_iterator itNameID = mBoneIDByName.begin(); itNameID != mBoneIDByName.end(); ++itNameID )
 	{
 		const map< string, INode* >::const_iterator itNode = mBoneByName.find( itNameID->first );
 		if(itNode != mBoneByName.end())
 			mBoneByID[ itNameID->second ] = itNode->second;
+		else
+			throw CEException("Erreur : CBinaryMeshMaxExporter::GetBoneByID() -> Bone \"" + itNameID->first + "\n introuvable dans la map de bones par noms (mBones)");
+	}
+	for (map< string, int >::const_iterator itNameID = mDummyIDByName.begin(); itNameID != mDummyIDByName.end(); ++itNameID)
+	{
+		const map< string, INode* >::const_iterator itNode = mBoneByName.find(itNameID->first);
+		if (itNode != mBoneByName.end())
+			mBoneByID[itNameID->second] = itNode->second;
 		else
 			throw CEException("Erreur : CBinaryMeshMaxExporter::GetBoneByID() -> Bone \"" + itNameID->first + "\n introuvable dans la map de bones par noms (mBones)");
 	}
@@ -215,8 +226,17 @@ void CBinaryMeshMaxExporter::StoreMeshToMeshInfos( Interface* pInterface, INode*
 		map< string, int >::iterator itBone = m_mBoneIDByName.find(sName);
 		if( itBone == m_mBoneIDByName.end() )
 		{
-			CEException e( "Erreur dans l'exporteur, tous les nodes de la hiérarchy ne sont pas récupérés correctement" );
-			throw e;
+			if (m_mBoneIDByName.empty()) {
+				itBone = m_mDummyIDByName.find(sName);
+				if (itBone == m_mDummyIDByName.end()) {
+					CEException e("Erreur dans l'exporteur, tous les nodes de la hiérarchy ne sont pas récupérés correctement");
+					throw e;
+				}
+			}
+			else {
+				CEException e("Erreur dans l'exporteur, tous les nodes de la hiérarchy ne sont pas récupérés correctement");
+				throw e;
+			}
 		}
 		mi.m_nParentBoneID = itBone->second;
 	}

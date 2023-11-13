@@ -3,7 +3,7 @@
 		{
 			"EntityID": "garde hopital",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01.bme",
+			"RessourceFileName": "Meshes/Bodies/body01-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -78,7 +78,7 @@
 		{
 			"EntityID": "geraldine",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body03.bme",
+			"RessourceFileName": "Meshes/Bodies/body03-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -116,7 +116,7 @@
 		{
 			"EntityID": "mirabelle",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -124,6 +124,38 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Specular": [
+				0.30000001192092896,
+				0.30000001192092896,
+				0.30000001192092896
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Tunique_Hospital",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs01"
+		},
+		{
+			"EntityID": "fatoumata",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-tres-noire.bmp",
 			"Specular": [
 				0.30000001192092896,
 				0.30000001192092896,
@@ -186,7 +218,7 @@
 		{
 			"EntityID": "ranja",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body04.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -502,27 +534,6 @@
 				0.0,
 				0.0
 			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"Speed": 4.0
-				}
-			],
-			"Items": [
-				{
-					"ItemName": "Legion_Boot_Left",
-					"IsWearArray": [
-						1,
-						1
-					]
-				},
-				{
-					"ItemName": "Legion_Boot_Right",
-					"IsWearArray": [
-						1
-					]
-				}
-			],
 			"Hairs": ""
 		},
 		{
@@ -560,7 +571,7 @@
 		{
 			"EntityID": "test2",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body07.bme",
+			"RessourceFileName": "Meshes/Bodies/body07-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -585,7 +596,7 @@
 		{
 			"EntityID": "test3",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body08.bme",
+			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -610,7 +621,7 @@
 		{
 			"EntityID": "test4",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body12.bme",
+			"RessourceFileName": "Meshes/Bodies/body12-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -635,7 +646,7 @@
 		{
 			"EntityID": "body14",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body14.bme",
+			"RessourceFileName": "Meshes/Bodies/body14-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -701,6 +712,106 @@
 			],
 			"Items": [],
 			"Hairs": ""
+		},
+		{
+			"EntityID": "xiam",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "body08.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": "hairs11"
+		},
+		{
+			"EntityID": "xiam2",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "athena3_tex2.bmp",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"AnimationOverriden": [
+				{
+					"Action": "Stand",
+					"Animation": "Stand-normal-mixamo"
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Xiam_Cape",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Xiam_Epaulettes",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Xiam_Helmet",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "xiam3",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.10000000149011612,
+				0.10000000149011612,
+				0.10000000149011612
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"Speed": 1.0
+				}
+			],
+			"Items": [],
+			"Hairs": "hairs11"
 		}
 	]
 }

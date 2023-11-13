@@ -5,6 +5,10 @@
 		  "Dummies" : [""]
 	  },
 	  {
+		  "Type" : "Hairs", 
+		  "Dummies" : ["BodyDummyHairs"]
+	  },
+	  {
 		  "Type":  "Arm", 
 		  "Dummies": ["BodyDummyBrassiereG", "BodyDummyBrassiereD"]
 	  },
@@ -15,6 +19,10 @@
 	  {
 		  "Type": "Left-Arm", 
 		  "Dummies": []
+	  },
+	  {
+		  "Type": "Shield", 
+		  "Dummies": ["BodyDummyShield"]
 	  },
 	  {
 		  "Type": "Chest", 
@@ -78,7 +86,7 @@
 		},
 		{
 			"ID": "Tunique_Hospital",
-			"Model": "clothes/tunique5.bme",
+			"Model": "clothes/tunique5-mixamo.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
 			"Preview": "Tunique_Hospital.bmp"
@@ -92,7 +100,7 @@
 		},
 		{
 			"ID": "Dress_LongueWide",
-			"Model": "clothes/robe5.bme",
+			"Model": "clothes/robe5-mixamo.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
 			"Preview": "Dress_LongueWide.bmp"
@@ -269,6 +277,30 @@
 			"Preview": "Base_Cuirass.bmp",
 			"Armor": 5,
 			"OffsetY": 5
+		},
+		{
+			"ID": "Xiam_Helmet",
+			"Model": "armors/xiam/casque.BME",
+			"Class": "Armor",
+			"Type": "Hairs",
+			"Preview": "",
+			"Armor": 100
+		},
+		{
+			"ID": "Xiam_Epaulettes",
+			"Model": "armors/xiam/epaulettes.BME",
+			"Class": "Armor",
+			"Type": "Shield",
+			"Preview": "",
+			"Armor": 100
+		},
+		{
+			"ID": "Xiam_Cape",
+			"Model": "armors/xiam/cape.BME",
+			"Class": "Armor",
+			"Type": "Chest",
+			"Preview": "",
+			"Armor": 100
 		}
 	]
 }

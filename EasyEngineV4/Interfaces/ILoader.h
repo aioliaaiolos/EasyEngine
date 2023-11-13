@@ -322,6 +322,7 @@ public:
 		bool									m_bUseCustomSpecular;
 		CVector									m_vSpecular;
 		map< string, float>						m_mAnimationSpeed;
+		map<string, string>						m_mAnimationOverriden;
 		map<string, string>						m_mClothesToNode;
 		map<string, vector<int>>				m_mItems;
 		string									m_sHairs;

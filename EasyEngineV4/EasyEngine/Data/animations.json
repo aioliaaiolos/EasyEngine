@@ -46,25 +46,25 @@
 			]
 		},
 				{
-			"bodies": ["body08-mixamo", "body08b-mixamo"],
+			"bodies": ["body01-mixamo", "body03-mixamo", "body06-mixamo", "body07-mixamo", "body08-mixamo", "body12-mixamo", "body14-mixamo", "body15-mixamo"],
 			"actionAnimations": 
 			[
-				{"Dying": "idle-mixamo"},
-				{"Guard": "idle-mixamo"},
-				{"HitWeapon": "idle-mixamo"},
-				{"HitLeftFoot": "idle-mixamo"},
-				{"HitReceived": "idle-mixamo"},
-				{"HitRightArm": "idle-mixamo"},
-				{"MoveToGuard": "idle-mixamo"},
-				{"MoveToGuardWeaponPart1": "idle-mixamo"},
-				{"MoveToGuardWeaponPart2": "idle-mixamo"},
-				{"Original": "idle-mixamo"},
-				{"Punished": "idle-mixamo"},
-				{"Run": "idle-mixamo"},
-				{"Sexy": "idle-mixamo"},
-				{"Seat": "idle-mixamo"},
-				{"Stand": "idle-mixamo"},
-				{"Walk": "idle-mixamo"}
+				{"Dying": "Standing-idle-mixamo"},
+				{"Guard": "Standing-idle-mixamo"},
+				{"HitWeapon": "Standing-idle-mixamo"},
+				{"HitLeftFoot": "Standing-idle-mixamo"},
+				{"HitReceived": "Standing-idle-mixamo"},
+				{"HitRightArm": "Standing-idle-mixamo"},
+				{"MoveToGuard": "Standing-idle-mixamo"},
+				{"MoveToGuardWeaponPart1": "Standing-idle-mixamo"},
+				{"MoveToGuardWeaponPart2": "Standing-idle-mixamo"},
+				{"Original": "Standing-idle-mixamo"},
+				{"Punished": "Standing-idle-mixamo"},
+				{"Run": "Standing-idle-mixamo"},
+				{"Sexy": "Standing-idle-mixamo"},
+				{"Seat": "Standing-idle-mixamo"},
+				{"Stand": "Standing-idle-mixamo"},
+				{"Walk": "walk-woman"}
 			]
 		},
 		{

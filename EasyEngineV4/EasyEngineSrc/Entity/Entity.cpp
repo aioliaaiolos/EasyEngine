@@ -936,17 +936,19 @@ int CEntity::GetCellSize()
 
 void CEntity::GetBonesMatrix( INode* pInitRoot, INode* pCurrentRoot, vector< CMatrix >& vMatrix )
 {
-	//if (pInitRoot->GetID() != -1) 
-	{
-		CMatrix mPassage;
-		GetPassageMatrix(pInitRoot, pCurrentRoot, mPassage);
+	if (pInitRoot->GetName().find("Dummy") == -1) {
+		//if (pInitRoot->GetID() != -1) 
+		{
+			CMatrix mPassage;
+			GetPassageMatrix(pInitRoot, pCurrentRoot, mPassage);
 
-		vMatrix.push_back(mPassage);
-	}
-	for ( unsigned int i = 0; i < pInitRoot->GetChildCount(); i++ )
-	{
-		if ( pInitRoot->GetChild( i ) )
-			GetBonesMatrix( pInitRoot->GetChild( i ), pCurrentRoot->GetChild( i ), vMatrix );
+			vMatrix.push_back(mPassage);
+		}
+		for (unsigned int i = 0; i < pInitRoot->GetChildCount(); i++)
+		{
+			if (pInitRoot->GetChild(i))
+				GetBonesMatrix(pInitRoot->GetChild(i), pCurrentRoot->GetChild(i), vMatrix);
+		}
 	}
 }
 
@@ -1069,20 +1071,23 @@ void CEntity::AddAnimation(string sAnimationName)
 
 void CEntity::SetCurrentAnimation(std::string sAnimation)
 {
-	m_pCurrentAnimation = m_mAnimation[sAnimation];
-	if (m_bUsePositionKeys)
-		m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
-	{
-		switch (e)
+	map<string, IAnimation*>::iterator itAnimation = m_mAnimation.find(sAnimation);
+	if (itAnimation != m_mAnimation.end()) {
+		m_pCurrentAnimation = itAnimation->second; //  m_mAnimation[sAnimation];
+		if (m_bUsePositionKeys)
+			m_pCurrentAnimation->AddCallback([this](IAnimation::TEvent e)
 		{
-		case IAnimation::ePlay:
-			IBone* pRoot = m_pSkeletonRoot;
-			CKey oKey;
-			pRoot->GetKeyByTime(GetCurrentAnimation()->GetStartAnimationTime(), oKey);
-			oKey.m_oLocalTM.GetInverse(m_oFirstAnimationFrameSkeletonMatrixInv);
-			break;
-		}
-	});
+			switch (e)
+			{
+			case IAnimation::ePlay:
+				IBone* pRoot = m_pSkeletonRoot;
+				CKey oKey;
+				pRoot->GetKeyByTime(GetCurrentAnimation()->GetStartAnimationTime(), oKey);
+				oKey.m_oLocalTM.GetInverse(m_oFirstAnimationFrameSkeletonMatrixInv);
+				break;
+			}
+		});
+	}
 }
 
 bool CEntity::HasAnimation(string sAnimationName)

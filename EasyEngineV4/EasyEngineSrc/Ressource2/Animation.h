@@ -46,6 +46,7 @@ public:
 	int				GetStartAnimationTime();
 	int				GetEndAnimationTime();
 	void			GetBoneKeysMap(map< int, vector< CKey > >& mBoneKeys);
+	void			SetBoneKeysMap(map< int, vector< CKey > >& mBoneKeys);
 	IAnimation*		CreateReversedAnimation();
 
 private:

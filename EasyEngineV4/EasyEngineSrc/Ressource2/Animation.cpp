@@ -216,6 +216,11 @@ void CAnimation::GetBoneKeysMap( map< int, vector< CKey > >& mBoneKeys )
 	mBoneKeys = m_mBoneKeys;
 }
 
+void CAnimation::SetBoneKeysMap(map< int, vector< CKey > >& mBoneKeys)
+{
+	m_mBoneKeys = mBoneKeys;
+}
+
 IAnimation*	CAnimation::CreateReversedAnimation()
 {
 	CAnimation* pReversedAnimation = new CAnimation(m_oInterface);

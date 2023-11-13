@@ -12,6 +12,7 @@ map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
 	{ "Right-Arm", CItem::eRightArm },
 	{ "Left-Arm", CItem::eLeftArm },
 	{ "Chest", CItem::eChest },
+	{ "Shield", CItem::eShield },
 	{ "Belt", CItem::eBelt },
 	{ "Belt-Weapon", CItem::eBeltWeapon},
 	{ "Left-Forearm", CItem::eLeftForearm },
@@ -21,7 +22,8 @@ map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
 	{ "Right-Calf", CItem::eRightCalf },
 	{ "Left-Calf", CItem::eLeftCalf },
 	{ "Left-Foot", CItem::eLeftFoot},
-	{ "Right-Foot", CItem::eRightFoot }
+	{ "Right-Foot", CItem::eRightFoot },
+	{ "Hairs", CItem::eHairs}
 };
 
 map<string, CItem::TClass> CItem::s_mClassString = map<string, CItem::TClass>{ 

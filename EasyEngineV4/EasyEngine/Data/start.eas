@@ -74,7 +74,7 @@ function onLoadingGame()
 	
 	//EditWorld("testLoot");	
 	//LoadWorld("", "OnWorldLoaded");
-	//EditWorld("empty");
+	// EditWorld("empty");
 	//LoadWorld("empty", "");
 	
 	//EditWorld("");

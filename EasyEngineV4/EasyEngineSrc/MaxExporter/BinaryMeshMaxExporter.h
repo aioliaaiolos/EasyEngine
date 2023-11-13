@@ -29,8 +29,8 @@ class CBinaryMeshMaxExporter : public CMaxExporter
 	static CBinaryMeshMaxExporter*		s_pCurrentInstance;
 	
 	
-	void			GetBonesIDByName( INode* pRoot, std::map< std::string, int >& mBoneIDByName ) const;
-	void			GetBoneByID( const std::map< std::string, INode* >& mBoneByName, const std::map< std::string, int >& mBoneIDByName, std::map< int, INode* >& mBoneByID );
+	void			GetBonesIDByName( INode* pRoot, std::map< std::string, int >& mBoneIDByName, map< string, int >& mDummyIDByName) const;
+	void			GetBoneByID( const std::map< std::string, INode* >& mBoneByName, const std::map< std::string, int >& mBoneIDByName, const map< string, int >& mDummyIDByName, std::map< int, INode* >& mBoneByID );
 	void			StoreSkinningToMeshInfos( const IWeightTable& wt, ILoader::CMeshInfos& mi );	
 	void			StoreMeshToMeshInfos( Interface* pInterface, INode* pMesh, ILoader::CMeshInfos& mi ) override;
 	void			StoreSkeletonToSkeletonMap( const map< int, INode* >& mNodeID, ILoader::CAnimatableMeshData& ami );

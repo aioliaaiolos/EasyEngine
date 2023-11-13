@@ -49,6 +49,7 @@ CObject::CObject(EEInterface& oInterface, string sFileName) :
 	CEntity(oInterface, sFileName)
 {
 	m_pfnCollisionCallback = OnCollision;
+	m_pBoundingGeometry = GetBoundingGeometry();
 }
 
 void CObject::Update()
@@ -58,7 +59,7 @@ void CObject::Update()
 
 	if (m_pCurrentAnimation) {
 		m_pCurrentAnimation->Update();
-		m_pBoundingGeometry = GetBoundingGeometry();
+		// m_pBoundingGeometry = GetBoundingGeometry();
 	}
 
 	UpdateWorldMatrix();
@@ -236,35 +237,16 @@ m_fNeckRotV( 0 )
 {
 	m_sID = sID;
 	m_sTypeName = "Human";
+
+	m_pRessource->GetFileName(m_sCurrentBodyName);
+	CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
+	CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
 	
 	for( int i = 0; i < eAnimationCount; i++ )
 		m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
 
 	m_pBody->m_fWeight = 1.f;	
-	InitAnimations();
-
-	string bboxFileName = sFileName.substr(0, sFileName.find(".")) + ".bbox";
-	ILoader::CAnimationBBoxInfos bboxInfos;
-	try {
-		m_pLoaderManager->Load(bboxFileName, bboxInfos);
-		m_oKeyBoundingBoxes = bboxInfos.mKeyBoundingBoxes;
-		string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName]["Stand"].first;
-		string sAnimationNameLow = sAnimationName;
-		std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
-		map<string, map<int, IBox*> >::iterator itBoxes = m_oKeyBoundingBoxes.find(sAnimationNameLow);
-		if (itBoxes == m_oKeyBoundingBoxes.end()) {
-			ostringstream oss;
-			oss << "Erreur : l'entite '" << sFileName << "' ne possede pas de bounding box pour '" + sAnimationNameLow + "'";
-			throw CEException(oss.str());
-		}
-		m_pBoundingGeometry = itBoxes->second.begin()->second;
-	}
-	catch (CFileNotFoundException& e) {
-		ostringstream oss;
-		oss << "Avertissement : fichier '" << bboxFileName << "' manquant,  utilisation de la bounding box du modele";
-		m_oConsole.Println(oss.str());
-		m_pBoundingGeometry = m_pMesh->GetBBox();
-	}
+	//
 
 	s_vHumans.push_back( this );
 	m_pLeftEye = dynamic_cast< IEntity* >( m_pSkeletonRoot->GetChildBoneByName( "OeilG" ) );
@@ -276,23 +258,18 @@ m_fNeckRotV( 0 )
 	m_sAttackBoneName = "MainD";
 	
 	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));
-	pEntityManager->AddNewCharacterInWorld(this);
-
-	map< string, map< int, IBox* > >::iterator itBox = m_oKeyBoundingBoxes.find("stand-normal");
-	if (itBox != m_oKeyBoundingBoxes.end()) {
-		m_pBoundingGeometry = itBox->second.find(160)->second;
-	}
+	pEntityManager->AddNewCharacterInWorld(this);	
 
 	m_pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
 	m_pDummyRHand = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName("BodyDummyRHand"));
 	if (!m_pDummyRHand) {
 		// throw CEException("Error : Dummy 'BodyDummyRHand' not found");
-		m_oConsole.Println("Error : Dummy 'BodyDummyRHand' not found");
+		m_oConsole.Println("Warning : Dummy 'BodyDummyRHand' not found");
 	}
 	IBone* pBone = GetPreloadedBone(m_sAttackBoneName);
 	if (!pBone) {
 		// throw CEException(string("Error : attack bone '") + m_sAttackBoneName + "' not found");
-		m_oConsole.Println(string("Error : attack bone '") + m_sAttackBoneName + "' not found");
+		m_oConsole.Println(string("Warning : attack bone '") + m_sAttackBoneName + "' not found");
 	}
 	else {
 		const IBox* pAttackBBox = static_cast<const IBox*>(pBone->GetBoundingBox());
@@ -310,17 +287,25 @@ m_fNeckRotV( 0 )
 		}
 	}
 
+	/*
+	InitAnimations();
+	InitBoundingBox(sFileName);
+	InitReverseAnimations();*/
+}
+
+CCharacter::~CCharacter()
+{
+
+}
+
+void CCharacter::InitReverseAnimations()
+{
 	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
 	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart1"].second);
 	pReverse = CreateReverseAnimation("MoveToGuardWeaponPart2");
 	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart2"].second);
 	pReverse = CreateReverseAnimation("Run");
 	SetAnimationSetSpeed();
-}
-
-CCharacter::~CCharacter()
-{
-
 }
 
 IAnimation* CCharacter::CreateReverseAnimation(string sAnimationType)
@@ -422,18 +407,52 @@ void CCharacter::InitAnimations()
 			m_pCurrentAnimation = nullptr;
 		}
 		m_mAnimation.clear();		
-		m_pRessource->GetFileName(m_sCurrentBodyName);
-		CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
-		CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
-		
 		bool endLoop = false;
 		map<string, pair<string, float>>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
 		for (const pair<string, pair<string, float>>& actionAnim : bodyAnimations) {
-			AddAnimation(actionAnim.second.first);
+			string aActionName = actionAnim.second.first;
+			map<string, string>::iterator itOverridenAction = m_mOverridenAnimation.find(actionAnim.first);
+			if (itOverridenAction != m_mOverridenAnimation.end())
+				aActionName = itOverridenAction->second;
+			AddAnimation(aActionName);
 			TAnimation animType = s_mAnimationStringToType[actionAnim.first];
 			if (animType == eStand)
 				m_sStandAnimation = actionAnim.second.first;
 		}
+	}
+}
+
+void CCharacter::InitBoundingBox(string sFileName)
+{
+	string bboxFileName = sFileName.substr(0, sFileName.find(".")) + ".bbox";
+	ILoader::CAnimationBBoxInfos bboxInfos;
+	try {
+		m_pLoaderManager->Load(bboxFileName, bboxInfos);
+		m_oKeyBoundingBoxes = bboxInfos.mKeyBoundingBoxes;
+		string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName]["Stand"].first;
+		if (sAnimationName.empty()) {
+			throw CEException(string("Error : no 'Stand' animation found for body '") + m_sCurrentBodyName + "'");
+		}
+		string sAnimationNameLow = sAnimationName;
+		std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
+		map<string, map<int, IBox*> >::iterator itBoxes = m_oKeyBoundingBoxes.find(sAnimationNameLow);
+		if (itBoxes == m_oKeyBoundingBoxes.end()) {
+			ostringstream oss;
+			oss << "Erreur : l'entite '" << sFileName << "' ne possede pas de bounding box pour '" + sAnimationNameLow + "'";
+			throw CEException(oss.str());
+		}
+		m_pBoundingGeometry = itBoxes->second.begin()->second;
+	}
+	catch (CFileNotFoundException& e) {
+		ostringstream oss;
+		oss << "Avertissement : fichier '" << bboxFileName << "' manquant,  utilisation de la bounding box du modele";
+		m_oConsole.Println(oss.str());
+		m_pBoundingGeometry = m_pMesh->GetBBox();
+	}
+
+	map< string, map< int, IBox* > >::iterator itBox = m_oKeyBoundingBoxes.find("stand-normal");
+	if (itBox != m_oKeyBoundingBoxes.end()) {
+		m_pBoundingGeometry = itBox->second.find(160)->second;
 	}
 }
 
@@ -898,13 +917,24 @@ void CCharacter::RunAction( string sAction, bool bLoop )
 void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 {
 	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
-	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][s].first;
+	map<string, string>::iterator itOverrideAnimation = m_mOverridenAnimation.find(s);
+	string sAnimationName; // = s_mBodiesAnimations[m_sCurrentBodyName][s].first;
+	sAnimationName = itOverrideAnimation != m_mOverridenAnimation.end() ? itOverrideAnimation->second : s_mBodiesAnimations[m_sCurrentBodyName][s].first;
 	SetCurrentAnimation( sAnimationName );
 	if( !m_pCurrentAnimation )
 	{
-		string sMessage = string( "Erreur : Animation type \"" ) + s + "\" manquante";
-		CEException e( sMessage );
-		throw e;
+		InitAnimations();
+		string sFileName;
+		pMesh->GetFileName(sFileName);
+		InitBoundingBox(sFileName);
+		InitReverseAnimations();
+		SetCurrentAnimation(sAnimationName);
+		if (!m_pCurrentAnimation)
+		{
+			string sMessage = string("Erreur : Animation type \"") + s + "\" manquante";
+			CEException e(sMessage);
+			throw e;
+		}
 	}
 	m_pCurrentAnimation->SetAnimationTime(nFrameNumber);
 	m_pCurrentAnimation->Play( bLoop );
@@ -1245,6 +1275,16 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 {
 	CEntity::BuildFromInfos(infos, pParent, true);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
+
+	for (const pair<string, string>& animation : pAnimatedEntityInfos->m_mAnimationOverriden) {
+		//m_mOverridenAnimation[animation.first] = animation.second;
+		m_mOverridenAnimation[animation.first] = animation.second;
+	}
+
+	InitAnimations();
+	InitBoundingBox(infos.m_sRessourceFileName);
+	InitReverseAnimations();
+
 	if (GetSkeletonRoot()) {
 		if(!pAnimatedEntityInfos->m_sTextureName.empty())
 			SetDiffuseTexture(pAnimatedEntityInfos->m_sTextureName);
@@ -1260,8 +1300,16 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 			m_mItems[item.first].push_back(pItem);
 			pItem->SetOwner(this);
 			pItem->m_bIsWear = item.second[0] == 1;
-			if (pItem->m_bIsWear)
-				WearItem(pItem->GetIDStr());
+			if (pItem->m_bIsWear) {
+				try {
+					WearItem(pItem->GetIDStr());
+				}
+				catch (CNodeNotFoundException& e) {
+					string sNodeName;
+					e.GetErrorMessage(sNodeName);
+					m_oConsole.Println(string("Warning : Dummy '") + sNodeName + "' not found");
+				}
+			}
 		}
 		if (!pAnimatedEntityInfos->m_sHairs.empty())
 			SetHairs(pAnimatedEntityInfos->m_sHairs);

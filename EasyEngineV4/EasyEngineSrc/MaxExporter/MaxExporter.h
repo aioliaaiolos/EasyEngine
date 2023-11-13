@@ -105,6 +105,7 @@ protected:
 	bool				m_bLog;
 	bool				m_bExportSkinning;
 	map< string, int >	m_mBoneIDByName;
+	map< string, int >	m_mDummyIDByName;
 	wstring				m_wVersion;
 	CMatrix				m_oMaxToOpenglMatrix;
 	bool				m_bExportBoundingBox;
