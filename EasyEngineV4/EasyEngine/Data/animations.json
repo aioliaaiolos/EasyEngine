@@ -49,20 +49,20 @@
 			"bodies": ["body01-mixamo", "body03-mixamo", "body06-mixamo", "body07-mixamo", "body08-mixamo", "body12-mixamo", "body14-mixamo", "body15-mixamo"],
 			"actionAnimations": 
 			[
-				{"Dying": "Standing-idle-mixamo"},
-				{"Guard": "Standing-idle-mixamo"},
-				{"HitWeapon": "Standing-idle-mixamo"},
-				{"HitLeftFoot": "Standing-idle-mixamo"},
-				{"HitReceived": "Standing-idle-mixamo"},
-				{"HitRightArm": "Standing-idle-mixamo"},
-				{"MoveToGuard": "Standing-idle-mixamo"},
-				{"MoveToGuardWeaponPart1": "Standing-idle-mixamo"},
-				{"MoveToGuardWeaponPart2": "Standing-idle-mixamo"},
-				{"Original": "Standing-idle-mixamo"},
-				{"Punished": "Standing-idle-mixamo"},
-				{"Run": "Standing-idle-mixamo"},
-				{"Sexy": "Standing-idle-mixamo"},
-				{"Seat": "Standing-idle-mixamo"},
+				{"Dying": "pose-female-mixamo"},
+				{"Guard": "pose-female-mixamo"},
+				{"HitWeapon": "pose-female-mixamo"},
+				{"HitLeftFoot": "pose-female-mixamo"},
+				{"HitReceived": "pose-female-mixamo"},
+				{"HitRightArm": "pose-female-mixamo"},
+				{"MoveToGuard": "pose-female-mixamo"},
+				{"MoveToGuardWeaponPart1": "pose-female-mixamo"},
+				{"MoveToGuardWeaponPart2": "pose-female-mixamo"},
+				{"Original": "pose-female-mixamo"},
+				{"Punished": "pose-female-mixamo"},
+				{"Run": "pose-female-mixamo"},
+				{"Sexy": "pose-female-mixamo"},
+				{"Seat": "pose-female-mixamo"},
 				{"Stand": "Standing-idle-mixamo"},
 				{"Walk": "walk-woman"}
 			]
@@ -87,6 +87,28 @@
 				{"Seat": "Original-m"},
 				{"Stand": "stand-m"},
 				{"Walk": "Original-m"}
+			]
+		},
+		{
+			"bodies": ["body01-m-mixamo"],
+			"actionAnimations": 
+			[
+				{"Dying": "Standing-Idle-m-mixamo"},
+				{"Guard": "Standing-Idle-m-mixamo"},
+				{"HitWeapon": "Standing-Idle-m-mixamo"},
+				{"HitLeftFoot": "Standing-Idle-m-mixamo"},
+				{"HitReceived": "Standing-Idle-m-mixamo"},
+				{"HitRightArm": "Standing-Idle-m-mixamo"},
+				{"MoveToGuard": "Standing-Idle-m-mixamo"},
+				{"MoveToGuardWeaponPart1": "Standing-Idle-m-mixamo"},
+				{"MoveToGuardWeaponPart2": "Standing-Idle-m-mixamo"},
+				{"Original": "Standing-Idle-m-mixamo"},
+				{"Punished": "Standing-Idle-m-mixamo"},
+				{"Run": "Standing-Idle-m-mixamo", "Speed": 2.0},
+				{"Sexy": "Standing-Idle-m-mixamo"},
+				{"Seat": "Standing-Idle-m-mixamo"},
+				{"Stand": "Standing-Idle-m-mixamo"},
+				{"Walk": "Standing-Idle-m-mixamo"}
 			]
 		}
 	]

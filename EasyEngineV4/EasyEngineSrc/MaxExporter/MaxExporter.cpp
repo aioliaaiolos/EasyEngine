@@ -743,8 +743,9 @@ INT_PTR CALLBACK CMaxExporter::OnExportAnim(HWND hWnd, UINT msg, WPARAM wParam, 
 		SetWindowText(hLast, wText2.c_str());		
 		
 		if (s_pExporter->m_bEnableAnimationList) {
-			s_pExporter->m_hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""), CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
-				20, 121, 150, 200, hWnd, NULL, (HINSTANCE)GetWindowLongW(hWnd, 0), NULL);
+			// s_pExporter->m_hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""), CBS_SIMPLE | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 20, 121, 150, 2000, hWnd, NULL, (HINSTANCE)GetWindowLongW(hWnd, 0), NULL);
+			s_pExporter->m_hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""), CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 20, 121, 150, 200, hWnd, NULL, (HINSTANCE)GetWindowLongW(hWnd, 0), NULL);
+
 			//path = BrowseFolder("C:/Users/wladi/Documents/Developpement/EasyEngine2/trunk/EasyEngineV4/EasyEngine/Data/Animations");
 			//path = "C:/Users/wladi/Documents/Developpement/EasyEngine2/trunk/EasyEngineV4/EasyEngine/Data/Animations";
 			path = "D:/Developpement/EasyEngine-git/trunk/EasyEngineV4/EasyEngine/Data/Animations";

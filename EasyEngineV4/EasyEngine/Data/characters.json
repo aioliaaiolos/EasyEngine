@@ -180,7 +180,7 @@
 		{
 			"EntityID": "namia",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -250,7 +250,7 @@
 		{
 			"EntityID": "aluyn",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body03.bme",
+			"RessourceFileName": "Meshes/Bodies/body03-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -294,7 +294,7 @@
 		{
 			"EntityID": "christine",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -364,7 +364,7 @@
 		{
 			"EntityID": "curvy",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -396,7 +396,7 @@
 		{
 			"EntityID": "player0",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06b.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -421,7 +421,7 @@
 		{
 			"EntityID": "player",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "Player",
@@ -453,7 +453,7 @@
 		{
 			"EntityID": "capitaine",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01-m.bme",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -469,7 +469,7 @@
 			"AnimationSpeeds": [
 				{
 					"Name": "Run",
-					"Speed": 128.0
+					"Speed": 1.0
 				}
 			],
 			"Items": [
@@ -482,7 +482,7 @@
 				{
 					"ItemName": "Legio-Tunique-m",
 					"IsWearArray": [
-						1
+						0
 					]
 				},
 				{
