@@ -45,7 +45,9 @@ void CWeightTable::GetArrays( vector<float >& vWeightVertex, vector< float >& vW
 		}
 		else
 		{
-			CEException e("Erreur : Tous les vertex de votre modèle ne sont pas skinnés");
+			std::ostringstream oss;
+			oss << "Erreur : le vertex " << iVertex << " n'est pas skinné";
+			CEException e(oss.str());
 			throw e;
 		}
 	}

@@ -385,7 +385,7 @@ void CEntity::UpdateCollision()
 bool CEntity::TestWorldCollision(INode* pEntity)
 {
 	bool ret = false;
-	if (GetBoundingSphereDistance(pEntity) < 0)
+	if (pEntity && GetBoundingSphereDistance(pEntity) < 0)
 	{
 		IGeometry* pGeometry = GetBoundingGeometry();
 		if (!pGeometry) {
@@ -509,13 +509,15 @@ float CEntity::GetGroundHeight(float x, float z)
 
 void CEntity::GetEntitiesCollision(vector<INode*>& entities)
 {
-	for (unsigned int i = 0; i < m_pParent->GetChildCount(); i++) {
-		INode* pEntity = m_pParent->GetChild(i);
-		if (!pEntity || pEntity == this)
-			continue;
+	if (m_pParent) {
+		for (unsigned int i = 0; i < m_pParent->GetChildCount(); i++) {
+			INode* pEntity = m_pParent->GetChild(i);
+			if (!pEntity || pEntity == this)
+				continue;
 
-		if (pEntity->IsCollidable() && TestCollision(pEntity))
-			entities.push_back(pEntity);
+			if (pEntity->IsCollidable() && TestCollision(pEntity))
+				entities.push_back(pEntity);
+		}
 	}
 }
 
@@ -970,6 +972,12 @@ void CEntity::GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& pa
 
 void CEntity::SetNewBonesMatrixArray( std::vector< CMatrix >& vMatBones )
 {
+	if (vMatBones.empty()) {
+		Unlink();		
+		string sFileName;
+		m_pRessource->GetFileName(sFileName);
+		throw CEmptyBoneMatricesException(string("SetNewBonesMatrixArray() : Error, try to send empty bone matrices to shader for model ") + sFileName + ", unlink entity.");
+	}
 	if(m_pRessource)
 		m_pRessource->GetShader()->SendUniformMatrix4Array( "matBones", vMatBones, true );
 }

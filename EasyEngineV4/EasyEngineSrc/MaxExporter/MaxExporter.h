@@ -88,6 +88,7 @@ protected:
 	virtual void		StoreMeshToMeshInfos(Interface* pInterface, INode* pMesh, ILoader::CMeshInfos& mi) {}
 	virtual void		GetSkeleton(INode* pRoot, map< string, INode* >& mBone);
 	bool				IsCollisionMesh(string sObjectName);
+	void				TrimBonesMap(std::map<int, float>& bonesIDs, size_t maxSize);
 
 	static bool			IsBone(Object* pObject);
 	static bool			IsBone(INode* pNode);

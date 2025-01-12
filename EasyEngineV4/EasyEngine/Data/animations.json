@@ -5,7 +5,7 @@
 			"bodies": ["body01", "body02", "body03", "body04", "body05", "body06"],
 			"actionAnimations": 
 			[
-				{"Dying": "Dying"},
+				{"Dying": "Dying", "AnimationSpeed": 6.0, "SpeedRelativeToAnimation": 7.0},
 				{"Guard": "Guard"},
 				{"HitWeapon": "HitWeapon2"},
 				{"HitLeftFoot": "HitLeftFoot"},
@@ -29,13 +29,13 @@
 			[
 				{"Dying": "Dying"},
 				{"Guard": "Guard2"},
-				{"HitWeapon": "HitWeapon2", "Speed": 3.0},
+				{"HitWeapon": "HitWeapon2", "AnimationSpeed": 3.0},
 				{"HitLeftFoot": "HitLeftFoot"},
 				{"HitReceived": "HitReceived"},
 				{"HitRightArm": "HitRightArm"},
 				{"MoveToGuard": "MoveToGuard2"},
-				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1", "Speed": 3.0},
-				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2", "Speed": 3.0},
+				{"MoveToGuardWeaponPart1": "MoveToGuardWeapon2-Part1", "AnimationSpeed": 3.0},
+				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon2-Part2", "AnimationSpeed": 3.0},
 				{"Original": "Original"},
 				{"Punished": "Punished"},
 				{"Run": "Run02"},
@@ -45,7 +45,7 @@
 				{"Walk": "Walk"}
 			]
 		},
-				{
+		{
 			"bodies": ["body01-mixamo", "body03-mixamo", "body06-mixamo", "body07-mixamo", "body08-mixamo", "body12-mixamo", "body14-mixamo", "body15-mixamo"],
 			"actionAnimations": 
 			[
@@ -68,6 +68,28 @@
 			]
 		},
 		{
+			"bodies": ["body04-mixamo"],
+			"actionAnimations": 
+			[
+				{"Dying": "pose-female-mixamo"},
+				{"Guard": "pose-female-mixamo"},
+				{"HitWeapon": "pose-female-mixamo"},
+				{"HitLeftFoot": "pose-female-mixamo"},
+				{"HitReceived": "pose-female-mixamo"},
+				{"HitRightArm": "pose-female-mixamo"},
+				{"MoveToGuard": "pose-female-mixamo"},
+				{"MoveToGuardWeaponPart1": "pose-female-mixamo"},
+				{"MoveToGuardWeaponPart2": "pose-female-mixamo"},
+				{"Original": "pose-female-mixamo"},
+				{"Punished": "pose-female-mixamo"},
+				{"Run": "pose-female-mixamo"},
+				{"Sexy": "pose-female-mixamo"},
+				{"Seat": "pose-female-mixamo"},
+				{"Stand": "Standing-Idle2-mixamo"},
+				{"Walk": "walk-woman"}
+			]
+		},
+		{
 			"bodies": ["body01-m"],
 			"actionAnimations": 
 			[
@@ -82,7 +104,7 @@
 				{"MoveToGuardWeaponPart2": "MoveToGuardWeapon-m-Part2"},
 				{"Original": "Original-m"},
 				{"Punished": "Original-m"},
-				{"Run": "run-m", "Speed": 2.0},
+				{"Run": "run-m", "AnimationSpeed": 2.0},
 				{"Sexy": "Original-m"},
 				{"Seat": "Original-m"},
 				{"Stand": "stand-m"},
@@ -104,11 +126,33 @@
 				{"MoveToGuardWeaponPart2": "Standing-Idle-m-mixamo"},
 				{"Original": "Standing-Idle-m-mixamo"},
 				{"Punished": "Standing-Idle-m-mixamo"},
-				{"Run": "Standing-Idle-m-mixamo", "Speed": 2.0},
+				{"Run": "run-man", "AnimationSpeed": 1.0},
 				{"Sexy": "Standing-Idle-m-mixamo"},
 				{"Seat": "Standing-Idle-m-mixamo"},
 				{"Stand": "Standing-Idle-m-mixamo"},
-				{"Walk": "Standing-Idle-m-mixamo"}
+				{"Walk": "walk-man"}
+			]
+		},
+		{
+			"bodies": ["body01-m-mixamo-Tpose"],
+			"actionAnimations": 
+			[
+				{"Dying": "Standing-Idle-m-mixamo-tpose"},
+				{"Guard": "Standing-Idle-m-mixamo-tpose"},
+				{"HitWeapon": "Standing-Idle-m-mixamo-tpose"},
+				{"HitLeftFoot": "Standing-Idle-m-mixamo-tpose"},
+				{"HitReceived": "Standing-Idle-m-mixamo-tpose"},
+				{"HitRightArm": "Standing-Idle-m-mixamo-tpose"},
+				{"MoveToGuard": "Standing-Idle-m-mixamo-tpose"},
+				{"MoveToGuardWeaponPart1": "Standing-Idle-m-mixamo-tpose"},
+				{"MoveToGuardWeaponPart2": "Standing-Idle-m-mixamo-tpose"},
+				{"Original": "Standing-Idle-m-mixamo-tpose"},
+				{"Punished": "standing-idle-m-mixamo-tpose"},
+				{"Run": "Run-m-mixamo-Tpose", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 10.0},
+				{"Sexy": "standing-idle-m-mixamo-tpose"},
+				{"Seat": "standing-idle-m-mixamo-tpose"},
+				{"Stand": "Stand-m-mixamo-Tpose"},
+				{"Walk": "Walk-m-mixamo-tpose", "AnimationSpeed": 1.0,  "SpeedRelativeToAnimation": 10.0}
 			]
 		}
 	]

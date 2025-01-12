@@ -17,6 +17,8 @@ public:
 	void				DisplayViewCone(bool display);
 
 protected:
+
+	virtual void		DisplayViewCone();
 	
 	bool				m_bFreeze;
 	float				m_fFov;

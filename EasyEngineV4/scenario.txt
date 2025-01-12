@@ -155,16 +155,18 @@ Guildes :
 . 
 
 
+Le pouvoir des Eran se nomme le Sangra Sanctum
 
 
-Dialoogues :
+
+Dialogues :
 
 
 . Vous etes en retard Zaarna, pensiez-vous qu'il me serait agréable de vous attendre pendant des heures sous ce soleil de plomb ?
 . Xiam ? Je ne vous avais pas reconnue, que faites vous habillée ainsi ?
 . Vous attendiez-vous à me voir en territoire ennemi dans ma tenue de grande pretresse ? Notre survie dépend de notre discrétion, si quelqu'un découvrait ma véritable identité notre plan tomberait à l'eau. 
 . Oui bien sur, pas de probleme, ca vous va heu... bien !
-. Ne soyez pas ridicule, seules des circonstances aussi graves que celles que nous vivons actuellement peuvent justifier que j'enfile ces guenilles. Mais assez parlé de ma tenue à présent, nous avons une importe mission à accomplir en ces lieux. Conduisez-moi au palais républicain je vous prie, si on vous interroge sur ma présence vous me ferez passer pour votre servante. De plus, ne m'appelez jamais par mon véritable nom, à partir de maintenant je serai Nouria.
+. Ne soyez pas ridicule, seules des circonstances aussi graves que celles que nous vivons actuellement peuvent justifier que j'enfile ces guenilles. Mais assez parlé de ma tenue à présent, nous avons une importe mission à remplir. Conduisez-moi au palais républicain je vous prie, si on vous interroge sur ma présence vous me ferez passer pour votre servante. De plus, ne m'appelez jamais par mon véritable nom, à partir de maintenant je serai Nouria.
 
 1 .(Pouffer de rire)
 . Est-ce que cela vous amuse ? Pensez-vous que nous sommes venus jusqu'ici ici dans le but de nous divertir ? N'oubliez pas votre rang, soldat, je suis peut-etre en haillons mais je reste votre grande pretresse et vous me devez le respect.

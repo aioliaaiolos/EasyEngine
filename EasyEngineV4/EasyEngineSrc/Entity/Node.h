@@ -19,6 +19,7 @@ class CNode : virtual public INode
 {
 public:
 	                    		CNode();
+								CNode(CNode& node);
 	virtual             		~CNode();
 	unsigned int        		GetChildCount() const;
 	INode*              		GetChild( unsigned int nIdx ) const;

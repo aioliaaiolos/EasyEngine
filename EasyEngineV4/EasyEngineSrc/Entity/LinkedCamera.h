@@ -3,6 +3,7 @@
 
 #include "Camera.h"
 
+class CCharacter;
 
 class CLinkedCamera : public CCamera
 {
@@ -22,9 +23,17 @@ public:
 	void				GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 
 private:
+
+	void				DisplayViewCone();
+	IBone*				GetHeadNode(CCharacter* pPerso);
+
 	string				m_sEntityID;
-	IBone*				m_pHeadNode;
-	CNode*				m_pBehindNode;
+	IBone*				m_pHeadNode = nullptr;
+	INode*				m_pNearNode = nullptr;
+	INode*				m_pFarNode = nullptr;
+	IEntity*			m_pNearSphere = nullptr;
+	IEntity*			m_pFarSphere = nullptr;
+	CNode*				m_pBehindNode = nullptr;
 };
 
 

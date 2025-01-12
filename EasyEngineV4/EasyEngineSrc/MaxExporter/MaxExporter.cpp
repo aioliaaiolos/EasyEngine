@@ -498,6 +498,29 @@ bool CMaxExporter::IsCollisionMesh(string sObjectName)
 	return true;
 }
 
+void CMaxExporter::TrimBonesMap(std::map<int, float>& bonesIDs, size_t maxSize)
+{
+	if (bonesIDs.size() <= maxSize) {
+		return;
+	}
+
+	// Copie les éléments de la map dans un vecteur pour trier par poids
+	std::vector<std::pair<int, float>> sortedBones(bonesIDs.begin(), bonesIDs.end());
+
+	// Trie les éléments par poids croissant
+	std::sort(sortedBones.begin(), sortedBones.end(), [](const auto& a, const auto& b) {
+		return a.second < b.second;
+	});
+
+	// Détermine le nombre d'éléments à supprimer
+	size_t toRemove = bonesIDs.size() - maxSize;
+
+	// Supprime les plus petits éléments de la map originale
+	for (size_t i = 0; i < toRemove; ++i) {
+		bonesIDs.erase(sortedBones[i].first);
+	}
+}
+
 void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string, int >& mBoneID, string sObjectName, IGameNode* pGameNode)
 {
 	WriteLog("\nCBinaryMeshMaxExporter::GetWeightTable() : debut");
@@ -539,26 +562,35 @@ void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string,
 			for (int iVertexIndex = 0; iVertexIndex < pGameSkin->GetNumOfSkinnedVerts(); iVertexIndex++)
 			{
 				int nBoneCount = 0;
+				map<int, float> bonesIDs;
 				for (int iBoneIndex = 0; iBoneIndex < pGameSkin->GetNumberOfBones(iVertexIndex); iBoneIndex++)
 				{
-					INode* pBone = pGameSkin->GetBone(iVertexIndex, iBoneIndex);
+					
 					float fWeight = pGameSkin->GetWeight(iVertexIndex, iBoneIndex);
-					if (fWeight > 0.01f)
-					{
-						wstring wName(pBone->GetName());
-						string sName(wName.begin(), wName.end());
-						map< string, int >::const_iterator itBone = mBoneID.find(sName);
-						oWeightTable.Add(iVertexIndex, itBone->second, fWeight);
-						nBoneCount++;
-					}
+					bonesIDs[iBoneIndex] = fWeight;
 				}
+
+				TrimBonesMap(bonesIDs, 4);
+
+				for (pair<int, float> bone : bonesIDs) {
+					INode* pBone = pGameSkin->GetBone(iVertexIndex, bone.first);
+					wstring wName(pBone->GetName());
+					string sName(wName.begin(), wName.end());
+					map< string, int >::const_iterator itBone = mBoneID.find(sName);
+					oWeightTable.Add(iVertexIndex, itBone->second, bone.second);
+					nBoneCount++;
+				}
+
+				/*
 				if (nBoneCount > 4)
 				{
 					ostringstream oss;
 					oss << "Erreur : le vertex " << iVertexIndex << " est influencé par plus de 4 bones";
 					CEException e(oss.str());
 					throw e;
-				}
+				}*/
+
+
 			}
 			break;
 		}

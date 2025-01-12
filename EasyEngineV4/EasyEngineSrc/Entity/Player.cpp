@@ -76,10 +76,12 @@ void CPlayer::Update()
 void CPlayer::CollectSelectableEntity(vector<INode*>& entities)
 {
 	INode* pParent = GetParent();
-	for (int i = 0; i < pParent->GetChildCount(); i++) {
-		INode* pChild = pParent->GetChild(i);
-		if (pChild->GetTypeName() == "Item" || pChild->GetTypeName() == "NPC") {
-			entities.push_back(pChild);
+	if (pParent) {
+		for (int i = 0; i < pParent->GetChildCount(); i++) {
+			INode* pChild = pParent->GetChild(i);
+			if (pChild->GetTypeName() == "Item" || pChild->GetTypeName() == "NPC") {
+				entities.push_back(pChild);
+			}
 		}
 	}
 }

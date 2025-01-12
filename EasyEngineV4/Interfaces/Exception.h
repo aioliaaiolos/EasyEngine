@@ -189,4 +189,10 @@ public:
 	CCharacterAlreadyExistsException(string message) : CEException(message) {}
 };
 
+class CEmptyBoneMatricesException : public CEException
+{
+public:
+	CEmptyBoneMatricesException(string message) : CEException(message) {}
+};
+
 #endif

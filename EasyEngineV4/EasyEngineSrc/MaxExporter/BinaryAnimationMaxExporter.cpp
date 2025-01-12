@@ -118,7 +118,11 @@ void CBinaryAnimationMaxExporter::GetBoneByID( const map< string, INode* >& mBon
 	for ( map< string, int >::const_iterator itNameID = mBoneIDByName.begin(); itNameID != mBoneIDByName.end(); ++itNameID )
 	{
 		const map< string, INode* >::const_iterator itNode = mBoneByName.find( itNameID->first );
-		mBoneByID[ itNameID->second ] = itNode->second;
+		if(itNode != mBoneByName.end())
+			mBoneByID[ itNameID->second ] = itNode->second;
+		else {
+			throw CEException(string("Error : bone '") + itNameID->first + "' does not exists in bone map");
+		}
 	}
 }
 

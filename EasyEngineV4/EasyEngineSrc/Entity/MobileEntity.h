@@ -157,9 +157,9 @@ protected:
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;
 	static map< TAnimation, string>							s_mAnimationTypeToString;
-	static map< TAnimation, float >							s_mOrgAnimationSpeedByType;
+	//static map< TAnimation, float >							s_mOrgAnimationSpeedByType;
 	static vector< CCharacter* >							s_vHumans;
-	static map<string, map<string, pair<string,	float>>>	s_mBodiesAnimations;
+	static map<string, map<string, pair<string,	pair<float, float>>>>	s_mBodiesAnimations;
 	map<string, string>										m_mOverridenAnimation;
 	static void												OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );
 	static void 											Walk( CCharacter*, bool bLoop );

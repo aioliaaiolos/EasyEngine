@@ -33,11 +33,11 @@ using namespace rapidjson;
 using namespace rapidjson;
 
 map< string, IEntity::TAnimation >			CCharacter::s_mAnimationStringToType;
-map< IEntity::TAnimation, float > 			CCharacter::s_mOrgAnimationSpeedByType;
+//map< IEntity::TAnimation, float > 			CCharacter::s_mOrgAnimationSpeedByType;
 map< string, CCharacter::TAction >				CCharacter::s_mActions;
 vector< CCharacter* >							CCharacter::s_vHumans;
 map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
-map<string, map<string, pair<string, float>>> CCharacter::s_mBodiesAnimations;
+map<string, map<string, pair<string, pair<float, float>>>> CCharacter::s_mBodiesAnimations;
 
 CObject::CObject(EEInterface& oInterface) :
 	CEntity(oInterface)
@@ -194,7 +194,7 @@ void CObject::UpdateCollision()
 			}
 		}
 		// Ground collision
-		if (m_pParent == m_pScene) {
+		if (m_pParent && (m_pParent == m_pScene)) {
 			const float margin = 10.f;
 			CVector nextPosition = m_oLocalMatrix * CVector(0, 0, 100);
 			float fGroundHeight = m_pParent->GetGroundHeight(localPos.m_x, localPos.m_z) + margin;
@@ -211,7 +211,7 @@ void CObject::UpdateCollision()
 		SetLocalPosition(last);
 
 		// Still into parent ?	
-		if (!TestWorldCollision(m_pParent)) {
+		if (m_pParent && !TestWorldCollision(m_pParent)) {
 			CEntity* pEntity = dynamic_cast<CEntity*>(m_pParent->GetParent());
 			if (pEntity)
 				LinkAndUpdateMatrices(pEntity);
@@ -242,8 +242,14 @@ m_fNeckRotV( 0 )
 	CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
 	CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
 	
-	for( int i = 0; i < eAnimationCount; i++ )
-		m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
+	//for( int i = 0; i < eAnimationCount; i++ )
+	//	m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
+
+	for (int i = 0; i < eAnimationCount; i++) {
+		TAnimation eAnim = (TAnimation)i;
+		string sAnimationName = s_mAnimationTypeToString[eAnim];
+		m_mAnimationSpeedByType[eAnim] = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationName].second.second;
+	}
 
 	m_pBody->m_fWeight = 1.f;	
 	//
@@ -301,9 +307,9 @@ CCharacter::~CCharacter()
 void CCharacter::InitReverseAnimations()
 {
 	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
-	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart1"].second);
+	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart1"].second.first);
 	pReverse = CreateReverseAnimation("MoveToGuardWeaponPart2");
-	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart2"].second);
+	pReverse->SetSpeed(s_mBodiesAnimations[m_sCurrentBodyName]["MoveToGuardWeaponPart2"].second.first);
 	pReverse = CreateReverseAnimation("Run");
 	SetAnimationSetSpeed();
 }
@@ -311,12 +317,16 @@ void CCharacter::InitReverseAnimations()
 IAnimation* CCharacter::CreateReverseAnimation(string sAnimationType)
 {
 	string sAnimationName = s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType].first;
-	IAnimation* pAnimation = m_mAnimation[sAnimationName];
-	IAnimation* pReversedAnimation = pAnimation->CreateReversedAnimation();
-	pReversedAnimation->SetName(sAnimationName + "Reverse");
-	AddAnimation(sAnimationName + "Reverse", pReversedAnimation);
-	s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"].first = sAnimationName + "Reverse";
-	return pReversedAnimation;
+	map< string, IAnimation* >::iterator itAnimation = m_mAnimation.find(sAnimationName);
+	if (itAnimation != m_mAnimation.end()) {
+		IAnimation* pAnimation = itAnimation->second;
+		IAnimation* pReversedAnimation = pAnimation->CreateReversedAnimation();
+		pReversedAnimation->SetName(sAnimationName + "Reverse");
+		AddAnimation(sAnimationName + "Reverse", pReversedAnimation);
+		s_mBodiesAnimations[m_sCurrentBodyName][sAnimationType + "Reverse"].first = sAnimationName + "Reverse";
+		return pReversedAnimation;
+	}
+	return nullptr;
 }
 
 const CMatrix& CCharacter::GetWeaponTM() const
@@ -377,12 +387,18 @@ void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 									string sMemberValue = actionAnim.MemberBegin()->value.GetString();
 									for (const string& sBody : vBodies) {										
 										s_mBodiesAnimations[sBody][sMemberName].first = sMemberValue;
-										if (actionAnim.HasMember("Speed")) {
-											Value& speed = actionAnim["Speed"];
-											s_mBodiesAnimations[sBody][sMemberName].second = speed.GetFloat();
+										if (actionAnim.HasMember("AnimationSpeed")) {
+											Value& animationSpeed = actionAnim["AnimationSpeed"];
+											s_mBodiesAnimations[sBody][sMemberName].second.first = animationSpeed.GetFloat();
 										}
 										else
-											s_mBodiesAnimations[sBody][sMemberName].second = 1.f;
+											s_mBodiesAnimations[sBody][sMemberName].second.first = 1.f;
+										if (actionAnim.HasMember("SpeedRelativeToAnimation")) {
+											Value& speed = actionAnim["SpeedRelativeToAnimation"];
+											s_mBodiesAnimations[sBody][sMemberName].second.second = speed.GetFloat();
+										}
+										else
+											s_mBodiesAnimations[sBody][sMemberName].second.second = 0.f;
 									}
 								}
 							}
@@ -408,8 +424,8 @@ void CCharacter::InitAnimations()
 		}
 		m_mAnimation.clear();		
 		bool endLoop = false;
-		map<string, pair<string, float>>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
-		for (const pair<string, pair<string, float>>& actionAnim : bodyAnimations) {
+		map<string, pair<string, pair<float, float>>>& bodyAnimations = s_mBodiesAnimations[m_sCurrentBodyName];
+		for (const pair<string, pair<string, pair<float, float>>>& actionAnim : bodyAnimations) {
 			string aActionName = actionAnim.second.first;
 			map<string, string>::iterator itOverridenAction = m_mOverridenAnimation.find(actionAnim.first);
 			if (itOverridenAction != m_mOverridenAnimation.end())
@@ -494,19 +510,6 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationTypeToString[eMoveToGuardWeaponPart2Reverse] = "MoveToGuardWeaponPart2Reverse";
 	s_mAnimationTypeToString[eOriginal] = "Original";
 
-	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
-	s_mOrgAnimationSpeedByType[eStand] = 0.f;
-	s_mOrgAnimationSpeedByType[eHitWeapon] = 0.f;
-	s_mOrgAnimationSpeedByType[eRun] = -7.f;
-	s_mOrgAnimationSpeedByType[eRunReverse] = 7.f;
-	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
-	s_mOrgAnimationSpeedByType[eReceiveHit] = 0.f;
-	s_mOrgAnimationSpeedByType[eDying] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart2] = 0.f;
-	s_mOrgAnimationSpeedByType[eOriginal] = 0.f;
-
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
 	s_mActions["RunReverse"] = RunReverse;
@@ -521,6 +524,24 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mStringToAnimation["Run"] = IEntity::eRun;
 
 	LoadAnimationsJsonFile(oFileSystem);
+
+	
+
+	// s_mBodiesAnimations[sBody][s_mAnimationStringToType[sAnimationName]].second.second;
+
+/*
+	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
+	s_mOrgAnimationSpeedByType[eStand] = 0.f;
+	s_mOrgAnimationSpeedByType[eHitWeapon] = 0.f;
+	s_mOrgAnimationSpeedByType[eRun] = -7.f;
+	s_mOrgAnimationSpeedByType[eRunReverse] = 7.f;
+	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
+	s_mOrgAnimationSpeedByType[eReceiveHit] = 0.f;
+	s_mOrgAnimationSpeedByType[eDying] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
+	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart2] = 0.f;
+	s_mOrgAnimationSpeedByType[eOriginal] = 0.f;*/
 }
 
 IGeometry* CCharacter::GetBoundingGeometry()
@@ -947,7 +968,7 @@ void CCharacter::Walk( bool bLoop )
 	{
 		SetPredefinedAnimation("Walk", bLoop);
 		if (!m_bUsePositionKeys)
-			ConstantLocalTranslate(CVector(0.f, 0.f, -m_mAnimationSpeedByType[eWalk]));
+			ConstantLocalTranslate(CVector(0.f, 0.f, m_mAnimationSpeedByType[eWalk] * m_pCurrentAnimation->GetSpeed()));
 	}
 }
 
@@ -955,15 +976,16 @@ void CCharacter::Stand( bool bLoop )
 {
 	SetPredefinedAnimation( "Stand", bLoop );
 	if( !m_bUsePositionKeys )
-		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eStand ], 0.f ) );
+		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eStand ] * m_pCurrentAnimation->GetSpeed(), 0.f ) );
 }
 
 void CCharacter::Run( bool bLoop )
 {
 	if( m_eCurrentAnimationType != eRun ) {
 		SetPredefinedAnimation( "Run", bLoop );
-		if( !m_bUsePositionKeys )
-			ConstantLocalTranslate( CVector( 0.f, 0.f, -m_mAnimationSpeedByType[eRun]) );
+		if (!m_bUsePositionKeys) {
+			ConstantLocalTranslate(CVector(0.f, 0.f, m_mAnimationSpeedByType[eRun] * m_pCurrentAnimation->GetSpeed()));
+		}
 	}
 }
 
@@ -1170,11 +1192,11 @@ IAnimation* CCharacter::GetAnimation(TAnimation eAnimationType)
 
 void CCharacter::SetAnimationSetSpeed()
 {
-	map<string, pair<string, float>>& animations = s_mBodiesAnimations[m_sCurrentBodyName];
-	for (const pair<string, pair<string, float>>& anim : animations) {
+	map<string, pair<string, pair<float, float>>>& animations = s_mBodiesAnimations[m_sCurrentBodyName];
+	for (const pair<string, pair<string, pair<float, float>>>& anim : animations) {
 		map< string, IEntity::TAnimation >::iterator itAnimation = s_mAnimationStringToType.find(anim.first);
-		if((itAnimation != s_mAnimationStringToType.end()) && (anim.second.second > 0.f))
-			SetAnimationSpeed(itAnimation->second, anim.second.second);
+		if((itAnimation != s_mAnimationStringToType.end()) && (anim.second.second.first > 0.f))
+			SetAnimationSpeed(itAnimation->second, anim.second.second.first);
 	}
 }
 
@@ -1190,7 +1212,7 @@ void CCharacter::SetMovmentSpeed(TAnimation eAnimationType, float fSpeed)
 	IAnimation* pAnimation = GetAnimation(eAnimationType);
 	if (pAnimation) {
 		SetAnimationSpeed(eAnimationType, pAnimation->GetSpeed() * fSpeed);
-		m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
+		// m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
 	}
 	else {
 		CEException e("Error : animation '" + s_mAnimationTypeToString[eAnimationType] + "' not found for body '" + m_sCurrentBodyName + "'");
@@ -1276,10 +1298,8 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 	CEntity::BuildFromInfos(infos, pParent, true);
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 
-	for (const pair<string, string>& animation : pAnimatedEntityInfos->m_mAnimationOverriden) {
-		//m_mOverridenAnimation[animation.first] = animation.second;
+	for (const pair<string, string>& animation : pAnimatedEntityInfos->m_mAnimationOverriden)
 		m_mOverridenAnimation[animation.first] = animation.second;
-	}
 
 	InitAnimations();
 	InitBoundingBox(infos.m_sRessourceFileName);
@@ -1296,7 +1316,10 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 		Stand();
 		m_sClass = pAnimatedEntityInfos->m_sClass;
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
-			CItem* pItem = new CItem(*m_pEntityManager->GetItem(item.first));
+			CItem* pOriginalItem = m_pEntityManager->GetItem(item.first);
+			if (!pOriginalItem)
+				throw CEException(string("Error : item \"" + item.first + "\" not found"));
+			CItem* pItem = new CItem(*pOriginalItem);
 			m_mItems[item.first].push_back(pItem);
 			pItem->SetOwner(this);
 			pItem->m_bIsWear = item.second[0] == 1;
@@ -1407,7 +1430,7 @@ void CCharacter::SaveToJson()
 			animationName.SetString(it->first.c_str(), doc.GetAllocator());
 			animationSpeed.SetFloat(it->second);
 			animation.AddMember("Name", animationName, doc.GetAllocator());
-			animation.AddMember("Speed", animationSpeed, doc.GetAllocator());
+			animation.AddMember("AnimationSpeed", animationSpeed, doc.GetAllocator());
 			animations.PushBack(animation, doc.GetAllocator());
 		}
 		items.SetArray();

@@ -14,6 +14,27 @@ m_bIsCollidable(false)
 	m_sTypeName = "Node";
 }
 
+CNode::CNode(CNode& node)
+{
+	m_pParent = node.GetParent();
+	m_vChild = node.m_vChild;
+	m_oLocalMatrix = node.m_oLocalMatrix;
+	m_oWorldMatrix = node.m_oWorldMatrix;
+	m_oLocalQuaternion = node.m_oLocalQuaternion;
+	m_oWorldQuaternion = node.m_oWorldQuaternion;
+	m_sName = node.m_sName;
+	m_sID = node.m_sID;
+	m_nID = node.m_nID;
+	m_nParentID = node.m_nParentID;
+	m_bQuaternionMode = node.m_bQuaternionMode;
+	m_vConstantLocalRotate = node.m_vConstantLocalRotate;
+	m_vConstantLocalTranslate = node.m_vConstantLocalTranslate;
+	m_bUpdateConstantLocalTranslate = node.m_bUpdateConstantLocalTranslate;
+	m_bUpdateConstantLocalRotate = node.m_bUpdateConstantLocalRotate;
+	m_bIsCollidable = node.m_bIsCollidable;
+	m_sTypeName = node.m_sTypeName;
+}
+
 CNode::~CNode()
 {
 	for (unsigned int i = 0; i < m_vChild.size(); i++) {

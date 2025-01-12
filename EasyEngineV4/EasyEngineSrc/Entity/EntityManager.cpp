@@ -813,7 +813,7 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					if (character.HasMember("AnimationSpeeds")) {
 						Value& animationSpeeds = character["AnimationSpeeds"];
 						for (int iSpeed = 0; iSpeed < animationSpeeds.Size(); iSpeed++)
-							infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["Speed"].GetFloat();
+							infos.m_mAnimationSpeed[animationSpeeds[iSpeed]["Name"].GetString()] = animationSpeeds[iSpeed]["AnimationSpeed"].GetFloat();
 					}
 					if (character.HasMember("AnimationOverriden")) {
 						Value& animationOverriden = character["AnimationOverriden"];

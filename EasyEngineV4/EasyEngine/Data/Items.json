@@ -99,6 +99,20 @@
 			"Preview": ""
 		},
 		{
+			"ID": "Legio-Tunique-m-mixamo",
+			"Model": "clothes/legio-tunique-m-mixamo.bme",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
+			"ID": "Legio-Tunique-m-mixamo-Tpose",
+			"Model": "clothes/legio-tunique-m-mixamo-Tpose.bme",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
 			"ID": "Dress_LongueWide",
 			"Model": "clothes/robe5-mixamo.bme",
 			"Class": "Cloth",

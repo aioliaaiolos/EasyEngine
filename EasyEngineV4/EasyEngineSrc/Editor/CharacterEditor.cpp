@@ -176,9 +176,9 @@ void CCharacterEditor::SpawnEntity(string sCharacterId)
 		if (!m_pCurrentCharacter) {
 			if (!sCharacterIdLow.empty()) {
 				if (sCharacterIdLow == "Player")
-					m_pCurrentCharacter = m_oEntityManager.CreatePlayer("body03");
+					m_pCurrentCharacter = m_oEntityManager.CreatePlayer("body03-mixamo");
 				else
-					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03", sCharacterIdLow);
+					m_pCurrentCharacter = m_oEntityManager.CreateNPC("body03-mixamo", sCharacterIdLow);
 				m_pCurrentCharacter->Link(m_pScene);
 			}
 			else
