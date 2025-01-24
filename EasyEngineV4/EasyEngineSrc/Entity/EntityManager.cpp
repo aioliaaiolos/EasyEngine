@@ -122,6 +122,16 @@ CItem* CEntityManager::GetItem(string sItemID)
 	return nullptr;
 }
 
+/*
+CItem* CEntityManager::ConstructItemByType(CItem* pItem, CWeapon::Type eAttackType)
+{
+	switch (pItem->m_eClass) {
+	case CItem::TClass::eWeapon:
+		return CWeapon(m_oInterface, *pItem);
+		break;
+	}
+}*/
+
 void CEntityManager::EnableCollisions(bool bEnable)
 {
 	m_bAreCollisionsEnabled = bEnable;

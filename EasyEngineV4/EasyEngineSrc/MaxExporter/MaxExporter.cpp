@@ -580,17 +580,6 @@ void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string,
 					oWeightTable.Add(iVertexIndex, itBone->second, bone.second);
 					nBoneCount++;
 				}
-
-				/*
-				if (nBoneCount > 4)
-				{
-					ostringstream oss;
-					oss << "Erreur : le vertex " << iVertexIndex << " est influencé par plus de 4 bones";
-					CEException e(oss.str());
-					throw e;
-				}*/
-
-
 			}
 			break;
 		}

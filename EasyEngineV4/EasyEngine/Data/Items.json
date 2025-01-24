@@ -106,15 +106,15 @@
 			"Preview": ""
 		},
 		{
-			"ID": "Legio-Tunique-m-mixamo-Tpose",
-			"Model": "clothes/legio-tunique-m-mixamo-Tpose.bme",
+			"ID": "Red-Tunique-f",
+			"Model": "clothes/tunique.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
 			"Preview": ""
 		},
 		{
 			"ID": "Dress_LongueWide",
-			"Model": "clothes/robe5-mixamo.bme",
+			"Model": "clothes/robe5-body06-mixamo.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
 			"Preview": "Dress_LongueWide.bmp"

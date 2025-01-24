@@ -133,7 +133,7 @@ bool CCharacterEditor::IsEnabled()
 
 void CCharacterEditor::InitEyeNodes()
 {
-	INode* pHead = m_pLeftEye = m_pCurrentCharacter->GetSkeletonRoot()->GetChildBoneByName("Tete");
+	INode* pHead = m_pLeftEye = m_pCurrentCharacter->GetHeadNode();
 	if (!pHead) {
 		CEException e(string("Erreur : le node 'Tete' est introuvable dans le personnage ") + m_pCurrentCharacter->GetName());
 		throw e;

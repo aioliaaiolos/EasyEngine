@@ -160,3 +160,12 @@ CEntity* CItem::GetModel()
 {
 	return m_pModel;
 }
+
+void CItem::Update()
+{
+	if(m_eClass == CItem::TClass::eArmor || m_eClass == CItem::TClass::eCloth)
+		m_oRenderer.CullFace(false);
+	CObject::Update();
+	if (m_eClass == CItem::TClass::eArmor || m_eClass == CItem::TClass::eCloth)
+		m_oRenderer.CullFace(true);
+}

@@ -116,7 +116,7 @@
 		{
 			"EntityID": "mirabelle",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -148,7 +148,7 @@
 		{
 			"EntityID": "fatoumata",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -180,7 +180,7 @@
 		{
 			"EntityID": "namia",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -218,7 +218,7 @@
 		{
 			"EntityID": "ranja",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -294,7 +294,7 @@
 		{
 			"EntityID": "christine",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -326,7 +326,7 @@
 		{
 			"EntityID": "hasna",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body04-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body04-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -364,7 +364,7 @@
 		{
 			"EntityID": "curvy",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -396,7 +396,7 @@
 		{
 			"EntityID": "player0",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -421,7 +421,7 @@
 		{
 			"EntityID": "player",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo-Tpose.bme",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "Player",
@@ -442,7 +442,13 @@
 			],
 			"Items": [
 				{
-					"ItemName": "Legio-Tunique-m-mixamo-Tpose",
+					"ItemName": "Legio-Tunique-m-mixamo",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Sword",
 					"IsWearArray": [
 						1
 					]
@@ -515,24 +521,6 @@
 						1
 					]
 				}
-			],
-			"Hairs": ""
-		},
-		{
-			"EntityID": "test",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
 			],
 			"Hairs": ""
 		},
@@ -816,7 +804,7 @@
 		{
 			"EntityID": "charlotte",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -836,7 +824,7 @@
 		{
 			"EntityID": "hasna2",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body04-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body04-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -856,6 +844,76 @@
 				}
 			],
 			"Items": [],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "body01-m",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Legio-Tunique-m-mixamo",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "test",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Red-Tunique-f",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Sword",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
 			"Hairs": ""
 		}
 	]

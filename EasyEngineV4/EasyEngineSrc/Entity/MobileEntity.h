@@ -83,6 +83,8 @@ protected:
 	void 													Stand(bool bLoop);
 	void 													Run(bool bLoop);
 	void													RunReverse(bool bLoop);
+	void													StrafeLeft(bool bLoop);
+	void													StrafeRight(bool bLoop);
 	void 													Jump(bool bLoop);
 	void													ReceiveHit(bool bLoop);
 	void													Stand();
@@ -122,6 +124,8 @@ protected:
 	IAnimation*												GetAnimation(TAnimation eAnimationType);
 	void													SetAnimationSetSpeed();
 	void													SetAnimationSpeed(TAnimation eAnimationType, float fSpeed);
+	IBone*													GetHeadNode();
+	string													GetAttackBoneName();
 
 	int														m_nStrength = 5.f;
 	string													m_sFileNameWithoutExt;
@@ -157,7 +161,6 @@ protected:
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;
 	static map< TAnimation, string>							s_mAnimationTypeToString;
-	//static map< TAnimation, float >							s_mOrgAnimationSpeedByType;
 	static vector< CCharacter* >							s_vHumans;
 	static map<string, map<string, pair<string,	pair<float, float>>>>	s_mBodiesAnimations;
 	map<string, string>										m_mOverridenAnimation;
@@ -166,6 +169,8 @@ protected:
 	static void 											Stand( CCharacter*, bool bLoop );
 	static void 											Run( CCharacter*, bool bLoop );
 	static void 											RunReverse(CCharacter*, bool bLoop);
+	static void												StrafeLeft(CCharacter* pCharacter, bool bLoop);
+	static void												StrafeRight(CCharacter* pCharacter, bool bLoop);
 	static void												Jump(CCharacter* pCharacter, bool bLoop);
 	static void												Dying(CCharacter* pCharacter, bool bLoop);
 	static void												MoveToGuard(CCharacter* pCharacter, bool bLoop);

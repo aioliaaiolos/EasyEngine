@@ -13,6 +13,7 @@ public:
 	};
 
 	CWeapon(EEInterface& oInterface, string sID, CItem::Type wearType, Type attackType, string sModelName, string sPreviewPath);
+	CWeapon(EEInterface& oInterface, CItem& item, CWeapon::Type eAttackType);
 	void			SetAttackType(Type type);
 	void			Load() override;
 	void			LinkToHand(INode* pHand);

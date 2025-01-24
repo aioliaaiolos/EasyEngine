@@ -469,8 +469,16 @@ void CBMELoader::ExportAnimatableMeshInfos( CBinaryFileStorage& store, const ILo
 	ExportSkeleton( mi, store );
 	ExportBonesBoundingBoxes( mi.m_mBonesBoundingBoxes, store );
 	store << (int)mi.m_vMeshes.size();
-	for( unsigned int i = 0; i < mi.m_vMeshes.size(); i++ )
-		ExportMeshInfos( mi.m_vMeshes[ i ], store );
+	for (unsigned int i = 0; i < mi.m_vMeshes.size(); i++) {
+		if ((mi.m_vMeshes[i].m_vWeightVertex.size() > 0) && (mi.m_vMeshes.size() > 1)) {
+			int ret = MessageBoxA(nullptr, "Warning: your scene contains a skin mesh with other meshes, are you sure you want to export it ?", "Warning", MB_CANCELTRYCONTINUE);
+			if (ret != IDCONTINUE) {
+				store.CloseFile();
+				throw CEException("Error : your scene contains a skin mesh with other meshes, you have to delete all additionnary non skinned meshes");
+			}
+		}
+		ExportMeshInfos(mi.m_vMeshes[i], store);
+	}
 	store.CloseFile();
 }
 

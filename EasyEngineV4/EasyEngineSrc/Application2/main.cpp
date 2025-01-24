@@ -38,6 +38,7 @@
 #ifdef NDEBUG
 #define CATCH_EXCEPTION
 #endif // NDEBUG
+#define CATCH_EXCEPTION
 
 using namespace std;
 
@@ -216,6 +217,18 @@ void UpdatePerso()
 				pPlayer->RunAction("RunReverse", true);
 				m_pActionManager->ForceActionState("ReculerPlayer", IInputManager::PRESSED);
 			}
+			IInputManager::KEY_STATE eStateStrafeLeft = m_pActionManager->GetKeyActionState("StrafeLeftPlayer");
+			if (eStateStrafeLeft == IInputManager::JUST_PRESSED || eStateStrafeLeft == IInputManager::PRESSED)
+			{
+				pPlayer->RunAction("StrafeLeft", true);
+				m_pActionManager->ForceActionState("StrafeLeftPlayer", IInputManager::PRESSED);
+			}
+			IInputManager::KEY_STATE eStateStrafeRight = m_pActionManager->GetKeyActionState("StrafeRightPlayer");
+			if (eStateStrafeRight == IInputManager::JUST_PRESSED || eStateStrafeRight == IInputManager::PRESSED)
+			{
+				pPlayer->RunAction("StrafeRight", true);
+				m_pActionManager->ForceActionState("StrafeRightPlayer", IInputManager::PRESSED);
+			}
 			if( eStateWalk == IInputManager::JUST_RELEASED)
 			{
 				pPlayer->RunAction( "StopRunning", true );
@@ -226,6 +239,17 @@ void UpdatePerso()
 			{
 				pPlayer->RunAction("StopRunning", true);
 				m_pActionManager->ForceActionState("ReculerPlayer", IInputManager::RELEASED);
+			}
+
+			if (eStateStrafeLeft == IInputManager::JUST_RELEASED)
+			{
+				pPlayer->RunAction("StopRunning", true);
+				m_pActionManager->ForceActionState("StrafeLeftPlayer", IInputManager::RELEASED);
+			}
+			if (eStateStrafeRight == IInputManager::JUST_RELEASED)
+			{
+				pPlayer->RunAction("StopRunning", true);
+				m_pActionManager->ForceActionState("StrafeRightPlayer", IInputManager::RELEASED);
 			}
 
 			IInputManager::KEY_STATE eStateJump = m_pActionManager->GetKeyActionState("SautPerso");
@@ -420,6 +444,8 @@ void InitKeyActions()
 
 	m_pActionManager->AddKeyAction("AvancerPlayer", 'W');
 	m_pActionManager->AddKeyAction("ReculerPlayer", 'S');
+	m_pActionManager->AddKeyAction("StrafeLeftPlayer", 'A');
+	m_pActionManager->AddKeyAction("StrafeRightPlayer", 'D');
 	m_pActionManager->AddKeyAction("SautPerso", ' ');
 	m_pActionManager->AddMouseAction("HitLeftFoot", IInputManager::eMouseButtonRight, IInputManager::eMouseButtonStateJustDown);
 	m_pActionManager->AddMouseAction("HitRightArm", IInputManager::eMouseButtonLeft, IInputManager::eMouseButtonStateJustDown);

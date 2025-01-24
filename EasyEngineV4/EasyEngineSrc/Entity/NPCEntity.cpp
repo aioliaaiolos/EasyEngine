@@ -63,7 +63,8 @@ void CNPCEntity::MoveToGuard()
 
 void CNPCEntity::Guard()
 {
-	CCharacter::Guard();
+	if(!m_pCurrentWeapon)
+		CCharacter::Guard();
 }
 
 void CNPCEntity::LookAt( float alpha )

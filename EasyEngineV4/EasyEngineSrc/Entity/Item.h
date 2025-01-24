@@ -60,6 +60,7 @@ public:
 	void											DrawBoundingBox(bool bDraw) override;
 	const CMatrix&									GetWorldMatrix() const override;
 	CEntity*										GetModel();
+	void											Update() override;
 
 	TClass											m_eClass;
 	Type											m_eType;

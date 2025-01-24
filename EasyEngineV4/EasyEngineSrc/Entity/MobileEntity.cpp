@@ -33,7 +33,6 @@ using namespace rapidjson;
 using namespace rapidjson;
 
 map< string, IEntity::TAnimation >			CCharacter::s_mAnimationStringToType;
-//map< IEntity::TAnimation, float > 			CCharacter::s_mOrgAnimationSpeedByType;
 map< string, CCharacter::TAction >				CCharacter::s_mActions;
 vector< CCharacter* >							CCharacter::s_vHumans;
 map<string, IEntity::TAnimation> CCharacter::s_mStringToAnimation;
@@ -242,9 +241,6 @@ m_fNeckRotV( 0 )
 	CStringUtils::GetShortFileName(m_sCurrentBodyName, m_sCurrentBodyName);
 	CStringUtils::GetFileNameWithoutExtension(m_sCurrentBodyName, m_sCurrentBodyName);
 	
-	//for( int i = 0; i < eAnimationCount; i++ )
-	//	m_mAnimationSpeedByType[ (TAnimation)i ] = s_mOrgAnimationSpeedByType[ (TAnimation)i ];
-
 	for (int i = 0; i < eAnimationCount; i++) {
 		TAnimation eAnim = (TAnimation)i;
 		string sAnimationName = s_mAnimationTypeToString[eAnim];
@@ -260,8 +256,8 @@ m_fNeckRotV( 0 )
 	m_pNeck = m_pSkeletonRoot->GetChildBoneByName( "Cou" );
 
 	m_pfnCollisionCallback = OnCollision;
+	m_sAttackBoneName = GetAttackBoneName();
 	m_sSecondaryAttackBoneName = "OrteilsG";
-	m_sAttackBoneName = "MainD";
 	
 	IEntityManager* pEntityManager = static_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager"));
 	pEntityManager->AddNewCharacterInWorld(this);	
@@ -346,6 +342,29 @@ int CCharacter::GetHitDamage()
 	return m_nStrength + (m_pCurrentWeapon ? m_pCurrentWeapon->m_nDamage : 0);
 }
 
+IBone* CCharacter::GetHeadNode()
+{
+	IBone* pHeadNode = GetSkeletonRoot()->GetChildBoneByName("Tete");
+	if (!pHeadNode)
+		pHeadNode = GetSkeletonRoot()->GetChildBoneByName("mixamorig:HeadTop_End");
+	return pHeadNode;
+}
+
+string CCharacter::GetAttackBoneName()
+{
+	IBone* pAttackBone = m_pSkeletonRoot->GetChildBoneByName("MainD");
+	if (!pAttackBone) {
+		pAttackBone = m_pSkeletonRoot->GetChildBoneByName("mixamorig:RightHand");
+		if (pAttackBone)
+			return "mixamorig:RightHand";
+		else
+			throw CEException("Attack bone name not found. Should be 'MainD' or 'mixamorig:RightHand'");
+			return "";
+	}
+	else
+		return "MainD";
+}
+
 void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 {
 	string sFileName = "animations.json";
@@ -373,6 +392,23 @@ void CCharacter::LoadAnimationsJsonFile(IFileSystem& oFileSystem)
 								Value& body = bodies[iBody];
 								if (body.IsString()) {
 									vBodies.push_back(body.GetString());
+								}
+							}
+						}
+					}
+					if (bodyAnimation.HasMember("nodeNames")) {
+						Value& nodeNames = bodyAnimation["nodeNames"];
+						if (nodeNames.IsArray()) {
+							for (int iNodeNames = 0; iNodeNames < nodeNames.Size(); iNodeNames++) {
+								Value& actionAnim = nodeNames[iNodeNames];
+								if (actionAnim.IsObject()) {
+									string sMemberName = actionAnim.MemberBegin()->name.GetString();
+									string sMemberValue = actionAnim.MemberBegin()->value.GetString();
+									for (const string& sBody : vBodies) {
+										if (sMemberName == "MainD")
+											sMemberName = sMemberName;
+										// s_mBodiesAnimations[sBody][sMemberName] = 
+									}
 								}
 							}
 						}
@@ -477,6 +513,8 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mAnimationStringToType["Walk"] = eWalk;
 	s_mAnimationStringToType["Run"] = eRun;
 	s_mAnimationStringToType["RunReverse"] = eRunReverse;
+	s_mAnimationStringToType["StrafeLeft"] = eStrafeLeft;
+	s_mAnimationStringToType["StrafeRight"] = eStrafeRight;
 	s_mAnimationStringToType["Stand"] = eStand;
 	s_mAnimationStringToType["HitReceived"] = eReceiveHit;
 	s_mAnimationStringToType["HitWeapon"] = eHitWeapon;
@@ -513,6 +551,8 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mActions["Walk"] = Walk;
 	s_mActions["Run"] = Run;
 	s_mActions["RunReverse"] = RunReverse;
+	s_mActions["StrafeLeft"] = StrafeLeft;
+	s_mActions["StrafeRight"] = StrafeRight;
 	s_mActions["Stand"] = Stand;
 	s_mActions["ReceiveHit"] = ReceiveHit;
 	s_mActions["Jump"] = Jump;
@@ -524,24 +564,6 @@ void CCharacter::InitStatics(IFileSystem& oFileSystem)
 	s_mStringToAnimation["Run"] = IEntity::eRun;
 
 	LoadAnimationsJsonFile(oFileSystem);
-
-	
-
-	// s_mBodiesAnimations[sBody][s_mAnimationStringToType[sAnimationName]].second.second;
-
-/*
-	s_mOrgAnimationSpeedByType[eWalk] = -1.6f;
-	s_mOrgAnimationSpeedByType[eStand] = 0.f;
-	s_mOrgAnimationSpeedByType[eHitWeapon] = 0.f;
-	s_mOrgAnimationSpeedByType[eRun] = -7.f;
-	s_mOrgAnimationSpeedByType[eRunReverse] = 7.f;
-	s_mOrgAnimationSpeedByType[eHitLeftFoot] = 0.f;
-	s_mOrgAnimationSpeedByType[eReceiveHit] = 0.f;
-	s_mOrgAnimationSpeedByType[eDying] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuard] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart1] = 0.f;
-	s_mOrgAnimationSpeedByType[eMoveToGuardWeaponPart2] = 0.f;
-	s_mOrgAnimationSpeedByType[eOriginal] = 0.f;*/
 }
 
 IGeometry* CCharacter::GetBoundingGeometry()
@@ -757,6 +779,8 @@ void CCharacter::WearItem(string sItemID)
 	if (itItem != m_mItems.end()) {
 		CItem* pItem = dynamic_cast<CItem*>(itItem->second.at(0));
 		WearItem(pItem);
+		if (pItem->m_eClass == CItem::eWeapon)
+			m_pCurrentWeapon = dynamic_cast<CWeapon*>(pItem);
 	}
 	else {
 		throw CEException(string("Error in CCharacter::WearItem() : item '") + sItemID + "' not exists");
@@ -998,6 +1022,26 @@ void CCharacter::RunReverse(bool bLoop)
 	}
 }
 
+void CCharacter::StrafeLeft(bool bLoop)
+{
+	if (m_eCurrentAnimationType != eStrafeLeft) {
+		SetPredefinedAnimation("StrafeLeft", bLoop);
+		if (!m_bUsePositionKeys) {
+			ConstantLocalTranslate(CVector(m_mAnimationSpeedByType[eRun] * m_pCurrentAnimation->GetSpeed(), 0.f, 0.f));
+		}
+	}
+}
+
+void CCharacter::StrafeRight(bool bLoop)
+{
+	if (m_eCurrentAnimationType != eStrafeRight) {
+		SetPredefinedAnimation("StrafeRight", bLoop);
+		if (!m_bUsePositionKeys) {
+			ConstantLocalTranslate(CVector(-m_mAnimationSpeedByType[eRun] * m_pCurrentAnimation->GetSpeed(), 0.f, 0.f));
+		}
+	}
+}
+
 void CCharacter::Jump(bool bLoop)
 {
 	if (m_eCurrentAnimationType != eJump)
@@ -1146,6 +1190,16 @@ void CCharacter::RunReverse(CCharacter* pCharacter, bool bLoop)
 	pCharacter->RunReverse(bLoop);
 }
 
+void CCharacter::StrafeLeft(CCharacter* pCharacter, bool bLoop)
+{
+	pCharacter->StrafeLeft(bLoop);
+}
+
+void CCharacter::StrafeRight(CCharacter* pCharacter, bool bLoop)
+{
+	pCharacter->StrafeRight(bLoop);
+}
+
 void CCharacter::Jump(CCharacter* pCharacter, bool bLoop)
 {
 	pCharacter->Jump(bLoop);
@@ -1212,7 +1266,6 @@ void CCharacter::SetMovmentSpeed(TAnimation eAnimationType, float fSpeed)
 	IAnimation* pAnimation = GetAnimation(eAnimationType);
 	if (pAnimation) {
 		SetAnimationSpeed(eAnimationType, pAnimation->GetSpeed() * fSpeed);
-		// m_mAnimationSpeedByType[eAnimationType] = s_mOrgAnimationSpeedByType[eAnimationType] * fSpeed;
 	}
 	else {
 		CEException e("Error : animation '" + s_mAnimationTypeToString[eAnimationType] + "' not found for body '" + m_sCurrentBodyName + "'");
@@ -1319,7 +1372,7 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 			CItem* pOriginalItem = m_pEntityManager->GetItem(item.first);
 			if (!pOriginalItem)
 				throw CEException(string("Error : item \"" + item.first + "\" not found"));
-			CItem* pItem = new CItem(*pOriginalItem);
+			CItem* pItem = dynamic_cast<CItem*>(m_pEntityManager->CreateItemEntity(item.first)); // new CItem(*pOriginalItem);
 			m_mItems[item.first].push_back(pItem);
 			pItem->SetOwner(this);
 			pItem->m_bIsWear = item.second[0] == 1;

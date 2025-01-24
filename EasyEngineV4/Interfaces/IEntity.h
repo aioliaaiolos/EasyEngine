@@ -85,6 +85,8 @@ public:
 		eStand,
 		eRun,
 		eRunReverse,
+		eStrafeLeft,
+		eStrafeRight,
 		eHitWeapon,
 		eHitLeftFoot,
 		eHitRightArm,
@@ -207,6 +209,7 @@ public:
 	virtual void									SetFightMode(bool fightMode) = 0;
 	virtual bool									GetFightMode() = 0;
 	virtual const string&							GetClass() = 0;
+	virtual IBone*									GetHeadNode() = 0;
 };
 
 class IScene : public virtual IEntity

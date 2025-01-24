@@ -2809,7 +2809,13 @@ void GetItemCount(IScriptState* pState)
 	CValueString* pCharacterName = (CValueString*)(pState->GetArg(0));
 	CValueString* pItemID = (CValueString*)(pState->GetArg(1));
 	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pCharacterName->m_sValue));
-	pState->SetReturnValue(pCharacter->GetItemCount(pItemID->m_sValue));
+	if(pCharacter)
+		pState->SetReturnValue(pCharacter->GetItemCount(pItemID->m_sValue));
+	else {
+		ostringstream oss;
+		oss << "Error : character " << pCharacterName->m_sValue << " not exists";
+		m_pConsole->Println(oss.str());
+	}
 }
 
 void GetCharacterLocalVarInt(IScriptState* pState)

@@ -17,6 +17,11 @@ CWeapon::CWeapon(EEInterface& oInterface, string sID, CItem::Type wearType, Type
 {
 }
 
+CWeapon::CWeapon(EEInterface& oInterface, CItem& item, CWeapon::Type eAttackType) :
+	CWeapon(oInterface, item.GetIDStr(), item.m_eType, eAttackType, item.m_sModelName, item.GetPreviewPath())
+{
+}
+
 void CWeapon::SetAttackType(Type type)
 {
 	m_eAttackType = type;
