@@ -242,6 +242,17 @@ void CBone::GetKeyByIndex( int nIndex, CKey& oKey ) const
 	oKey = itAnim->second.at( nIndex );
 }
 
+void CBone::GetKeys(map< string, vector< CKey > >& mKeys) const
+{
+	mKeys = m_mKeys;
+}
+
+void CBone::SetKeys(const map< string, vector< CKey > >& mKeys)
+{
+	m_mKeys = mKeys;
+}
+
+
 void CBone::GetKeyByTime( int nTime, CKey& oKey ) const
 {
 	map< string, vector< CKey > >::const_iterator itAnim = m_mKeys.find( m_sCurrentAnimation );

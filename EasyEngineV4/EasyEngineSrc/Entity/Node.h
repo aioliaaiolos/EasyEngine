@@ -77,6 +77,7 @@ public:
 	void						UpdateTime(float fTime) override;
 	bool						IsCollidable() override;
 	const string&				GetTypeName() const override;
+	void						SetTypeName(const string& sTypeName) override;
 
 protected:
 	INode*                     	m_pParent;

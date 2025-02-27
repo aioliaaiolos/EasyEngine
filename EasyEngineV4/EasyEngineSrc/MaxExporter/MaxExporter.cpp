@@ -493,7 +493,8 @@ bool CMaxExporter::IsCollisionMesh(string sObjectName)
 		(sObjectName.find("Door") == -1) &&
 		(sObjectName.find("Roof") == -1) &&
 		(sObjectName.find("Floor") == -1) &&
-		(sObjectName.find("Ground") == -1) )
+		(sObjectName.find("Ground") == -1) &&
+		(sObjectName.find("Column") == -1) )
 		return false;
 	return true;
 }

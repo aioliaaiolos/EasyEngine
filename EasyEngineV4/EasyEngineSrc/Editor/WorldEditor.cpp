@@ -465,10 +465,12 @@ void CWorldEditor::SaveToJson(string sFileName)
 
 		Value characters(kArrayType);
 		for (map<string, pair<CMatrix, string>>::iterator it = m_mCharacterMatrices.begin(); it != m_mCharacterMatrices.end(); it++) {
-			IEntity* pEntity = m_oEntityManager.GetEntity(it->first);
+			string sCharacterIdLow = it->first;
+			std::transform(it->first.begin(), it->first.end(), sCharacterIdLow.begin(), tolower);
+			IEntity* pEntity = m_oEntityManager.GetEntity(sCharacterIdLow);
 			if (pEntity) {
 				Value name(kStringType), tm, script, character(kObjectType);
-				name.SetString(it->first.c_str(), doc.GetAllocator());
+				name.SetString(sCharacterIdLow.c_str(), doc.GetAllocator());
 				ConvertMatrixToJsonObject(doc, pEntity->GetWorldMatrix(), tm);
 				script.SetString(pEntity->GetAttachedScript().c_str(), doc.GetAllocator());
 				character.AddMember("Name", name, doc.GetAllocator());
@@ -606,13 +608,13 @@ IEntity* CWorldEditor::SpawnCharacter(string sID)
 	m_pEditingEntity = m_oEntityManager.BuildCharacterFromDatabase(sIDLow, m_pScene);
 	if (!m_pEditingEntity) {
 		ostringstream oss;
-		oss << "Erreur : Personnage " << sIDLow << " introuvable dans la base de donnees des personnages.";
+		oss << "Erreur : Personnage " << sID << " introuvable dans la base de donnees des personnages.";
 		throw CEException(oss.str());
 	}
-	m_oEntityManager.AddEntity(m_pEditingEntity, sIDLow);
+	m_oEntityManager.AddEntity(m_pEditingEntity, m_pEditingEntity->GetIDStr());
 	InitSpawnedEntity();
 	CMatrix m;
-	m_mCharacterMatrices[sIDLow].first = m;
+	m_mCharacterMatrices[m_pEditingEntity->GetIDStr()].first = m;
 	m_vEntities.push_back(m_pEditingEntity);
 	m_oCameraManager.SetActiveCamera(m_pEditorCamera);
 	m_eEditorMode = TEditorMode::eAdding;
@@ -716,7 +718,7 @@ void CWorldEditor::OnSceneLoaded()
 		}
 		m_oRessourceManager.RemoveAllLights(m_oRenderer);
 	}
-
+	IPlayer* pPlayer = nullptr;
 	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
 		IEntity* pEntity = m_oEntityManager.BuildCharacterFromDatabase(itCharacter->first, m_pScene);
 		if (pEntity) {

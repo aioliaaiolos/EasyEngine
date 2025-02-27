@@ -82,40 +82,37 @@ void CollisionModelExporter::GetPrimitives(Interface* pInterface, vector<IGeomet
 	for (int iNode = 0; iNode < pRoot->NumberOfChildren(); iNode++)
 	{
 		INode* pNode = pRoot->GetChildNode(iNode);
-		wstring wTest = pNode->GetName();
-		Object* pObject = pNode->EvalWorldState(0).obj;
-		IGeometry* pGeometry = NULL;
-		/*if (IsBone(pObject))
-		{
-			vector<IGeometry*> primitives;
-			GetPrimitives(pInterface, primitives);
-			continue;
-		}*/
-		if (pObject->CanConvertToType(Class_ID(CYLINDER_CLASS_ID, 0)) == TRUE)
-		{
-			pGeometry = m_pGeometryManager->CreateCylinder();
-			StoreCylinderInfos(pNode, *(ICylinder*)pGeometry);
-			if (g_bInterruptExport)
-				break;
-		}
-		else if (pObject->CanConvertToType(Class_ID(BOXOBJ_CLASS_ID, 0)) == TRUE)
-		{
-			pGeometry = m_pGeometryManager->CreateBox();
-			StoreBoxInfos(pNode, *(IBox*)pGeometry);			
-			if (g_bInterruptExport)
-				break;
-		}
-		else {
-			pGeometry = m_pGeometryManager->CreateBox();
-			if (!StoreMeshInfos(pNode, *(IBox*)pGeometry)) {
-				delete pGeometry;
-				pGeometry = nullptr;
+		int hidden = pNode->IsHidden();
+		if (hidden == 0) {
+			wstring wTest = pNode->GetName();
+			Object* pObject = pNode->EvalWorldState(0).obj;
+			IGeometry* pGeometry = NULL;
+			if (pObject->CanConvertToType(Class_ID(CYLINDER_CLASS_ID, 0)) == TRUE)
+			{
+				pGeometry = m_pGeometryManager->CreateCylinder();
+				StoreCylinderInfos(pNode, *(ICylinder*)pGeometry);
+				if (g_bInterruptExport)
+					break;
 			}
-			if (g_bInterruptExport)
-				break;
+			else if (pObject->CanConvertToType(Class_ID(BOXOBJ_CLASS_ID, 0)) == TRUE)
+			{
+				pGeometry = m_pGeometryManager->CreateBox();
+				StoreBoxInfos(pNode, *(IBox*)pGeometry);
+				if (g_bInterruptExport)
+					break;
+			}
+			else {
+				pGeometry = m_pGeometryManager->CreateBox();
+				if (!StoreMeshInfos(pNode, *(IBox*)pGeometry)) {
+					delete pGeometry;
+					pGeometry = nullptr;
+				}
+				if (g_bInterruptExport)
+					break;
+			}
+			if (pGeometry)
+				primitives.push_back(pGeometry);
 		}
-		if(pGeometry)
-			primitives.push_back(pGeometry);
 	}
 }
 
@@ -178,7 +175,8 @@ bool CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 		(sName.find("Door") == -1) && 
 		(sName.find("Roof") == -1) && 
 		(sName.find("Floor") == -1) && 
-		(sName.find("Ground") == -1))
+		(sName.find("Ground") == -1) &&
+		(sName.find("Column") == -1) )
 		return false;
 	box.SetName(sName);
 

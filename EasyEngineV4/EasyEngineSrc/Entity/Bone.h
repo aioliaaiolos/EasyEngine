@@ -21,6 +21,8 @@ public:
 	void					Pitch(float fAngle);
   	void					Roll(float fAngle);
 	void					GetKeyByIndex( int nIndex, CKey& oKey ) const;
+	void					GetKeys(map< string, vector< CKey > >& mKeys) const;
+	void					SetKeys(const map< string, vector< CKey > >& mKeys);
 	void					GetKeyByTime( int nTime, CKey& oKey ) const;
 	int						GetKeyCount() const;
 	void					SetCurrentAnimation( string sAnimation );

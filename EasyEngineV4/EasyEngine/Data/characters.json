@@ -3,7 +3,7 @@
 		{
 			"EntityID": "garde hopital",
 			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01-mixamo.bme",
+			"RessourceFileName": "Meshes/Bodies/body01-f-mixamo.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
 			"TypeName": "NPC",
@@ -12,6 +12,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Life": 1000,
 			"Specular": [
 				0.0,
 				0.0,
@@ -86,6 +87,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
+			"Life": 50,
 			"Specular": [
 				0.20000000298023224,
 				0.20000000298023224,
@@ -124,6 +126,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Life": 50,
 			"Specular": [
 				0.30000001192092896,
 				0.30000001192092896,
@@ -137,7 +140,13 @@
 			],
 			"Items": [
 				{
-					"ItemName": "Tunique_Hospital",
+					"ItemName": "Haut",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Pagne",
 					"IsWearArray": [
 						1
 					]
@@ -156,6 +165,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-noire.bmp",
+			"Life": 50,
 			"Specular": [
 				0.30000001192092896,
 				0.30000001192092896,
@@ -188,6 +198,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-tres-foncee.bmp",
+			"Life": 70,
 			"Specular": [
 				0.20000000298023224,
 				0.20000000298023224,
@@ -226,6 +237,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-moyenne.bmp",
+			"Life": 500,
 			"Specular": [
 				0.0,
 				0.0,
@@ -258,6 +270,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-dore.bmp",
+			"Life": 50,
 			"Specular": [
 				1.0,
 				1.0,
@@ -302,6 +315,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-blanc.bmp",
+			"Life": 50,
 			"Specular": [
 				0.800000011920929,
 				0.800000011920929,
@@ -334,6 +348,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "textures/skin01-moyenne.bmp",
+			"Life": 50,
 			"Specular": [
 				0.5,
 				0.5,
@@ -372,6 +387,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Life": 50,
 			"Specular": [
 				0.5,
 				0.5,
@@ -404,6 +420,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "Textures/skin02-claire.bmp",
+			"Life": 50,
 			"Specular": [
 				0.0,
 				0.0,
@@ -429,6 +446,46 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 200,
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Legio-Tunique-m-mixamo",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Sword",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "Garde-caserne",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Life": 200,
 			"Specular": [
 				0.0,
 				0.0,
@@ -467,6 +524,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 5000,
 			"Specular": [
 				0.0,
 				0.0,
@@ -535,6 +593,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 50,
 			"Specular": [
 				0.0,
 				0.0,
@@ -555,152 +614,7 @@
 				}
 			],
 			"Hairs": ""
-		},
-		{
-			"EntityID": "test2",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body07-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": "hairs06"
-		},
-		{
-			"EntityID": "test3",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": "hairs10"
-		},
-		{
-			"EntityID": "test4",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body12-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": "hairs01"
-		},
-		{
-			"EntityID": "body14",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body14-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": ""
-		},
-		{
-			"EntityID": "mixamo",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [],
-			"Items": [],
-			"Hairs": ""
-		},
-		{
-			"EntityID": "test-mixamo",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body08-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [],
-			"Hairs": ""
-		},
+		},		
 		{
 			"EntityID": "xiam",
 			"RessourceName": "Perso",
@@ -712,6 +626,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "body08.bmp",
+			"Life": 20000,
 			"Specular": [
 				0.0,
 				0.0,
@@ -737,6 +652,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "athena3_tex2.bmp",
+			"Life": 20000,
 			"Specular": [
 				0.0,
 				0.0,
@@ -787,6 +703,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 20000,
 			"Specular": [
 				0.10000000149011612,
 				0.10000000149011612,
@@ -812,6 +729,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 50,
 			"Specular": [
 				0.0,
 				0.0,
@@ -832,6 +750,7 @@
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 50,
 			"Specular": [
 				0.0,
 				0.0,
@@ -847,73 +766,27 @@
 			"Hairs": ""
 		},
 		{
-			"EntityID": "body01-m",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
+			"EntityID": "rat",
+			"Unique": false,
+			"RessourceName": "rat",
+			"RessourceFileName": "Meshes/Bodies/rat02.bme",
 			"ParentName": "Scene",
 			"ParentBoneID": -1,
-			"TypeName": "NPC",
+			"TypeName": "Beast",
+			"DangerZone": 1000,
+			"MinimumFleeDistance": 100,
 			"Weight": 0.0,
 			"Strength": 5,
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
+			"Life": 5,
 			"Specular": [
 				0.0,
 				0.0,
 				0.0
 			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [
-				{
-					"ItemName": "Legio-Tunique-m-mixamo",
-					"IsWearArray": [
-						1
-					]
-				}
-			],
-			"Hairs": ""
-		},
-		{
-			"EntityID": "test",
-			"RessourceName": "Perso",
-			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
-			"ParentName": "Scene",
-			"ParentBoneID": -1,
-			"TypeName": "NPC",
-			"Weight": 0.0,
-			"Strength": 5,
-			"GrandParentDummyRootID": -1,
-			"DiffuseTextureName": "",
-			"Specular": [
-				0.0,
-				0.0,
-				0.0
-			],
-			"AnimationSpeeds": [
-				{
-					"Name": "Run",
-					"AnimationSpeed": 1.0
-				}
-			],
-			"Items": [
-				{
-					"ItemName": "Red-Tunique-f",
-					"IsWearArray": [
-						1
-					]
-				},
-				{
-					"ItemName": "Sword",
-					"IsWearArray": [
-						1
-					]
-				}
-			],
+			"AnimationSpeeds": [],
+			"Items": [],
 			"Hairs": ""
 		}
 	]

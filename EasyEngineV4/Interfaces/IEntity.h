@@ -195,6 +195,7 @@ public:
 	virtual void									UnWearAllShoes() = 0;
 	virtual void									SetHairs(string sHairsPath) = 0;
 	virtual void									SetBody(string sBodyName) = 0;
+	virtual void									SetUnique(bool bUnique) = 0;
 	virtual void									BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) = 0;
 	virtual void									GetPosition(CVector& oPosition) const = 0;
 	virtual void									AddItem(string sItemName) = 0;

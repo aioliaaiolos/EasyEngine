@@ -11,7 +11,7 @@ onLoadingGame();
 
 function onExitHospitalArea()
 {
-	Player = GetEntityID("Player");
+	Player = GetEntityID("player");
 	area = GetEntityID("area-hospital");
 
 	if(IsIntersect(Player, area)==0)

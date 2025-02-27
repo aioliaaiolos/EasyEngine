@@ -5,9 +5,9 @@ uniform int TextureCount;
 
 uniform int nMaterialCount;
 uniform sampler1D MaterialMap;
-uniform vec4 MaterialArray[16];
-uniform float ShininessArray[4];
-uniform sampler2D baseMapArray[16];
+uniform vec4 MaterialArray[20];
+uniform float ShininessArray[5];
+uniform sampler2D baseMapArray[20];
 uniform float ArraySize;
 uniform int LightCount;
 
@@ -47,6 +47,9 @@ void main()
 				diffuseColor = texture2D( baseMapArray[nPSMatID], Texcoord );
 		}
 		
+	    if (diffuseColor.a < 0.5) 
+			discard;  // Supprime les pixels transparents
+
 		for ( int i = 0; i < LightCount; i++ ) {
 			gl_FragColor += GetLightInfluenceMultiMaterial( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
 		}

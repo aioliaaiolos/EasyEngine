@@ -9,6 +9,7 @@
 #include "Scene.h"
 #include "EntityManager.h"
 #include "Utils2/Logger.h"
+#include "IEditor.h"
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
 IAEntity(oInterface),
@@ -103,7 +104,27 @@ void CNPCEntity::ReceiveHit( IAEntity* pEnemy )
 void CNPCEntity::Update()
 {
 	CCharacter::Update();
-	IAEntity::Update();	
+	IAEntity::Update();
+	
+	if (!m_pWorldEditor->IsSpawningEntity()) {
+		if (m_sTypeName == "Beast") {
+			for (int i = 0; i < m_pParent->GetChildCount(); i++) {
+				INode* pChild = m_pParent->GetChild(i);
+				if (pChild != (INode*)m_pCurrentEnemy && pChild->GetTypeName() == "Player") {
+					float fDistance = GetDistance(pChild);
+					if (fDistance < m_fDangerZone) {
+						m_pCurrentEnemy = dynamic_cast<IFighterEntity*>(pChild);
+						break;
+					}
+					else if (m_pCurrentEnemy) {
+						m_pCurrentEnemy = nullptr;
+						m_eFightState = eNoFight;
+						Stand();
+					}
+				}
+			}
+		}
+	}
 }
 
 IAnimation* CNPCEntity::GetCurrentAnimation()
@@ -223,6 +244,14 @@ void CNPCEntity::OpenTopicWindow()
 	});
 	m_oGUIManager.GetTopicsWindow()->SetSpeakerId(GetIDStr());
 	m_oGUIManager.AddWindow(m_oGUIManager.GetTopicsWindow());
+}
+
+void CNPCEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren)
+{
+	CCharacter::BuildFromInfos(infos, pParent, bExcludeChildren);
+	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
+	m_fDangerZone = pAnimatedEntityInfos->m_fDangerZone;
+	m_fMinimumFleeDistance = pAnimatedEntityInfos->m_fMinimumFleeDistance;
 }
 
 void CNPCEntity::UpdateGoto()

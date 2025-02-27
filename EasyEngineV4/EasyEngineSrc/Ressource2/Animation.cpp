@@ -109,8 +109,8 @@ void CAnimation::UpdateAnimationTime()
 	int nDeltaTickCount = nCurrentTickCount - m_nLastTickCount;
 	m_nLastTickCount = nCurrentTickCount;
 	m_nCurrentAnimationTime += (int)((float)nDeltaTickCount * 4.f * m_fSpeed);
-	if (m_nCurrentAnimationTime > m_nEndAnimationTime)
-	{
+	if (m_nCurrentAnimationTime > m_nEndAnimationTime) {
+		m_nCurrentAnimationTime = m_nEndAnimationTime;
 		CallCallbacks(eBeginRewind);
 		if (!m_bLoop)
 			Stop();

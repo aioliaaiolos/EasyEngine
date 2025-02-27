@@ -8,6 +8,9 @@ class IFileSystem;
 class CItem;
 class CWeapon;
 
+// to delete
+class IHud;
+
 class CObject : public CEntity
 {
 public:
@@ -30,11 +33,25 @@ private:
 
 class CCharacter : public CObject, public virtual IFighterEntity, public virtual ICharacter
 {
+	struct CBodyAnimations
+	{
+		struct CAnimationInfos
+		{
+			pair<string, string> m_ActionToAnimation;
+			float m_fAnimationSpeed = 0.f;
+			float m_fSpeedRelativeToAnimation = 0.f;
+		};
+
+		string m_sSpineValue = "mixamorig:Spine";
+		string m_sAttackDummy = "BodyDummyRHand";
+		map<string, CAnimationInfos> m_mAnimationInfos;
+	};
 
 public:
 	CCharacter(EEInterface& oInterface, string sFileName, string sID);
 	virtual ~CCharacter();
 
+	void													Update() override;
 	float													GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void													GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 	void													BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
@@ -49,6 +66,8 @@ public:
 	void													UnWearAllShoes() override;
 	void													SetHairs(string sHairsPath) override;
 	void													SetBody(string sBodyName) override;
+	void													SetUnique(bool bUnique) override;
+	bool													IsUnique();
 	void													Yaw(float fAngle);
 	void													Pitch(float fAngle);
 	void													Roll(float fAngle);
@@ -157,12 +176,16 @@ protected:
 	CBone*													m_pDummyRHand = nullptr;
 	IGeometry*												m_pWeaponGeometry = nullptr;
 	string													m_sClass;
+	map< string, vector< CKey > >							m_mOriginalSpineKeys;
+	CMatrix													m_oOriginalSpineLocalTM;
+	string													m_sSpineNode;
+	bool													m_bUnique = true;
 
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;
 	static map< TAnimation, string>							s_mAnimationTypeToString;
 	static vector< CCharacter* >							s_vHumans;
-	static map<string, map<string, pair<string,	pair<float, float>>>>	s_mBodiesAnimations;
+	static map<string, CBodyAnimations>						s_mBodyAnimations;
 	map<string, string>										m_mOverridenAnimation;
 	static void												OnWalkAnimationCallback( IAnimation::TEvent e, void* pEntity );
 	static void 											Walk( CCharacter*, bool bLoop );

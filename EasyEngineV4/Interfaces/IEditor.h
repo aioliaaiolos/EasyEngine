@@ -36,6 +36,7 @@ public:
 	virtual void	EnableDisplayPickingIntersectPlane(bool enable) = 0;
 	virtual void	Save(string fileName) = 0;
 	virtual void	SetEditionSpeed(float fSpeed) = 0;
+	virtual bool	IsSpawningEntity() = 0;
 };
 
 class IMapEditor : virtual public ISpawnableEditor
@@ -72,6 +73,7 @@ public:
 	virtual void	SaveModifiedMesh() = 0;
 	virtual void	TurnEyes(float fYaw, float fPitch, float fRoll) = 0;
 	virtual void	WearItem(string sItemID) = 0;
+	virtual void	SetUnique(bool bUnique = true) = 0;
 	virtual ICharacter*	GetCurrentCharacter() = 0;
 };
 

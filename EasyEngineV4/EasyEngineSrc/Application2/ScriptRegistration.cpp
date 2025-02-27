@@ -1663,6 +1663,7 @@ void PauseTime(IScriptState* pState)
 //ID entité, ID bone
 void SelectBone( IScriptState* pState )
 {
+	string sMessage = "Parametres requis : (1) identifiant de l'entité (2) Nom du bone";
 	CValueInt* pIDEntity = static_cast< CValueInt* >( pState->GetArg( 0 ) );
 	CValueString* pBoneName = static_cast< CValueString* >(pState->GetArg(1));
 	IEntity* pEntity = m_pEntityManager->GetEntity( pIDEntity->m_nValue );
@@ -1681,13 +1682,13 @@ void SelectBone( IScriptState* pState )
 				m_pConsole->Println( sMessage );
 			}
 			else
-				m_pConsole->Println( "Identifiant de bone incorrect" );
+				m_pConsole->Println( string("Identifiant de bone incorrect") + sMessage);
 		}
 		else
-			m_pConsole->Println( "Erreur : L'entité sélectionné n'a pas de squelette" );
+			m_pConsole->Println( string("Erreur : L'entité sélectionné n'a pas de squelette") + sMessage);
 	}
 	else
-		m_pConsole->Println( "Identifiant d'entité incorrect" );
+		m_pConsole->Println(string("Identifiant d'entité incorrect") + sMessage);
 }
 
 void Yaw( IScriptState* pState )
@@ -2932,6 +2933,12 @@ void SetBody(IScriptState* pState)
 {
 	CValueString* pBody = (CValueString*)(pState->GetArg(0));
 	m_pCharacterEditor->SetBody(pBody->m_sValue);
+}
+
+void SetUnique(IScriptState* pState)
+{
+	CValueInt* pUnique = (CValueInt*)(pState->GetArg(0));
+	m_pCharacterEditor->SetUnique(pUnique->m_nValue == 0 ? false : true);
 }
 
 void DisplayPickingRaySelected(IScriptState* pState)

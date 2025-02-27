@@ -145,6 +145,7 @@ void CSpawnableEditor::OnLeftMouseDown(int x, int y)
 		OnEntityAdded();
 		m_pEditingEntity->DrawBoundingBox(false);
 		m_pEditingEntity = nullptr;
+		m_eEditorMode = TEditorMode::eNone;
 	}
 	else {
 		CVector intersect;
@@ -318,6 +319,11 @@ void CSpawnableEditor::InitSpawnedEntity()
 	m_bIsCurrentSpawningCollidable = m_pEditingEntity->IsCollidable();
 	m_pEditingEntity->SetCollidable(false);
 	m_pEditingEntity->Update();
+}
+
+bool CSpawnableEditor::IsSpawningEntity()
+{
+	return m_eEditorMode != TEditorMode::eNone;
 }
 
 void CSpawnableEditor::InitCamera()

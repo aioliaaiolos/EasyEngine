@@ -500,9 +500,7 @@ float CEntity::GetGroundHeight(float x, float z)
 {
 	float fGroundHeight = 0.f;
 	if (m_pParent) {
-		CVector localPos(x, 0, z);
-		CVector worldPosition = m_oWorldMatrix * localPos;
-		fGroundHeight = m_pParent->GetGroundHeight(worldPosition.m_x, worldPosition.m_z) - GetY();
+		fGroundHeight = m_pParent->GetGroundHeight(x, z) /* - GetY()*/;
 	}
 	return fGroundHeight;
 }
@@ -1007,6 +1005,11 @@ void CEntity::SetMesh( IMesh* pMesh )
 void CEntity::DrawBoundingBox( bool bDraw )
 {
 	m_bDrawBoundingBox = bDraw;
+	for (int i = 0; i < GetChildCount(); i++) {
+		CCollisionEntity* pChild = dynamic_cast<CCollisionEntity*>(GetChild(i));
+		if (pChild)
+			pChild->DrawBoundingBox(bDraw);
+	}
 }
 
 void CEntity::SetShader(IShader* pShader)

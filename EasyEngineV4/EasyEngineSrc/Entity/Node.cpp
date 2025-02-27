@@ -52,6 +52,11 @@ const string& CNode::GetTypeName() const
 	return m_sTypeName;
 }
 
+void CNode::SetTypeName(const string& sTypeName)
+{
+	m_sTypeName = sTypeName;
+}
+
 INode* CNode::GetParent()
 {
 	return m_pParent;

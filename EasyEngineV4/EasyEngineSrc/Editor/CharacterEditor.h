@@ -33,6 +33,7 @@ public:
 	void					UnWearAllShoes() override;
 	void					SetTexture(string sTexture) override;
 	void					SetBody(string sBodyName) override;
+	void					SetUnique(bool bUnique = true) override;
 	void					Edit(string id) override;
 	void					SetSpecular(float r, float g, float b) override;
 	void					SetShininess(float fValue) override;

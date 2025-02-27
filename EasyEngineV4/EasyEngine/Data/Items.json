@@ -92,6 +92,20 @@
 			"Preview": "Tunique_Hospital.bmp"
 		},
 		{
+			"ID": "Pagne",
+			"Model": "clothes/pagne.bme",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
+			"ID": "Haut",
+			"Model": "clothes/haut.bme",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
 			"ID": "Legio-Tunique-m",
 			"Model": "clothes/legio-tunique-m.bme",
 			"Class": "Cloth",

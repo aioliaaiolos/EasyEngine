@@ -34,6 +34,7 @@ public:
 	IBox*					GetNextCollideBox();	
 	void					ComputePathFind2D( const CVector& oOrigin, const CVector& oDestination, vector<CVector>& vPoints);
 	void					OpenTopicWindow();
+	void					BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
 
 protected:
 	void					UpdateGoto() override;

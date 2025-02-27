@@ -62,6 +62,7 @@ public:
 	virtual INode*						DuplicateHierarchy() = 0;
 	virtual bool						IsCollidable() = 0;
 	virtual const string&				GetTypeName() const = 0;
+	virtual void						SetTypeName(const string& sTypeName) = 0;
 };
 
 #endif // INODE_H

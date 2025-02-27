@@ -52,8 +52,9 @@ protected:
 	virtual void					OnEntityRemoved(IEntity* pEntity) = 0;
 	virtual void					CollectSelectableEntity(vector<IEntity*>& entities) = 0;
 	virtual void					InitSpawnedEntity();
+	bool							IsSpawningEntity() override;
 	static void						OnMouseEventCallback(CPlugin* plugin, IEventDispatcher::TMouseEvent, int x, int y);
-	static void						OnKeyEventCallback(CPlugin*, IEventDispatcher::TKeyEvent e, int n);	
+	static void						OnKeyEventCallback(CPlugin*, IEventDispatcher::TKeyEvent e, int n);
 	
 	IEventDispatcher&				m_oEventDispatcher;
 	IEntity*						m_pEditingEntity;

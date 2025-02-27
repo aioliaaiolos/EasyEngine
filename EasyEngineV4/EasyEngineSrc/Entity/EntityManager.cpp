@@ -79,8 +79,10 @@ void CEntityManager::AddEntity( IEntity* pEntity, string sName, int id )
 	m_mIDEntities[id] = pEntity;
 	m_mEntitiesID[ pEntity ] = id;
 	pEntity->SetID(id);
-	m_mNameEntities[ sName ] = pEntity;
-	m_mEntitiesName[ pEntity ] = sName;
+	string sNameLow = sName;
+	std::transform(sName.begin(), sName.end(), sNameLow.begin(), tolower);
+	m_mNameEntities[sNameLow] = pEntity;
+	m_mEntitiesName[ pEntity ] = sNameLow;
 	IAEntity* pIAEntity = dynamic_cast< IAEntity* >( pEntity );
 	if( pIAEntity )
 		m_mIAEntities[ pIAEntity ] = 1;
@@ -268,10 +270,12 @@ CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTyp
 	CEntity* pEntity = NULL;
 	if( sTypeName == "Entity" )
 		pEntity = new CEntity(m_oInterface, sFileName, bDuplicate );
-	else if( sTypeName == "Human" )
+	else if( sTypeName == "Human")
 		pEntity = new CCharacter(m_oInterface, sFileName, sID);
-	else if (sTypeName == "NPC")
+	else if (sTypeName == "NPC" || sTypeName == "Beast") {
 		pEntity = new CNPCEntity(m_oInterface, sFileName, sID);
+		pEntity->SetTypeName(sTypeName);
+	}
 	else if (sTypeName == "Player") {
 		pEntity = new CPlayer(m_oInterface, sFileName);
 		IPlayer* pPlayer = dynamic_cast<IPlayer*>(pEntity);
@@ -417,9 +421,20 @@ void CEntityManager::AddNewCharacterInWorld(IEntity* pEntity)
 	std::transform(sCharacterName.begin(), sCharacterName.end(), sCharacterNameLow.begin(), tolower);
 
 	map<string, CCharacter*>::iterator itCharacter = m_mCharacters.find(sCharacterNameLow);
-	if (itCharacter != m_mCharacters.end())
+	if (itCharacter != m_mCharacters.end() && itCharacter->second->IsUnique())
 		throw CCharacterAlreadyExistsException(sCharacterNameLow);
 	CCharacter* pCharacter = dynamic_cast<CCharacter*>(pEntity);
+	if(itCharacter != m_mCharacters.end() && !itCharacter->second->IsUnique())	{
+		// pCharacter = dynamic_cast<CCharacter*>(BuildCharacterFromDatabase(sCharacterNameLow, dynamic_cast<IEntity*>(pEntity->GetParent())));
+		int index = 1;
+		string sNewName = sCharacterNameLow + "_" + std::to_string(index);
+		while (m_mCharacters.find(sNewName) != m_mCharacters.end()) {
+			index++;
+			sNewName = sCharacterName + "_" + std::to_string(index);
+		}
+		sCharacterNameLow = sNewName;
+		pEntity->SetEntityID(sCharacterNameLow);
+	}
 	m_mCharacters[sCharacterNameLow] = pCharacter;
 }
 
@@ -441,6 +456,13 @@ ICharacter* CEntityManager::BuildCharacterFromDatabase(string sCharacterId, IEnt
 		string sCharacterIdLow = sCharacterId;
 		std::transform(sCharacterId.begin(), sCharacterId.end(), sCharacterIdLow.begin(), tolower);
 		itCharacter = m_mCharacterInfos.find(sCharacterIdLow);
+		if (itCharacter == m_mCharacterInfos.end()) {
+			int underscoreIndex = sCharacterId.find("_");
+			if (underscoreIndex != -1) {
+				sCharacterId = sCharacterId.substr(0, underscoreIndex);
+				itCharacter = m_mCharacterInfos.find(sCharacterId);
+			}
+		}
 	}
 	if (itCharacter != m_mCharacterInfos.end()) {
 		pEntity = CreateEntityFromType(itCharacter->second.m_sRessourceFileName, itCharacter->second.m_sTypeName, sCharacterId);
@@ -816,6 +838,7 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 						infos.m_sClass = character["Class"].GetString();
 					infos.m_fWeight = character["Weight"].GetFloat();
 					infos.m_fStrength = character["Strength"].GetFloat();
+					infos.m_nLife = character["Life"].GetInt();
 					infos.m_nGrandParentDummyRootID = character["GrandParentDummyRootID"].GetInt();
 					infos.m_sTextureName = character["DiffuseTextureName"].GetString();
 					Value& specular = character["Specular"].GetArray();
@@ -841,6 +864,18 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 								infos.m_mItems[itemName].push_back(isWear);
 							}
 						}
+					}
+					if (character.HasMember("Unique")) {
+						Value& unique = character["Unique"];
+						infos.m_bUnique = unique.GetBool();
+					}
+					if (character.HasMember("DangerZone")) {
+						Value& dangerZone = character["DangerZone"];
+						infos.m_fDangerZone = dangerZone.GetFloat();
+					}
+					if (character.HasMember("MinimumFleeDistance")) {
+						Value& minimumFleeDistance = character["MinimumFleeDistance"];
+						infos.m_fMinimumFleeDistance = minimumFleeDistance.GetFloat();
 					}
 					infos.m_sHairs = character["Hairs"].GetString();
 					mCharacterInfos[infos.m_sObjectID] = infos;

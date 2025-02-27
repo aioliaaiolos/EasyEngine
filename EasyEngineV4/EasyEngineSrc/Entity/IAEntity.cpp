@@ -97,6 +97,9 @@ void IAEntity::UpdateFightState()
 	default:
 		break;
 	}
+	float fDistanceToEnemy = GetDistanceToEnemy();
+	if (fDistanceToEnemy > m_fMinimumFleeDistance)
+		Flee();
 }
 
 void IAEntity::UpdateTalkToState()
@@ -224,6 +227,44 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 	}
 }
 
+float IAEntity::GetDistanceToEnemy()
+{
+	CVector oEnemyPos;
+	m_pCurrentEnemy->GetPosition(oEnemyPos);
+	float fDistanceToEnemy = GetDistanceTo2dPoint(oEnemyPos);
+	return fDistanceToEnemy;
+}
+
+void IAEntity::UpdateFlee()
+{	
+	float fDistanceToEnemy = GetDistanceToEnemy();
+	if (fDistanceToEnemy < m_fMinimumFleeDistance)
+		Attack(m_pCurrentEnemy);
+	else {
+		if (abs(m_fAngleRemaining) > abs(fRotateSpeed))
+		{
+			const float epsilon = 1.0;
+			if (abs(m_fAngleRemaining) > epsilon) {
+				float fDelta = m_fAngleRemaining > 0 ? -fRotateSpeed : fRotateSpeed;
+				if (abs(m_fAngleRemaining) > abs(fDelta)) {
+					Turn(fDelta);
+					m_fAngleRemaining = m_fAngleRemaining + fDelta;
+				}
+				else if (abs(m_fAngleRemaining) > epsilon) {
+					Turn(-m_fAngleRemaining);
+					m_fAngleRemaining = 0;
+				}
+			}
+		}
+		else {
+			CVector oEnemyPos;
+			m_pCurrentEnemy->GetPosition(oEnemyPos);
+			m_vCurrentPath.clear();
+			SetDestination(oEnemyPos);
+			m_fAngleRemaining = GetFleeAngleRemaining();
+		}
+	}
+}
 
 void IAEntity::UpdateGoto()
 {
@@ -264,7 +305,15 @@ void IAEntity::UpdateGoto()
 
 void IAEntity::Update()
 {
-	if ( (m_eFightState != eNoFight) && (GetLife() > 0) ) {
+	if (m_eFightState == eNoFight && m_pCurrentEnemy) {
+		float fDistanceToEnemy = GetDistanceToEnemy();
+		if (fDistanceToEnemy < m_fDangerZone) {
+			Flee();
+		}
+	}
+	else if (m_eFightState == eFlee)
+		UpdateFlee();
+	else if ( (m_eFightState != eNoFight) && (GetLife() > 0) ) {
 		UpdateFaceTo();
 		UpdateGoto();
 		UpdateFightState();
@@ -297,6 +346,11 @@ float IAEntity::GetDestinationAngleRemaining()
 		return 0.f;
 	}
 	return m_fForceDeltaRotation + GetAngleBetween2Vectors(oBefore, oDirection);
+}
+
+float IAEntity::GetFleeAngleRemaining()
+{
+	return 180.f - GetDestinationAngleRemaining();
 }
 
 float IAEntity::GetAngleBetween2Vectors(CVector& v1, CVector& v2)
@@ -353,4 +407,10 @@ void IAEntity::Attack(IFighterEntity* pEntity)
 	SetFightMode(true);
 	m_pCurrentEnemy = pEntity;
 	m_eFightState = eBeginGoToEnemy;
+}
+
+void IAEntity::Flee()
+{
+	m_eFightState = eFlee;
+	Run();
 }

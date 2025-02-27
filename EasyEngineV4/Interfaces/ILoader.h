@@ -328,6 +328,10 @@ public:
 		string									m_sHairs;
 		float									m_fStrength = 0.f;
 		string									m_sClass;
+		int										m_nLife;
+		bool									m_bUnique = true;
+		float									m_fDangerZone = -1;
+		float									m_fMinimumFleeDistance = -1;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{

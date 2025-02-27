@@ -275,6 +275,11 @@ void CCharacterEditor::SetBody(string sBodyName)
 	InitHeadNode(m_pCurrentCharacter);
 }
 
+void CCharacterEditor::SetUnique(bool bUnique)
+{
+	m_pCurrentCharacter->SetUnique(bUnique);
+}
+
 void CCharacterEditor::Edit(string id)
 {
 	SetEditionMode(true);
