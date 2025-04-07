@@ -45,6 +45,8 @@ void main()
 		if(nPSMatID < nMaterialCount) {
 			if ( TextureCount != 0 )
 				diffuseColor = texture2D( baseMapArray[nPSMatID], Texcoord );
+			else 
+				diffuseColor = gl_FrontMaterial.diffuse;
 		}
 		
 	    if (diffuseColor.a < 0.5) 

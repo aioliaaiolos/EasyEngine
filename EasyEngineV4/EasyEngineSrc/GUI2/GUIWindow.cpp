@@ -37,8 +37,8 @@ CGUIWindow::CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int
 {
 }
 
-CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize) :
-	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight()),
+CGUIWindow::CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, int borderWidth, int color) :
+	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight(), borderWidth, color),
 	m_bGUIMode(false),
 	m_oCloseWindowCallback(nullptr),
 	m_bIsShown(false)
@@ -85,12 +85,12 @@ deque<CGUIWidget*>::iterator CGUIWindow::RemoveWidget(CGUIWidget* pWidget, bool 
 	return itWidget;
 }
 
-void CGUIWindow::SetPosition(float fPosX, float fPosY)
+void CGUIWindow::SetPosition(int x, int y)
 {
-	CGUIWidget::SetPosition(fPosX, fPosY);
+	CGUIWidget::SetPosition(x, y);
 	for (int i = 0; i < m_vWidget.size(); i++) {
 		CGUIWidget* pWidget = m_vWidget[i];
-		pWidget->SetPosition(pWidget->GetPosition().GetX() + fPosX, pWidget->GetPosition().GetY() + fPosY);
+		pWidget->SetPosition(pWidget->GetRelativePosition().GetX() + x, pWidget->GetRelativePosition().GetY() + y);
 	}
 }
 

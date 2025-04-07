@@ -187,8 +187,8 @@ void CEntityManager::LoadItems()
 				for (int iItem = 0; iItem < count; iItem++) {
 					rapidjson::Value& item = items[iItem];
 					if (item.IsObject()) {
-						string sId, sModel, sClass, sType, sAttackType, sPreview, sDiffuse;
-						int nValue = 0, nDamage = 0;
+						string sId, sModel, sClass, sType, sAttackType, sPreview, sDiffuse, sDecription;
+						int nValue = 0, nDamage = 0, nArmor = 0;
 						if (item.HasMember("ID")) {
 							rapidjson::Value& id = item["ID"];
 							if (id.IsString()) {
@@ -227,8 +227,14 @@ void CEntityManager::LoadItems()
 						}
 						if (item.HasMember("Value")) {
 							Value& type = item["Value"];
-							if (type.IsString()) {
+							if (type.IsInt()) {
 								nValue = type.GetInt();
+							}
+						}
+						if (item.HasMember("Armor")) {
+							Value& type = item["Armor"];
+							if (type.IsInt()) {
+								nArmor = type.GetInt();
 							}
 						}
 						if (item.HasMember("Damage")) {
@@ -243,6 +249,12 @@ void CEntityManager::LoadItems()
 								sDiffuse = type.GetString();
 							}
 						}
+						if (item.HasMember("Description")) {
+							Value& type = item["Description"];
+							if (type.IsString()) {
+								sDecription = type.GetString();
+							}
+						}
 						CItem* pItem = nullptr;
 						if (sClass == "Weapon") {
 							pItem = new CWeapon(m_oInterface, sId, CItem::GetTypeFromString(sType), CWeapon::GetAttackTypeFromString(sAttackType), sModel, sPreview);
@@ -252,8 +264,10 @@ void CEntityManager::LoadItems()
 						}
 						else
 							pItem = new CItem(m_oInterface, sId, CItem::s_mClassString[sClass], CItem::GetTypeFromString(sType), sModel, sPreview);
-						pItem->m_nValue = nValue;
+						pItem->SetValue(nValue);
 						pItem->m_sDiffuse = sDiffuse;
+						pItem->SetDescription(sDecription);
+						pItem->m_nArmor = nArmor;
 						m_mItems[sId] = pItem;
 					}
 				}
@@ -834,8 +848,10 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					infos.m_sParentName = character["ParentName"].GetString();
 					infos.m_nParentBoneID = character["ParentBoneID"].GetInt();
 					infos.m_sTypeName = character["TypeName"].GetString();
-					if(character.HasMember("Class"))
+					if (character.HasMember("Class"))
 						infos.m_sClass = character["Class"].GetString();
+					else
+						infos.m_sClass = "None";
 					infos.m_fWeight = character["Weight"].GetFloat();
 					infos.m_fStrength = character["Strength"].GetFloat();
 					infos.m_nLife = character["Life"].GetInt();
@@ -876,6 +892,14 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 					if (character.HasMember("MinimumFleeDistance")) {
 						Value& minimumFleeDistance = character["MinimumFleeDistance"];
 						infos.m_fMinimumFleeDistance = minimumFleeDistance.GetFloat();
+					}
+					if (character.HasMember("WeaponRange")) {
+						Value& weaponRange = character["WeaponRange"];
+						infos.m_fWeaponRange = weaponRange.GetFloat();
+					}
+					if (character.HasMember("GoldAmount")) {
+						Value& goldAmount = character["GoldAmount"];
+						infos.m_nGoldAmount = goldAmount.GetInt();
 					}
 					infos.m_sHairs = character["Hairs"].GetString();
 					mCharacterInfos[infos.m_sObjectID] = infos;

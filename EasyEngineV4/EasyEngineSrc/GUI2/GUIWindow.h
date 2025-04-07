@@ -19,7 +19,7 @@ public:
 													CGUIWindow(EEInterface& oInterface, string fileName);
 													CGUIWindow(string fileName, EEInterface& oInterface, const CDimension& windowSize);
 													CGUIWindow(string fileName, EEInterface& oInterface, int nWidth, int nHeight);
-													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize);
+													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, int borderWidth = 0, int color = 0);
 													CGUIWindow(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
 	virtual											~CGUIWindow();
 	void											AddWidget(CGUIWidget* pWidget);
@@ -30,7 +30,7 @@ public:
 	void											SetCloseWindowCallback(CloseWindowCallback callback) override;
 	bool											IsVisible();
 	void											Clear();
-	void											SetPosition(float fPosX, float fPosY);
+	void											SetPosition(int x, int y) override;
 	void											SetRelativePosition(float fPosX, float fPosY) override;
 	bool											IsGUIMode();
 	void											SetGUIMode(bool bGUIMode);	

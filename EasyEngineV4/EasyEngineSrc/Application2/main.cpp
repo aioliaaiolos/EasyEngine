@@ -93,7 +93,7 @@ bool bCapture = false;
 
 
 void InitScene( ISceneManager* pSceneManager )
-{	
+{
 	try
 	{
 		InitScriptRegistration();

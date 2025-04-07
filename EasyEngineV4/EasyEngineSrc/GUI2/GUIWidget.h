@@ -22,17 +22,17 @@ class CMesh;
 class CListener;
 class CGUIManager;
 
-class CGUIWidget
+class CGUIWidget : public virtual IGUIWidget
 {
 
 public:
-							CGUIWidget(EEInterface& oInterface);
-							CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight );
+							CGUIWidget(EEInterface& oInterface, int nBorderWidth = 0);
+							CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight, int nBorderWidth = 0, unsigned int color = 0);
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin);
 							CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial);
-							CGUIWidget(EEInterface& oInterface, string sFileNam);
+							CGUIWidget(EEInterface& oInterface, string sFileNam, int nBorderWidth = 0);
 							CGUIWidget(EEInterface& oInterface, string sFileName, int width, int height);
-							CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin);
+							CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin, int nBorderWidth = 0);
 	virtual					~CGUIWidget(void);
 
 	bool					operator==( const CGUIWidget& w );
@@ -48,7 +48,7 @@ public:
 	void					GetLogicalDimension( float& x, float& y, int nResWidth, int nResHeight ) const;
 	CDimension				GetDimension() const;
 
-	virtual void			SetPosition(float fPosX, float fPosY);
+	virtual void			SetPosition(int x, int y);
 	void					SetRelativePosition(const CPosition& oPosition);
 	virtual void			SetRelativePosition(float fPosX, float fPosY);
 	void					SetPosition(CPosition p);
@@ -62,10 +62,10 @@ public:
 	virtual void			SetParent(CGUIWidget* parent);
 	deque<CGUIWidget*>::iterator	Unlink(bool bDelete = true);
 	void					UpdatePosition();
-	void					SetVisibility(bool bVisible);
-
+	virtual void			SetVisibility(bool bVisible);
+	bool					IsVisible();
 	string					m_sUserData;
-
+	
 	static void				Init( int nResX, int nResY, IShader* pShader );
 
 protected:
@@ -75,6 +75,7 @@ protected:
 	void					CreateQuadMeshInfos(IRenderer& oRenderer, const CDimension& dimQuad, const CRectangle& oSkin, ILoader::CMeshInfos& mi) const;
 	IMesh*					CreateQuadFromTexture(IRenderer& oRenderer, IRessourceManager& oRessourceManager, ITexture* pTexture, const CRectangle& oSkin) const;
 	IMesh*					CreateQuad(IRenderer& oRenderer, IRessourceManager& oRessourceManager, const CDimension& quadSize, const CRectangle& skin) const;
+	void					CreateWidgetFromTexture(ITexture* pTexture);
 	void					InitManagers(EEInterface& oInterface);	
 
 	CPosition				m_oNextCursorPos;

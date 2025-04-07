@@ -53,6 +53,7 @@ protected:
 	virtual const CMatrix&		GetWeaponTM() const = 0;
 	virtual void				SetHitEnemySphereCallback(THitEnemyCallback callback);
 	virtual void				SetHitEnemyBoxCallback(THitEnemyCallback callback);
+	virtual void				LockHit(bool lock);
 
 private:
 
@@ -66,6 +67,7 @@ private:
 	THitEnemyCallback			m_oHitEnemySphereCallback;
 	THitEnemyCallback			m_oHitEnemyBoxCallback;
 	int							m_nLife;
+	bool						m_bHitLocked = false;
 };
 
 #endif // IFIGHTERENTITY_H

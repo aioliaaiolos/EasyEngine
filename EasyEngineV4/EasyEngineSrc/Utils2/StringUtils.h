@@ -24,6 +24,7 @@ public:
 	static void		ConvertStringToWString(const std::string& s, std::wstring& w);
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
 	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines, bool bSkipSpace = true);
+	static void		DecodeString(string& sIn, string& sOut);
 };
 
 

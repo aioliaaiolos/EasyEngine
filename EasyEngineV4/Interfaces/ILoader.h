@@ -332,6 +332,8 @@ public:
 		bool									m_bUnique = true;
 		float									m_fDangerZone = -1;
 		float									m_fMinimumFleeDistance = -1;
+		float									m_fWeaponRange = 0.f;
+		int										m_nGoldAmount = 0;
 
 		const IPersistantObject& operator >> (CBinaryFileStorage& store) const override
 		{

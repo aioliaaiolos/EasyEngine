@@ -7,6 +7,21 @@
 using namespace std;
 
 
+void CStringUtils::DecodeString(string& sIn, string& sOut)
+{
+	sOut = sIn;
+	int idx = sIn.find("Ã©");
+	while (idx != -1) {
+		sOut = sIn.replace(sIn.begin() + idx, sIn.begin() + idx + 2, "é");
+		idx = sOut.find("Ã©");
+	}
+	idx = sIn.find("Ã");
+	while (idx != -1) {
+		sOut = sIn.replace(sIn.begin() + idx, sIn.begin() + idx + 2, "à");
+		idx = sOut.find("Ã");
+	}
+}
+
 void CStringUtils::ExtractFloatFromString( const string& sString, vector< float >& vFloat, unsigned int nCount )
 {
 	vFloat.clear();

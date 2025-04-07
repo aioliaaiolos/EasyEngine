@@ -45,7 +45,8 @@ public:
 		eCloth = 0,
 		eArmor,
 		eWeapon,
-		eJewel
+		eJewel,
+		eTool
 	};
 
 	CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath);
@@ -61,20 +62,24 @@ public:
 	const CMatrix&									GetWorldMatrix() const override;
 	CEntity*										GetModel();
 	void											Update() override;
+	int												GetValue() override;
+	string											GetDescription() override;
+	void											SetValue(int nValue);
+	void											SetDescription(string sDescription);
+	int												GetArmor() override;
+	int												GetDamage() override;
 
 	TClass											m_eClass;
 	Type											m_eType;
 	string											m_sModelName;
-	bool											m_bIsWear;
-	int												m_nValue = 0;
-	string											m_sDiffuse;
+	bool											m_bIsWear;	
+	string											m_sDiffuse;	
+	int												m_nArmor = 0;
 	
 	static Type										GetTypeFromString(string sType);
 	static map<string, TClass>						s_mClassString;
 	static void										LoadDummyTypes(rapidjson::Document& doc);
-	static map<Type, vector<string>>				s_mBodyDummies;
-
-	
+	static map<Type, vector<string>>				s_mBodyDummies;	
 
 protected:
 	static map<string, Type>						s_mTypeString;
@@ -82,4 +87,6 @@ protected:
 	ICharacter*										m_pOwner = nullptr;
 	CEntity*										m_pModel = nullptr;
 	EEInterface&									m_oInterface;
+	int												m_nValue = 0;
+	string											m_sDescription;
 };

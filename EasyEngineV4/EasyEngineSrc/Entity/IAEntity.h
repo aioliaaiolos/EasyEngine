@@ -18,6 +18,8 @@ public:
 	virtual void				Goto(const CVector& oPosition, float fSpeed);
 	void						TalkTo(IFighterEntityInterface* pEntity, TalkToCallback callback) override;
 	void						Update();
+	//void						SetWeaponRange(float range);
+	//float						GetWeaponRange();
 
 	pair<TalkToCallback, IFighterEntityInterface*>	m_oTalkToCallback;
 
@@ -100,6 +102,7 @@ protected:
 	IFighterEntityInterface*	m_pCurrentInterlocutor;
 	vector<CVector>				m_vCurrentPath;
 	int							m_nCurrentPathPointNumber;
+	float						m_fWeaponRange = 115.f;
 	float						m_fDestinationDeltaRadius;
 	CTimeManager&				m_oTimeManager;
 	bool						m_bFightingIAEnabled = true;	

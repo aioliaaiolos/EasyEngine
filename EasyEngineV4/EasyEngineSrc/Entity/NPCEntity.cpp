@@ -110,7 +110,7 @@ void CNPCEntity::Update()
 		if (m_sTypeName == "Beast") {
 			for (int i = 0; i < m_pParent->GetChildCount(); i++) {
 				INode* pChild = m_pParent->GetChild(i);
-				if (pChild != (INode*)m_pCurrentEnemy && pChild->GetTypeName() == "Player") {
+				if (pChild != (INode*)m_pCurrentEnemy && (pChild->GetTypeName() == "Player" || pChild->GetTypeName() == "NPC")) {
 					float fDistance = GetDistance(pChild);
 					if (fDistance < m_fDangerZone) {
 						m_pCurrentEnemy = dynamic_cast<IFighterEntity*>(pChild);
@@ -252,6 +252,7 @@ void CNPCEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 	const ILoader::CAnimatedEntityInfos* pAnimatedEntityInfos = dynamic_cast< const ILoader::CAnimatedEntityInfos* >(&infos);
 	m_fDangerZone = pAnimatedEntityInfos->m_fDangerZone;
 	m_fMinimumFleeDistance = pAnimatedEntityInfos->m_fMinimumFleeDistance;
+	m_fWeaponRange = pAnimatedEntityInfos->m_fWeaponRange;
 }
 
 void CNPCEntity::UpdateGoto()

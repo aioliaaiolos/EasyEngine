@@ -114,6 +114,7 @@ public:
 	void							SetLocalVariableValue(string sVariableName, string sValue) override;
 	void							SetLocalVariableValue(string sVariableName, int nValue) override;
 	void							SetLocalVariableValue(string sVariableName, float fValue) override;
+	void							SetCullFace(bool culling);
 	
 
 protected:
@@ -170,6 +171,7 @@ protected:
 	IWorldEditor*									m_pWorldEditor;
 	CTimeManager&									m_oTimeManager;
 	map<string, IValue*>							m_mLocalScriptVariable;
+	bool											m_bCullFace = true;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);

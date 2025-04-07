@@ -202,8 +202,9 @@ void CMesh::Update()
 			if (!m_vTextureArray.empty()) {
 				m_pShader->SendUniformVector4Array("MaterialArray", m_vMaterialArray);
 				m_pShader->SendUniformVectorArray("ShininessArray", m_vShininessArray);
+				int i = 0;
 				for (ITexture* pTexture : m_vTextureArray)
-					m_oRenderer.BindTexture(pTexture->GetID(), pTexture->GetUnitTexture(), IRenderer::T_2D);
+					m_oRenderer.BindTexture(pTexture->GetID(), m_vUnitTextures[i++], IRenderer::T_2D);
 				m_pShader->SendUniformVectorArray("baseMapArray", m_vUnitTextures);
 				m_pShader->SendUniformValues("TextureCount", (int)m_vTextureArray.size());
 			}

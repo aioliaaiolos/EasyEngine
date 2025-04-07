@@ -166,8 +166,8 @@
 			],
 			"Actions":[
 				"AddCharacterItem(\"ranja\", \"Opium_Fiole\")",
-				"RemoveCharacterItem(\"Player\", \"Opium_Fiole\")",
-				"AddCharacterItem(\"Player\", \"Pass-Hospital\")"
+				"RemoveCharacterItem(\"player\", \"Opium_Fiole\")",
+				"AddCharacterItem(\"player\", \"Pass-Hospital\")"
 			]
 		},
 		
@@ -880,7 +880,7 @@
 			],
 			"Actions": [
 				"RemoveCharacterItem(\"Aluyn\", \"Opium_Fiole\")",
-				"AddCharacterItem(\"Player\", \"Opium_Fiole\")",
+				"AddCharacterItem(\"player\", \"Opium_Fiole\")",
 				"Mission_Infirmerie=20"
 			]
 		},
@@ -1111,7 +1111,7 @@
 			],
 			"Actions": [
 				"AddCharacterItem(\"mirabelle\", \"Armlet_EvilSpelled\")",
-				"RemoveCharacterItem(\"Player\", \"Armlet_EvilSpelled\")",
+				"RemoveCharacterItem(\"player\", \"Armlet_EvilSpelled\")",
 				"WearCharacterItem(\"mirabelle\", \"Armlet_EvilSpelled\")",
 				"Mission_Infirmerie=8"
 			]
@@ -1189,7 +1189,7 @@
 				}
 			],
 			"Actions": [
-				"AddCharacterItem(\"Player\", \"Armlet_EvilSpelled\");",
+				"AddCharacterItem(\"player\", \"Armlet_EvilSpelled\");",
 				"RemoveCharacterItem(\"namia\", \"Armlet_EvilSpelled\");",
 				"Mission_Infirmerie=7;"
 				]
@@ -1262,6 +1262,35 @@
 					"Comp": "=="
 				}
 			]
+		},
+		{
+			"Title": "Antil", 
+			"Text": ["Vous le trouverez dans la cour, il doit faire semblant de passer le balai"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Equipement", 
+			"Text": ["Equipement ! Equipement ! Gneuuu !"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": ">"
+				}
+			],
+			"Actions": ["OpenTrade()"]
 		}
 	],
 	
@@ -1352,7 +1381,7 @@
 			],
 			"Conditions": [
 				{
-					"Name": "Class",
+					"Name": "SpeakerClass",
 					"Value": "Guard",
 					"Comp": "=="
 				},
@@ -1392,7 +1421,7 @@
 			],
 			"Actions":[
 				"DetachScript(\"garde hopital\", \"onExitHospitalArea\")",
-				"SpeakerAttack(\"Player\")"
+				"SpeakerAttack(\"player\")"
 			]
 		},
 		{
@@ -1449,7 +1478,61 @@
 					"Comp": "=="
 				}
 			],
-			"Actions": ["Choice(\"{1}J'Oui bien sur, j'accepte votre proposition{2}Je vais devoir y réfléchir{3}En quoi consisterait ma tache ?{4}Non merci\")"]
+			"Actions": ["Mission_Infirmerie=22", "Mission_Legion=1",
+						"Choice(\"{1}Oui bien sur, j'accepte votre proposition{2}Je vais devoir y réfléchir{3}En quoi consisterait ma tache ?{4}Non merci\")"]
+		},
+		{
+			"Text": [
+				"Tres bien, nous allons démarrer une campagne de recrutement prochainement, encore une... Nous n'avons meme plus de lieu décent pour accueillir les prochaines recrues. Le batiment de gauche a été laissé à l'abandon pendant tres longtemps. Avec la chaleur qu'il fait ici de nombreux animaux dangereux s'y sont introduits, des scorpions, des lézards vénimeux, des rats vampires..."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "1",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": [
+						"Mission_Legion=2", 
+						"Choice(\"{1}Des rats vampires ?{2}Poursuivez\")"
+						]
+		},
+		{
+			"Text": [
+				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "2",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Mission_Legion=4", "Goodbye()"]
 		},
 		{
 			"Text": [
@@ -1475,6 +1558,206 @@
 				}
 			],
 			"Actions": ["Goodbye()"]
+		},
+		{
+			"Text": [
+				"Oui, des rats qui ont été sélectionnés pour leur agressivité. Nous les avons créé pour lutter contre l'ennemi mais... vous savez ce que c'est, tot ou tard certains d'entre eux finissent par s'échappent et ca nous fait un probleme de plus à régler."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "2",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Mission_Legion=3", "Choice(\"{1}Poursuivez\")"]
+		},
+		{
+			"Text": [
+				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est."
+			],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "3",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Mission_Legion=4"]
+		},
+		{
+			"Text": ["Heu ?"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "<"
+				}
+			],
+			"Actions": [
+				"Choice(\"{1}Heu...{2}Je me suis trompé de personne, désolé pour le dérangement\")"
+				]
+		},
+		{
+			"Text": ["Heu !"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "<"
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": [
+				"Goodbye()"
+				]
+		},
+		{
+			"Text": ["Ah..."],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "<"
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Actions": [
+				"Goodbye()"
+				]
+		},
+		{
+			"Text": ["Heu ?"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "=="
+				}
+			],
+			"Actions": [
+				"Choice(\"{1}Bonjour mon brave, je viens de la part du capitaine, il m'a dit que vous pourriez me fournir un equipement{2}Je me suis trompé de personne, désolé pour le dérangement\")"
+				]
+		},
+		{
+			"Text": ["Gneu ! J'ai beaucoup <link>equipement</link> ! gneu !"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "1",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Mission_Legion=5"]
+		},
+		{
+			"Text": ["Heu !"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "choice",
+					"Value": "2",
+					"Comp": "=="
+				}
+			],
+			"Actions": ["Goodbye()"]
+		},
+		{
+			"Text": ["Heu ?"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "4",
+					"Comp": ">"
+				}
+			]
 		}
 	]
 }

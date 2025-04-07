@@ -37,9 +37,10 @@ void CWeapon::Load()
 		if (pBone)
 			m_pDummyHandle = pBone;
 	}
-	m_pDummyHandle->Unlink();
-
-	m_pDummyHandle->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInHandleBase);
+	if (m_pDummyHandle) {
+		m_pDummyHandle->Unlink();
+		m_pDummyHandle->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInHandleBase);
+	}
 	m_pDummyWear->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInWearBase);
 
 	// box

@@ -172,6 +172,10 @@ public:
 	virtual void UnWear() = 0;
 	virtual void SetOwner(ICharacter* pCharacter) = 0;	
 	virtual void Load() = 0;
+	virtual int	GetValue() = 0;
+	virtual string GetDescription() = 0;
+	virtual int GetArmor() = 0;
+	virtual int GetDamage() = 0;
 };
 
 class IBoxEntity : public virtual IEntity
@@ -211,6 +215,8 @@ public:
 	virtual bool									GetFightMode() = 0;
 	virtual const string&							GetClass() = 0;
 	virtual IBone*									GetHeadNode() = 0;
+	virtual int										GetGoldAmount() = 0;
+	virtual void									SetGoldAmount(int nGoldAmount) = 0;
 };
 
 class IScene : public virtual IEntity

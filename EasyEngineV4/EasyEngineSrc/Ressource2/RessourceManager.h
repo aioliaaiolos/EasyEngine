@@ -97,7 +97,9 @@ private:
 	static void										CollectMaterials(EEInterface& oInterface, const ILoader::CMaterialInfos& oMaterialInfos, IShader* pShader, std::map< int, CMaterial* >& vMaterials);
 	static CMaterial*								CreateMaterial(EEInterface& oInterface, const ILoader::CMaterialInfos*, IShader* pShader);
 
+	ITexture*										CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface) override;
 	void											CreateTextureDesc(string sFileName, CTexture2D::CDesc& desc);
+	void											CreateTextureDesc(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, CTexture2D::CDesc& desc);
 	std::map< std::string, TRessourceCreation >		m_mRessourceCreation;
 	std::map< std::string, TTestRessourceCreation >	m_mTestRessourceCreation;
 	int												m_nLightCount;

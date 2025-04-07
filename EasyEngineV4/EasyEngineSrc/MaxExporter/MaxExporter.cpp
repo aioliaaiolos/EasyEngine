@@ -578,7 +578,11 @@ void CMaxExporter::GetWeightTable(IWeightTable& oWeightTable, const map< string,
 					wstring wName(pBone->GetName());
 					string sName(wName.begin(), wName.end());
 					map< string, int >::const_iterator itBone = mBoneID.find(sName);
-					oWeightTable.Add(iVertexIndex, itBone->second, bone.second);
+					if(itBone != mBoneID.end())
+						oWeightTable.Add(iVertexIndex, itBone->second, bone.second);
+					else {
+						throw CEException(string("Error: ") + sName + "not found in 'mBoneID'");
+					}
 					nBoneCount++;
 				}
 			}

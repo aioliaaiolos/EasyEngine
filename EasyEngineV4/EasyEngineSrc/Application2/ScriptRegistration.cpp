@@ -650,6 +650,27 @@ void Attack(IScriptState* pState)
 	}
 }
 
+void DisplayMaterial(IScriptState* pState)
+{
+	CValueInt* pEntityId = static_cast< CValueInt* >(pState->GetArg(0));
+	IEntity* pEntity = m_pEntityManager->GetEntity(pEntityId->m_nValue);
+	if (pEntity) {
+		string sMaterialName;
+		IMesh* pRessource = dynamic_cast<IMesh*>(pEntity->GetRessource());
+		if (pRessource) {
+			pRessource->GetName(sMaterialName);
+			for (int i = 0; i < pRessource->GetMaterialCount(); i++) {
+				IMaterial* pMaterial = pRessource->GetMaterial(i);
+				string materialName;
+				pMaterial->GetName(materialName);
+				ostringstream oss;
+				oss << "Material " << i << " : " << sMaterialName;
+				m_pConsole->Println(oss.str());
+			}
+		}
+	}
+}
+
 void SpeakerAttack(IScriptState* pState)
 {	
 	IAEntityInterface* pSpeaker = dynamic_cast<IAEntityInterface*>(m_pEntityManager->GetEntity(m_pGUIManager->GetTopicsWindow()->GetSpeakerID()));
@@ -2773,7 +2794,10 @@ void WearItem(IScriptState* pState)
 void AddItem(IScriptState* pState)
 {
 	CValueString* pItemName = (CValueString*)(pState->GetArg(0));
-	m_pCharacterEditor->AddItem(pItemName->m_sValue);
+	if (m_pCharacterEditor)
+		m_pCharacterEditor->AddItem(pItemName->m_sValue);
+	else
+		m_pConsole->Println("Erreur, m_pCharacterEditor == NULL");
 }
 
 void AddCharacterItem(IScriptState* pState)
@@ -3796,15 +3820,65 @@ void GetTime(IScriptState* pState)
 	pState->SetReturnValue(t);
 }
 
+IInventoryWindow* pInventoryWindow = nullptr;
+void DrawInventory(IScriptState* pState)
+{
+	CValueString* pId = static_cast<CValueString*>(pState->GetArg(0));
+	CValueInt* pShow = static_cast<CValueInt*>(pState->GetArg(1));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pId->m_sValue));
+	if (pCharacter) {
+		if (pShow->m_nValue != 0) {
+			IInventoryWindow* pInventoryWindow = m_pGUIManager->CreateInventoryWindow(CDimension(600, 800));
+			m_pGUIManager->AddWindow(pInventoryWindow);
+			pInventoryWindow->SetPosition(800, 100);
+			pInventoryWindow->DisplayItems(pCharacter);
+		}
+		else {
+			if (pInventoryWindow) {
+				m_pGUIManager->RemoveWindow(pInventoryWindow);
+				delete pInventoryWindow;
+				pInventoryWindow = nullptr;
+			}
+		}
+	}
+	else {
+		ostringstream oss;
+		oss << "Erreur, character '" << pId->m_sValue << "' introuvable";
+		throw CEException(oss.str());
+	}
+}
+
+void OpenTrade(IScriptState* pState)
+{
+	CValueString* pId = static_cast<CValueString*>(pState->GetArg(0));
+	CValueInt* pShow = static_cast<CValueInt*>(pState->GetArg(1));
+	ICharacter* pTrader = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pId->m_sValue));
+	if (pTrader)
+		m_pGUIManager->OpenTradeWindow(pTrader, pShow->m_nValue != 0);
+	else {
+		ostringstream oss;
+		oss << "Error: character '" << pId->m_sValue << "' not found ";
+		m_pConsole->Println(oss.str());
+	}
+}
+
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
 
-	/*
 	vType.clear();
 	vType.push_back(eString);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("OpenTrade", OpenTrade, vType, eVoid);
+
+	vType.clear();
 	vType.push_back(eString);
-	m_pScriptManager->RegisterFunction("GetCharacterLocalVar", GetCharacterLocalVar, vType, eInt);*/
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("DrawInventory", DrawInventory, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("DisplayMaterial", DisplayMaterial, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

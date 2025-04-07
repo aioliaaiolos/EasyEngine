@@ -88,8 +88,10 @@ public:
 	IBox*													GetBoundingBox();
 	const string&											GetClass();
 	void													SetClass(string sClassName);
+	int														GetGoldAmount() override;
+	void													SetGoldAmount(int nGoldAmount) override;
 	static void												InitStatics(IFileSystem& oFileSystem);
-	static map<string, IEntity::TAnimation>					s_mStringToAnimation;
+	static map<string, IEntity::TAnimation>					s_mStringToAnimation;	
 
 protected:
 	typedef void (*TAction)( CCharacter*, bool );
@@ -180,6 +182,7 @@ protected:
 	CMatrix													m_oOriginalSpineLocalTM;
 	string													m_sSpineNode;
 	bool													m_bUnique = true;
+	int														m_nGoldAmount = 0;
 
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;

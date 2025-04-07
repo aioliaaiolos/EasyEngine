@@ -447,6 +447,7 @@
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
 			"Life": 200,
+			"GoldAmount": 100,
 			"Specular": [
 				0.0,
 				0.0,
@@ -475,7 +476,8 @@
 			"Hairs": ""
 		},
 		{
-			"EntityID": "Garde-caserne",
+			"EntityID": "garde-caserne",
+			"Unique": false,
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
 			"ParentName": "Scene",
@@ -499,13 +501,25 @@
 			],
 			"Items": [
 				{
-					"ItemName": "Legio-Tunique-m-mixamo",
+					"ItemName": "Legio_Cuirass",
 					"IsWearArray": [
 						1
 					]
 				},
 				{
-					"ItemName": "Sword",
+					"ItemName": "Legio_Greaves",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legio_LSandal",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legio_RSandal",
 					"IsWearArray": [
 						1
 					]
@@ -614,7 +628,7 @@
 				}
 			],
 			"Hairs": ""
-		},		
+		},
 		{
 			"EntityID": "xiam",
 			"RessourceName": "Perso",
@@ -719,6 +733,129 @@
 			"Hairs": "hairs11"
 		},
 		{
+			"EntityID": "maradriya",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body17-f-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Life": 20000,
+			"Specular": [
+				0.10000000149011612,
+				0.10000000149011612,
+				0.10000000149011612
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "LSandal_F",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "RSandal_F",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Tunique3",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Tunique3_Haut",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs12"
+		},
+		{
+			"EntityID": "test-mirabelle",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "Textures/skin01-foncee.bmp",
+			"Life": 50,
+			"Specular": [
+				0.30000001192092896,
+				0.30000001192092896,
+				0.30000001192092896
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "Tunique3_Haut",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs01"
+		},
+		{
+			"EntityID": "test-maradriya",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body17-f-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Life": 20000,
+			"Specular": [
+				0.10000000149011612,
+				0.10000000149011612,
+				0.10000000149011612
+			],
+			"AnimationSpeeds": [
+				{
+					"Name": "Run",
+					"AnimationSpeed": 1.0
+				}
+			],
+			"Items": [
+				{
+					"ItemName": "LSandal_F",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "RSandal_F",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
+			"Hairs": "hairs12"
+		},
+		{
 			"EntityID": "charlotte",
 			"RessourceName": "Perso",
 			"RessourceFileName": "Meshes/Bodies/body06-f-mixamo.bme",
@@ -787,6 +924,78 @@
 			],
 			"AnimationSpeeds": [],
 			"Items": [],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "ratb",
+			"Unique": false,
+			"RessourceName": "rat",
+			"RessourceFileName": "Meshes/Bodies/rat02b.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "Beast",
+			"DangerZone": 1000,
+			"MinimumFleeDistance": 600,
+			"WeaponRange": 60,
+			"Weight": 0.0,
+			"Strength": 5,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"Life": 5,
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [],
+			"Items": [],
+			"Hairs": ""
+		},
+		{
+			"EntityID": "antil",
+			"RessourceName": "Perso",
+			"RessourceFileName": "Meshes/Bodies/body01-m-mixamo.bme",
+			"ParentName": "Scene",
+			"ParentBoneID": -1,
+			"TypeName": "NPC",
+			"Weight": 0.0,
+			"Strength": 5,
+			"Life": 1000,
+			"GrandParentDummyRootID": -1,
+			"DiffuseTextureName": "",
+			"GoldAmount": 10,
+			"Specular": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"AnimationSpeeds": [],
+			"Items": [
+				{
+					"ItemName": "Legio-Tunique-m-mixamo",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legio_LSandal",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Legio_RSandal",
+					"IsWearArray": [
+						1
+					]
+				},
+				{
+					"ItemName": "Broom",
+					"IsWearArray": [
+						1
+					]
+				}
+			],
 			"Hairs": ""
 		}
 	]

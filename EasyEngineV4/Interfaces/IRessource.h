@@ -235,6 +235,7 @@ public:
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
 	virtual void				RemoveAllLights(IRenderer& oRenderer) = 0;
 	virtual void				Reset() = 0;
+	virtual ITexture*			CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface) = 0;
 };
 
 #endif // IRESSOURCE_H

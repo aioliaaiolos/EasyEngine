@@ -6,6 +6,7 @@ numberAdvertises = 0;
 stateGuardHospital = 0;
 GuardTimerStarted = 0;
 Mission_Infirmerie = 0;
+Mission_Legion = 0;
 
 onLoadingGame();
 
@@ -59,6 +60,8 @@ function onLoadingGame()
 	SetCameraType("free");
 
 	EnableInstancingMode(0);
+	
+	print("onLoadingGame() complete")
 	
 	//EditWorld("empty");
 	//LoadWorld("testMur");

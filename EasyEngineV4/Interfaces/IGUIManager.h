@@ -16,11 +16,19 @@ class ICameraManager;
 class IEntityManager;
 class IScene;
 class ITexture;
+class ICharacter;
+class CDimension;
 struct IValue;
 
 using namespace std;
 
-class IGUIWindow
+class IGUIWidget
+{
+public:
+	virtual void SetPosition(int x, int y) = 0;
+};
+
+class IGUIWindow : public virtual IGUIWidget
 {
 public:
 	using CloseWindowCallback = function<void(IGUIWindow*)>;
@@ -41,6 +49,12 @@ public:
 	virtual void SetSpeakerLocalVar(string sLocalVar, int nValue) = 0;
 	virtual IValue* GetSpeakerLocalVar(string sVarName) = 0;
 	virtual const string& GetSpeakerID() = 0;
+};
+
+class IInventoryWindow : public virtual IGUIWindow
+{
+public:
+	virtual void DisplayItems(ICharacter* pCharacter) = 0;
 };
 
 class IGUIManager : public CPlugin
@@ -70,7 +84,7 @@ public:
 		eRed
 	};
 
-	typedef void (*EVENT_CALLBACK)( ENUM_EVENT nEvent, CGUIWidget*, int, int) ;
+	using EVENT_CALLBACK = std::function<void(ENUM_EVENT nEvent, CGUIWidget*, int, int)>;
 
 	struct Desc : public CPlugin::Desc
 	{
@@ -100,35 +114,36 @@ public:
 			m_oScene(oScene){}
 	};
 
-	virtual void			SetPosition( int hWidget, int x, int y ) = 0;
-	virtual void			AddWidget( int hWindow, int hWidget ) = 0;
-	virtual int				CreateListener( EVENT_CALLBACK pfnCallback ) = 0;
-	virtual void			AddEventListener( int hWidget, int hListener ) = 0;
-	virtual bool			IsWindowDisplayed(IGUIWindow* pWindow) = 0;
-	virtual void			AddWindow(IGUIWindow* pWindow) = 0;
-	virtual void			RemoveWindow(IGUIWindow* pWindow) = 0;
-	virtual void			SetVisibility( int hWindow, bool bVisible ) = 0;
-	virtual void			OnRender() = 0;
-	virtual void			Print( std::string sText, int x, int y, TFontColor color = eWhite) = 0;
-	virtual void			Print( char c, int x, int y, IGUIManager::TFontColor color = eWhite) = 0;
-	virtual void			SetActive( bool bActivate ) = 0;
-	virtual bool			GetActive() = 0;
-	virtual unsigned int	GetCurrentFontHeight() const = 0;
-	virtual unsigned int	GetCurrentFontWidth( char c ) const = 0;
-	virtual unsigned int	GetCharSpace() = 0;
-	virtual int				CreateStaticText( vector< string >& vText, int nPosX = 0, int nPosY = 0, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite) = 0;
-	virtual void			DestroyStaticTest( int nID ) = 0;
-	virtual void			PrintStaticText( int nTextID ) = 0;
-	virtual void			EnableStaticText( int nTextID, bool bEnable ) = 0;
-	virtual ITopicWindow*	GetTopicsWindow() = 0;
-	virtual IGUIWindow*		CreatePlayerWindow(int nWidth, int nHeight) = 0;
-	virtual void			SetGUIMode(bool bGUIMode) = 0;
-	virtual bool			GetGUIMode() = 0;
-	virtual void			ToggleDisplayMiniMap() = 0;
-	virtual void			ToggleDisplayMiniMap2() = 0;
-	virtual void			ToggleDisplayShadowMap() = 0;
-	virtual void			CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets) = 0;
-	virtual ITexture*		GetColorTexture(TFontColor color) const = 0;
+	virtual void					AddWidget( int hWindow, int hWidget ) = 0;
+	virtual int						CreateListener( EVENT_CALLBACK pfnCallback ) = 0;
+	virtual void					AddEventListener( int hWidget, int hListener ) = 0;
+	virtual bool					IsWindowDisplayed(IGUIWindow* pWindow) = 0;
+	virtual void					AddWindow(IGUIWindow* pWindow) = 0;
+	virtual void					RemoveWindow(IGUIWindow* pWindow) = 0;
+	virtual void					SetVisibility( int hWindow, bool bVisible ) = 0;
+	virtual void					OnRender() = 0;
+	virtual void					Print( std::string sText, int x, int y, TFontColor color = eWhite) = 0;
+	virtual void					Print( char c, int x, int y, IGUIManager::TFontColor color = eWhite) = 0;
+	virtual void					SetActive( bool bActivate ) = 0;
+	virtual bool					GetActive() = 0;
+	virtual unsigned int			GetCurrentFontHeight() const = 0;
+	virtual unsigned int			GetCurrentFontWidth( char c ) const = 0;
+	virtual unsigned int			GetCharSpace() = 0;
+	virtual int						CreateStaticText( vector< string >& vText, int nPosX = 0, int nPosY = 0, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite) = 0;
+	virtual void					DestroyStaticTest( int nID ) = 0;
+	virtual void					PrintStaticText( int nTextID ) = 0;
+	virtual void					EnableStaticText( int nTextID, bool bEnable ) = 0;
+	virtual ITopicWindow*			GetTopicsWindow() = 0;
+	virtual IGUIWindow*				CreatePlayerWindow(int nWidth, int nHeight) = 0;
+	virtual void					SetGUIMode(bool bGUIMode) = 0;
+	virtual bool					GetGUIMode() = 0;
+	virtual void					ToggleDisplayMiniMap() = 0;
+	virtual void					ToggleDisplayMiniMap2() = 0;
+	virtual void					ToggleDisplayShadowMap() = 0;
+	virtual void					CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets) = 0;
+	virtual ITexture*				GetColorTexture(TFontColor color) const = 0;
+	virtual IInventoryWindow*		CreateInventoryWindow(const CDimension& windowSize) = 0;
+	virtual void					OpenTradeWindow(ICharacter* pTrader, bool open) = 0;
 };
 
 #endif // IGUIManager_H

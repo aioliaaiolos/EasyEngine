@@ -26,6 +26,8 @@ class IMesh;
 class CTopicsWindow;
 class ICamera;
 class IScene;
+class ICharacter;
+class CTradeWindow;
 
 using namespace std;
 
@@ -75,6 +77,7 @@ public:
 	unsigned int		GetCharSpace();
 	int					CreateStaticText(vector< string >& vText, int nPosX = 0, int nPosY = 0, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
 	CGUIWidget*			CreateStaticText(string sText, int& nLineCount, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
+	CGUIWidget*			CreateStaticText(string sText, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite);
 	void				CreateStaticText(string sText, int nMaxWith, vector<CGUIWidget*>& vLineWidgets);
 	void				CreateStaticText_(string sText, int nMaxCharacterPerLine, vector<CGUIWidget*>& vLineWidgets);
 	IAnimatableMesh*	CreateTextMeshes(string sText, int& nLineCount, IGUIManager::TFontColor color = IGUIManager::TFontColor::eWhite, int nMaxWidth = -1);
@@ -94,6 +97,8 @@ public:
 	string				GetName() override;
 	ITexture*			GetColorTexture(TFontColor color) const override;
 	IRessource*			GetFontMaterial(IGUIManager::TFontColor color);
+	IInventoryWindow*	CreateInventoryWindow(const CDimension& windowSize);
+	void				OpenTradeWindow(ICharacter* pTrader, bool open);
 
 private:
 	ILoaderManager*								m_pLoaderManager;
@@ -139,6 +144,7 @@ private:
 	map<IGUIManager::TFontColor, IRessource*>	m_mFontMaterialByColor;
 	map<IGUIManager::TFontColor, map<unsigned char, CGUIWidget*>>	m_mFontWidgetByColor;
 	map<TFontColor, ITexture*>					m_mFontColor;
+	CTradeWindow*								m_pTradeWindow = nullptr;
 
 	void									GetScreenCoordFromTexCoord(const CRectangle& oTexture, const CDimension& oScreenDim, CRectangle& oScreen) const;
 	void									InitFontMap();

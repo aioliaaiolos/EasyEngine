@@ -534,7 +534,7 @@ void CEntity::SendBonesToShader()
 	{
 		m_vBoneMatrix.clear();
 		GetBonesMatrix(m_pOrgSkeletonRoot, m_pSkeletonRoot, m_vBoneMatrix);
-		if (!m_pEntityManager->IsUsingInstancing())
+		if (!m_pEntityManager->IsUsingInstancing() && !m_vBoneMatrix.empty())
 			SetNewBonesMatrixArray(m_vBoneMatrix);
 	}
 }
@@ -543,6 +543,7 @@ void CEntity::UpdateRessource()
 {
 	if (!m_bHidden)
 	{
+		bool backupCulling = m_oRenderer.IsCullingEnabled();
 		if (m_pMesh)
 		{
 			m_pMesh->SetRenderingType(m_eRenderType);
@@ -551,6 +552,7 @@ void CEntity::UpdateRessource()
 				for (int i = 0; i < m_pMesh->GetMaterialCount(); i++)
 					m_pMesh->GetMaterial(i)->SetSpecular(m_vCustomSpecular);
 			}
+			m_oRenderer.CullFace(m_bCullFace);
 		}
 		if (m_pRessource) {
 			if (!m_pEntityManager->IsUsingInstancing()) {				
@@ -565,6 +567,7 @@ void CEntity::UpdateRessource()
 		}
 		if (m_pMesh)
 			m_pMesh->SetRenderingType(IRenderer::eFill);
+		m_oRenderer.CullFace(backupCulling);
 	}
 }
 
@@ -700,6 +703,11 @@ void CEntity::SetLocalVariableValue(string sVariableName, float fValue)
 {
 	CValueFloat* pValue = new CValueFloat(fValue);
 	SetLocalVariableValue(sVariableName, pValue);
+}
+
+void CEntity::SetCullFace(bool culling)
+{
+	m_bCullFace = culling;
 }
 
 void CEntity::UpdateBoundingBox()

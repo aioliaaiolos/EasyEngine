@@ -67,6 +67,10 @@
 	  {
 		  "Type": "Right-Foot", 
 		  "Dummies": ["BodyDummyRFoot"]
+	  },
+	  {
+		  "Type": "Hand", 
+		  "Dummies": ["BodyDummyRHand"]
 	  }
 	],
 	"Items": [
@@ -110,14 +114,19 @@
 			"Model": "clothes/legio-tunique-m.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
-			"Preview": ""
+			"Preview": "",
+			"Value": 5,
+			"Armor": 1
 		},
 		{
 			"ID": "Legio-Tunique-m-mixamo",
 			"Model": "clothes/legio-tunique-m-mixamo.bme",
 			"Class": "Cloth",
 			"Type": "Skin",
-			"Preview": ""
+			"Preview": "Legio-Tunique-m-mixamo.bmp",
+			"Value": 5,
+			"Armor": 1,
+			"Description": "Tunique de la légion"
 		},
 		{
 			"ID": "Red-Tunique-f",
@@ -244,12 +253,20 @@
 			"Armor": 5
 		},
 		{
+			"ID": "Legio_Greaves",
+			"Model": "armors/legionnaire/greave.bme",
+			"Class": "Armor",
+			"Type": "Belt",
+			"Preview": "",
+			"Armor": 5
+		},
+		{
 			"ID": "Captain_Greaves",
 			"Model": "armors/01m/greaves02.bme",
 			"Class": "Armor",
 			"Type": "Belt",
 			"Preview": "base-greaves.bmp",
-			"Armor": 5
+			"Armor": 10
 		},
 		{
 			"ID": "Vase",
@@ -271,7 +288,17 @@
 			"AttackType" : "Right-Hand",
 			"Preview": "sword.bmp",
 			"Value": 20,
-			"Damage": 15
+			"Damage": 15,
+			"Description": "Epée basique"
+		},
+		{
+			"ID": "Broom",
+			"Model": "Items/broom.bme",
+			"Class": "Tool",
+			"Type": "Hand",
+			"Preview": "broom.bmp",
+			"Value": 1,
+			"Description": "Balai"
 		},
 		{
 			"ID": "Pass-Hospital",
@@ -281,30 +308,71 @@
 			"Value": 20
 		},
 		{
+			"ID": "Legio_Cuirass",
+			"Model": "armors/legionnaire/cuirasse.bme",
+			"Class": "Armor",
+			"Type": "Chest",
+			"Preview": "",
+			"Value": 10,
+			"Armor": 5
+		},
+		{
 			"ID": "Legio_SolidCuirass",
 			"Model": "armors/01m/cuirasse.bme",
 			"Class": "Armor",
 			"Type": "Chest",
 			"Preview": "Base_Cuirass.bmp",
-			"Armor": 5
+			"Armor": 10
 		},
 		{
 			"ID": "Legio_LSandal",
 			"Model": "Clothes/Shoes/01m/LSandal.BME",
 			"Class": "Cloth",
 			"Type": "Left-Foot",
-			"Preview": "Base_Cuirass.bmp",
+			"Preview": "Legio_LSandal.bmp",
 			"Armor": 5,
-			"OffsetY": 5
+			"Value": 10,
+			"OffsetY": 5,
+			"Description": "Sandale de la légion, pied gauche"
 		},
 		{
 			"ID": "Legio_RSandal",
 			"Model": "Clothes/Shoes/01m/RSandal.BME",
 			"Class": "Cloth",
 			"Type": "Right-Foot",
-			"Preview": "Base_Cuirass.bmp",
+			"Preview": "Legio_RSandal.bmp",
 			"Armor": 5,
-			"OffsetY": 5
+			"Value": 10,
+			"OffsetY": 5,
+			"Description": "Sandale de la légion, pied droit"
+		},
+		{
+			"ID": "LSandal_F",
+			"Model": "Clothes/Shoes/LSandal.BME",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
+			"ID": "RSandal_F",
+			"Model": "Clothes/Shoes/RSandal.BME",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
+			"ID": "Tunique3",
+			"Model": "Clothes/tunique3.BME",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
+		},
+		{
+			"ID": "Tunique3_Haut",
+			"Model": "Clothes/haut2.BME",
+			"Class": "Cloth",
+			"Type": "Skin",
+			"Preview": ""
 		},
 		{
 			"ID": "Xiam_Helmet",

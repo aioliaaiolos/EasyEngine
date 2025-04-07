@@ -285,7 +285,7 @@ m_fNeckRotV( 0 )
 			m_pRHandBoxEntity->Hide(true);
 		}
 		else {
-			m_oConsole.Println("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName);
+			m_oConsole.Println("Error in CCharacter::CCharacter() : No bounding box for " + m_sAttackBoneName + ", check if there are vertices associated to '" + m_sAttackBoneName + "' in skinning");
 		}
 	}
 	SetPredefinedAnimation("HitWeapon", false);
@@ -306,6 +306,8 @@ CCharacter::~CCharacter()
 void CCharacter::InitReverseAnimations()
 {
 	IAnimation* pReverse = CreateReverseAnimation("MoveToGuardWeaponPart1");
+	if (!pReverse)
+		throw CEException(string("Error: animation 'MoveToGuardWeaponPart1' not found for entity ") + m_sName);
 	pReverse->SetSpeed(s_mBodyAnimations[m_sCurrentBodyName].m_mAnimationInfos["MoveToGuardWeaponPart1"].m_fAnimationSpeed);
 	pReverse = CreateReverseAnimation("MoveToGuardWeaponPart2");
 	pReverse->SetSpeed(s_mBodyAnimations[m_sCurrentBodyName].m_mAnimationInfos["MoveToGuardWeaponPart2"].m_fAnimationSpeed);
@@ -920,6 +922,16 @@ void CCharacter::SetClass(string sClassName)
 	m_sClass = sClassName;
 }
 
+int CCharacter::GetGoldAmount()
+{
+	return m_nGoldAmount;
+}
+
+void CCharacter::SetGoldAmount(int nGoldAmount)
+{
+	m_nGoldAmount = nGoldAmount;
+}
+
 const map<string, vector<IItem*>>& CCharacter::GetItems() const
 {
 	return m_mItems;
@@ -939,10 +951,13 @@ void CCharacter::SetHairs(string hairsName)
 	// link new hairs
 	CEntity* hairs = new CEntity(m_oInterface, string("Meshes/hairs/") + hairsName + ".bme");
 	hairs->LinkDummyParentToDummyEntity(this, "BodyDummyHairs");
+	hairs->SetCullFace(false);
 	if (hairs->GetSkeletonRoot() && hairs->GetSkeletonRoot()->GetChildCount() > 0) {
-		IEntity* pEntity = dynamic_cast<IEntity*>(hairs->GetSkeletonRoot()->GetChild(0));
-		if (pEntity)
+		CEntity* pEntity = dynamic_cast<CEntity*>(hairs->GetSkeletonRoot()->GetChild(0));
+		if (pEntity) {
 			pEntity->SetEntityID(hairsName);
+			pEntity->SetCullFace(false);
+		}
 	}
 	delete hairs;
 }
@@ -1017,9 +1032,11 @@ void CCharacter::Walk( bool bLoop )
 
 void CCharacter::Stand( bool bLoop )
 {
-	SetPredefinedAnimation( "Stand", bLoop );
-	if( !m_bUsePositionKeys )
-		ConstantLocalTranslate( CVector( 0.f, m_mAnimationSpeedByType[ eStand ] * m_pCurrentAnimation->GetSpeed(), 0.f ) );
+	if (GetLife() > 0) {
+		SetPredefinedAnimation("Stand", bLoop);
+		if (!m_bUsePositionKeys)
+			ConstantLocalTranslate(CVector(0.f, m_mAnimationSpeedByType[eStand] * m_pCurrentAnimation->GetSpeed(), 0.f));
+	}
 }
 
 void CCharacter::Run( bool bLoop )
@@ -1135,6 +1152,7 @@ void CCharacter::PlayHitAnimation()
 					{
 						m_pCurrentAnimation->RemoveAllCallback();
 						pSpine->SetKeys(m_mOriginalSpineKeys);
+						LockHit(false);
 						break;
 					}
 					}
@@ -1418,6 +1436,7 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 	for (const pair<string, string>& animation : pAnimatedEntityInfos->m_mAnimationOverriden)
 		m_mOverridenAnimation[animation.first] = animation.second;
 
+	
 	InitAnimations();
 	InitBoundingBox(infos.m_sRessourceFileName);
 	InitReverseAnimations();
@@ -1434,6 +1453,7 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 		m_sClass = pAnimatedEntityInfos->m_sClass;
 		SetLife(pAnimatedEntityInfos->m_nLife);
 		m_bUnique = pAnimatedEntityInfos->m_bUnique;
+		m_nGoldAmount = pAnimatedEntityInfos->m_nGoldAmount;
 		for (const pair<string, vector<int>>& item : pAnimatedEntityInfos->m_mItems) {
 			CItem* pOriginalItem = m_pEntityManager->GetItem(item.first);
 			if (!pOriginalItem)
@@ -1521,7 +1541,7 @@ void CCharacter::SaveToJson()
 		character.AddMember("EntityID", entityID, doc.GetAllocator());		
 
 		rapidjson::Value ressourceName(kStringType), ressourceFileName(kStringType), parentName(kStringType), parentBoneID(kNumberType), typeName(kStringType),
-			weight(kNumberType), strength(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
+			weight(kNumberType), strength(kNumberType), life(kNumberType), grandParentDummyRootID(kNumberType), diffuseTextureName(kStringType), useCustomSpecular(kNumberType), specular(kArrayType), animationSpeeds(kArrayType),
 			items(kArrayType), hairs(kStringType);
 
 		ressourceName.SetString(pInfos->m_sRessourceName.c_str(), doc.GetAllocator());
@@ -1531,6 +1551,7 @@ void CCharacter::SaveToJson()
 		typeName.SetString(pCharacterInfos-> m_sTypeName.c_str(), doc.GetAllocator());
 		weight.SetFloat(pCharacterInfos->m_fWeight);
 		strength.SetInt(m_nStrength);
+		life.SetInt(GetLife());
 		grandParentDummyRootID.SetInt(pCharacterInfos->m_nGrandParentDummyRootID);
 		diffuseTextureName.SetString(pCharacterInfos->m_sTextureName.c_str(), doc.GetAllocator());
 		specular.SetArray();		
@@ -1574,6 +1595,7 @@ void CCharacter::SaveToJson()
 		character.AddMember("TypeName", typeName, doc.GetAllocator());
 		character.AddMember("Weight", weight, doc.GetAllocator());
 		character.AddMember("Strength", strength, doc.GetAllocator());
+		character.AddMember("Life", life, doc.GetAllocator());
 		character.AddMember("GrandParentDummyRootID", grandParentDummyRootID, doc.GetAllocator());
 		character.AddMember("DiffuseTextureName", diffuseTextureName, doc.GetAllocator());
 		character.AddMember("Specular", specular, doc.GetAllocator());

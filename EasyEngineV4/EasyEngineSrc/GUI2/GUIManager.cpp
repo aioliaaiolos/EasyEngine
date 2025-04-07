@@ -17,10 +17,13 @@
 #include "PlayerWindow.h"
 #include "TopicsWindow.h"
 #include "MapWindow.h"
+//#include "InventoryWindow.h"
+#include "TradeWindow.h"
 #include "Utils2/Chunk.h"
 #include "Utils2/Dimension.h"
 #include "Utils2/Position.h"
 #include "Utils2/Rectangle.h"
+#include "../utils2/StringUtils.h"
 
 
 class CMaterial;
@@ -65,7 +68,7 @@ m_pLoaderManager(nullptr)
 	m_pMapWindow2 = new CMinimapWindow(oInterface, m_pScene->GetMinimapTexture2(), 512, 512);
 	m_pMapWindow2->SetPosition(0, 500);
 	m_pShadowMapWindow = new CShadowMapWindow(oInterface, *m_pScene, 512, 512);
-
+	m_pTradeWindow = new CTradeWindow(m_oInterface);
 	m_pCurrentFont = &GetFontWidget(IGUIManager::TFontColor::eWhite);
 }
 
@@ -341,7 +344,7 @@ void CGUIManager::AddWidget( int hWindow, int hWidget )
 void CGUIManager::SetPosition( int hWidget, int nx, int ny)
 {
 	CGUIWidget* pWidget = GetWidgetByHandle( hWidget );
-	pWidget->SetPosition(static_cast<float>(nx), static_cast<float>(ny));
+	pWidget->SetPosition(nx, ny);
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -624,6 +627,21 @@ IRessource* CGUIManager::GetFontMaterial(IGUIManager::TFontColor color)
 	return m_mFontMaterialByColor[color];
 }
 
+IInventoryWindow* CGUIManager::CreateInventoryWindow(const CDimension& windowSize)
+{
+	return new CInventoryWindow(m_oInterface, windowSize);
+}
+
+void CGUIManager::OpenTradeWindow(ICharacter* pTrader, bool open)
+{
+	if (open) {
+		ICharacter* pPlayer = m_oEntityManager.GetPlayer();
+		m_pTradeWindow->Open(pPlayer, pTrader);
+	}
+	else
+		m_pTradeWindow->Close();
+}
+
 const map<unsigned char, CGUIWidget*>& CGUIManager::GetFontWidget(IGUIManager::TFontColor color) const
 {
 	return m_mFontWidgetByColor.at(color);
@@ -702,6 +720,12 @@ CGUIWidget* CGUIManager::CreateStaticText(string sText, int& nLineCount, IGUIMan
 	CGUIWidget* pWidget = new CGUIWidget(m_oInterface, nWidth, GetCurrentFontEspacementY());
 	pWidget->SetQuad(pARect->GetMesh(0));
 	return pWidget;
+}
+
+CGUIWidget* CGUIManager::CreateStaticText(string sText, IGUIManager::TFontColor color)
+{
+	int lineCount = 0;
+	return CreateStaticText(sText, lineCount, color);
 }
 
 void CGUIManager::CreateStaticText(string sText, int nMaxWidth, vector<CGUIWidget*>& vLineWidgets)

@@ -152,27 +152,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GUIButton.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="GUI2API.h" />
     <ClInclude Include="GUIManager.h" />
     <ClInclude Include="GUIWidget.h" />
     <ClInclude Include="GUIWindow.h" />
+    <ClInclude Include="InventoryWindow.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="MapWindow.h" />
     <ClInclude Include="PlayerWindow.h" />
     <ClInclude Include="TopicsWindow.h" />
+    <ClInclude Include="TradeWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GUIButton.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="GUIManager.cpp" />
     <ClCompile Include="GUIWidget.cpp" />
     <ClCompile Include="GUIWindow.cpp" />
+    <ClCompile Include="InventoryWindow.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="MapWindow.cpp" />
     <ClCompile Include="PlayerWindow.cpp" />
     <ClCompile Include="TopicsWindow.cpp" />
+    <ClCompile Include="TradeWindow.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

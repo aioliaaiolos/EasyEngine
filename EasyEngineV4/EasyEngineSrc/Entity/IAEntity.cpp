@@ -5,7 +5,6 @@
 #include "Utils2/Logger.h"
 
 const float fRotateSpeed = 10.f;
-const float g_fArrivedAtDestinationDistance = 115.f;
 
 IAEntity::IAEntity(EEInterface& oInterface):
 m_nRecoveryTime( 1000 ),
@@ -14,7 +13,7 @@ m_eFightState( eNoFight ),
 m_eTalkToState(eNoTalkTo),
 m_fAngleRemaining( 0.f ),
 m_bArriveAtDestination( true ),
-m_fDestinationDeltaRadius(g_fArrivedAtDestinationDistance),
+m_fDestinationDeltaRadius(m_fWeaponRange),
 m_nCurrentPathPointNumber( 0 ),
 m_pCurrentEnemy(NULL),
 m_bFaceToTarget(false),
@@ -79,7 +78,7 @@ void IAEntity::UpdateFightState()
 	case ePreparingForNextAttack:
 		m_pCurrentEnemy->GetPosition( oEnemyPos );
 		distance = GetDistanceTo2dPoint(oEnemyPos);
-		if(distance > g_fArrivedAtDestinationDistance)
+		if(distance > m_fWeaponRange)
 			m_eFightState = eBeginGoToEnemy;
 		else
 		{
@@ -143,7 +142,7 @@ void IAEntity::UpdateTalkToState()
 
 void IAEntity::OnReceiveHit( IFighterEntity* pAgressor )
 {
-	if (m_bFightingIAEnabled) {
+	if ((GetLife() > 0) && m_bFightingIAEnabled) {
 		SetFightMode(true);
 		m_pCurrentEnemy = pAgressor;
 		m_eFightState = IAEntity::eBeginHitReceived;
@@ -197,6 +196,17 @@ void IAEntity::UpdateFaceTo()
 		}
 	}
 }
+/*
+void IAEntity::SetWeaponRange(float range)
+{
+	m_fWeaponRange = range;
+}
+*/
+/*
+float IAEntity::GetWeaponRange()
+{
+	return m_fWeaponRange;
+}*/
 
 void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 {
@@ -214,9 +224,9 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 
 	if (!m_vCurrentPath.empty()) {
 		if (m_vCurrentPath.size() > 1)
-			m_fDestinationDeltaRadius = g_fArrivedAtDestinationDistance;
+			m_fDestinationDeltaRadius = m_fWeaponRange;
 		else
-			m_fDestinationDeltaRadius = g_fArrivedAtDestinationDistance;
+			m_fDestinationDeltaRadius = m_fWeaponRange;
 		m_nCurrentPathPointNumber = 0;
 		m_oDestination = m_vCurrentPath[m_nCurrentPathPointNumber];
 		m_fAngleRemaining = GetDestinationAngleRemaining();
@@ -292,6 +302,8 @@ void IAEntity::UpdateGoto()
 				m_bArriveAtDestination = true;
 				if(!GetFightMode())
 					Stand();
+				else
+					Stand();
 				m_vCurrentPath.clear();
 			}
 			else
@@ -305,25 +317,27 @@ void IAEntity::UpdateGoto()
 
 void IAEntity::Update()
 {
-	if (m_eFightState == eNoFight && m_pCurrentEnemy) {
-		float fDistanceToEnemy = GetDistanceToEnemy();
-		if (fDistanceToEnemy < m_fDangerZone) {
-			Flee();
+	if (GetLife() > 0) {
+		if (m_eFightState == eNoFight && m_pCurrentEnemy) {
+			float fDistanceToEnemy = GetDistanceToEnemy();
+			if (fDistanceToEnemy < m_fDangerZone) {
+				Flee();
+			}
 		}
-	}
-	else if (m_eFightState == eFlee)
-		UpdateFlee();
-	else if ( (m_eFightState != eNoFight) && (GetLife() > 0) ) {
-		UpdateFaceTo();
-		UpdateGoto();
-		UpdateFightState();
-	}
-	else if (m_eTalkToState != eNoTalkTo) {
-		UpdateGoto();
-		UpdateTalkToState();
-	}
-	else {
-		UpdateGoto();
+		else if (m_eFightState == eFlee)
+			UpdateFlee();
+		else if ((m_eFightState != eNoFight) && (GetLife() > 0)) {
+			UpdateFaceTo();
+			UpdateGoto();
+			UpdateFightState();
+		}
+		else if (m_eTalkToState != eNoTalkTo) {
+			UpdateGoto();
+			UpdateTalkToState();
+		}
+		else {
+			UpdateGoto();
+		}
 	}
 }
 

@@ -24,7 +24,7 @@ void CGUIWidget::Init( int nResX, int nResY, IShader* pShader )
 	s_pShader = pShader;
 }
 
-CGUIWidget::CGUIWidget(EEInterface& oInterface) :
+CGUIWidget::CGUIWidget(EEInterface& oInterface, int nBorderWidth) :
 	CGUIWidget(oInterface, 0, 0)
 {
 	if (s_pShader == NULL)
@@ -35,7 +35,54 @@ CGUIWidget::CGUIWidget(EEInterface& oInterface) :
 	m_pShader = s_pShader;
 }
 
-CGUIWidget::CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight ):
+void AddBorderToTexelArray(int width, int height, vector< unsigned char >& vTexels)
+{
+	// horizontal bas
+	for (int x = 0; x < width; x++) {
+		int index = 4 * x;
+		vTexels[index] = 255;
+		vTexels[index + 1] = 255;
+		vTexels[index + 2] = 255;
+		vTexels[index + 3] = 255;
+	}
+	// horizontal haut
+	for (int x = 0; x < width; x++) {
+		int index = 4 * (x + width * (height - 1));
+		vTexels[index] = 255;
+		vTexels[index + 1] = 255;
+		vTexels[index + 2] = 255;
+		vTexels[index + 3] = 255;
+	}	
+	// Vertical gauche
+	for (int y = 0; y < height; y++) {
+		int index = 4 * width * y;
+		vTexels[index] = 255;
+		vTexels[index + 1] = 255;
+		vTexels[index + 2] = 255;
+		vTexels[index + 3] = 255;
+	}
+	// Vertical
+	for (int y = 1; y < height; y++) {
+		int index = 4 * (width * y - 1);
+		vTexels[index] = 255;
+		vTexels[index + 1] = 255;
+		vTexels[index + 2] = 255;
+		vTexels[index + 3] = 255;
+	}
+}
+
+void CGUIWidget::CreateWidgetFromTexture(ITexture* pTexture)
+{
+	int width, height;
+	pTexture->GetDimension(width, height);
+	m_oDimension.SetDimension(width, height);
+	CRectangle oSkin;
+	oSkin.SetDimension(width, height);
+	IMesh* pQuad = CreateQuadFromTexture(*m_pRenderer, *m_pRessourceManager, pTexture, oSkin);
+	SetQuad(pQuad);
+}
+
+CGUIWidget::CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight, int nBorderWidth, unsigned int color):
 _pListener(NULL),
 _bIsCursorInWidget( NULL ),
 m_pMesh( NULL ),
@@ -43,6 +90,7 @@ m_pParent(NULL),
 m_bVisible(true),
 m_oInterface(oInterface)
 {
+	InitManagers(oInterface);
 	if( s_pShader == NULL )
 	{
 		CWidgetNotInitialized e( "" );
@@ -50,6 +98,22 @@ m_oInterface(oInterface)
 	}
 	m_oDimension.SetDimension( (float) nWidth, (float)nHeight);
 	m_pShader = s_pShader;
+	vector<unsigned char> vTexels;
+	vTexels.resize(nWidth * nHeight * 4 * sizeof(unsigned char));
+	if (color != 0) {
+		for (int y = 0; y < nHeight; y++) {
+			for (int x = 0; x < nWidth; x++) {
+				memcpy(&vTexels[4 * (x + y * nWidth)], &color, 4);
+			}
+		}
+	}
+	if (nBorderWidth > 0) {
+		AddBorderToTexelArray(nWidth, nHeight, vTexels);
+	}
+	if (!vTexels.empty()) {
+		ITexture* pTexture = m_pRessourceManager->CreateTexture(vTexels, nWidth, nHeight, IRenderer::TPixelFormat::T_RGBA, m_oInterface);
+		CreateWidgetFromTexture(pTexture);
+	}
 }
 
 CGUIWidget::CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin):
@@ -82,12 +146,7 @@ m_oInterface(oInterface)
 	SetQuad(pRect);
 }
 
-CGUIWidget::CGUIWidget(
-	EEInterface& oInterface,
-	ITexture* pTexture, 
-	CRectangle& oSkin, 
-	ILoader::CMeshInfos& outMeshInfos, 
-	IRessource*& pOutMaterial) :
+CGUIWidget::CGUIWidget(	EEInterface& oInterface, ITexture* pTexture,  CRectangle& oSkin, ILoader::CMeshInfos& outMeshInfos, IRessource*& pOutMaterial) :
 _pListener(NULL),
 _bIsCursorInWidget(NULL),
 m_pMesh(NULL),
@@ -118,7 +177,7 @@ m_bVisible(true)
 }
 
 
-CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName) : 
+CGUIWidget::CGUIWidget(EEInterface& oInterface, string sFileName, int nBorderWidth) :
 	CGUIWidget(oInterface)
 {
 	InitManagers(oInterface);
@@ -142,7 +201,7 @@ CGUIWidget(oInterface, width, height)
 	SetQuad(pQuad);
 }
 
-CGUIWidget::CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin) :
+CGUIWidget::CGUIWidget(EEInterface& oInterface, const CDimension& windowSize, const CRectangle& skin, int nBorderWidth) :
 	CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight())
 {
 	InitManagers(oInterface);
@@ -233,10 +292,15 @@ void CGUIWidget::SetVisibility(bool bVisible)
 	m_bVisible = bVisible;
 }
 
-void CGUIWidget::SetPosition(float fPosX, float fPosY)
+bool CGUIWidget::IsVisible()
 {
-	m_oPosition.SetX(fPosX);
-	m_oPosition.SetY(fPosY);
+	return m_bVisible;
+}
+
+void CGUIWidget::SetPosition(int x, int y)
+{
+	m_oPosition.SetX(x);
+	m_oPosition.SetY(y);
 }
 
 void CGUIWidget::SetRelativePosition(const CPosition& oPosition)

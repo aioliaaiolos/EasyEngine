@@ -19,7 +19,7 @@ void IFighterEntity::OnHit()
 			IFighterEntity* pEnemy = GetFirstEnemy();
 			while (pEnemy)
 			{
-				if (IsHitIntersectEnemySphere(pEnemy))
+				if (pEnemy->GetLife() > 0 && IsHitIntersectEnemySphere(pEnemy))
 				{
 					if (m_oHitEnemySphereCallback)
 						m_oHitEnemySphereCallback(pEnemy);
@@ -45,7 +45,8 @@ void IFighterEntity::OnHit()
 
 void IFighterEntity::MainHit()
 {
-	if (GetFightMode() && GetLife() > 0) {
+	if (!m_bHitLocked && GetFightMode() && (GetLife() > 0)) {
+		LockHit(true);
 		PlayHitAnimation();
 		OnHit();
 	}
@@ -137,4 +138,9 @@ void IFighterEntity::SetHitEnemySphereCallback(THitEnemyCallback callback)
 void IFighterEntity::SetHitEnemyBoxCallback(THitEnemyCallback callback)
 {
 	m_oHitEnemyBoxCallback = callback;
+}
+
+void IFighterEntity::LockHit(bool lock)
+{
+	m_bHitLocked = lock;
 }

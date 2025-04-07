@@ -30,7 +30,8 @@ map<string, CItem::TClass> CItem::s_mClassString = map<string, CItem::TClass>{
 	{"", CItem::TClass::eClassNone },
 	{"Cloth", CItem::TClass::eCloth},
 	{"Armor", CItem::TClass::eArmor},
-	{"Jewel", CItem::TClass::eJewel}
+	{"Jewel", CItem::TClass::eJewel},
+	{"Tool", CItem::TClass::eTool}
 };
 
 CItem::CItem(EEInterface& oInterface, string sID, TClass tclass, Type type, string sModelName, string sPreviewPath) :
@@ -168,4 +169,34 @@ void CItem::Update()
 	CObject::Update();
 	if (m_eClass == CItem::TClass::eArmor || m_eClass == CItem::TClass::eCloth)
 		m_oRenderer.CullFace(true);
+}
+
+int CItem::GetValue()
+{
+	return m_nValue;
+}
+
+string CItem::GetDescription()
+{
+	return m_sDescription;
+}
+
+void CItem::SetValue(int nValue)
+{
+	m_nValue = nValue;
+}
+
+void CItem::SetDescription(string sDescription)
+{
+	m_sDescription = sDescription;
+}
+
+int CItem::GetArmor()
+{
+	return m_nArmor;
+}
+
+int CItem::GetDamage()
+{
+	return -1;
 }

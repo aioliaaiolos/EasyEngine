@@ -176,7 +176,6 @@ private:
 	void									LoadTopics(string sFileName);
 	void									LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction);
 	void									LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName);
-	void									DecodeString(string& sIn, string& sOut);
 	void									OnShow(bool bShow) override;
 	void									DisplayGreating();
 	void									DestroyTopicsWidgets();

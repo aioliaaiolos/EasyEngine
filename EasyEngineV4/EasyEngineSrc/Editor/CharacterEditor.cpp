@@ -403,7 +403,10 @@ void CCharacterEditor::OnEditorExit()
 
 void CCharacterEditor::AddItem(string sItemName)
 {
-	m_pCurrentCharacter->AddItem(sItemName);
+	if (m_pCurrentCharacter)
+		m_pCurrentCharacter->AddItem(sItemName);
+	else
+		throw CEException("Error : No current character selected in character editor");
 }
 
 void CCharacterEditor::RemoveItem(string sItemID)

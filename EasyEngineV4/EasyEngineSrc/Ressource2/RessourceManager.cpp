@@ -155,7 +155,10 @@ IRessource* CRessourceManager::GetRessourceByExtension( string sRessourceFileNam
 	map< string, TRessourceCreation >::iterator itRessourceCreation = m_mRessourceCreation.find( sExtension );
 	if( itRessourceCreation == m_mRessourceCreation.end() )
 	{
-		string sMessage = string( "\"" ) + sRessourceFileName + "\" n'existe pas ou n'est pas prise en charge par le gestionnaire de ressources";
+		string sMessage = string( "\"" ) + sRessourceFileName + "\" n'existe pas ou n'est pas prise en charge par le gestionnaire de ressources. ";
+		sMessage += "Formats de ressource pris en compte : ";
+		for (const std::pair<string, TRessourceCreation >& res : m_mRessourceCreation)
+			sMessage += (res.first + " ");
 		CExtensionNotFoundException e( sMessage.c_str() );
 		throw e;
 	}
@@ -681,11 +684,16 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 		throw e;
 	}
 	}
-	
-	desc.m_nWidth = ti.m_nWidth;
-	desc.m_nHeight = ti.m_nHeight;
-	desc.m_eFormat = format;
-	desc.m_vTexels.swap(ti.m_vTexels);
+
+	CreateTextureDesc(ti.m_vTexels, ti.m_nWidth, ti.m_nHeight, format, desc);
+}
+
+void CRessourceManager::CreateTextureDesc(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, CTexture2D::CDesc& desc)
+{
+	desc.m_nWidth = width;
+	desc.m_nHeight = height;
+	desc.m_eFormat = pixelFormat;
+	desc.m_vTexels.swap(vTextels);
 	desc.m_nUnitTexture = 3;
 }
 
@@ -696,6 +704,15 @@ IRessource* CRessourceManager::CreateTexture( string sFileName, EEInterface& oIn
 	pRessourceManager->CreateTextureDesc(sFileName, desc);
 	CTexture2D* pTexture = new CTexture2D( desc );
 	return static_cast< ITexture* > ( pTexture );
+}
+
+ITexture* CRessourceManager::CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface)
+{
+	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
+	CTexture2D::CDesc desc(pRessourceManager->m_oRenderer, NULL, 0);
+	pRessourceManager->CreateTextureDesc(vTextels, width, height, pixelFormat, desc);
+	CTexture2D* pTexture = new CTexture2D(desc);
+	return static_cast< ITexture* > (pTexture);
 }
 
 IRessource* CRessourceManager::CreateLight( CVector Color, IRessource::TLight type, float fIntensity)

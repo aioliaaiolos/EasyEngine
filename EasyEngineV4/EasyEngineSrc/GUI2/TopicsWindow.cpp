@@ -493,20 +493,6 @@ void CTopicsWindow::RemoveTopicTexts()
 	m_pTopicTextFrame->Clear();
 }
 
-void CTopicsWindow::DecodeString(string& sIn, string& sOut)
-{
-	int idx = sIn.find("Ã©");
-	while (idx != -1) {
-		sOut = sIn.replace(sIn.begin() + idx, sIn.begin() + idx + 2, "é");
-		idx = sOut.find("Ã©");
-	}
-	idx = sIn.find("Ã");
-	while (idx != -1) {
-		sOut = sIn.replace(sIn.begin() + idx, sIn.begin() + idx + 2, "à");
-		idx = sOut.find("Ã");
-	}
-}
-
 void CTopicsWindow::LoadTopics(string sFileName)
 {
 	m_mTopics.clear();
@@ -555,8 +541,8 @@ void CTopicsWindow::LoadTopics(string sFileName)
 					}
 					else if (topic.IsString()) {
 					}
-					DecodeString(sTitle, sTitle);
-					DecodeString(sText, sText);
+					CStringUtils::DecodeString(sTitle, sTitle);
+					CStringUtils::DecodeString(sText, sText);
 					AddTopic(sTitle, sText, vConditions, vAction);
 				}
 			}
@@ -586,7 +572,7 @@ void CTopicsWindow::LoadTopics(string sFileName)
 						LoadJsonConditions(greating, vConditions, sFileName);
 						LoadJsonActions(greating, vAction);
 					}
-					DecodeString(sText, sText);
+					CStringUtils::DecodeString(sText, sText);
 					AddGreating(sText, vConditions, vAction);
 				}
 			}
@@ -608,7 +594,7 @@ void CTopicsWindow::LoadJsonActions(rapidjson::Value& oParentNode, vector<string
 				rapidjson::Value& action = actions[iAction];
 				if (action.IsString()) {
 					string sAction = action.GetString();
-					DecodeString(sAction, sAction);
+					CStringUtils::DecodeString(sAction, sAction);
 					vAction.push_back(sAction);
 				}
 			}
