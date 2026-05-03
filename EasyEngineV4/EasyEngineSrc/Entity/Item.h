@@ -19,6 +19,8 @@ public:
 		eArm = 0,
 		eRightArm,
 		eLeftArm,
+		eRightHand,
+		eLeftHand,
 		eSkin,
 		eChest,
 		eShield,

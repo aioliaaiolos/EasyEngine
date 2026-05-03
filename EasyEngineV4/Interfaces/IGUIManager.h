@@ -44,7 +44,6 @@ public:
 	virtual void SetSpeakerId(string sId) = 0;
 	virtual void OnChoiceCalled(string sChoices) = 0;
 	virtual void OnGoodbyeCalled() = 0;
-	virtual void LoadTopics(string sFileName) = 0;
 	virtual void SetSpeakerLocalVar(string sVarName, string sValue) = 0;
 	virtual void SetSpeakerLocalVar(string sLocalVar, int nValue) = 0;
 	virtual IValue* GetSpeakerLocalVar(string sVarName) = 0;

@@ -54,7 +54,7 @@ protected:
 	std::map< TTextureDimension, int >		m_mTextureDimension;
 
 	GLUquadricObj*							m_pQuadricObj;
-	IWindow&								m_oWindow;
+	IWindow*								m_pWindow = nullptr;
 	HDC										m_hDC;
 	HGLRC									m_hRC;
 	ENUM_MODE								m_Mode;
@@ -247,7 +247,7 @@ public:
 	int							GetLastError();
 };
 
-extern "C" _declspec(dllexport) IRenderer* CreateRenderer(EEInterface& oInterface );
+extern "C" _declspec(dllexport) IRenderer* CreateRenderer(EEInterface& oInterface);
 
 
 

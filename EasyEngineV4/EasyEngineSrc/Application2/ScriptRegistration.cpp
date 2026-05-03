@@ -20,6 +20,7 @@
 #include "IHud.h"
 #include "IEditor.h"
 #include "IPhysic.h"
+#include "ITopicSystem.h"
 #include "../Utils2/RenderUtils.h"
 #include "../Utils2/DebugTool.h"
 #include "../Utils2/EasyFile.h"
@@ -55,6 +56,7 @@ extern IEditorManager*		m_pEditorManager;
 extern IPathFinder*			m_pPathFinder;
 extern IPhysic*				m_pPhysic;
 extern CTimeManager*		m_pTimeManager;
+extern ITopicSystem*		m_pTopicSystem;
 
 IEntity* m_pRepere = NULL;
 vector< string > g_vStringsResumeMode;
@@ -1844,7 +1846,7 @@ void LoadShader( IScriptState* pState )
 
 void LoadTopicFile(IScriptState* pState)
 {
-	m_pGUIManager->GetTopicsWindow()->LoadTopics("Topics.json");
+	//m_pGUIManager->GetTopicsWindow()->LoadTopics("Topics.json");
 }
 
 void SetHMPrecision( IScriptState* pState )
@@ -3862,9 +3864,62 @@ void OpenTrade(IScriptState* pState)
 	}
 }
 
+void AddGold(IScriptState* pState)
+{
+	CValueString* pId = static_cast<CValueString*>(pState->GetArg(0));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pId->m_sValue));
+	if (pCharacter) {
+		CValueInt* pGoldAmount = static_cast<CValueInt*>(pState->GetArg(1));
+		pCharacter->SetGoldAmount(pCharacter->GetGoldAmount() + pGoldAmount->m_nValue);
+		ostringstream oss;
+		oss << pId->m_sValue << " a recu " << pGoldAmount->m_nValue << " pieces d'or";
+		m_pConsole->Println(oss.str());
+	}
+	else {
+		ostringstream oss;
+		oss << "Error: character '" << pId->m_sValue << "' not found ";
+		m_pConsole->Println(oss.str());
+	}
+}
+
+void DisplayGoldAmount(IScriptState* pState)
+{
+	CValueString* pId = static_cast<CValueString*>(pState->GetArg(0));
+	ICharacter* pCharacter = dynamic_cast<ICharacter*>(m_pEntityManager->GetEntity(pId->m_sValue));
+	if (pCharacter) {
+		ostringstream oss;
+		oss << pId->m_sValue << " possede " << pCharacter->GetGoldAmount() << " pieces d'or";
+		m_pConsole->Println(oss.str());
+	}
+}
+
+void DisplayVariables(IScriptState* pState)
+{
+	vector<string> names;
+	m_pScriptManager->GetVariableNames(names);
+	for (string name : names) {
+		float value = m_pScriptManager->GetVariableValue(name);
+		ostringstream oss;
+		oss << name << " = " << value;
+		m_pConsole->Println(oss.str());
+	}
+}
+
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("DisplayGoldAmount", DisplayGoldAmount, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplayVariables", DisplayVariables, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("AddGold", AddGold, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

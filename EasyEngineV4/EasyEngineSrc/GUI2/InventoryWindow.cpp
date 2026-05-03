@@ -9,10 +9,11 @@
 CInventoryWindow::CInventoryWindow(EEInterface& oInterface, const CDimension& windowSize) : 
 	CGUIWindow(oInterface, windowSize, CRectangle(0, 0, windowSize.GetWidth(), windowSize.GetHeight()))
 {
+	int baseColor = 0xBB080c0e;
 	IRessourceManager* pRessourceManager = static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	ITexture* pTexture = static_cast< ITexture* > (pRessourceManager->GetRessource("Gui/PlayerWindow.bmp"));
 	m_pMesh->SetTexture(pTexture);
-	m_pDescriptionWindow = new CGUIWindow("gui/PlayerWindow.bmp", oInterface, 500, 300);
+	m_pDescriptionWindow = new CGUIWindow(oInterface, CDimension(500, 300), 1, baseColor);
 	m_pDescriptionWindow->m_sUserData = "test position";
 	AddWidget(m_pDescriptionWindow);
 	m_pDescriptionWindow->SetRelativePosition(50, 400);
@@ -77,33 +78,35 @@ void CInventoryWindow::DisplayItems(ICharacter* pCharacter)
 					int yMargin = 20;
 					int x = 20, y = m_pGUIManager->GetCurrentFontEspacementY();
 					pItem->m_pBorder->SetVisibility(true);
-					m_pDescriptionWindow->Clear();
-					m_pDescriptionWindow->SetVisibility(true);
-					string desc;
-					CStringUtils::DecodeString(pItem->m_pItem->GetDescription(), desc);
-					if (!desc.empty()) {
-						CGUIWidget* pDescription = m_pGUIManager->CreateStaticText(desc);
-						m_pDescriptionWindow->AddWidget(pDescription);
-						pDescription->SetRelativePosition(x, yMargin);
-					}
-					ostringstream oss;
-					oss << "Valeur " << pItem->m_pItem->GetValue();
-					CGUIWidget* pValue = m_pGUIManager->CreateStaticText(oss.str());
-					m_pDescriptionWindow->AddWidget(pValue);
-					pValue->SetRelativePosition(x, yMargin + y);
+					if (m_bTradeMode) {
+						m_pDescriptionWindow->Clear();
+						m_pDescriptionWindow->SetVisibility(true);
+						string desc;
+						CStringUtils::DecodeString(pItem->m_pItem->GetDescription(), desc);
+						if (!desc.empty()) {
+							CGUIWidget* pDescription = m_pGUIManager->CreateStaticText(desc);
+							m_pDescriptionWindow->AddWidget(pDescription);
+							pDescription->SetRelativePosition(x, yMargin);
+						}
+						ostringstream oss;
+						oss << "Valeur " << pItem->m_pItem->GetValue();
+						CGUIWidget* pValue = m_pGUIManager->CreateStaticText(oss.str());
+						m_pDescriptionWindow->AddWidget(pValue);
+						pValue->SetRelativePosition(x, yMargin + y);
 
-					oss.str("");
-					oss << "Armure " << pItem->m_pItem->GetArmor();
-					CGUIWidget* pArmor = m_pGUIManager->CreateStaticText(oss.str());
-					m_pDescriptionWindow->AddWidget(pArmor);
-					pArmor->SetRelativePosition(x, yMargin + 2 * y);
-
-					if (pItem->m_pItem->GetDamage() > -1) {
 						oss.str("");
-						oss << "Dommages " << pItem->m_pItem->GetDamage();
-						CGUIWidget* pDamage = m_pGUIManager->CreateStaticText(oss.str());
-						m_pDescriptionWindow->AddWidget(pDamage);
-						pDamage->SetRelativePosition(x, yMargin + 3 * y);
+						oss << "Armure " << pItem->m_pItem->GetArmor();
+						CGUIWidget* pArmor = m_pGUIManager->CreateStaticText(oss.str());
+						m_pDescriptionWindow->AddWidget(pArmor);
+						pArmor->SetRelativePosition(x, yMargin + 2 * y);
+
+						if (pItem->m_pItem->GetDamage() > -1) {
+							oss.str("");
+							oss << "Dommages " << pItem->m_pItem->GetDamage();
+							CGUIWidget* pDamage = m_pGUIManager->CreateStaticText(oss.str());
+							m_pDescriptionWindow->AddWidget(pDamage);
+							pDamage->SetRelativePosition(x, yMargin + 3 * y);
+						}
 					}
 
 					break;
@@ -115,14 +118,15 @@ void CInventoryWindow::DisplayItems(ICharacter* pCharacter)
 					m_pDescriptionWindow->SetVisibility(false);					
 					break;
 				case IGUIManager::EVENT_LMOUSERELEASED:
-					if (m_bInventoryMode) {
+					if (!m_bTradeMode) {
 						if (!pItem->m_pItem->IsWear())
 							pItem->m_pItem->Wear();
 						else
 							pItem->m_pItem->UnWear();
 					}
 					else {
-						m_ItemSelectedCallback(pItem);
+						if(m_ItemSelectedCallback)
+							m_ItemSelectedCallback(pItem);
 					}
 					break;
 				default:
@@ -161,9 +165,9 @@ void CInventoryWindow::ClearItems()
 	}
 }
 
-void CInventoryWindow::SetInventoryMode(bool tradeMode)
+void CInventoryWindow::SetTradeMode(bool tradeMode)
 {
-	m_bInventoryMode = tradeMode;
+	m_bTradeMode = tradeMode;
 }
 
 #if 0

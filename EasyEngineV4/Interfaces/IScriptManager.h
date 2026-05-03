@@ -82,6 +82,7 @@ public:
 	virtual void	GenerateAssemblerListing(bool generate) = 0;
 	virtual void	Compile(string script, vector<unsigned char>& vByteCode) = 0;
 	virtual void	SetVariableValue(string sVariableName, float value) = 0;
+	virtual void	GetVariableNames(vector<string>& names) = 0;
 };
 
 #endif // ISCRIPTMANAGER_H

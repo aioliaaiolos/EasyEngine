@@ -82,6 +82,26 @@ void CGUIWidget::CreateWidgetFromTexture(ITexture* pTexture)
 	SetQuad(pQuad);
 }
 
+void CGUIWidget::SetBackgroundAndBorder(int colorBackground, int nBorderWidth)
+{
+	vector<unsigned char> vTexels;
+	vTexels.resize(m_oDimension.GetWidth() * m_oDimension.GetHeight() * 4 * sizeof(unsigned char));
+	if (colorBackground != 0) {
+		for (int y = 0; y < m_oDimension.GetHeight(); y++) {
+			for (int x = 0; x < m_oDimension.GetWidth(); x++) {
+				memcpy(&vTexels[4 * (x + y * m_oDimension.GetWidth())], &colorBackground, 4);
+			}
+		}
+	}
+	if (nBorderWidth > 0) {
+		AddBorderToTexelArray(m_oDimension.GetWidth(), m_oDimension.GetHeight(), vTexels);
+	}
+	if (!vTexels.empty()) {
+		ITexture* pTexture = m_pRessourceManager->CreateTexture(vTexels, m_oDimension.GetWidth(), m_oDimension.GetHeight(), IRenderer::TPixelFormat::T_RGBA, m_oInterface);
+		CreateWidgetFromTexture(pTexture);
+	}
+}
+
 CGUIWidget::CGUIWidget(EEInterface& oInterface, int nWidth, int nHeight, int nBorderWidth, unsigned int color):
 _pListener(NULL),
 _bIsCursorInWidget( NULL ),
@@ -98,22 +118,7 @@ m_oInterface(oInterface)
 	}
 	m_oDimension.SetDimension( (float) nWidth, (float)nHeight);
 	m_pShader = s_pShader;
-	vector<unsigned char> vTexels;
-	vTexels.resize(nWidth * nHeight * 4 * sizeof(unsigned char));
-	if (color != 0) {
-		for (int y = 0; y < nHeight; y++) {
-			for (int x = 0; x < nWidth; x++) {
-				memcpy(&vTexels[4 * (x + y * nWidth)], &color, 4);
-			}
-		}
-	}
-	if (nBorderWidth > 0) {
-		AddBorderToTexelArray(nWidth, nHeight, vTexels);
-	}
-	if (!vTexels.empty()) {
-		ITexture* pTexture = m_pRessourceManager->CreateTexture(vTexels, nWidth, nHeight, IRenderer::TPixelFormat::T_RGBA, m_oInterface);
-		CreateWidgetFromTexture(pTexture);
-	}
+	SetBackgroundAndBorder(color, nBorderWidth);
 }
 
 CGUIWidget::CGUIWidget(EEInterface& oInterface, ITexture* pTexture, CRectangle& oSkin):

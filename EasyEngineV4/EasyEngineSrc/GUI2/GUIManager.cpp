@@ -379,20 +379,17 @@ void CGUIManager::OnRender()
 			m_oInputManager.SetMouseCursorYPos( 0 );
 		// fin test
 
-		for(set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.begin(); itWindow != m_DisplayedWindowsSet.end(); itWindow++)
+		for(vector<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.begin(); itWindow != m_DisplayedWindowsSet.end(); itWindow++)
 		{
 			CGUIWindow* pWindow = *itWindow;
-			pWindow->Display();
-			IInputManager::TMouseButtonState eButtonState = m_oInputManager.GetMouseButtonState(IInputManager::eMouseButtonLeft);
-			pWindow->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);	
-			if (!pWindow->IsShown()) {
-				if (!m_DisplayedWindowsSet.empty()) {
-					itWindow--;
-				}
-				else
+			if (pWindow->IsShown()) {
+				pWindow->Display();
+				IInputManager::TMouseButtonState eButtonState = m_oInputManager.GetMouseButtonState(IInputManager::eMouseButtonLeft);
+				int arraySize = m_DisplayedWindowsSet.size();
+				pWindow->UpdateCallback(nCursorXPos, nCursorYPos, eButtonState);
+				if (arraySize != m_DisplayedWindowsSet.size())
 					break;
 			}
-
 		}
 
 		RenderText();
@@ -454,7 +451,7 @@ CDimension CGUIManager::GetDimension(CGUIWidget* pWidget)
 void CGUIManager::AddWindow(IGUIWindow* pWindow)
 {
 	CGUIWindow* pGUIWindow = dynamic_cast<CGUIWindow*>(pWindow);
-	m_DisplayedWindowsSet.insert(pGUIWindow);
+	m_DisplayedWindowsSet.push_back(pGUIWindow);
 	pGUIWindow->OnShow(true);
 	if (!m_bGUIMode && pGUIWindow->IsGUIMode())
 		SetGUIMode(true);
@@ -462,17 +459,18 @@ void CGUIManager::AddWindow(IGUIWindow* pWindow)
 
 bool CGUIManager::IsWindowDisplayed(IGUIWindow* pWindow)
 {
-	set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.find(dynamic_cast<CGUIWindow*>(pWindow));
+	vector<CGUIWindow*>::iterator itWindow = std::find(m_DisplayedWindowsSet.begin(), m_DisplayedWindowsSet.end(), pWindow); //m_DisplayedWindowsSet.find(dynamic_cast<CGUIWindow*>(pWindow));
 	return (itWindow != m_DisplayedWindowsSet.end());
 }
 
 void CGUIManager::RemoveWindow(IGUIWindow* pWindow)
 {
 	CGUIWindow* pGUIWindow = dynamic_cast<CGUIWindow*>(pWindow);
-	m_DisplayedWindowsSet.erase(pGUIWindow);
+	vector<CGUIWindow*>::iterator itWindow = std::find(m_DisplayedWindowsSet.begin(), m_DisplayedWindowsSet.end(), pWindow);
+	itWindow = m_DisplayedWindowsSet.erase(itWindow);
 	pGUIWindow->OnShow(false);
 	bool bGUIMode = false;
-	for (set<CGUIWindow*>::iterator itWindow = m_DisplayedWindowsSet.begin(); itWindow != m_DisplayedWindowsSet.end(); itWindow++) {
+	for (itWindow = m_DisplayedWindowsSet.begin(); itWindow != m_DisplayedWindowsSet.end(); itWindow++) {
 		if ((*itWindow)->IsGUIMode() == true) {
 			bGUIMode = true;
 			break;

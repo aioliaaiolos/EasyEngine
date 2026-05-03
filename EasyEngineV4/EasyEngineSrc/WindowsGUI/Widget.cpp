@@ -67,7 +67,7 @@ void CWidget::CreateWnd( DWORD dwExStyle, string sClassName, string sWindowName,
 	HMENU hMenu = NULL;
 	if ( pMenu )
 		hMenu = pMenu->m_hHandle;
-	m_hWnd = CreateWindowExA( dwExStyle, sClassName.c_str(), sWindowName.c_str() , dwStyle, nPosX, nPosY, nWidth, nHeight, hParent, hMenu, GetModuleHandleA(NULL), 0 );
+	m_hWnd = CreateWindowExA( dwExStyle, sClassName.c_str(), sWindowName.c_str() , dwStyle, nPosX, nPosY, nWidth, nHeight, hParent, hMenu, GetModuleHandleA("WindowsGUI.dll"), 0 );
 }
 
 

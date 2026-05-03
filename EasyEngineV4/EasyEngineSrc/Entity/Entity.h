@@ -172,6 +172,7 @@ protected:
 	CTimeManager&									m_oTimeManager;
 	map<string, IValue*>							m_mLocalScriptVariable;
 	bool											m_bCullFace = true;
+	string											m_sAnimationBoundingBox;
 
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
@@ -194,6 +195,7 @@ protected:
 	void				ExecuteScripts();
 	void				SetLocalVariableValue(string sVariableName, IValue* pValue);
 	IValue*				GetLocalVariableValue(string sVariableName);
+	string&				GetAnimationBoundingBox();
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

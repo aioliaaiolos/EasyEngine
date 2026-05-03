@@ -78,10 +78,12 @@ void CGUIWindow::AddWidget(CGUIWidget* pWidget)
 deque<CGUIWidget*>::iterator CGUIWindow::RemoveWidget(CGUIWidget* pWidget, bool bDelete)
 {
 	deque<CGUIWidget*>::iterator itWidget = std::find(m_vWidget.begin(), m_vWidget.end(), pWidget);
-	m_vWidget.erase(itWidget);
-	pWidget->SetParent(nullptr);
-	if (bDelete)
-		delete pWidget;
+	if (itWidget != m_vWidget.end()) {
+		m_vWidget.erase(itWidget);
+		pWidget->SetParent(nullptr);
+		if (bDelete)
+			delete pWidget;
+	}
 	return itWidget;
 }
 
@@ -174,6 +176,12 @@ void CGUIWindow::Close()
 bool CGUIWindow::IsShown()
 {
 	return m_bIsShown;
+}
+
+bool CGUIWindow::HasChild(CGUIWidget* pChild)
+{
+	deque<CGUIWidget*>::iterator itChild = std::find(m_vWidget.begin(), m_vWidget.end(), pChild);
+	return itChild != m_vWidget.end();
 }
 
 void CGUIWindow::OnShow(bool bShow)

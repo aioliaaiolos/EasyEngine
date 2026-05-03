@@ -22,6 +22,7 @@ CPlayerWindow::CPlayerWindow(EEInterface& oInterface, const CDimension& windowSi
 	m_pArmorWindow = new CGUIWidget(oInterface, windowSize.GetWidth(), windowSize.GetHeight());
 	SetPosition(100, 100);
 	m_pInventory = new CInventoryWindow(oInterface, windowSize);
+	m_pInventory->SetTradeMode(false);
 	AddWidget(m_pInventory);
 
 	SetGUIMode(true);
@@ -54,7 +55,7 @@ void CPlayerWindow::OnShow(bool bShow)
 		m_pInventory->DisplayItems(m_pPlayer);
 	}
 	else {
-		m_pInventory->Clear();
+		m_pInventory->OnShow(false);
 		RestoreCamera();
 	}
 }

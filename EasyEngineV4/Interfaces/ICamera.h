@@ -22,7 +22,7 @@ public:
 	virtual void	Move( float fOffsetYaw, float fOffsetPitch, float fOffsetRoll, float fAvanceOffet, float fLeftOffset, float fUpOffset ) = 0;
 	virtual float	GetFov() = 0;
 	virtual void	Zoom(int value) = 0;
-	virtual void	SetInventoryMode(bool bInventoryMode) = 0;
+	virtual void	SetTradeMode(bool bInventoryMode) = 0;
 	virtual void	DisplayViewCone(bool display) = 0;
 };
 

@@ -28,7 +28,6 @@ using namespace std;
 
 
 CRenderer::CRenderer(EEInterface& oInterface) :
-	m_oWindow(static_cast<IWindow&>(*oInterface.GetPlugin("Window"))),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
 	m_Mode(MODE_3D),
 	m_hRC(0),
@@ -39,6 +38,10 @@ CRenderer::CRenderer(EEInterface& oInterface) :
 	m_fFov(40.f),
 	m_bCameraLocked(false)
 {
+
+	IWindowsGUISystem* pWindowGUISystem = dynamic_cast<IWindowsGUISystem*>(oInterface.GetPlugin("WindowsGUISystem"));
+	m_pWindow = pWindowGUISystem->GetWindowEditor();
+
 	m_mDrawStyle[ T_LINES ] = GL_LINES;
 	m_mDrawStyle[ T_POINTS ] = GL_POINTS;
 	m_mDrawStyle[ T_TRIANGLES ] = GL_TRIANGLES;
@@ -105,10 +108,10 @@ void CRenderer::InitGLExtensions()
 void CRenderer::InitOpengl()
 {
 	m_pQuadricObj = gluNewQuadric();
-	m_oWindow.SetForeground();
-	m_oWindow.Setfocus();
+	m_pWindow->SetForeground();
+	m_pWindow->Setfocus();
 	unsigned int nWidth, nHeight;
-	m_oWindow.GetDimension( nWidth, nHeight );
+	m_pWindow->GetDimension( nWidth, nHeight );
 	glViewport( 0, 0, nWidth, nHeight );
 
 	glEnable(GL_LIGHTING);
@@ -167,7 +170,7 @@ void CRenderer::CalcProjection( CMatrix& m, float Left, float Right, float Botto
 void CRenderer::CalcProjection( CMatrix& oMatrix, float fov )
 {
 	unsigned int nWidth, nHeight;
-	m_oWindow.GetDimension( nWidth, nHeight );
+	m_pWindow->GetDimension( nWidth, nHeight );
 	float fRatio = (GLfloat)nWidth / (GLfloat)nHeight;
 	float fInvRatio = 1.f / fRatio;
 	float fovRad = fov * 3.1415927f / 180.f;
@@ -205,9 +208,9 @@ void CRenderer::DestroyContext()
 	wglDeleteContext(m_hRC);
 	m_hRC=NULL;
 
-	ReleaseDC( m_oWindow.GetHandle() ,m_hDC);
+	ReleaseDC( m_pWindow->GetHandle() ,m_hDC);
 	m_hDC=NULL;
-	m_oWindow.Close();
+	m_pWindow->Close();
 }
 
 void CRenderer::SetFov( float fov )
@@ -254,7 +257,7 @@ void CRenderer::CreateOGLContext()
 	if ( !hRC )
 	{
 		GLuint		PixelFormat;
-		int nBits = m_oWindow.GetBits();
+		int nBits = m_pWindow->GetBits();
 		if ( nBits < 0 )
 			nBits = 32;
 		static	PIXELFORMATDESCRIPTOR pfd=				
@@ -277,9 +280,9 @@ void CRenderer::CreateOGLContext()
 			0, 0, 0										
 		};
 		
-		if ( !( m_hDC = GetDC( m_oWindow.GetHandle() ) ) )
+		if ( !( m_hDC = GetDC( m_pWindow->GetHandle() ) ) )
 		{
-			m_oWindow.Close();
+			m_pWindow->Close();
 			exception e( "Impossible de créer un contexte opengl" );
 			throw e;
 		}
@@ -906,7 +909,7 @@ void CRenderer::Set3DMode()
 
 void CRenderer::GetResolution( unsigned int& nWidth, unsigned int& nHeight )
 {
-	m_oWindow.GetDimension( nWidth, nHeight );
+	m_pWindow->GetDimension( nWidth, nHeight );
 }
 
 void CRenderer::Translate2D(float fx, float fy)
@@ -1692,7 +1695,7 @@ void CRenderer::SetCurrentFBO(int fbo)
 float CRenderer::GetScreenRatio()
 {
 	unsigned int nWidth, nHeight;
-	m_oWindow.GetDimension(nWidth, nHeight);
+	m_pWindow->GetDimension(nWidth, nHeight);
 	return ((float)nWidth / (float)nHeight);
 }
 

@@ -47,10 +47,10 @@ m_oEventDispatcher( desc.m_oEventDispatcher )
 		WndClass.hbrBackground = NULL;
 	WndClass.hCursor = LoadCursor( NULL, IDC_ARROW );
 	WndClass.hIcon = LoadIcon( NULL, IDI_APPLICATION );
-	WndClass.hInstance = GetModuleHandleA( NULL );
+	WndClass.hInstance = GetModuleHandleA("WindowsGUI.dll");
 	WndClass.lpfnWndProc = WndProc;
 	WndClass.lpszClassName = desc.m_sClassName.c_str();
-	WndClass.lpszMenuName = "MainMenu";
+	WndClass.lpszMenuName = desc.m_bFullscreen ? "" : "MainMenu";
 	if ( desc.m_dwClassStyle == -1 )
 		WndClass.style = CS_HREDRAW | CS_VREDRAW;
 	else
@@ -93,7 +93,7 @@ m_oEventDispatcher( desc.m_oEventDispatcher )
 		WindowRect.left = 0;
 		WindowRect.bottom = desc.m_nHeight;
 		WindowRect.right = desc.m_nWidth;
-		AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
+		AdjustWindowRectEx(&WindowRect, dwStyle, m_pMenu != nullptr, dwExStyle);
 	}	
 
 	m_oEventDispatcher.DispatchWindowEvent( IEventDispatcher::T_WINDOWCREATE, desc.m_nWidth, desc.m_nHeight );
@@ -209,6 +209,12 @@ void CWindow2::ShowModal()
 	}
 }
 
+void CWindow2::DisplayCursor(bool bShow)
+{
+	m_bShowCursor = bShow;
+	ShowCursor(m_bShowCursor);
+}
+
 bool CWindow2::TestDesc( const IWindow::Desc& desc, string& sErrorMessage )const
 {
 	bool bReturn = true;
@@ -237,7 +243,7 @@ CWindow2* CWindow2::GetWindow( HWND hWnd )
 	return s_mWindow[ hWnd ];
 }
 
-void CWindow2::Close() const
+void CWindow2::Close()
 {
 	if ( m_bFullscreen )
 	{

@@ -1290,10 +1290,56 @@
 					"Comp": ">"
 				}
 			],
-			"Actions": ["OpenTrade()"]
+			"Actions": ["OpenTrade(\"antil\", 1)"]
+		},
+		{
+			"Title": "Mission", 
+			"Text": ["Je ne peux pas vous envoyer au combat démuni comme vous l'etes, allez d'abord voir Antil pour vous équiper"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "5",
+					"Comp": "=="
+				}
+			]
+		},
+		{
+			"Title": "Mission", 
+			"Text": ["Bien, je vois que vous vous etes équipé"],
+			"Conditions": [
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "=="
+				},
+				{
+					"Type": "Global",
+					"Name": "Mission_Legion",
+					"Value": "5",
+					"Comp": "=="
+				},
+				{
+					"Type": "PCItem",
+					"Name": "Shield_Wood",
+					"Value": "0",
+					"Comp": ">"
+				},
+				{
+					"Type": "PCItem",
+					"Name": "Stick_Wood",
+					"Value": "0",
+					"Comp": ">"
+				}
+			],
+			"Actions": ["Mission_Legion=6"]
 		}
 	],
-	
 	"Greatings" : [
 		{
 			"Text": [
@@ -1511,7 +1557,7 @@
 		},
 		{
 			"Text": [
-				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est."
+				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est. Je vais vous donner une avance sur votre solde pour le payer."
 			],
 			"Conditions": [
 				{
@@ -1532,7 +1578,7 @@
 					"Comp": "=="
 				}
 			],
-			"Actions": ["Mission_Legion=4", "Goodbye()"]
+			"Actions": ["Mission_Legion=4", "AddGold(\"player\", 100)", "Goodbye()"]
 		},
 		{
 			"Text": [
@@ -1586,7 +1632,7 @@
 		},
 		{
 			"Text": [
-				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est."
+				"Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est. Je vais vous donner une avance sur votre solde pour le payer."
 			],
 			"Conditions": [
 				{
@@ -1607,7 +1653,7 @@
 					"Comp": "=="
 				}
 			],
-			"Actions": ["Mission_Legion=4"]
+			"Actions": ["Mission_Legion=4", "AddGold(\"player\", 100)", "Goodbye()"]
 		},
 		{
 			"Text": ["Heu ?"],
@@ -1625,7 +1671,7 @@
 				}
 			],
 			"Actions": [
-				"Choice(\"{1}Heu...{2}Je me suis trompé de personne, désolé pour le dérangement\")"
+				"AddGold(\"player\",100)", "Choice(\"{1}Heu...{2}Je me suis trompé de personne, désolé pour le dérangement\")"
 				]
 		},
 		{
@@ -1698,7 +1744,7 @@
 				]
 		},
 		{
-			"Text": ["Gneu ! J'ai beaucoup <link>equipement</link> ! gneu !"],
+			"Text": ["Gneu ! J'ai beaucoup <link>equipement</link> ! Gneuuuu !"],
 			"Conditions": [
 				{
 					"Name": "CharacterId",

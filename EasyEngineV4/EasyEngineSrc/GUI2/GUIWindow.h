@@ -38,6 +38,7 @@ public:
 	deque<CGUIWidget*>&								GetChildren();
 	void											Close();
 	bool											IsShown();
+	bool											HasChild(CGUIWidget* pChild);
 	virtual void									OnShow(bool bShow);
 
 protected:

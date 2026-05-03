@@ -1,125 +1,14 @@
 #pragma once
 #include "GUIWindow.h"
 
-// rapidjson
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/filereadstream.h"
-#include <fstream>
-
 
 class CGUIManager;
 class CTopicFrame;
 class IScriptManager;
 class CTopicsWindow;
 class IPlayer;
-
-struct CCondition
-{
-	enum TComp
-	{
-		eEqual = 0,
-		eDifferent,
-		eSup,
-		eSupEqual,
-		eInf,
-		eInfEqual,
-		eIs,
-		eIsNot
-	};
-
-	string	m_sType;
-	string	m_sName;
-	string	m_sValue;
-	TComp	m_eComp;
-	bool Evaluate(int val) const
-	{
-		int value = atoi(m_sValue.c_str());
-		switch (m_eComp) {
-		case eEqual:
-			return val == value;
-			break;
-		case eSup:
-			return val > value;
-			break;
-		case eSupEqual:
-			return val >= value;
-			break;
-		case eInf:
-			return val < value;
-			break;
-		case eInfEqual:
-			return val <= value;
-			break;
-		case eDifferent:
-			return val != value;
-			break;
-		default:
-			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
-			break;
-		}
-	}
-	bool Evaluate(float val) const
-	{
-		float value = atof(m_sValue.c_str());
-		switch (m_eComp) {
-		case eEqual:
-			return val == value;
-			break;
-		case eSup:
-			return val > value;
-			break;
-		case eSupEqual:
-			return val >= value;
-			break;
-		case eInf:
-			return val < value;
-			break;
-		case eInfEqual:
-			return val <= value;
-			break;
-		case eDifferent:
-			return val != value;
-			break;
-		default:
-			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
-			break;
-		}
-	}
-	bool Evaluate(string val) const
-	{
-		m_sValue;
-		switch (m_eComp) {
-		case eEqual:
-			return val == m_sValue;
-			break;
-		case eSup:
-			return val > m_sValue;
-			break;
-		case eInf:
-			return val < m_sValue;
-			break;
-		case eDifferent:
-			return val != m_sValue;
-			break;
-		default:
-			throw CEException("Error in CCondition::Evaluate() : Comparaison operator not managed.");
-			break;
-		}
-	}
-};
-
-struct CTopicInfo
-{
-	CTopicInfo();
-	CTopicInfo(const string& sText, const vector<CCondition>& conditions, const vector<string>& actions);
-	void ExecuteActions(IScriptManager* pScriptManager, CTopicsWindow* pTopicsWindow);
-
-	string m_sName;
-	string m_sText;
-	vector<CCondition> m_vConditions;
-	vector<string> m_vAction;
-};
+class ITopicSystem;
+class ITopic;
 
 class CTopicLink : public CLink
 {
@@ -128,7 +17,7 @@ public:
 	CTopicLink(EEInterface& oInterface, string sName, int nMaxChar = -1) : 
 		CLink(oInterface, sName, nMaxChar), m_nChoiceNumber(-1)
 	{
-		m_oTopicInfos.m_sName = sName;
+		//m_pTopic.m_sName = sName;
 	}
 
 	
@@ -136,15 +25,15 @@ public:
 		CLink(oInterface, sName, nMaxWidth),
 		m_nChoiceNumber(nChoiceNumber)
 	{
-		m_oTopicInfos.m_sName = sName;
+		//m_pTopic->SetName(sName);
 	}
 
-	CTopicInfo&	GetTopicInfos();
-	void		SetTopicInfos(const CTopicInfo& oTopicInfos);
+	ITopic*		GetTopic();
+	void		SetTopicInfos(ITopic* pTopic);
 	int			GetChoiceNumber();
 
 private:
-	CTopicInfo	m_oTopicInfos;
+	ITopic*		m_pTopic;
 	int			m_nChoiceNumber;
 };
 
@@ -154,16 +43,14 @@ class CTopicsWindow : public CGUIWindow, public ITopicWindow
 public:
 	CTopicsWindow(EEInterface& oInterface, int width, int height);
 	virtual ~CTopicsWindow();
-	void									AddTopic(string sTopicName, string sText, const vector<CCondition>& vConditions, const vector<string>& vAction);
-	void									AddGreating(string sText, vector<CCondition>& conditions, vector<string>& actions);
+	//void									AddTopic(string sTopicName, string sText, const vector<CCondition>& vConditions, const vector<string>& vAction);
+	//void									AddGreating(string sText, vector<CCondition>& conditions, vector<string>& actions);
 	void									AddTopicText(const string& sTopicText, bool bNewParagraph = true);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
 	string									GetSpeakerId();
 	void									RemoveTopicTexts();
 	IScriptManager*							GetScriptManager();
-	int										SelectTopic(const vector<CTopicInfo>& topics, string sSpeakerId);
-	int										SelectTopic(string sTopicName, string sSpeakerId);
 	void									SetCurrentTopicName(string sTopicName);
 	bool									IsGoodbye();
 	IValue*									GetSpeakerLocalVar(string sVarName) override;
@@ -173,9 +60,6 @@ public:
 
 private:
 
-	void									LoadTopics(string sFileName);
-	void									LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction);
-	void									LoadJsonConditions(rapidjson::Value& oParentNode, vector<CCondition>& vConditions, string sFileName);
 	void									OnShow(bool bShow) override;
 	void									DisplayGreating();
 	void									DestroyTopicsWidgets();
@@ -204,13 +88,12 @@ private:
 	const int								m_nMaxCharPerLine;
 	int										m_nTopicTextPointer;
 	string									m_sNextTopicTextToAdd;
-	vector<CTopicInfo>						m_vGreatings;
 	IScriptManager*							m_pScriptManager;
 	string									m_sSpeakerId;
 	string									m_sCurrentTopicName;
-	map<string, vector<CTopicInfo>>			m_mTopics;
 	bool									m_bChoiceSet;
 	IEntityManager&							m_oEntityManager;
+	ITopicSystem*							m_pTopicSystem = nullptr;
 	bool									m_bGoodbye;
 };
 
@@ -224,14 +107,14 @@ public:
 		eReleased
 	};
 
-	CTopicFrame(EEInterface& oInterface, int width, int height, const map<string, vector<CTopicInfo>>& mTopics, IEntityManager& oEntityManager);
+	CTopicFrame(EEInterface& oInterface, int width, int height, IEntityManager& oEntityManager);
 	virtual ~CTopicFrame();
 	void										Display();
 	CTopicLink*									GetTopicLink(string sTopicTitle);
 	void										SetParent(CGUIWidget* parent);
 	int											GetTextHeight();
 	void										UpdateTopics();
-	int											AddTopicToWindow(const pair<string, vector<CTopicInfo>>& topic, string sSpeakerId);
+	int											AddTopicToWindow(const pair<string, vector<ITopic*>>& topic, string sSpeakerId);
 	void										DestroyTopicsWidgets();
 
 private:
@@ -239,11 +122,10 @@ private:
 	CTopicsWindow*								GetParent();
 	int											GetTopicIndexFromY(int y);
 	void										OnItemSelected(CTopicLink* pTitle);
-	int											IsConditionChecked(const vector<CTopicInfo>& topics, string sSpeakerId);
 	static int									ConvertValueToInt(string sValue);
 	static void									OnClickTopic(CLink* pLink);
-	static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
-	static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
+	//static void									Format(string sTopicText, string sSpeakerId, string& sFormatedText);
+	//static void									GetVarValue(string sVarName, string sCharacterId, string& sValue);
 
 	EEInterface&											m_oInterface;
 	CGUIManager*											m_pGUIManager;
@@ -254,7 +136,7 @@ private:
 	map<string, TTopicState>								m_mTopicsState;
 	const int												m_nTopicBorderWidth;
 	map<TTopicState, IGUIManager::TFontColor>				m_mFontColorFromTopicState;
-	const map<string, vector<CTopicInfo>>&					m_mTopics;
 	IEntityManager&											m_oEntityManager;
+	ITopicSystem*											m_pTopicSystem;
 };
 

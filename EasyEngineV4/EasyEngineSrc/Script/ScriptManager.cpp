@@ -99,6 +99,17 @@ float CScriptManager::GetVariableValue(string variableName)
 	return m_pProc->GetVariableValue(variableName);
 }
 
+void CScriptManager::GetVariableNames(vector<string>& names)
+{
+	map<int, map<string, CVar>>::iterator itVars = m_pSemanticAnalyser->GetVarMap().GetVarMap().find(0);
+	if (itVars != m_pSemanticAnalyser->GetVarMap().GetVarMap().end()) {
+		map<string, CVar>& mVars = itVars->second;
+		for (const pair<string, CVar>& var : mVars) {
+			names.push_back(var.first);
+		}
+	}
+}
+
 void CScriptManager::SetVariableValue(string sVariableName, float value)
 {
 	m_pProc->SetVariableValue(sVariableName, value);

@@ -163,7 +163,7 @@ private:
 	IShader*								m_pShader;
 	int										m_nCharspace;
 	map< int, bool >						m_mStaticTextToRender;
-	set<CGUIWindow*>						m_DisplayedWindowsSet;
+	vector<CGUIWindow*>						m_DisplayedWindowsSet;
 };
 
 extern "C" _declspec(dllexport) IGUIManager* CreateGUIManager(EEInterface& oInterface);

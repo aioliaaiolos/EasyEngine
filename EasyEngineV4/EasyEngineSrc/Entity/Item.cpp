@@ -11,6 +11,8 @@ map<string, CItem::Type> CItem::s_mTypeString = map<string, CItem::Type>{
 	{ "Arm", CItem::eArm },
 	{ "Right-Arm", CItem::eRightArm },
 	{ "Left-Arm", CItem::eLeftArm },
+	{ "Right-Hand", CItem::eRightHand},
+	{ "Left-Hand", CItem::eLeftHand},
 	{ "Chest", CItem::eChest },
 	{ "Shield", CItem::eShield },
 	{ "Belt", CItem::eBelt },
@@ -52,7 +54,7 @@ void CItem::LoadDummyTypes(rapidjson::Document& doc)
 	if (doc.HasMember("DummyTypes")) {
 		rapidjson::Value& dummyTypes = doc["DummyTypes"];
 		if (dummyTypes.IsArray()) {
-			vector<string> sDummyNames = vector<string>{ "Skin", "Arm", "Right-Arm", "Left-Arm", "Chest", "Belt", "Belt-Weapon",			
+			vector<string> sDummyNames = vector<string>{ "Skin", "Arm", "Right-Arm", "Left-Arm", "Right-Hand", "Left-Hand", "Chest", "Belt", "Belt-Weapon",			
 				"Left-Forearm", "Right-Forearm", "Left-Shoulder", "Right-Shoulder", "Left-Calf", "Right-Calf" };
 			for (int iType = 0; iType < dummyTypes.Size(); iType++) {
 				rapidjson::Value& type = dummyTypes[iType];

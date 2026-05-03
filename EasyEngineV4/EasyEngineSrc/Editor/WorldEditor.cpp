@@ -5,6 +5,7 @@
 #include "ICamera.h"
 #include "IGeometry.h"
 #include "IConsole.h"
+#include "IScriptManager.h"
 #include "EditorManager.h"
 #include "CharacterEditor.h"
 #include "../Utils2/StringUtils.h"
@@ -25,7 +26,8 @@ CWorldEditor::CWorldEditor(EEInterface& oInterface, ICameraManager::TCameraType 
 	CSpawnableEditor(oInterface, cameraType),
 	m_oSceneManager(static_cast<ISceneManager&>(*oInterface.GetPlugin("SceneManager"))),
 	m_oFileSystem(static_cast<IFileSystem&>(*oInterface.GetPlugin("FileSystem"))),
-	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager")))
+	m_oRessourceManager(static_cast<IRessourceManager&>(*oInterface.GetPlugin("RessourceManager"))),
+	m_oScriptManager(static_cast<IScriptManager&>(*oInterface.GetPlugin("ScriptManager")))
 {
 	m_eEditingMode = TEditingType::eXForm;
 	m_pScene = m_oSceneManager.GetScene("Game");
@@ -231,8 +233,13 @@ void CWorldEditor::SaveGame(string fileName)
 		map<string, pair<CMatrix, string>> mBackupCharacterMatrices = m_mCharacterMatrices;
 		for (IEntity* pEntity : entities) {
 			string entityName = pEntity->GetIDStr();
-			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityName);
-			itCharacter->second.first = pEntity->GetWorldMatrix();
+			string entityNameLower = entityName;
+			std::transform(entityName.begin(), entityName.end(), entityNameLower.begin(), tolower);
+			map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.find(entityNameLower);
+			if (itCharacter != m_mCharacterMatrices.end())
+				itCharacter->second.first = pEntity->GetWorldMatrix();
+			else
+				m_oConsole.Println(string("CWorldEditor::SaveGame() : Erreur -> character '" + entityNameLower) + "' introuvable dans m_mCharacterMatrices");
 		}
 		Save(fileName);
 		m_mCharacterMatrices = mBackupCharacterMatrices;
@@ -327,6 +334,17 @@ void CWorldEditor::LoadFromJson(string sFileName)
 	doc.ParseStream(isw);
 	if (doc.IsObject() && doc.HasMember("World")) {
 		Value& world = doc["World"];
+
+		if (world.HasMember("Variables")) {
+			Value& variables = world["Variables"];
+			for (int iVariable = 0; iVariable < variables.Size(); iVariable++) {
+				Value& variable = variables[iVariable];
+				Value& name = variable["Name"];
+				Value& value = variable["Value"];
+				m_oScriptManager.SetVariableValue(name.GetString(), value.GetFloat());
+			}
+		}
+
 		Value& maps = world["Maps"];
 		for (int iMap = 0; iMap < maps.Size(); iMap++) {
 			Value& map = maps[iMap];
@@ -447,6 +465,33 @@ void CWorldEditor::SaveToJson(string sFileName)
 		if (!doc.IsObject())
 			doc.SetObject();
 		Value world(kObjectType);
+
+		Value variables(kArrayType);
+		if (!m_bEditionMode) {
+			vector<string> names;
+			m_oScriptManager.GetVariableNames(names);
+			for (string name : names) {
+				Value variable(kObjectType);
+				Value kname(kStringType);
+				Value kvalue(kNumberType);
+				float value = m_oScriptManager.GetVariableValue(name);
+				kvalue.SetFloat(value);
+				kname.SetString(name.c_str(), doc.GetAllocator());
+				variable.AddMember("Name", kname, doc.GetAllocator());
+				variable.AddMember("Value", kvalue, doc.GetAllocator());
+				variables.PushBack(variable, doc.GetAllocator());
+			}
+			world.AddMember("Variables", variables, doc.GetAllocator());
+
+			vector<IEntity*> characters;
+			m_pScene->GetCharactersInfos(characters);
+
+			for (IEntity* pEntity : characters) {
+				ICharacter* pCharacter = dynamic_cast<ICharacter*>(pEntity);
+				pCharacter->Save();
+			}
+
+		}
 
 		Value maps(kArrayType);
 		for (map<string, CVector>::iterator itMap = m_mMaps.begin(); itMap != m_mMaps.end(); itMap++) {

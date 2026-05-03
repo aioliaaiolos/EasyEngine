@@ -23,13 +23,13 @@ public:
 	CInventoryWindow(EEInterface& oInterface, const CDimension& windowSize);
 	void DisplayItems(ICharacter* pCharacter);
 	void ClearItems();
-	void SetInventoryMode(bool tradeMode);
+	void SetTradeMode(bool tradeMode);
 	void SetSelectItemCallback(std::function<void(CGUIItem*)>);
 	int GetTotalCost();
 	int GetGoldAmount();
 
 private:
-	bool m_bInventoryMode = false;
+	bool m_bTradeMode = false;
 	std::function<void(CGUIItem*)>  m_ItemSelectedCallback;
 	CGUIWindow*						m_pDescriptionWindow = nullptr;
 	CGUIManager*					m_pGUIManager = nullptr;

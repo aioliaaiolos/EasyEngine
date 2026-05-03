@@ -3,10 +3,11 @@
 
 #include "IWidget.h"
 #include "IEventDispatcher.h"
+#include <functional>
 
 class CMenu2;
 
-typedef LRESULT ( *WINDOWCALLBACK )( IWidget*, UINT, WPARAM, LPARAM );
+using WINDOWCALLBACK = std::function<LRESULT(IWidget*, UINT, WPARAM, LPARAM)>;
 
 class IWindow : public IWidget
 {
@@ -46,15 +47,25 @@ public:
 					}	
 	};
 
-	virtual void			Close() const = 0;
+	virtual void			Close() = 0;
 	virtual int				GetBits() const = 0;
 	virtual void			Show() const = 0;
 	virtual void			Setfocus() = 0;
 	virtual void			SetForeground() = 0;
 	virtual void			ShowModal() = 0;
 	virtual void			SetFullScreenMode(bool fullscreen) = 0;
-	//virtual void			SetUpdateCallback( void (*pfnOnUpdate)(const IWindow* ) ) = 0;
+	virtual void			DisplayCursor(bool bShow) = 0;
 };
 
+class IWindowsGUISystem : public CPlugin
+{
+public:
+	IWindowsGUISystem() : CPlugin(nullptr, "WindowsGUISystem") {}
+	virtual IWindow* CreateWindow2(const IWindow::Desc& oWindowDesc) = 0;
+	virtual IWindow* CreateWindowEditor(const IWindow::Desc& oWindowDesc) = 0;
+
+	virtual IWindow* GetWindow2() = 0;
+	virtual IWindow* GetWindowEditor() = 0;
+};
 
 #endif // IWINDOW_H

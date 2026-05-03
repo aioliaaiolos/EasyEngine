@@ -1,7 +1,3 @@
-#ifndef WINDOW2_CPP
-#error
-#endif
-
 #ifndef BASE_WINDOW_H
 #define BASE_WINDOW_H
 
@@ -21,7 +17,6 @@ public:
 
 private:
 	bool									m_bFullscreen;
-	WINDOWCALLBACK							m_pfnWindowCallback;
 	std::string								m_sClassName;
 	CMenu2*									m_pMenu;
 	static std::map< int, std::string >		s_mErrorString;
@@ -38,6 +33,7 @@ protected:
 	static CWindow2*						GetWindow( HWND hWnd );	
 	bool									m_bDestroy;
 	IEventDispatcher&						m_oEventDispatcher;
+	WINDOWCALLBACK							m_pfnWindowCallback;
 
 public:
 
@@ -46,7 +42,8 @@ public:
 	int										GetBits() const;
 	void									Show()const;
 	void									ShowModal();
-	void									Close()const;
+	void									DisplayCursor(bool bShow) override;
+	void									Close();
 	void									CallCallback( CallbackArgs& args );
 	bool									IsFullscreenMode();
 	void									Setfocus();

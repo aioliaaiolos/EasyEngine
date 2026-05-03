@@ -58,14 +58,14 @@ Ordre du royaume d'Eran
 
 Noms : 
 
-. Adnak
+. Adnak de Bahia
 . Mirabelle
 . Balam Akab
 . Akhenao
 . Akhanea
 . Ramsab Edao
 . Ulam Edao
-. Ranja
+. Ranja de Sirak
 . Asna
 . Inaya
 . Malia
@@ -94,6 +94,24 @@ Eran :
 . Aluyne
 . Darius
 . Arian
+. Abillius
+. Acedomopatis
+. Acumis
+. Subroni
+. Iturios
+. Sucaria
+. Magesilla
+. Namuta
+. Verbronara
+. Attisaga
+. Esubia
+. Mandubia
+. Neria
+. Suadulla
+. Uxelina
+. Vindilla
+. Virdumara
+. Toutamara
 
 Guerriers Eran :
 . Eiluv Andabata

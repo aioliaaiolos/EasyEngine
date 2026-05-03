@@ -584,10 +584,10 @@ IGeometry* CCharacter::GetBoundingGeometry()
 		sAnimationType = "Guard";
 
 	string sAnimationName = s_mBodyAnimations[m_sCurrentBodyName].m_mAnimationInfos[sAnimationType].m_ActionToAnimation.second;
-	string sAnimationNameLow = sAnimationName;
-	std::transform(sAnimationName.begin(), sAnimationName.end(), sAnimationNameLow.begin(), tolower);
-	map<int, IBox*>::iterator itBox = m_oKeyBoundingBoxes[sAnimationNameLow].begin();
-	if (itBox != m_oKeyBoundingBoxes[sAnimationNameLow].end()) {
+	m_sAnimationBoundingBox = sAnimationName;
+	std::transform(sAnimationName.begin(), sAnimationName.end(), m_sAnimationBoundingBox.begin(), tolower);
+	map<int, IBox*>::iterator itBox = m_oKeyBoundingBoxes[m_sAnimationBoundingBox].begin();
+	if (itBox != m_oKeyBoundingBoxes[m_sAnimationBoundingBox].end()) {
 		return itBox->second;
 	}
 	return nullptr;

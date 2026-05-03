@@ -163,6 +163,7 @@
     <ClInclude Include="FighterEntity.h" />
     <ClInclude Include="FightSystem.h" />
     <ClInclude Include="FreeCamera.h" />
+    <ClInclude Include="Gameplay.h" />
     <ClInclude Include="IAEntity.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="LightEntity.h" />

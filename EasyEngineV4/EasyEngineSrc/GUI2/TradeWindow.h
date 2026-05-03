@@ -21,7 +21,7 @@ private:
 	CInventoryWindow*				m_pPlayerInventory = nullptr;
 	CInventoryWindow*				m_pTraderInventory = nullptr;
 	CGUIWindow*						m_pCostWindow = nullptr;
-	//CGUIWindow*						m_pTradeButton;
+	CGUIWidget*						m_pNotEnoughGoldMessage = nullptr;
 	CGUIManager*					m_pGUIManager = nullptr;
 	map<CGUIItem*, CGUIWidget*>		m_mItemsToBuy;
 	int								m_nCurrentCost = 0;

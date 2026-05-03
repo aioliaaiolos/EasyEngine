@@ -447,7 +447,7 @@
 			"GrandParentDummyRootID": -1,
 			"DiffuseTextureName": "",
 			"Life": 200,
-			"GoldAmount": 100,
+			"GoldAmount": 0,
 			"Specular": [
 				0.0,
 				0.0,
@@ -462,12 +462,6 @@
 			"Items": [
 				{
 					"ItemName": "Legio-Tunique-m-mixamo",
-					"IsWearArray": [
-						1
-					]
-				},
-				{
-					"ItemName": "Sword",
 					"IsWearArray": [
 						1
 					]
@@ -993,6 +987,18 @@
 					"ItemName": "Broom",
 					"IsWearArray": [
 						1
+					]
+				},
+				{
+					"ItemName": "Shield_Wood",
+					"IsWearArray": [
+						0
+					]
+				},
+				{
+					"ItemName": "Stick_Wood",
+					"IsWearArray": [
+						0
 					]
 				}
 			],

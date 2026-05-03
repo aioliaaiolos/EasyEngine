@@ -32,8 +32,19 @@
 #include "IPathFinder.h"
 #include "IEditor.h"
 #include "IPhysic.h"
+#include "ITopicSystem.h"
+#include "IWindow.h"
 #include "Interface.h"
 #include "Utils2/TimeManager.h"
+#include "Resource.h"
+#include "WindowsGUI/Menu2.h"
+
+// rapidjson
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+
+#include <fstream>
 
 #ifdef NDEBUG
 #define CATCH_EXCEPTION
@@ -41,10 +52,12 @@
 #define CATCH_EXCEPTION
 
 using namespace std;
+using namespace rapidjson;
 
 struct CGFXOption
 {
-	bool m_bFullscreen;
+	bool m_bFullscreen = true;
+	bool m_bEditor = false;
 	CGFXOption() : m_bFullscreen( true ){}
 };
 
@@ -52,6 +65,7 @@ void OnWindowEvent( CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int nWid
 void OnMouseEvent(CPlugin*, IEventDispatcher::TMouseEvent, int, int);
 void UpdateCamera();
 void GetOptionsByCommandLine( string sCommandArguments, CGFXOption& oOption );
+void GetConfig(CGFXOption& oOption);
 void DestroyPlugins();
 
 IDrawTool*				m_pDrawTool = nullptr;
@@ -76,7 +90,9 @@ IXMLParser*				m_pXMLParser = nullptr;
 IGeometryManager*		m_pGeometryManager = nullptr;
 IPathFinder*			m_pPathFinder = nullptr;
 IPhysic*				m_pPhysic = nullptr;
+ITopicSystem*			m_pTopicSystem = nullptr;
 IEditorManager*			m_pEditorManager = nullptr;
+IWindowsGUISystem*		m_pWindowGUISystem = nullptr;
 EEInterface*			m_pInterface = nullptr;
 CTimeManager*			m_pTimeManager = nullptr;
 
@@ -357,10 +373,7 @@ EEInterface* InitPlugins( string sCmdLine )
 		sDirectoryName = "..\\..\\EasyEngine\\Debug\\";
 #else
 		sDirectoryName = "..\\..\\EasyEngine\\release\\";
-#endif
-
-	CGFXOption oOption;
-	GetOptionsByCommandLine( sCmdLine, oOption );
+#endif	
 
 	m_pTimeManager = static_cast<CTimeManager*>(CPlugin::Create(*pInterface, "Ressource.dll", "CreateTimeManager"));
 
@@ -369,6 +382,10 @@ EEInterface* InitPlugins( string sCmdLine )
 	m_pFileSystem = static_cast< IFileSystem* > ( CPlugin::Create( *pInterface, sDirectoryName + "FileUtils.dll", "CreateFileSystem" ) );
 	m_pFileSystem->Mount( "..\\data" );
 	m_pFileSystem->Mount( "..\\..\\EasyEngine\\data" );
+
+	CGFXOption oOption;
+	GetConfig(oOption);
+	GetOptionsByCommandLine( sCmdLine, oOption );	
 
 	m_pEventDispatcher = static_cast< IEventDispatcher* >( CPlugin::Create(*pInterface, sDirectoryName + "WindowsGUI.dll", "CreateEventDispatcher" ) );
 
@@ -388,7 +405,8 @@ EEInterface* InitPlugins( string sCmdLine )
 	oWindowDesc.m_bFullscreen = oOption.m_bFullscreen;
 	oWindowDesc.m_nBits = 32;
 	oWindowDesc.m_sName = "Window";
-	m_pWindow = static_cast< IWindow* >( CPlugin::Create( oWindowDesc, sDirectoryName + "WindowsGUI.dll", "CreateWindow2" ) );
+	m_pWindowGUISystem = static_cast<IWindowsGUISystem*> (CPlugin::Create(*pInterface, sDirectoryName + "WindowsGUI.dll", "CreateWindowsGUISystem"));
+	m_pWindow = m_pWindowGUISystem->CreateWindowEditor(oWindowDesc);
 
 	m_pRenderer = static_cast< IRenderer* >( CPlugin::Create( *pInterface, sDirectoryName + "Renderer.dll", "CreateRenderer" ) );	
 
@@ -399,7 +417,8 @@ EEInterface* InitPlugins( string sCmdLine )
 	m_pCollisionManager = static_cast< ICollisionManager* >( CPlugin::Create(*pInterface, "Collision.dll", "CreateCollisionManager" ));
 	m_pCameraManager = static_cast< ICameraManager* >( CPlugin::Create( *pInterface, sDirectoryName + "Entity.dll", "CreateCameraManager" ) );
 	m_pEntityManager =	static_cast< IEntityManager* >	(CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreateEntityManager"));
-	m_pPhysic =			static_cast<IPhysic*>			(CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreatePhysic"));
+	m_pPhysic =	static_cast<IPhysic*> (CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreatePhysic"));
+	m_pTopicSystem = static_cast<ITopicSystem*>	(CPlugin::Create(*pInterface, sDirectoryName + "Gameplay.dll", "CreateTopicSystem"));
 	m_pCollisionManager->SetEntityManager(m_pEntityManager);
 
 	m_pSceneManager = static_cast< ISceneManager* >( CPlugin::Create(*pInterface, sDirectoryName + "Entity.dll", "CreateSceneManager" ) );
@@ -419,6 +438,9 @@ EEInterface* InitPlugins( string sCmdLine )
 
 	m_pEditorManager = static_cast< IEditorManager* >(CPlugin::Create(*pInterface, sDirectoryName + "Editor.dll", "CreateEditorManager"));
 
+	if (oOption.m_bEditor) {
+		m_pWindow->DisplayCursor(true);
+	}
 	return pInterface;
 }
 
@@ -524,20 +546,46 @@ void  OnWindowEvent( CPlugin* pPlugin, IEventDispatcher::TWindowEvent e, int nWi
 	}
 }
 
-
-
 void OnInitGUI()
 {
 }
 
+void GetConfig(CGFXOption& oOption)
+{
+	string sFileName = "config.cfg";
+	FILE* pFile = m_pFileSystem->OpenFile(sFileName, "r");
+	fclose(pFile);
+	string sJsonDirectory;
+	m_pFileSystem->GetLastDirectory(sJsonDirectory);
+	string sFilePath = sJsonDirectory + "\\" + sFileName;
+
+	ifstream ifs(sFilePath);
+	IStreamWrapper isw(ifs);
+	Document doc;
+
+	doc.ParseStream(isw);
+	if (doc.IsObject()) {
+		if (doc.HasMember("fullscreen")) {
+			rapidjson::Value& fullscreen = doc["fullscreen"];
+			oOption.m_bFullscreen = fullscreen.GetBool();
+		}
+	}
+	else {
+		throw CEException(string("Error: Config file '") + sFileName + "' not found");
+	}
+}
 
 void GetOptionsByCommandLine( string sCommandArguments, CGFXOption& oOption )
 {
-	if ( sCommandArguments.size() > 0 )
+	int nBegin = 0;
+	int nEnd = 0;
+	while(true)
 	{
-		int nBegin = static_cast< int >( sCommandArguments.find( "-" ) );
-		int nEnd = static_cast< int >( sCommandArguments.find( "=" ) );
-		string sArgName = sCommandArguments.substr( nBegin + 1, nEnd - 1 );
+		nBegin = static_cast< int >( sCommandArguments.find( "-", nEnd ) );
+		if (nBegin == -1)
+			break;
+		nEnd = static_cast< int >( sCommandArguments.find( "=", nBegin) );
+		string sArgName = sCommandArguments.substr( nBegin + 1, nEnd - nBegin - 1 );
 		int nEndArgValue = static_cast< int >( sCommandArguments.find( " ", nEnd ) );
 		if ( nEndArgValue == -1 )
 		{
@@ -545,7 +593,7 @@ void GetOptionsByCommandLine( string sCommandArguments, CGFXOption& oOption )
 			if ( nEndArgValue == -1 )
 				nEndArgValue = static_cast< int >( sCommandArguments.size() - nEnd + 1 );
 		}
-		string sArgValue = sCommandArguments.substr( nEnd + 1, nEndArgValue );
+		string sArgValue = sCommandArguments.substr( nEnd + 1, nEndArgValue - nEnd - 1 );
 		string sArgNameLow = sArgName;
 		string sArgValueLow = sArgValue;
 		transform( sArgName.begin(), sArgName.end(), sArgNameLow.begin(), tolower );
@@ -565,6 +613,10 @@ void GetOptionsByCommandLine( string sCommandArguments, CGFXOption& oOption )
 					throw e;
 				}
 			}
+		}
+		if (sArgName == "editor") {
+			oOption.m_bEditor = sArgValue == "true" ? true : false;
+			oOption.m_bFullscreen = oOption.m_bEditor ? false : oOption.m_bFullscreen;
 		}
 	}
 }

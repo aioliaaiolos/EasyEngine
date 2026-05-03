@@ -69,8 +69,12 @@
 		  "Dummies": ["BodyDummyRFoot"]
 	  },
 	  {
-		  "Type": "Hand", 
+		  "Type": "Right-Hand", 
 		  "Dummies": ["BodyDummyRHand"]
+	  },
+	  {
+		  "Type": "Left-Hand", 
+		  "Dummies": ["BodyDummyLHand"]
 	  }
 	],
 	"Items": [
@@ -295,7 +299,7 @@
 			"ID": "Broom",
 			"Model": "Items/broom.bme",
 			"Class": "Tool",
-			"Type": "Hand",
+			"Type": "Right-Hand",
 			"Preview": "broom.bmp",
 			"Value": 1,
 			"Description": "Balai"
@@ -345,6 +349,27 @@
 			"Value": 10,
 			"OffsetY": 5,
 			"Description": "Sandale de la légion, pied droit"
+		},
+		{
+			"ID": "Shield_Wood",
+			"Model": "Armors/shield.BME",
+			"Class": "Armor",
+			"Type": "Left-Hand",
+			"Preview": "Shield_Wood.bmp",
+			"Armor": 10,
+			"Value": 10,
+			"Description": "Bouclier en bois"
+		},
+		{
+			"ID": "Stick_Wood",
+			"Model": "Weapons/Stick.BME",
+			"Class": "Weapon",
+			"Type": "Belt-Weapon",
+			"AttackType" : "Right-Hand",
+			"Preview": "Stick_Wood.bmp",
+			"Value": 10,
+			"Damage": 5,
+			"Description": "Baton de bois"
 		},
 		{
 			"ID": "LSandal_F",

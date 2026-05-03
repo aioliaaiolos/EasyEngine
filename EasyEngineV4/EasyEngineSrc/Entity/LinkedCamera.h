@@ -19,7 +19,7 @@ public:
 	float				GetSpeed() { return 0.f; }
 	void				SetSpeed(float fSpeed) {}
 	void				Update();
-	void				SetInventoryMode(bool bInventoryMode) {}
+	void				SetTradeMode(bool bInventoryMode) {}
 	void				GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 
 private:

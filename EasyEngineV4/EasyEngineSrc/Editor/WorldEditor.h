@@ -6,6 +6,7 @@
 
 class IFileSystem;
 class ISceneManager;
+class IScriptManager;
 
 class CWorldEditor : public IWorldEditor, public CSpawnableEditor
 {
@@ -45,6 +46,7 @@ private:
 
 	IFileSystem&														m_oFileSystem;
 	ISceneManager&														m_oSceneManager;
+	IScriptManager&														m_oScriptManager;
 	map<string, CVector>												m_mMaps;
 	map<string, pair<CMatrix, string>>									m_mCharacterMatrices; // (Nom, (TM, Script))
 	map<string, vector<pair<IEntity*, CMatrix>>>						m_mEntityMatrices;

@@ -64,6 +64,7 @@ public:
 	void					UpdatePosition();
 	virtual void			SetVisibility(bool bVisible);
 	bool					IsVisible();
+	void					SetBackgroundAndBorder(int colorBackground, int nBorderWidth);
 	string					m_sUserData;
 	
 	static void				Init( int nResX, int nResY, IShader* pShader );

@@ -23,6 +23,7 @@ public:
 	void	ExecuteByteCode(const vector<unsigned char>& vByteCode) override;
 	void	GetRegisteredFunctions(vector< string >& vFuncNames) override;
 	float	GetVariableValue(string variableName) override;
+	void	GetVariableNames(vector<string>& names) override;
 	void	SetVariableValue(string sVariableName, float value) override;
 	float	GetRegisterValue(string sRegisterName) override;
 	string	GetName() override;

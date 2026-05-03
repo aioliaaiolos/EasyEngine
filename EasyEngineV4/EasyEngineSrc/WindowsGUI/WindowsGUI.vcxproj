@@ -156,9 +156,12 @@
     <ClInclude Include="Control.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="Menu2.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="TabControl.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="Window2.h" />
+    <ClInclude Include="WindowEditor.h" />
+    <ClInclude Include="WindowsGUISystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button2.cpp" />
@@ -168,6 +171,11 @@
     <ClCompile Include="TabControl.cpp" />
     <ClCompile Include="Widget.cpp" />
     <ClCompile Include="Window2.cpp" />
+    <ClCompile Include="WindowEditor.cpp" />
+    <ClCompile Include="WindowsGUISystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WindowsGUI.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
