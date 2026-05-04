@@ -614,11 +614,18 @@ CEntity* CEntityManager::CreateLightEntity()
 	return pLightEntity;
 }
 
-ILightEntity* CEntityManager::CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity )
+ILightEntity* CEntityManager::CreateLightEntity( CVector Color, ILight::Type type, float fIntensity )
 {
 	IRessource* pLight = m_oRessourceManager.CreateLight(Color, type, fIntensity);
 	CLightEntity* pLightEntity = new CLightEntity(m_oInterface, pLight);
 	AddEntity( pLightEntity );
+	return pLightEntity;
+}
+
+ILightEntity* CEntityManager::CreateLightEntity(ILight* pLight)
+{
+	CLightEntity* pLightEntity = new CLightEntity(m_oInterface, pLight);
+	AddEntity(pLightEntity);
 	return pLightEntity;
 }
 
@@ -673,7 +680,7 @@ void CEntityManager::Clear()
 	m_mCharacters.clear();
 	m_nLastEntityID = -1;
 	m_pPlayer = nullptr;
-	m_oRessourceManager.RemoveAllLights(m_oRenderer);
+	m_oRessourceManager.RemoveAllLights();
 	m_mCollideEntities.clear();
 	m_mFighterEntities.clear();
 }

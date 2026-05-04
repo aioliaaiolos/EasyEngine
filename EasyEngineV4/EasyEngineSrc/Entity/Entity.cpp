@@ -22,6 +22,7 @@
 #include "PlaneEntity.h"
 #include "Bone.h"
 #include "Item.h"
+#include "LightEntity.h"
 
 // Utils
 #include "Utils2/TimeManager.h"
@@ -539,6 +540,18 @@ void CEntity::SendBonesToShader()
 	}
 }
 
+void CEntity::SendShadowInfosToShader()
+{
+	if (m_pRessource) {
+		IShader* pCurrentShader = m_pRessource->GetShader();
+		if (m_pScene) {
+			for (CLightEntity* pLightEntity : m_pScene->getShadowLights()) {
+				pLightEntity->RenderSecondShadowPass(pCurrentShader, this);
+			}
+		}
+	}
+}
+
 void CEntity::UpdateRessource()
 {
 	if (!m_bHidden)
@@ -551,6 +564,10 @@ void CEntity::UpdateRessource()
 			if (m_bUseCustomSpecular) {
 				for (int i = 0; i < m_pMesh->GetMaterialCount(); i++)
 					m_pMesh->GetMaterial(i)->SetSpecular(m_vCustomSpecular);
+			}
+			if (m_bUseCustomAmbient) {
+				for (int i = 0; i < m_pMesh->GetMaterialCount(); i++)
+					m_pMesh->GetMaterial(i)->SetAmbient(m_vCustomAmbient);
 			}
 			m_oRenderer.CullFace(m_bCullFace);
 		}
@@ -580,6 +597,7 @@ void CEntity::Update()
 
 	CNode::Update();
 	SendBonesToShader();
+	SendShadowInfosToShader();
 
 	if (m_oSkinOffset != CVector(0, 0, 0)) {
 		CMatrix offsetLocalMatrix = m_oLocalMatrix * CMatrix::GetTranslation(m_oSkinOffset.m_x, m_oSkinOffset.m_y, m_oSkinOffset.m_z);
@@ -1391,6 +1409,12 @@ void CEntity::SetCustomSpecular(const CVector& customSpecular)
 {
 	m_vCustomSpecular = customSpecular;
 	m_bUseCustomSpecular = true;
+}
+
+void CEntity::SetCustomAmbient(const CVector& customAmbient)
+{
+	m_vCustomAmbient = customAmbient;
+	m_bUseCustomAmbient = true;
 }
 
 void CEntity::DrawCollisionBoundingBoxes(bool bDraw)

@@ -93,6 +93,7 @@ public:
 	void							AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback);
 	void							DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback);
 	void							SetCustomSpecular(const CVector& customSpecular) override;
+	void							SetCustomAmbient(const CVector& customAmbient) override;
 	void							DrawCollisionBoundingBoxes(bool bDraw) override;
 	static void						GetSkeletonEntities(CBone* pRoot, vector< CEntity* >& vEntity, string sFileFilter);
 	void							GetBonesMatrix(std::vector< CMatrix >& vBoneMatrix);
@@ -158,6 +159,8 @@ protected:
 	bool											m_bIsOnTheGround;
 	CVector											m_vCustomSpecular;
 	bool											m_bUseCustomSpecular;
+	CVector											m_vCustomAmbient;
+	bool											m_bUseCustomAmbient = false;
 	CEntity*										m_pCloth;
 	IGrid*											m_pCollisionGrid;
 	IPathFinder&									m_oPathFinder;
@@ -188,6 +191,7 @@ protected:
 	bool				IsPassingDoor(INode* pWall, IGeometry* pBBox, IGeometry* pWallBBox);
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
 	virtual void		SendBonesToShader();
+	void				SendShadowInfosToShader();
 	void				DispatchEntityEvent();
 	void				LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors);
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);

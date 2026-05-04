@@ -146,6 +146,7 @@ public:
 	virtual void						AbonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void						DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) = 0;
 	virtual void						SetCustomSpecular(const CVector& customSpecular) = 0;
+	virtual void						SetCustomAmbient(const CVector& customAmbient) = 0;
 	virtual void						DrawCollisionBoundingBoxes(bool bDraw) = 0;
 	virtual int							GetCellSize() = 0;
 	virtual void						CreateCollisionMaps(float fBias, int nCellSize) = 0;
@@ -188,7 +189,10 @@ public:
 class ILightEntity : public virtual IEntity
 {
 public:
-
+	virtual ILight*	GetLight() = 0;
+	virtual void CastShadow(bool castShadow) = 0;
+	virtual void SetShadowFrustumSize(float size) = 0;
+	virtual float GetShadowFrustumSize() = 0;
 };
 
 class ICharacter : public virtual IEntity
@@ -233,11 +237,7 @@ public:
 	typedef void(*StateChangedCallback)(TSceneState, CPlugin*);
 	virtual void				RenderMinimap() = 0;
 	virtual ITexture*			GetMinimapTexture() = 0;
-	virtual ITexture*			GetMinimapTexture2() = 0;
-	virtual ITexture*			GetShadowMapTexture() = 0;
 	virtual void				DisplayMinimap(bool display) = 0;
-	virtual void				DisplayMinimap2(bool display) = 0;
-	virtual void				DisplayShadowMap(bool display) = 0;
 	virtual void				UpdateMapEntities() = 0;
 	virtual void				CollectMinimapEntities(vector<IEntity*>& entities) = 0;
 	virtual void				SetGroundMargin(float margin) = 0;
@@ -260,6 +260,7 @@ public:
 	virtual void				UnhandleStateChanged(StateChangedCallback callback) = 0;
 	virtual void				OnChangeSector() = 0;
 	virtual void				SetRessourceFileName(string sNewFileName) = 0;
+	virtual void				RemoveAllLights() = 0;
 };
 
 class IFighterEntityInterface
@@ -314,7 +315,8 @@ public:
 	virtual IEntity*			GetEntity(string sEntityID) = 0;
 	virtual int					GetEntityID( IEntity* pEntity ) = 0;
 	virtual int					GetEntityCount() = 0;
-	virtual ILightEntity*		CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity ) = 0;
+	virtual ILightEntity*		CreateLightEntity( CVector Color, ILight::Type type, float fIntensity ) = 0;
+	virtual ILightEntity*		CreateLightEntity(ILight* pLight) = 0;
 	virtual float				GetLightIntensity(int nID) = 0;
 	virtual void				SetLightIntensity( int nID, float fIntensity ) = 0;
 	virtual void				DestroyEntity( IEntity* pEntity ) = 0;

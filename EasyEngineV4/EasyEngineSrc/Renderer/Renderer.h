@@ -16,6 +16,7 @@
 #define BUFFER_OFFSET(i) ((char*)NULL + i)	
 
 class CMatrix;
+class IConsole;
 
 enum RENDER_MODE
 {
@@ -85,6 +86,9 @@ protected:
 	void						ApplySetFov();
 	CVector						m_vBackgroundColor;
 	bool						m_bCameraLocked;
+	int							m_nViewportWidth = 0;
+	int							m_nViewportHeight = 0;
+	IConsole*					m_pConsole;
 
 public:	
 
@@ -92,6 +96,8 @@ public:
 								~CRenderer();
 								
 	void						SetViewPort(int width, int height);
+	void						DisplayLightInfos();
+	void						GetViewPort(int& width, int& height);
 	void						SetRenderType( TRenderType t );
 	void						ResizeScreen( int nWidth, int nHeight );
 	void						DestroyContext();
@@ -103,6 +109,7 @@ public:
 	
 	void						CalcProjection( CMatrix& oMatrix, float fLeft, float fRight, float fBottom, float fTop, float fNear, float fFar );
 	void						CalcProjection( CMatrix& oMatrix, float fov );
+	void						CalcOrthoProjection(CMatrix& oMatrix, float fLeft, float fRight, float fBottom, float fTop, float fNear, float fFar);
 	void						GetProjectionMatrix( CMatrix& oMatrix );
 	void						GetModelViewMatrix(CMatrix& oMatrix);
 	void						GetModelViewProjectionMatrix(CMatrix& oMatrix);
@@ -240,6 +247,7 @@ public:
 	void						CreateColorFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId);
 	void						CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId);
 	void						SetCurrentFBO(int fbo);
+	bool						IsLightingEnabled();
 	float						GetScreenRatio();
 	void						GetGlslVersion(string& sVersion);
 	void						GetOpenglVersion(string& sVersion);

@@ -86,8 +86,6 @@ public:
 	void				EnableStaticText( int nTextID, bool bEnable );
 	ITopicWindow*		GetTopicsWindow();
 	void				ToggleDisplayMiniMap();
-	void				ToggleDisplayMiniMap2();
-	void				ToggleDisplayShadowMap();
 	void				SetGUIMode(bool bGUIMode);
 	bool				GetGUIMode();
 	int					GetCurrentFontEspacementX();
@@ -136,11 +134,8 @@ private:
 	std::map< int, CListener* >					m_mListener;
 	CTopicsWindow*								m_pTopicsWindow;
 	CGUIWindow*									m_pMapWindow;
-	CGUIWindow*									m_pMapWindow2;
 	CGUIWindow*									m_pShadowMapWindow = nullptr;
-	bool										m_bDisplayMap;
-	bool										m_bDisplayMap2;
-	bool										m_bDisplayShadowMap = false;
+	bool										m_bDisplayMap = false;
 	map<IGUIManager::TFontColor, IRessource*>	m_mFontMaterialByColor;
 	map<IGUIManager::TFontColor, map<unsigned char, CGUIWidget*>>	m_mFontWidgetByColor;
 	map<TFontColor, ITexture*>					m_mFontColor;

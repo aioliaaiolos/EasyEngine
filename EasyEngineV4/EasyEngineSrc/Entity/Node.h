@@ -30,10 +30,12 @@ public:
 	void						RemoveChild(int index);
 	void						ClearChildren() override;
   	void                		SetParent( INode* pNode );
+	virtual void				Follow(INode* pNode, float distance, float nearDistance = -1);
   	virtual void                Yaw(float fAngle);
   	virtual void                Pitch(float fAngle);
   	virtual void                Roll(float fAngle);
   	virtual void                LocalTranslate(float dx , float dy , float dz);
+	virtual void				LocalTranslate(const CVector& v);
 	virtual void				WorldTranslate( float dx , float dy , float dz );
 	virtual void				WorldTranslate( const CVector& vTranslate );
   	void                		SetLocalPosition(float x, float y , float z);
@@ -97,9 +99,13 @@ protected:
 	bool						m_bUpdateConstantLocalRotate;
 	bool						m_bIsCollidable;
 	string						m_sTypeName;
+	INode*						m_pFollowedEntity = nullptr;
+	float						m_fFarDistanceToFollow = 0.f;
+	float						m_fNearDistanceToFollow = 0.f;
 
 	void						UpdateWorldMatrix();
 	void						UpdateChildren();
+	void						UpdateFollow();
 };
 
 #endif  //NODE_H

@@ -102,6 +102,7 @@ void InitExtensions()
 	glUniform3fv = reinterpret_cast< PFNGLUNIFORM3FVPROC >					( wglGetProcAddress( "glUniform3fv" ) );
 	glUniform4fv = reinterpret_cast< PFNGLUNIFORM4FVPROC >					( wglGetProcAddress( "glUniform4fv" ) );
 	glUniform4iv = reinterpret_cast< PFNGLUNIFORM4IVPROC >					( wglGetProcAddress( "glUniform4iv" ) );
+	glUniform4f = reinterpret_cast< PFNGLUNIFORM4FPROC >					( wglGetProcAddress( "glUniform4f" ));
 	glUniform1i = reinterpret_cast< PFNGLUNIFORM1IPROC >					( wglGetProcAddress( "glUniform1i" ) );
 	glUniform1f = reinterpret_cast< PFNGLUNIFORM1FPROC >					( wglGetProcAddress( "glUniform1f" ) );
 

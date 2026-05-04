@@ -52,7 +52,7 @@ void CWorldEditor::ClearWorld()
 	m_mAreaMatrices.clear();
 	m_mItemMatrices.clear();
 	m_oEntityManager.Clear();
-	m_vLights.clear();
+	m_vShadowLights.clear();
 	m_pEditingEntity = nullptr;
 	m_mMaps.clear();
 }
@@ -432,13 +432,50 @@ void CWorldEditor::LoadFromJson(string sFileName)
 		
 		if (world.HasMember("Lights")) {
 			Value& lights = world["Lights"];
+			bool CastShadow = false;
+			string type;
+			bool sun = false;
 			for (unsigned int iLight = 0; iLight < lights.Size(); iLight++) {
 				Value& light = lights[iLight];
-				Value& position = light["Position"];
 				Value& intensity = light["Intensity"];
 				Value& ambient = light["Ambient"];
-				CVector pos(position["x"].GetFloat(), position["y"].GetFloat(), position["z"].GetFloat());
-				m_vLights.push_back(pair<CVector, pair<float, float>>{ pos, { intensity.GetDouble(), ambient.GetFloat() } });
+				if (light.HasMember("CastShadow")) {
+					CastShadow = light["CastShadow"].GetBool();
+				}
+				if (light.HasMember("Sun")) {
+					sun = light["Sun"].GetBool();
+				}
+				if (light.HasMember("Type")) {
+					type = light["Type"].GetString();
+				}
+				CMatrix oTM;
+				if (light.HasMember("WorldTM")) {
+					Value& worldTM = light["WorldTM"];
+					vector<float> vMatrix;
+					for (int i = 0; i < worldTM.Size(); i++)
+						vMatrix.push_back(worldTM[i].GetFloat());
+					oTM.Set(vMatrix);
+				}
+				else {
+					Value& position = light["Position"];
+					CVector pos(position["x"].GetFloat(), position["y"].GetFloat(), position["z"].GetFloat());
+					oTM.SetPosition(pos.m_x, pos.m_y, pos.m_z);
+				}
+				float fShadowFrustumSize = 20000.f;
+				if (light.HasMember("ShadowFrustumSize"))
+					fShadowFrustumSize = light["ShadowFrustumSize"].GetFloat();
+
+				map<string, ILight::Type> lightTypes = { {"omni", ILight::OMNI }, { "dir", ILight::DIRECTIONAL}, { "spot", ILight::SPOT} };
+				ILight* pLight = static_cast<ILight*>(m_oRessourceManager.CreateLight(CVector(1, 1, 1, 1), lightTypes[type], intensity.GetDouble()));
+				pLight->SetAmbient(ambient.GetFloat());
+				pLight->CastShadow(CastShadow);
+				pLight->SetSun(sun);
+				pLight->Enable(true);
+				pLight->SetType(lightTypes[type]);
+				ILightEntity* pLightEntity = m_oEntityManager.CreateLightEntity(pLight);
+				pLightEntity->SetLocalMatrix(oTM);
+				pLightEntity->SetShadowFrustumSize(fShadowFrustumSize);
+				m_vShadowLights.push_back(pLightEntity);
 			}
 		}
 	}
@@ -577,20 +614,31 @@ void CWorldEditor::SaveToJson(string sFileName)
 			Value light(kObjectType);
 			ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pScene->GetChild(i));
 			if (pLightEntity) {
-				Value position(kObjectType);
 				CVector pos;
 				pLightEntity->GetWorldPosition(pos);
+				Value position(kObjectType);
 				position.AddMember("x", pos.m_x, doc.GetAllocator());
 				position.AddMember("y", pos.m_y, doc.GetAllocator());
 				position.AddMember("z", pos.m_z, doc.GetAllocator());
+				CMatrix oTM;
+				pLightEntity->GetWorldMatrix(oTM);
+				Value tm;
+				ConvertMatrixToJsonObject(doc, oTM, tm);
 				Value intensity(kNumberType);
 				ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
 				intensity.SetDouble(pLight->GetIntensity());
 				Value ambient(kNumberType);
 				ambient.SetDouble(pLight->GetAmbient());
-				light.AddMember("Position", position, doc.GetAllocator());
+				light.AddMember("WorldTM", tm, doc.GetAllocator());
 				light.AddMember("Intensity", intensity, doc.GetAllocator());
 				light.AddMember("Ambient", ambient, doc.GetAllocator());
+				light.AddMember("CastShadow", pLight->IsCastShadow(), doc.GetAllocator());
+				light.AddMember("Sun", pLight->IsSun(), doc.GetAllocator());
+				light.AddMember("ShadowFrustumSize", pLightEntity->GetShadowFrustumSize(), doc.GetAllocator());
+				Value kType(kStringType);
+				string type = m_oRessourceManager.LightTypeToString(pLight->GetType());
+				kType.SetString(type.c_str(), doc.GetAllocator());
+				light.AddMember("Type", kType, doc.GetAllocator());
 				lights.PushBack(light, doc.GetAllocator());
 			}
 		}
@@ -761,7 +809,7 @@ void CWorldEditor::OnSceneLoaded()
 				delete pLightEntity;
 			}
 		}
-		m_oRessourceManager.RemoveAllLights(m_oRenderer);
+		m_oRessourceManager.RemoveAllLights();
 	}
 	IPlayer* pPlayer = nullptr;
 	for (map<string, pair<CMatrix, string>>::iterator itCharacter = m_mCharacterMatrices.begin(); itCharacter != m_mCharacterMatrices.end(); itCharacter++) {
@@ -820,12 +868,10 @@ void CWorldEditor::OnSceneLoaded()
 			}
 		}
 	}
-	for (pair<CVector, pair<float, float>>& light : m_vLights) {
-		ILightEntity* pLightEntity = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1, 1), IRessource::TLight::OMNI, light.second.first);
+
+	m_pScene->RemoveAllLights();
+	for (ILightEntity* pLightEntity : m_vShadowLights) {
 		pLightEntity->Link(m_pScene);
-		pLightEntity->SetLocalPosition(light.first);
-		ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
-		pLight->SetAmbient(light.second.second);
 		m_vEntities.push_back(pLightEntity);
 	}
 	

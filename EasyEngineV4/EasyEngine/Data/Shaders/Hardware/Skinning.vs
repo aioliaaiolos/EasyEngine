@@ -4,6 +4,7 @@ varying vec4 vVertexPos;
 varying vec3 N;
 varying vec3 V;
 varying vec2 Texcoord;
+varying vec4 fragPosLightSpace;
 
 #ifdef MULTIMATERIAL
 varying float nPSMatID;
@@ -16,6 +17,9 @@ attribute int nMatID;
 #endif // MULTIMATERIAL
 
 uniform mat4 matBones[85];
+uniform mat4 lightSpaceModelview;
+uniform mat4 lightSpaceProjection;
+uniform mat4 model;
 
 void main()
 {
@@ -42,8 +46,7 @@ void main()
 	
 	Texcoord    = gl_MultiTexCoord0.xy;
 	
-	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * matWeight * gl_Vertex;
-
-
-
+	vec4 transformedVertex = matWeight * gl_Vertex;
+	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * transformedVertex;
+	fragPosLightSpace = lightSpaceProjection * lightSpaceModelview * model * transformedVertex;
 }

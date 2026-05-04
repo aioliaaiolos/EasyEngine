@@ -107,7 +107,6 @@ CMatrix ident;
 bool m_bRenderScene = true;
 bool bCapture = false;
 
-
 void InitScene( ISceneManager* pSceneManager )
 {
 	try
@@ -190,10 +189,6 @@ void OnKeyAction( CPlugin* pPlugin, unsigned int key, IInputManager::KEY_STATE s
 			}
 			else if (key == 'M')
 				m_pGUIManager->ToggleDisplayMiniMap();
-			else if (key == 'N')
-				m_pGUIManager->ToggleDisplayMiniMap2();
-			else if (key == 'H')
-				m_pGUIManager->ToggleDisplayShadowMap();
 			else if (key == 'E')
 			{
 				IPlayer* pPlayer = m_pEntityManager->GetPlayer();

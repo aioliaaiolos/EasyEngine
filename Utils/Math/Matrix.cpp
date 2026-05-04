@@ -773,6 +773,25 @@ void CMatrix::AddTranslation( float x, float y, float z )
 	m_23 += z;
 }
 
+void CMatrix::LookAt(const CVector& dir, const CVector& pos)
+{
+	CVector z = dir;
+	z.Normalize();
+
+	CVector up = (fabs(z.m_y) > 0.999f)
+		? CVector(0, 0, 1, 0)
+		: CVector(0, 1, 0, 0);
+
+	CVector x = up ^ z;
+	x.Normalize();
+	CVector y = z ^ x;
+
+	m_00 = x.m_x; m_01 = y.m_x;  m_02 = z.m_x;  m_03 = pos.m_x;
+	m_10 = x.m_y; m_11 = y.m_y;  m_12 = z.m_y;  m_13 = pos.m_y;
+	m_20 = x.m_z; m_21 = y.m_z;  m_22 = z.m_z;  m_23 = pos.m_z;
+	m_30 = 0;     m_31 = 0;      m_32 = 0;      m_33 = 1;
+}
+
 void CMatrix::GetAffinePart( CVector& v ) const
 {
 	v.m_x = m_03;

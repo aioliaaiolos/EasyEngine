@@ -31,12 +31,7 @@ class IRessource
 {	
 public:
 
-	enum TLight
-	{
-		DIRECTIONAL,
-		OMNI,
-		SPOT
-	};
+
 	
 	struct Desc
 	{
@@ -70,15 +65,28 @@ protected:
 class ILight : public IRessource
 {
 public:
+
+	enum Type
+	{
+		DIRECTIONAL,
+		OMNI,
+		SPOT
+	};
+
 	virtual float GetIntensity() = 0;
 	virtual void SetIntensity(float fIntensity) = 0;
 	virtual float GetAmbient() = 0;
 	virtual void SetAmbient(float fAmbient) = 0;
 	virtual void SetSpecular(float fAmbient) = 0;
+	virtual void CastShadow(bool castShadow) = 0;
+	virtual bool IsCastShadow() = 0;
 	virtual void Enable(bool enable) = 0;
-	virtual TLight GetType() = 0;
+	virtual Type GetType() = 0;
 	virtual void SetSpotDirection(CVector dir) = 0;
 	virtual void SetSpotAngle(float angle) = 0;
+	virtual void SetSun(bool sun) = 0;
+	virtual bool IsSun() = 0;
+	virtual void SetType(Type type) = 0;
 };
 
 class ITexture : public IRessource
@@ -133,6 +141,7 @@ class IMaterial : public IRessource
 {
 public:
 	virtual void SetAmbient(float r, float g, float b, float a) = 0;
+	virtual void SetAmbient(const CVector& ambient) = 0;
 	virtual void SetDiffuse(float r, float g, float b, float a) = 0;
 	virtual void SetSpecular(float r, float g, float b, float a) = 0;
 	virtual void SetSpecular(const CVector& pos) = 0;
@@ -166,7 +175,6 @@ public:
 	virtual void			UpdateInstances(int instanceCount) = 0;
 	virtual bool			IsSkinned() = 0;
 	virtual void			SetShader(IShader* pShader) = 0;
-	virtual IShader*		GetShader() = 0;
 };
 
 class IAnimatableMesh : public IRessource
@@ -221,21 +229,23 @@ public:
 	virtual IMesh*				CreatePlane2(int slices, int size, float height, string heightTexture, string diffuseTexture) = 0;
 	virtual int					GetLightCount() = 0;
 	virtual void				SetDrawTool( IDrawTool* pDrawTool ) = 0;
-	virtual IRessource*			CreateLight( CVector Color, IRessource::TLight type, float fIntensity) = 0;
+	virtual ILight*				CreateLight( CVector Color, ILight::Type type, float fIntensity) = 0;
 	virtual void				SetLightIntensity( IRessource* pLight, float fIntensity ) = 0;
 	virtual float				GetLightIntensity( IRessource* pRessource ) = 0;
 	virtual CVector				GetLightColor( IRessource* pRessource ) = 0;
-	virtual IRessource::TLight	GetLightType( IRessource* pRessource ) = 0;
+	virtual ILight::Type		GetLightType( IRessource* pRessource ) = 0;
 	virtual void				EnableCatchingException( bool bEnable ) = 0;
 	virtual bool				IsCatchingExceptionEnabled() = 0;
 	virtual void				PopErrorMessage( string& sMessage ) = 0;
 	virtual void				DestroyAllRessources() = 0;
-	virtual ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type) = 0;
+	virtual ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type, int unitTexture) = 0;
 	virtual ITexture*			CreateTexture2D(IShader* pShader, int nUnitTexture, vector< unsigned char >& vData, int nWidth, int nHeight, IRenderer::TPixelFormat eFormat) = 0;
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
-	virtual void				RemoveAllLights(IRenderer& oRenderer) = 0;
+	virtual void				RemoveAllLights() = 0;
 	virtual void				Reset() = 0;
 	virtual ITexture*			CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface) = 0;
+	virtual ILight::Type		LightStringToType(string type) = 0;
+	virtual string				LightTypeToString(ILight::Type type) = 0;
 };
 
 #endif // IRESSOURCE_H

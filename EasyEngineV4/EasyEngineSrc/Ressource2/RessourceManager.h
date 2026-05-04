@@ -60,17 +60,19 @@ public:
 	ITestMesh*			GetTestRessource( const std::string& sRessourceFileName, ITestShaderManager&);
 	int					GetLightCount();
 	void				SetDrawTool( IDrawTool* pDrawTool ){ m_pDrawTool = pDrawTool; }
-	IRessource*			CreateLight( CVector Color, IRessource::TLight type, float fIntensity);
+	ILight*				CreateLight( CVector Color, ILight::Type type, float fIntensity) override;
 	void				SetLightIntensity( IRessource* pLight, float fIntensity );
 	float				GetLightIntensity( IRessource* pRessource );
 	CVector				GetLightColor( IRessource* pRessource );
-	IRessource::TLight	GetLightType( IRessource* pRessource );
+	ILight::Type		GetLightType( IRessource* pRessource );
 	void				PopErrorMessage( string& sMessage );
 	void				DestroyAllRessources();
-	ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type);
+	ITexture*			CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type, int unitTexture);
 	string				GetName() override;
-	void				RemoveAllLights(IRenderer& oRenderer) override;
+	void				RemoveAllLights() override;
 	void				Reset() override;
+	ILight::Type		LightStringToType(string type);
+	string				LightTypeToString(ILight::Type type);
 
 private:
 	typedef IRessource*(*TRessourceCreation)(string sFileName, EEInterface& oInterface);
@@ -106,7 +108,8 @@ private:
 	IRenderer*										m_pCurrentRenderer;
 	bool											m_bCatchException;
 	bool											m_bUseDefaultTextureIfNotExists = true;
-
+	map<string, ILight::Type>						m_LightStringToType = { { "omni", ILight::OMNI },{ "dir", ILight::DIRECTIONAL },{ "spot", ILight::SPOT } };
+	map<ILight::Type, string>						m_LightTypeToString = { { ILight::OMNI , "omni"},{ ILight::DIRECTIONAL, "dir"},{ ILight::SPOT, "spot", } };
 	IDrawTool*										m_pDrawTool;
 };
 

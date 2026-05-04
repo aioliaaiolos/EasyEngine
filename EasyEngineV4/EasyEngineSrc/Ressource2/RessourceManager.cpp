@@ -458,7 +458,7 @@ void CRessourceManager::DestroyAllRessources()
 	m_mRessource.clear();
 }
 
-ITexture* CRessourceManager::CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type)
+ITexture* CRessourceManager::CreateRenderTexture(int width, int height, string sShaderName, TRenderTextureType type, int unitTexture)
 {
 	unsigned int nTextureId, nFBOId;
 	if(type == IRessourceManager::COLOR)
@@ -467,13 +467,13 @@ ITexture* CRessourceManager::CreateRenderTexture(int width, int height, string s
 		m_oRenderer.CreateDepthFrameBufferObject(width, height, nFBOId, nTextureId);
 
 	IShader* pShader = m_oRenderer.GetShader(sShaderName);
-	CTexture2D* pTexture = NULL;	
+	CTexture2D* pTexture = NULL;
 	CTexture2D::CDesc desc(m_oRenderer, pShader, 0);
 	desc.m_nWidth = width;
 	desc.m_nHeight = height;
 	desc.m_eFormat = IRenderer::T_RGB;
 	desc.m_sName = "Map render texture";
-	desc.m_nUnitTexture = 3;
+	desc.m_nUnitTexture = unitTexture;
 	desc.m_bGenerateMipmaps = false;
 	desc.m_bRenderTexture = true;
 	desc.m_nTextureId = nTextureId;
@@ -487,14 +487,24 @@ string CRessourceManager::GetName()
 	return "RessourceManager";
 }
 
-void CRessourceManager::RemoveAllLights(IRenderer& oRenderer)
+void CRessourceManager::RemoveAllLights()
 {
-	CLight::RemoveAllLights(oRenderer);
+	CLight::RemoveAllLights(m_oRenderer);
 }
 
 void CRessourceManager::Reset()
 {
 	m_mRessource.clear();
+}
+
+ILight::Type CRessourceManager::LightStringToType(string type)
+{
+	return m_LightStringToType[type];
+}
+
+string CRessourceManager::LightTypeToString(ILight::Type type)
+{
+	return m_LightTypeToString[type];
 }
 
 void CRessourceManager::CollectMaterials(EEInterface& oInterface, const ILoader::CMaterialInfos& oMaterialInfos, IShader* pShader, std::map< int, CMaterial* >& mMaterials )
@@ -715,7 +725,7 @@ ITexture* CRessourceManager::CreateTexture(vector<unsigned char>& vTextels, int 
 	return static_cast< ITexture* > (pTexture);
 }
 
-IRessource* CRessourceManager::CreateLight( CVector Color, IRessource::TLight type, float fIntensity)
+ILight* CRessourceManager::CreateLight( CVector Color, ILight::Type type, float fIntensity)
 {
 	CLight::Desc oDesc( m_oRenderer, NULL );
 	oDesc.Color = Color;
@@ -752,7 +762,7 @@ IRessource* CRessourceManager::CreateLight( string sFileName, EEInterface& oInte
 	ILoader::CLightInfos li;
 	li.m_sFileName = sFileName;
 	pRessourceManager->m_oLoaderManager.Load( sFileName, li );
-	CLight::TLight type;
+	ILight::Type type;
 	switch( li.m_eLightType )
 	{
 	case ILoader::CLightInfos::eDirectionnelle:
@@ -774,7 +784,7 @@ IRessource* CRessourceManager::CreateLight( string sFileName, EEInterface& oInte
 	return pLight;
 }
 
-IRessource::TLight	CRessourceManager::GetLightType( IRessource* pRessource )
+ILight::Type CRessourceManager::GetLightType( IRessource* pRessource )
 {
 	CLight* pLight = dynamic_cast< CLight* >( pRessource );
 	return pLight->GetType();

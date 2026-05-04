@@ -82,6 +82,7 @@ public:
 	void				SetAffinePart( const CVector& v );
 	void				AddTranslation( const CVector& v );
 	void				AddTranslation( float x, float y, float z );
+	void				LookAt(const CVector& dir, const CVector& pos);
 
 	static CMatrix		GetxRotation(float Angle);
 	static CMatrix		GetyRotation(float Angle);

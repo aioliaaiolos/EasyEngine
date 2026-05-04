@@ -176,38 +176,31 @@ bool CMesh::IsSkinned()
 	return m_nVertexWeightBufferID != -1;
 }
 
-IShader* CMesh::GetShader()
-{
-	return m_pShader;
-}
-
 void CMesh::Update()
 {
 	m_pShader->Enable( true );
 	m_oRenderer.SetRenderType( m_eRenderType );
 
-	if (m_pShader->GetName().find("shadowMap") == -1) {
-		m_pShader->SendUniformValues("LightCount", CLight::GetLightCount());
-		m_pShader->SendUniformValues("nMaterialCount", (int)m_mMaterials.size());
-		if (m_mMaterials.size() == 1) {
-			map< int, CMaterial* >::iterator itMat = m_mMaterials.begin();
-			itMat->second->Update();
+	m_pShader->SendUniformValues("LightCount", CLight::GetLightCount());
+	m_pShader->SendUniformValues("nMaterialCount", (int)m_mMaterials.size());
+	if (m_mMaterials.size() == 1) {
+		map< int, CMaterial* >::iterator itMat = m_mMaterials.begin();
+		itMat->second->Update();
+	}
+	else {
+		int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
+		if (nMatID != -1) {
+			m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
+			m_pShader->VertexAttributePointerf(nMatID, 1, 0);
 		}
-		else {
-			int nMatID = m_pShader->EnableVertexAttribArray("nMatID");
-			if (nMatID != -1) {
-				m_oRenderer.BindVertexBuffer(m_nFaceMaterialBufferID);
-				m_pShader->VertexAttributePointerf(nMatID, 1, 0);
-			}
-			if (!m_vTextureArray.empty()) {
-				m_pShader->SendUniformVector4Array("MaterialArray", m_vMaterialArray);
-				m_pShader->SendUniformVectorArray("ShininessArray", m_vShininessArray);
-				int i = 0;
-				for (ITexture* pTexture : m_vTextureArray)
-					m_oRenderer.BindTexture(pTexture->GetID(), m_vUnitTextures[i++], IRenderer::T_2D);
-				m_pShader->SendUniformVectorArray("baseMapArray", m_vUnitTextures);
-				m_pShader->SendUniformValues("TextureCount", (int)m_vTextureArray.size());
-			}
+		if (!m_vTextureArray.empty()) {
+			m_pShader->SendUniformVector4Array("MaterialArray", m_vMaterialArray);
+			m_pShader->SendUniformVectorArray("ShininessArray", m_vShininessArray);
+			int i = 0;
+			for (ITexture* pTexture : m_vTextureArray)
+				m_oRenderer.BindTexture(pTexture->GetID(), m_vUnitTextures[i++], IRenderer::T_2D);
+			m_pShader->SendUniformVectorArray("baseMapArray", m_vUnitTextures);
+			m_pShader->SendUniformValues("TextureCount", (int)m_vTextureArray.size());
 		}
 	}
 		
@@ -217,7 +210,7 @@ void CMesh::Update()
 	m_pShader->GetName(shaderName);
 	transform(shaderName.begin(), shaderName.end(), shaderName.begin(), tolower);
 	
-	if (shaderName=="skinning") {
+	if (shaderName=="skinning" || shaderName == "shadowmapskinningfirstpass") {
 		nVertexWeightID = m_pShader->EnableVertexAttribArray( "vVertexWeight" );
 		m_oRenderer.BindVertexBuffer( m_nVertexWeightBufferID );
 		m_pShader->VertexAttributePointerf( nVertexWeightID, 4, 0 );
@@ -232,7 +225,7 @@ void CMesh::Update()
 	else
 		m_oRenderer.DrawGeometry( m_pBuffer );
 
-	if (shaderName == "skinning") {
+	if (shaderName == "skinning" || shaderName == "shadowmapskinningfirstpass") {
 		m_pShader->DisableVertexAttribArray( nVertexWeightID );
 		m_pShader->DisableVertexAttribArray( nWeightedVertexID );
 	}
@@ -361,6 +354,11 @@ void CMesh::SetShader( IShader* pShader )
 IBox* CMesh::GetBBox()
 {
 	return m_pBbox;
+}
+
+IShader* CMesh::GetShader() const 
+{ 
+	return m_pShader; 
 }
 
 int CMesh::GetParentBoneID() const

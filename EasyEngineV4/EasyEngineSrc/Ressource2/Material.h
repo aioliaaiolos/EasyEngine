@@ -51,6 +51,7 @@ public:
 	ITexture*					GetTexture();
 	void						SetTexture(ITexture* pTexture);
 	void						SetAmbient(float r, float g, float b, float a) override;
+	void						SetAmbient(const CVector& ambient) override;
 	void						SetDiffuse(float r, float g, float b, float a) override;
 	void						SetSpecular(float r, float g, float b, float a) override;
 	void						SetSpecular(const CVector& pos) override;

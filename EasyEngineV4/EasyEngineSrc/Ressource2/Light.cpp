@@ -4,7 +4,9 @@
 #include "IRenderer.h"
 
 unsigned int CLight::s_nCurrentLightID = GL_LIGHT0;
-map< int, bool > CLight::s_mEnabledLight;
+map< CLight*, bool > CLight::s_mEnabledLight;
+
+map<ILight::Type, string> CLight::s_TypeToString = { { ILight::OMNI, "omni" },{ ILight::DIRECTIONAL , "dir"},{ ILight::SPOT , "spot"} };
 
 CLight::Desc::Desc( IRenderer& oRenderer, IShader* pShader ):
 fIntensity( 0 ),
@@ -24,19 +26,20 @@ m_Diffuse( oDesc.Color ),
 m_Type( oDesc.type ),
 m_ID( s_nCurrentLightID ),
 m_Ambient(0.1f, 0.1f, 0.1f, 1.f),
-m_oRenderer(oDesc.m_oRenderer)
+m_oRenderer(oDesc.m_oRenderer),
+m_fAttenuationConstant(oDesc.fAttenuationConstant),
+m_fAttenuationLinear(oDesc.fAttenuationLinear),
+m_fAttenuationQuadratic(oDesc.fAttenuationQuadratic)
 {
-	s_nCurrentLightID ++;	
+	s_nCurrentLightID ++;
 	oDesc.m_oRenderer.SetLightAttenuation( m_ID, oDesc.fAttenuationConstant, oDesc.fAttenuationLinear, oDesc.fAttenuationQuadratic );
 	SetIntensity( oDesc.fIntensity );
 
-	if (m_Type != CLight::DIRECTIONAL)
-		oDesc.m_oRenderer.SetLightAttenuation( m_ID, 0.01f, 0.0001f, 0.000001f );
+	SetType(m_Type);
 
-	if (m_Type == CLight::SPOT)
-		m_oRenderer.SetLightSpotProp( m_ID, 10.f, 1 );
+
 	m_oRenderer.EnableLight( m_ID );
-	s_mEnabledLight[ m_ID ] = true;
+	s_mEnabledLight[ this ] = true;
 	ostringstream ossName;
 	ossName << "Light" << m_ID;
 	m_sName = ossName.str();
@@ -46,9 +49,12 @@ m_oRenderer(oDesc.m_oRenderer)
 void CLight::RemoveAllLights(IRenderer& oRenderer)
 {
 	s_nCurrentLightID = GL_LIGHT0;
-	for (map<int, bool>::iterator itLight = s_mEnabledLight.begin(); itLight != s_mEnabledLight.end(); itLight++) {
-		if (itLight->second)
-			oRenderer.DisableLight(itLight->first);
+	for (map<CLight*, bool>::iterator itLight = s_mEnabledLight.begin(); itLight != s_mEnabledLight.end(); itLight++) {
+		if (itLight->first)
+			itLight->first->Enable(false);
+	}
+	for (int i = 0; i < 8; i++) {
+		oRenderer.DisableLight(GL_LIGHT0 + i);
 	}
 }
 
@@ -70,7 +76,7 @@ void CLight::Update()
 			m_oRenderer.SetLightLocalPos(m_ID, 0.f, -1.f, 0.f, 0.f);
 		}
 		if (m_Type == CLight::OMNI)
-		{			
+		{
 			m_oRenderer.SetLightLocalPos(m_ID, 0.f,0.f,0.f,1.f);
 		}
 		if (m_Type == CLight::SPOT)
@@ -83,16 +89,22 @@ void CLight::Update()
 
 void CLight::Enable(bool enable)
 {
+	if (m_bIsEnabled == enable)
+		return;
 	m_bIsEnabled = enable;
 	if (!enable) {
 		m_oRenderer.DisableLight(m_ID);
-		SetIntensity(0.f);
 	}
-	else
+	else {
+		m_ID = s_nCurrentLightID;
 		m_oRenderer.EnableLight(m_ID);
+		s_nCurrentLightID++;
+		UpdateIntensity();
+		SetAttenuation(m_fAttenuationConstant, m_fAttenuationLinear, m_fAttenuationQuadratic);
+	}
 }
 
-CLight::TLight CLight::GetType()
+CLight::Type CLight::GetType()
 {
 	return m_Type;
 }
@@ -105,13 +117,18 @@ float CLight::GetIntensity()
 void CLight::SetIntensity(float fIntensity)
 {
 	m_fIntensity = fIntensity;
-	GLfloat diffuse[] = {m_fIntensity*m_Diffuse.m_x,m_fIntensity*m_Diffuse.m_y,m_fIntensity*m_Diffuse.m_z,m_Diffuse.m_w};
-	GLfloat specular[] = {m_fIntensity*m_Specular.m_x,m_fIntensity*m_Specular.m_y,m_fIntensity*m_Specular.m_z,m_Specular.m_w};
-	GLfloat ambient[] = {m_fIntensity*m_Ambient.m_x,m_fIntensity*m_Ambient.m_y,m_fIntensity*m_Ambient.m_z,1.f};			
+	UpdateIntensity();
+}
 
-	m_oRenderer.SetLightAmbient( m_ID, ambient[0], ambient[1], ambient[2], ambient[3] );
-	m_oRenderer.SetLightDiffuse(m_ID, diffuse[0], diffuse[1], diffuse[2], diffuse[3] );
-	m_oRenderer.SetLightSpecular( m_ID, specular[0], specular[1], specular[2], specular[3] );
+void CLight::UpdateIntensity()
+{
+	GLfloat diffuse[] = { m_fIntensity*m_Diffuse.m_x,m_fIntensity*m_Diffuse.m_y,m_fIntensity*m_Diffuse.m_z,m_Diffuse.m_w };
+	GLfloat specular[] = { m_fIntensity*m_Specular.m_x,m_fIntensity*m_Specular.m_y,m_fIntensity*m_Specular.m_z,m_Specular.m_w };
+	GLfloat ambient[] = { m_fIntensity*m_Ambient.m_x,m_fIntensity*m_Ambient.m_y,m_fIntensity*m_Ambient.m_z,1.f };
+
+	m_oRenderer.SetLightAmbient(m_ID, ambient[0], ambient[1], ambient[2], ambient[3]);
+	m_oRenderer.SetLightDiffuse(m_ID, diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
+	m_oRenderer.SetLightSpecular(m_ID, specular[0], specular[1], specular[2], specular[3]);
 }
 
 float CLight::GetAmbient()
@@ -131,6 +148,26 @@ void CLight::SetSpecular(float fSpecular)
 	m_Specular = CVector(fSpecular, fSpecular, fSpecular, 1.f);
 	GLfloat specular[] = { m_fIntensity * fSpecular, m_fIntensity * fSpecular, m_fIntensity * fSpecular, 1.f };
 	m_oRenderer.SetLightSpecular(m_ID, specular[0], specular[1], specular[2], specular[3]);
+}
+
+void CLight::CastShadow(bool castShadow)
+{
+	m_bCastShadow = castShadow;
+}
+
+bool CLight::IsCastShadow()
+{
+	return m_bCastShadow;
+}
+
+void CLight::SetSun(bool sun)
+{
+	m_bIsSun = sun;
+}
+
+bool CLight::IsSun()
+{
+	return m_bIsSun;
 }
 
 bool CLight::IsEnabled()
@@ -156,4 +193,24 @@ void CLight::SetSpotAngle(float angle)
 {
 	m_fSpotAngle = angle;
 	m_oRenderer.SetLightSpotProp(m_ID, m_fSpotAngle, 1);
+}
+
+void CLight::SetAttenuation(float fAttenuationConstant, float fAttenuationLinear, float fAttenuationQuadratic)
+{
+	m_fAttenuationConstant = fAttenuationConstant;
+	m_fAttenuationLinear = fAttenuationLinear;
+	m_fAttenuationQuadratic = fAttenuationQuadratic;
+	m_oRenderer.SetLightAttenuation(m_ID, fAttenuationConstant, fAttenuationLinear, fAttenuationQuadratic);
+}
+
+void CLight::SetType(Type type)
+{
+	m_Type = type;
+	if (type != CLight::DIRECTIONAL)
+		SetAttenuation(0.01f, 0.0001f, 0.000001f);
+	else
+		SetAttenuation(0.01f, 0.f, 0.f);
+
+	if (type == CLight::SPOT)
+		m_oRenderer.SetLightSpotProp(m_ID, 10.f, 1);
 }

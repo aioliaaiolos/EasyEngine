@@ -1,3 +1,6 @@
+#ifndef REPERE_H
+#define REPERE_H
+
 #include "Shape.h"
 
 
@@ -12,9 +15,13 @@ public:
 	void						DrawCollisionBoundingBoxes(bool bDraw) {}
 	int							GetCellSize() { throw 1; return -1; };
 	const string&				GetTypeName() const;
+	void						SetAxesLength(int length);
 
 private:
 	CMatrix						m_oBase;
 	string						m_sEntityID;
 	string						m_sEntityType;
+	int							m_nAxeLength = 1000;
 };
+
+#endif // REPERE_H

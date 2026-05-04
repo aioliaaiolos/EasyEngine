@@ -1,8 +1,8 @@
 #extension GL_EXT_gpu_shader4 : enable
 
 uniform sampler2D baseMap;
+uniform sampler2D shadowMap;
 uniform int TextureCount;
-
 uniform int nMaterialCount;
 uniform sampler1D MaterialMap;
 uniform vec4 MaterialArray[20];
@@ -10,18 +10,20 @@ uniform float ShininessArray[5];
 uniform sampler2D baseMapArray[20];
 uniform float ArraySize;
 uniform int LightCount;
+uniform vec4 lightDir;
 
 varying vec4 vModelVertexPos;
 varying vec3 N;
 varying vec3 V;
 varying vec2 Texcoord;
-
 varying float fPSMatID;
+varying vec4 fragPosLightSpace;
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor );
 vec4 GetLightInfluence2( gl_LightSourceParameters light, vec4 vMatAmbient, vec4 vMatDiffuse, vec4 vMatSpecular, vec4 vMatEmissive, float fMatShininess, vec4 vModelVertexPos, vec3 N, vec3 V);
 float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light );
 vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor);
+float ComputeShadowFactor();
 
 void main()
 {
@@ -56,6 +58,38 @@ void main()
 			gl_FragColor += GetLightInfluenceMultiMaterial( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
 		}
 	}
+	
+	vec3 color = gl_FragColor.xyz;
+	color = color / (color + vec3(1.0));
+	gl_FragColor = vec4(color, 1.0);
+}
+
+float ComputeShadowFactor()
+{
+	if(lightDir.xyz == vec3(0, 0, 0))
+		return 1.0;
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    
+    // Hors du frustum lumière → pas d'ombre
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+        projCoords.y < 0.0 || projCoords.y > 1.0 ||
+        projCoords.z > 1.0)
+        return 1.0;
+    
+    float closestDepth = texture2D(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float bias = 0.0005;
+	
+	float shadow = 0.0;
+	float texelSize = 1.0 / 8192.0;
+	for(int x = -2; x <= 2; x++) {
+		for(int y = -2; y <= 2; y++) {
+			shadow += projCoords.z - bias > texture2D(shadowMap, projCoords.xy + vec2(x,y) * texelSize).r ? 0.0 : 1.0;
+		}
+	}
+	shadow /= 25.0;
+    return shadow;
 }
 
 vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor)
@@ -64,6 +98,7 @@ vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, v
 	vec3 L = normalize(light.position - vPos).xyz;
 	float alpha = acos(dot(L, light.spotDirection));
 	if(alpha < light.spotCutoff) {
+		float shadowFactor = ComputeShadowFactor();
 		int nPSMatID = int(round(fPSMatID));
 		vec4 matSpecular = MaterialArray[nPSMatID * 4 + 2];
 		float shininess = ShininessArray[nPSMatID];
@@ -73,20 +108,21 @@ vec4 GetLightInfluenceMultiMaterial(gl_LightSourceParameters light, vec4 vPos, v
 		float factor = pow(max(dot(R,V),0.), shininess);
 		vec4 vSpecular = factor * matSpecular * light.specular;
 		float fAttenuationFactor = GetAttenuationFactor( vPos, light );
-		return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+		return fAttenuationFactor * ( vAmbient + shadowFactor * (vDiffuse + vSpecular) );
 	}
 	return vec4(0, 0, 0, 1);
 }
 
 vec4 GetLightInfluence( gl_LightSourceParameters light, vec4 vPos, vec3 N, vec3 V, vec4 diffuseColor )
 {
+	float shadowFactor = ComputeShadowFactor();
 	vec4 vAmbient = diffuseColor * light.ambient;
 	vec3 L = normalize(light.position - vPos).xyz;
 	vec4 vDiffuse = max(dot(L,N), 0.) * diffuseColor * light.diffuse;
 	vec3 R = reflect( -L, N );
 	vec4 vSpecular = pow(max(dot(R,V),0.), gl_FrontMaterial.shininess) * gl_FrontMaterial.specular * light.specular;
 	float fAttenuationFactor = GetAttenuationFactor( vPos, light );
-	return fAttenuationFactor * ( vAmbient + vDiffuse + vSpecular );
+	return fAttenuationFactor * ( vAmbient + shadowFactor * (vDiffuse + vSpecular) );
 }
 
 float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light )
@@ -94,3 +130,5 @@ float GetAttenuationFactor( vec4 vertexPos, gl_LightSourceParameters light )
 	float fDistance = distance(light.position, vertexPos);
 	return 1. / ( light.constantAttenuation + light.linearAttenuation * fDistance + light.quadraticAttenuation*pow(fDistance,2.) );
 }
+
+

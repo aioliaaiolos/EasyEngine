@@ -155,6 +155,11 @@ void CMaterial::SetAmbient(float r, float g, float b, float a)
 	m_vAmbient.push_back(a);
 }
 
+void CMaterial::SetAmbient(const CVector& ambient)
+{
+	SetAmbient(ambient.m_x, ambient.m_y, ambient.m_z, 1.f);
+}
+
 void CMaterial::SetDiffuse(float r, float g, float b, float a)
 {
 	m_vDiffuse.clear();
@@ -173,13 +178,9 @@ void CMaterial::SetSpecular(float r, float g, float b, float a)
 	m_vSpecular.push_back(a);
 }
 
-void CMaterial::SetSpecular(const CVector& pos)
+void CMaterial::SetSpecular(const CVector& spec)
 {
-	m_vSpecular.clear();
-	m_vSpecular.push_back(pos.m_x);
-	m_vSpecular.push_back(pos.m_y);
-	m_vSpecular.push_back(pos.m_z);
-	m_vSpecular.push_back(1.f);
+	SetSpecular(spec.m_x, spec.m_y, spec.m_z, 1.f);
 }
 
 float CMaterial::GetShininess()

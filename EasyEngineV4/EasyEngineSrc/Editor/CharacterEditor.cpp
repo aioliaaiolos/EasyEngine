@@ -42,7 +42,7 @@ void CCharacterEditor::SetEditionMode(bool bEditionMode)
 		m_oEntityManager.Clear();
 		m_pScene->Clear();
 		ZoomCameraBody();
-		IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.1f);
+		IEntity* pLight = m_oEntityManager.CreateLightEntity(CVector(1, 1, 1), ILight::Type::OMNI, 0.1f);
 		CVector pos(230, 150, -35);
 		pLight->SetLocalPosition(pos);
 		pLight->Link(m_pScene);

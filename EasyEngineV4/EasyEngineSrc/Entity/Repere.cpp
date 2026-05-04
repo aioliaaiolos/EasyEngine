@@ -13,7 +13,12 @@ void CRepere::Update()
 {
 	CShape::Update();
 	if (!m_bHidden)
-		m_oRenderer.DrawBase(m_oBase, 1000);
+		m_oRenderer.DrawBase(m_oBase, m_nAxeLength);
+}
+
+void CRepere::SetAxesLength(int length)
+{
+	m_nAxeLength = length;
 }
 
 void CRepere::SetEntityName(string sName) 

@@ -32,7 +32,7 @@ CPlayerWindow::CPlayerWindow(EEInterface& oInterface, const CDimension& windowSi
 
 	m_pCameraManager = static_cast<ICameraManager*>(oInterface.GetPlugin("CameraManager"));
 	m_pWindowCamera = m_pCameraManager->CreateCamera(ICameraManager::TCameraType::TFree, 40.f);
-	m_pLightEntity = m_pEntityManager->CreateLightEntity(CVector(1, 1, 1), IRessource::TLight::OMNI, 0.f);
+	m_pLightEntity = m_pEntityManager->CreateLightEntity(CVector(1, 1, 1), ILight::Type::OMNI, 0.f);
 	m_pLightEntity->SetName("PlayerWindowLightEntity");
 }
 

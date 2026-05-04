@@ -8,14 +8,13 @@
 #include <gl/gl.h>
 #include <gl/GLU.h>
 
-
 class CLight : public ILight
 {	
 public:
 	struct Desc
 	{
 		CVector				Color;
-		IRessource::TLight	type;
+		ILight::Type		type;
 		float 				fIntensity;
 		float 				fAttenuationConstant;
 		float 				fAttenuationLinear;
@@ -28,7 +27,7 @@ public:
 								CLight( const Desc& oDesc );
 	virtual 					~CLight();
 	void 						Update();
-	TLight						GetType() override;
+	Type						GetType() override;
 	bool						IsEnabled();
 	void						Enable(bool enable);
 	void						SetShader( IShader* pShader );
@@ -37,28 +36,42 @@ public:
 	float						GetAmbient() override;
 	void						SetAmbient(float fAmbient) override;
 	void						SetSpecular(float fAmbient) override;
+	void						CastShadow(bool castShadow) override;
+	bool						IsCastShadow() override;
+	void						SetSun(bool sun) override;
+	bool						IsSun() override;
 	CVector						GetColor();
 	IShader*					GetShader() const { return NULL; }
 	void						SetSpotDirection(CVector dir) override;
 	void						SetSpotAngle(float angle) override;
+	void						SetAttenuation(float fAttenuationConstant, float fAttenuationLinear, float fAttenuationQuadratic);
+	void						SetType(Type type) override;
 	static void					RemoveAllLights(IRenderer& oRenderer);
 	static int					GetLightCount();
 
 private:
+	void						UpdateIntensity();
 	static unsigned int			s_nCurrentLightID;
-	static map< int, bool >		s_mEnabledLight;
+	static map< CLight*, bool>	s_mEnabledLight;
 
 	IRenderer&					m_oRenderer;
 	CVector						m_Ambient;
 	CVector						m_Diffuse;
 	CVector						m_Specular;
-	TLight						m_Type;
+	Type						m_Type;
 	float						m_fIntensity;
 	unsigned int				m_ID;
 	bool						m_bIsEnabled;
 	GLUquadricObj*				m_pDebugQuadricObj;
 	CVector						m_oSpotDirection;
 	float						m_fSpotAngle = 10.f;
+	bool						m_bCastShadow = false;
+	bool						m_bIsSun = false;
+	float						m_fAttenuationConstant = 0.f;
+	float						m_fAttenuationLinear = 0.f;
+	float						m_fAttenuationQuadratic = 0.f;
+
+	static map<ILight::Type, string> s_TypeToString;
 };
 
 #endif //LIGHT_H

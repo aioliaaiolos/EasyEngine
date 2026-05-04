@@ -17,6 +17,7 @@
 #include "Shader.h"
 #include "IFileSystem.h"
 #include "Utils2/RenderUtils.h"
+#include "IConsole.h"
 
 #pragma pack(push, 1)
 
@@ -38,6 +39,12 @@ CRenderer::CRenderer(EEInterface& oInterface) :
 	m_fFov(40.f),
 	m_bCameraLocked(false)
 {
+
+	oInterface.HandlePluginCreation("Console", [&](CPlugin* pPlugin) 
+	{
+		IConsole* pConsole = dynamic_cast<IConsole*>(pPlugin);
+		m_pConsole = pConsole;
+	});
 
 	IWindowsGUISystem* pWindowGUISystem = dynamic_cast<IWindowsGUISystem*>(oInterface.GetPlugin("WindowsGUISystem"));
 	m_pWindow = pWindowGUISystem->GetWindowEditor();
@@ -76,9 +83,80 @@ CRenderer::~CRenderer()
 	m_mShader.clear();
 }
 
+void CRenderer::DisplayLightInfos(void)
+{
+	GLboolean lighting_enabled = glIsEnabled(GL_LIGHTING);
+	m_pConsole->Println("=== État des lumières OpenGL ===\n");
+	m_pConsole->Println(string("GL_LIGHTING : ") + (lighting_enabled ? "ACTIVÉ" : "désactivé"));
+
+	/* Modèle d'éclairage global */
+	GLfloat ambient_global[4];
+	glGetFloatv(GL_LIGHT_MODEL_AMBIENT, ambient_global);
+	m_pConsole->Println(string("Ambiante globale : ") + 
+		std::to_string(ambient_global[0]) + ", " + 
+		std::to_string(ambient_global[1]) + ", " + 
+		std::to_string(ambient_global[2]) + ", " + 
+		std::to_string(ambient_global[3]));
+
+	for (int i = 0; i < 8; i++) {
+		GLenum light = GL_LIGHT0 + i;
+		GLboolean enabled = glIsEnabled(light);
+
+		m_pConsole->Println(string("--- GL_LIGHT") + std::to_string(i) + " : " + (enabled ? "ACTIVÉE" : "désactivée"));
+		if (!enabled)
+			continue;
+
+		GLfloat ambient[4], diffuse[4], specular[4], position[4];
+		GLfloat spot_dir[3];
+		GLfloat spot_exp, spot_cutoff;
+		GLfloat const_att, lin_att, quad_att;
+
+		glGetLightfv(light, GL_AMBIENT, ambient);
+		glGetLightfv(light, GL_DIFFUSE, diffuse);
+		glGetLightfv(light, GL_SPECULAR, specular);
+		glGetLightfv(light, GL_POSITION, position);
+		glGetLightfv(light, GL_SPOT_DIRECTION, spot_dir);
+		glGetLightfv(light, GL_SPOT_EXPONENT, &spot_exp);
+		glGetLightfv(light, GL_SPOT_CUTOFF, &spot_cutoff);
+		glGetLightfv(light, GL_CONSTANT_ATTENUATION, &const_att);
+		glGetLightfv(light, GL_LINEAR_ATTENUATION, &lin_att);
+		glGetLightfv(light, GL_QUADRATIC_ATTENUATION, &quad_att);
+
+		m_pConsole->Println(string("  Ambiante  : ") + std::to_string(ambient[0]) + ", " + std::to_string(ambient[1]) + ", " + std::to_string(ambient[2]) + ", " + std::to_string(ambient[3]));
+		m_pConsole->Println(string("  Diffuse  : ") + std::to_string(diffuse[0]) + ", " + std::to_string(diffuse[1]) + ", " + std::to_string(diffuse[2]) + ", " + std::to_string(diffuse[3]));
+		m_pConsole->Println(string("  Spéculaire  : ") + std::to_string(specular[0]) + ", " + std::to_string(specular[1]) + ", " + std::to_string(specular[2]) + ", " + std::to_string(specular[3]));
+		
+		m_pConsole->Println(string("  Position  : ") + 
+			std::to_string(position[0]) + ", " + 
+			std::to_string(position[1]) + ", " + 
+			std::to_string(position[2]) + ", " + 
+			std::to_string(position[3]) + 
+			(position[3] == 0.0f ? " directionnelle" : " ponctuelle"));
+
+		if (spot_cutoff != 180.0f) {
+			m_pConsole->Println(string("  Spot dir   : ") + std::to_string(spot_dir[0]) + ", " + std::to_string(spot_dir[1]) + ", " + std::to_string(spot_dir[2]));
+			m_pConsole->Println(string("  Spot cutoff/exp : ") + std::to_string(spot_cutoff) + ", " + std::to_string(spot_exp));
+		}
+		else {
+			m_pConsole->Println("  (pas un spot, cutoff = 180°)");
+		}
+
+		m_pConsole->Println(string("  Atténuation : const =  : ") + std::to_string(const_att) + ", lin = " + std::to_string(lin_att) + ", quad = " + std::to_string(quad_att));
+	}
+	m_pConsole->Println("================================");
+}
+
 void CRenderer::SetViewPort(int width, int height)
 {
+	m_nViewportWidth = width;
+	m_nViewportHeight = height;
 	glViewport(0, 0, width, height);
+}
+
+void CRenderer::GetViewPort(int& width, int& height)
+{
+	width = m_nViewportWidth;
+	height = m_nViewportHeight;
 }
 
 void CRenderer::TurnOffAllLight()
@@ -112,7 +190,7 @@ void CRenderer::InitOpengl()
 	m_pWindow->Setfocus();
 	unsigned int nWidth, nHeight;
 	m_pWindow->GetDimension( nWidth, nHeight );
-	glViewport( 0, 0, nWidth, nHeight );
+	SetViewPort(nWidth, nHeight);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
@@ -175,6 +253,18 @@ void CRenderer::CalcProjection( CMatrix& oMatrix, float fov )
 	float fInvRatio = 1.f / fRatio;
 	float fovRad = fov * 3.1415927f / 180.f;
 	CalcProjection( oMatrix, -fovRad, fovRad, -fovRad*fInvRatio, fovRad*fInvRatio, 1.f, 1000000.f );
+}
+
+void CRenderer::CalcOrthoProjection(CMatrix& m, float Left, float Right, float Bottom, float Top, float Near, float Far)
+{
+	m.SetIdentity();
+	m.m_00 = 2.0f / (Right - Left);
+	m.m_03 = -(Right + Left) / (Right - Left);
+	m.m_11 = 2.0f / (Top - Bottom);
+	m.m_13 = -(Top + Bottom) / (Top - Bottom);
+	m.m_22 = -2.0f / (Far - Near);
+	m.m_23 = -(Far + Near) / (Far - Near);
+	m.m_33 = 1.0f;
 }
 
 void CRenderer::BeginRender()
@@ -248,7 +338,7 @@ void CRenderer::GetModelViewProjectionMatrix(CMatrix& oMatrix)
 
 void CRenderer::ResizeScreen( int nWidth, int nHeight )
 {
-	glViewport( 0, 0, nWidth, nHeight );
+	SetViewPort(nWidth, nHeight);
 }
 
 void CRenderer::CreateOGLContext()
@@ -1644,52 +1734,32 @@ void CRenderer::CreateColorFrameBufferObject(int width, int height, unsigned int
 	}
 }
 
-void CRenderer::CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& nTextureId)
+void CRenderer::CreateDepthFrameBufferObject(int width, int height, unsigned int& nFBOId, unsigned int& depthMap)
 {
-# if 0
-	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 	glGenFramebuffers(1, &nFBOId);
-	glBindFramebuffer(GL_FRAMEBUFFER, nFBOId);
-
-	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
-	glGenTextures(1, &nTextureId);
-	glBindTexture(GL_TEXTURE_2D, nTextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, nTextureId, 0);
-
-	glDrawBuffer(GL_NONE); // No color buffer is drawn to
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		throw CEException("CRenderer::CreateDepthFrameBufferObject : glCheckFramebufferStatus() call fails");
-#else
-	glGenFramebuffers(1, &nFBOId);
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
-	glGenTextures(1, &nTextureId);
-	glBindTexture(GL_TEXTURE_2D, nTextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, nFBOId);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, nTextureId, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif // 0
 }
 
 void CRenderer::SetCurrentFBO(int fbo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+}
+
+bool CRenderer::IsLightingEnabled()
+{
+	return glIsEnabled(GL_LIGHTING);
 }
 
 float CRenderer::GetScreenRatio()

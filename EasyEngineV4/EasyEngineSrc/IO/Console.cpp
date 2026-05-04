@@ -16,6 +16,8 @@
 #include "Exception.h"
 #include "IGUIManager.h"
 
+#include "Utils2/logger.h"
+
 using namespace std;
 
 
@@ -471,6 +473,14 @@ void CConsole::NewLine()
 	m_vLines.resize( m_vLines.size() + 1 );
 	m_nCurrentLineWidth = 0;
 	UpdateConsoleHeight();
+
+	
+	if (m_bWriteToFile) {
+		FILE* pFile = fopen("log2.txt", "a");
+		string s = "\n";
+		fwrite(s.c_str(), 1, s.size(), pFile);
+		fclose(pFile);
+	}
 }
 
 bool CConsole::IsOpen()
@@ -489,6 +499,11 @@ void CConsole::Print( string s )
 {
 	AddString(s);
 	
+	if (m_bWriteToFile) {
+		FILE* pFile = fopen("log2.txt", "a");
+		fwrite(s.c_str(), 1, s.size(), pFile);
+		fclose(pFile);
+	}
 }
 
 void CConsole::Print(int i)

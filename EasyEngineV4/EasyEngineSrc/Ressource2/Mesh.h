@@ -66,7 +66,7 @@ public:
 	void								DrawAnimationBoundingBox(bool bDraw);
 	void								SetShader(IShader* pShader);
 	IBox*								GetBBox();
-	IShader*							GetShader() const { return m_pShader; }
+	IShader*							GetShader() const;
 	int									GetParentBoneID()const;
 	void								GetOrgWorldPosition(CVector& v);
 	void								SetRenderingType(IRenderer::TRenderType t);
@@ -80,7 +80,6 @@ public:
 	IMaterial*							GetMaterial(int index) override;
 	void								SetDrawStyle(IRenderer::TDrawStyle style) override;
 	bool								IsSkinned();
-	IShader*							GetShader();
 
 
 private:

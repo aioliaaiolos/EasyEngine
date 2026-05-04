@@ -1,8 +1,8 @@
 varying vec2 Texcoord;
 
-uniform sampler2D baseMap;
+uniform sampler2D shadowMap;
 
 void main()
 {
-    gl_FragData[0] = texture2D(baseMap, Texcoord);	
+    gl_FragData[0] = texture2D(shadowMap, Texcoord);	
 }

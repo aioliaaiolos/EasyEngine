@@ -20,20 +20,3 @@ private:
 	IRenderer&			m_oRenderer;
 	CGUIWidget			m_oMinimap;
 };
-
-class CShadowMapWindow : public CGUIWindow
-{
-public:
-	CShadowMapWindow(EEInterface& oInterface, IScene& oScene, int nWidth, int nHeight);
-	~CShadowMapWindow();
-
-	void				Display();
-
-protected:
-
-private:
-	CGUIManager*		m_pGUIManager;
-	IScene&				m_oScene;
-	IRenderer&			m_oRenderer;
-	CGUIWidget			m_oShadowMap;
-};

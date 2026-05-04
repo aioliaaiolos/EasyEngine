@@ -31,10 +31,6 @@ void CShape::Update()
 	}
 }
 
-void CShape::SetAxesLength( float r, float g, float b )
-{
-}
-
 void CShape::SetAxesColor( int r, int g, int b )
 {
 }

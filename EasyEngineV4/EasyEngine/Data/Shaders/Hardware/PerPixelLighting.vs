@@ -4,11 +4,16 @@ varying vec4 vModelVertexPos;
 varying vec3 N;
 varying vec3 V;
 varying vec2 Texcoord;
+varying vec4 fragPosLightSpace;
 
 #ifdef MULTIMATERIAL
 attribute int nMatID;
 varying float fPSMatID;
 #endif // MULTIMATERIAL
+
+uniform mat4 lightSpaceModelview;
+uniform mat4 lightSpaceProjection;
+uniform mat4 model;
 
 void main()
 {
@@ -21,4 +26,5 @@ void main()
 	V = -normalize(vModelVertexPos.xyz);
 	Texcoord    = gl_MultiTexCoord0.xy;	
 	gl_Position = vViewVertexPos;
+	fragPosLightSpace = lightSpaceProjection * lightSpaceModelview * model * gl_Vertex;
 }

@@ -1926,6 +1926,19 @@ void DisplayLightIntensity( IScriptState* pState )
 	m_pConsole->Println( oss.str() );
 }
 
+void DisplayLightAmbient(IScriptState* pState)
+{
+	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
+		float fAmbient = pLight->GetAmbient();
+		ostringstream oss;
+		oss << fAmbient;
+		m_pConsole->Println(oss.str());
+	}
+}
+
 void RunScript( string sFileName )
 {
 	FILE* pFile = m_pFileSystem->OpenFile( sFileName, "r" );
@@ -2492,13 +2505,13 @@ void CreateLight(IScriptState* pState)
 	CVector Color( (float)pr->m_nValue / 255.f, (float)pg->m_nValue / 255.f, (float)pb->m_nValue / 255.f, 1.f );
 	string sType = pType->m_sValue;
 	transform( pType->m_sValue.begin(), pType->m_sValue.end(), sType.begin(), tolower );
-	IRessource::TLight type;
+	ILight::Type type;
 	if( sType == "omni" )
-		type = IRessource::OMNI;
+		type = ILight::Type::OMNI;
 	else if( sType == "dir" )
-		type = IRessource::DIRECTIONAL;
+		type = ILight::Type::DIRECTIONAL;
 	else if( sType == "spot" )
-		type = IRessource::SPOT;
+		type = ILight::Type::SPOT;
 	else
 	{
 		m_pConsole->Println( "Paramètre 4 invalide, vous devez entrer un type de lumière parmis les 3 suivants : \"omni\" , \"dir\" , \"spot\" " );
@@ -2520,13 +2533,13 @@ void CreateLightw( IScriptState* pState )
 	CVector Color( 1.f, 1.f, 1.f, 1.f );
 	string sType = pType->m_sValue;
 	transform( pType->m_sValue.begin(), pType->m_sValue.end(), sType.begin(), tolower );
-	IRessource::TLight type;
+	ILight::Type type;
 	if( sType == "omni" )
-		type = IRessource::OMNI;
+		type = ILight::Type::OMNI;
 	else if( sType == "dir" )
-		type = IRessource::DIRECTIONAL;
+		type = ILight::Type::DIRECTIONAL;
 	else if( sType == "spot" )
-		type = IRessource::SPOT;
+		type = ILight::Type::SPOT;
 	else
 	{
 		m_pConsole->Println( "Paramètre 1 invalide, vous devez entrer un type de lumière parmis les 3 suivants : \"omni\" , \"dir\" , \"spot\" " );
@@ -2638,6 +2651,62 @@ void SetEntitySpecular(IScriptState* pState)
 	CValueFloat* pb = (CValueFloat*)pState->GetArg(3);
 	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
 	pEntity->SetCustomSpecular(CVector(pr->m_fValue, pg->m_fValue, pb->m_fValue));
+}
+
+void SetLightCastShadow(IScriptState* pState)
+{
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueInt* pCast = (CValueInt*)pState->GetArg(1);
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		pLightEntity->CastShadow(pCast->m_nValue > 0);
+	}
+}
+
+void SetShadowFrustumSize(IScriptState* pState)
+{
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueFloat* pLength = (CValueFloat*)pState->GetArg(1);
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		pLightEntity->SetShadowFrustumSize(pLength->m_fValue);
+	}
+}
+
+void SetLightSun(IScriptState* pState)
+{
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueInt* pSun = (CValueInt*)pState->GetArg(1);
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	if (pLightEntity) {
+		ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
+		bool sun = pSun->m_nValue > 0;
+		pLight->SetSun(sun);
+	}
+}
+
+void SetLightType(IScriptState* pState)
+{
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueString* pType = (CValueString*)pState->GetArg(1);
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
+	ILight::Type type = m_pRessourceManager->LightStringToType(pType->m_sValue);
+	pLightEntity->GetLight()->SetType(type);
+}
+
+void RemoveallLights(IScriptState* pState)
+{
+	m_pRessourceManager->RemoveAllLights();
+}
+
+void SetEntityAmbient(IScriptState* pState)
+{
+	CValueInt* pID = (CValueInt*)pState->GetArg(0);
+	CValueFloat* pr = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pg = (CValueFloat*)pState->GetArg(2);
+	CValueFloat* pb = (CValueFloat*)pState->GetArg(3);
+	IEntity* pEntity = m_pEntityManager->GetEntity(pID->m_nValue);
+	pEntity->SetCustomAmbient(CVector(pr->m_fValue, pg->m_fValue, pb->m_fValue));
 }
 
 void SetSpecular(IScriptState* pState)
@@ -3319,6 +3388,13 @@ void SetEntityPos( IScriptState* pState )
 		m_pConsole->Println("Identifiant invalide");
 }
 
+void SetFarShadowFrustum(IScriptState* pState)
+{
+	CValueInt* pLightID = static_cast< CValueInt* >(pState->GetArg(0));
+	CValueFloat* pFarFrustumLength = static_cast< CValueFloat* >(pState->GetArg(1));
+
+}
+
 void SetEntityDummyRootPos(IScriptState* pState)
 {
 	CValueInt* pID = static_cast< CValueInt* >(pState->GetArg(0));
@@ -3905,9 +3981,36 @@ void DisplayVariables(IScriptState* pState)
 	}
 }
 
+void EnableLight(IScriptState* pState)
+{
+	CValueInt* pLightId = static_cast<CValueInt*>(pState->GetArg(0));
+	CValueInt* pEnable = static_cast<CValueInt*>(pState->GetArg(1));
+	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pLightId->m_nValue));
+	if (pLightEntity) {
+		pLightEntity->GetLight()->Enable(pEnable->m_nValue != 0);
+	}
+	else {
+		string msg = string("Error, light ") + std::to_string(pLightId->m_nValue) + " does not exists";
+		m_pConsole->Println(msg);
+	}
+}
+
+void DisplayLightInfos(IScriptState* pState)
+{
+	m_pRenderer->DisplayLightInfos();
+}
+
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("DisplayLightInfos", DisplayLightInfos, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("EnableLight", EnableLight, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);
@@ -4167,6 +4270,36 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	m_pScriptManager->RegisterFunction("SetEntitySpecular", SetEntitySpecular, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("SetLightCastShadow", SetLightCastShadow, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetShadowFrustumSize", SetShadowFrustumSize, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("SetLightSun", SetLightSun, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SetLightType", SetLightType, vType, eVoid);
+
+	vType.clear();
+	m_pScriptManager->RegisterFunction("RemoveallLights", RemoveallLights, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
+	m_pScriptManager->RegisterFunction("SetEntityAmbient", SetEntityAmbient, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eFloat);
@@ -4462,6 +4595,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back(eInt);
 	m_pScriptManager->RegisterFunction("DisplayLightIntensity", DisplayLightIntensity, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eInt);
+	m_pScriptManager->RegisterFunction("DisplayLightAmbient", DisplayLightAmbient, vType, eVoid);
 
 	vType.clear();
 	vType.push_back( eInt );

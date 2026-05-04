@@ -47,7 +47,8 @@ public:
 	int														GetEntityID( IEntity* pEntity );
 	int														GetEntityCount();
 	CEntity*												CreateLightEntity();
-	ILightEntity*											CreateLightEntity( CVector Color, IRessource::TLight type, float fIntensity );
+	ILightEntity*											CreateLightEntity(ILight* pLight);
+	ILightEntity*											CreateLightEntity(CVector Color, ILight::Type type, float fIntensity);
 	float													GetLightIntensity(int nID) override;
 	void													SetLightIntensity( int nID, float fIntensity ) override;
 	void													DestroyEntity( IEntity* pEntity );
@@ -134,7 +135,7 @@ private:
 	map<IMesh*, vector<vector<CMatrix>>>					m_mBonesMatrixQueue;
 	bool													m_bUseInstancing;
 	map<string, CItem*>										m_mItems;
-	vector<ILight*>											m_vLights;
+	vector<ILight*>											m_vShadowLights;
 	bool													m_bAreCollisionsEnabled = true;
 };
 

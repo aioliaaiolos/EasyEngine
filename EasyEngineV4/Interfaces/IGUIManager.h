@@ -137,8 +137,6 @@ public:
 	virtual void					SetGUIMode(bool bGUIMode) = 0;
 	virtual bool					GetGUIMode() = 0;
 	virtual void					ToggleDisplayMiniMap() = 0;
-	virtual void					ToggleDisplayMiniMap2() = 0;
-	virtual void					ToggleDisplayShadowMap() = 0;
 	virtual void					CreateWidgetArrayFromString(string sText, TFontColor color, vector<CGUIWidget>& widgets) = 0;
 	virtual ITexture*				GetColorTexture(TFontColor color) const = 0;
 	virtual IInventoryWindow*		CreateInventoryWindow(const CDimension& windowSize) = 0;

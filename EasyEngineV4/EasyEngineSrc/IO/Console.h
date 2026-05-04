@@ -80,6 +80,7 @@ private:
 	string											m_sResponse;
 	int												m_nBeginReponseCursorPos;
 	void*											m_pResponseData;
+	bool											m_bWriteToFile = false;
 
 	void											OnKeyPress(unsigned char key);
 	void											OnKeyRelease(unsigned char key);

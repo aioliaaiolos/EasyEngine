@@ -63,6 +63,7 @@ public:
 	virtual bool						IsCollidable() = 0;
 	virtual const string&				GetTypeName() const = 0;
 	virtual void						SetTypeName(const string& sTypeName) = 0;
+	virtual void						Follow(INode* pNode, float farDistance, float fNearDistance) = 0;
 };
 
 #endif // INODE_H

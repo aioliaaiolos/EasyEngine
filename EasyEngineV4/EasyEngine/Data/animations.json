@@ -24,7 +24,7 @@
 			]
 		},
 		{
-			"bodies": ["body01-f-mixamo", "body04-f-mixamo", "body06-f-mixamo", "body17-f-mixamo"],
+			"bodies": ["body01-f-mixamo", "body04-f-mixamo", "body06-f-mixamo"],
 			"actionAnimations": 
 			[
 				{"Dancing": "Standing-f-mixamo"},

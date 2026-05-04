@@ -117,12 +117,49 @@ void CNode::Update()
 		LocalTranslate( m_vConstantLocalTranslate.m_x, m_vConstantLocalTranslate.m_y, m_vConstantLocalTranslate.m_z );
 	UpdateWorldMatrix();
 	UpdateChildren();
+	UpdateFollow();
 }
 
 void CNode::Link( INode* pNode )
 {
 	SetParent( dynamic_cast<CNode*>(pNode) );
 	pNode->AddChild(this);
+}
+
+void CNode::Follow(INode* pNode, float farDistance, float nearDistance)
+{
+	m_pFollowedEntity = pNode;
+	m_fFarDistanceToFollow = farDistance;
+	m_fNearDistanceToFollow = nearDistance;
+}
+
+void CNode::UpdateFollow()
+{
+	if (m_pFollowedEntity) {
+		float distance = this->GetDistance(m_pFollowedEntity);
+		if (distance > m_fFarDistanceToFollow) {
+			CVector thisPos, nodePos;
+			m_pFollowedEntity->GetWorldPosition(nodePos);
+			GetWorldPosition(thisPos);
+			CVector dir = nodePos - thisPos;
+			dir.Normalize();
+			static float bias = 1.f;
+			CVector translation = dir * (distance + bias - m_fFarDistanceToFollow);
+			translation.m_y = 0;
+			LocalTranslate(translation);
+		}
+		if (m_fNearDistanceToFollow >= 0 && distance < m_fNearDistanceToFollow) {
+			CVector thisPos, nodePos;
+			m_pFollowedEntity->GetWorldPosition(nodePos);
+			GetWorldPosition(thisPos);
+			CVector dir = thisPos - nodePos;
+			dir.Normalize();
+			static float bias = 1.f;
+			CVector translation = dir * (m_fNearDistanceToFollow - distance);
+			translation.m_y = 0;
+			LocalTranslate(translation);
+		}
+	}
 }
 
 void CNode::Unlink()
@@ -169,6 +206,10 @@ void CNode::LocalTranslate( float dx, float dy, float dz )
 	m_oLocalMatrix = m_oLocalMatrix * CMatrix::GetTranslation( dx, dy, dz );
 }
 
+void CNode::LocalTranslate(const CVector& v)
+{
+	m_oLocalMatrix = m_oLocalMatrix * CMatrix::GetTranslation(v.m_x, v.m_y, v.m_z);
+}
 
 bool bTest = false;
 
@@ -226,6 +267,7 @@ void CNode::SetWorldPosition( const CVector& vPos )
 	m_oLocalMatrix.m_03 = localPos.m_x;
 	m_oLocalMatrix.m_13 = localPos.m_y;
 	m_oLocalMatrix.m_23 = localPos.m_z;
+	m_oLocalMatrix.m_33 = 1;
 }
 
 void CNode::SetWorldPosition(float x, float y, float z)

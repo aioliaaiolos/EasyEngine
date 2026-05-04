@@ -18,7 +18,6 @@ protected:
 public:
 	CShape( IRenderer& oRenderer );
 	virtual void	Update() = 0;
-	void			SetAxesLength( float r, float g, float b );
 	void			SetAxesColor( int r, int g, int b );
 	void			GetRessourceFileName( string& sFileName );
 	void			DrawBoundingBox( bool bDraw );
@@ -52,6 +51,7 @@ public:
 	void			DeabonneToEntityEvent(IEventDispatcher::TEntityCallback callback) override {}
 	void			SetDiffuseTexture(string sFileName) override {}
 	void			SetCustomSpecular(const CVector& customSpecular) override {}
+	void			SetCustomAmbient(const CVector& customAmbient) override {}
 	void			DrawCollisionBoundingBoxes(bool bDraw) override{}
 	void			PlayCurrentAnimation(bool loop) override{}
 	void			PauseCurrentAnimation(bool loop) override{}

@@ -50,10 +50,9 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_nHeightMapID(-1),
 	m_bHeightMapCreated(true),
 	m_sMiniMapFirstPassShaderName("mapFirstPass"),
-	m_sMiniMap2FirstPassShaderName("map2FirstPass"),
 	m_sMiniMapSecondPassShaderName("mapSecondPass2D"),
 	m_sShadowMapFirstPassShaderName("shadowMapFirstPass"),
-	m_sShadowMapSecondPassShaderName("shadowMapSecondPass"),
+	m_sShadowMapFirstPassSkinningShaderName("shadowMapSkinningFirstPass"),
 	m_pPlayer(NULL),
 	m_bDisplayMinimap(false),
 	m_fGroundMargin(-10.f),
@@ -81,10 +80,7 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_pMiniMapCamera->SetWorldPosition(0, 40000, 0);
 	m_pMiniMapCamera->Pitch(-90);
 
-	m_pShadowMapTexture = CreateShadowMapTexture();
-	m_pMinimapTexture = CreateMinimapTexture();
-	m_pMinimapTexture2 = CreateMinimap2Texture();
-	
+	m_pMinimapTexture = CreateMinimapTexture();	
 
 	m_pPlayerMapSphere = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity("playerPointer.bme"));
 	m_pPlayerMapSphere->SetShader(m_oRenderer.GetShader(m_sMiniMapFirstPassShaderName));
@@ -99,41 +95,13 @@ ITexture* CScene::CreateMinimapTexture()
 {
 	unsigned int nMinimapWidth, nMinimapHeight;
 	m_oRenderer.GetResolution(nMinimapWidth, nMinimapHeight);
-	ITexture* pMinimapTexture = m_oRessourceManager.CreateRenderTexture(nMinimapWidth, nMinimapHeight, m_sMiniMapSecondPassShaderName, IRessourceManager::COLOR);
+	ITexture* pMinimapTexture = m_oRessourceManager.CreateRenderTexture(nMinimapWidth, nMinimapHeight, m_sMiniMapSecondPassShaderName, IRessourceManager::COLOR, 9);
 	return pMinimapTexture;
-}
-
-ITexture* CScene::CreateMinimap2Texture()
-{
-	unsigned int nMinimapWidth, nMinimapHeight;
-	m_oRenderer.GetResolution(nMinimapWidth, nMinimapHeight);
-	ITexture* pMinimapTexture = m_oRessourceManager.CreateRenderTexture(nMinimapWidth, nMinimapHeight, m_sMiniMapSecondPassShaderName, IRessourceManager::COLOR);
-	return pMinimapTexture;
-}
-
-ITexture* CScene::CreateShadowMapTexture()
-{
-	unsigned int nShadowmapWidth, nShadowmapHeight;
-	m_oRenderer.GetResolution(nShadowmapWidth, nShadowmapHeight);
-	ITexture* pShadowMapTexture = m_oRessourceManager.CreateRenderTexture(nShadowmapWidth, nShadowmapHeight, m_sShadowMapSecondPassShaderName, IRessourceManager::DEPTH);
-	pShadowMapTexture->SetShader(m_oRenderer.GetShader("ground"));
-	pShadowMapTexture->SetUnitTexture(10);
-	return pShadowMapTexture;
 }
 
 ITexture* CScene::GetMinimapTexture()
 {
 	return m_pMinimapTexture;
-}
-
-ITexture* CScene::GetMinimapTexture2()
-{
-	return m_pMinimapTexture2;
-}
-
-ITexture* CScene::GetShadowMapTexture()
-{
-	return m_pShadowMapTexture;
 }
 
 void CScene::SetRessource(string sFileName, bool bDuplicate)
@@ -286,45 +254,25 @@ IEntity* CScene::Merge( string sRessourceName, CMatrix& oXForm )
 
 void CScene::Update()
 {
-	if (m_vMiniMapEntities.size() == 0) {
-		OnChangeSector();
-	}
 	m_oTimeManager.Update();
-	if (m_bDisplayShadowMap) {
-		RenderShadowMap();
-	}
-	RenderScene();
-
 	if (m_bDisplayMinimap) {
 		RenderMinimap();
 		m_oRenderer.SetCurrentFBO(0);
 	}
-	if (m_bDisplayMinimap2) {
-		RenderMinimap2();
-		m_oRenderer.SetCurrentFBO(0);
+	
+	for (CLightEntity* pLightEntity : m_vShadowLights) {
+		if (pLightEntity->GetLight()->IsCastShadow()) {
+			pLightEntity->RenderFirstShadowPass(m_vShadowMapEntities);
+			break;
+		}
 	}
-	else {
-		ICamera* pActiveCamera = m_oCameraManager.GetActiveCamera();
-		m_oCameraTM = pActiveCamera->GetWorldMatrix();
-	}
-
+	RenderScene();
 	DispatchEntityEvent();
 }
 
 void CScene::DisplayMinimap(bool display)
 {
 	m_bDisplayMinimap = display;
-}
-
-void CScene::DisplayMinimap2(bool display)
-{
-	m_bDisplayMinimap2 = display;
-}
-
-
-void CScene::DisplayShadowMap(bool display)
-{
-	m_bDisplayShadowMap = display;
 }
 
 void CScene::SetGroundMargin(float margin)
@@ -409,6 +357,11 @@ void CScene::SetRessourceFileName(string sNewFileName)
 	m_pCollisionMap->SetFileName(sCollisionFileName);
 }
 
+vector<CLightEntity*> CScene::getShadowLights()
+{
+	return m_vShadowLights;
+}
+
 void CScene::UpdateState()
 {
 	switch (m_eSceneState) {
@@ -439,6 +392,44 @@ void CScene::UpdateState()
 	}
 }
 
+void CScene::RemoveAllLights()
+{
+	m_vShadowLights.clear();
+}
+
+void CScene::AddChild(INode* pNode)
+{
+	CEntity::AddChild(pNode);
+	CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pNode);
+	if (pLightEntity) {
+		ILight* pLight = static_cast<ILight*>(pLightEntity->GetRessource());
+		if (pLight && pLight->IsCastShadow()) {
+			m_vShadowLights.push_back(pLightEntity);
+			pLightEntity->CastShadow(true);
+		}
+	}
+	else
+	{
+		CPlayer* pPlayer = dynamic_cast<CPlayer*>(pNode);
+		if (pPlayer)
+			m_pPlayer = pPlayer;
+	}
+	
+#ifdef LIGHT_SUN
+	if (m_pPlayer && m_pCastShadowLight && m_pCastShadowLight->GetLight()->IsSun()) {
+		CMatrix sunTM;
+		m_pCastShadowLight->GetLocalMatrix(sunTM);
+		CVector playerPos, sunPos;
+		m_pPlayer->GetWorldPosition(playerPos);
+		m_pCastShadowLight->GetLocalPosition(sunPos);
+		CVector z(sunPos - playerPos);
+		sunTM.LookAt(z, sunPos);
+		m_pCastShadowLight->SetLocalMatrix(sunTM);
+		m_pCastShadowLight->Follow(m_pPlayer, m_fFarShadowFrustum / 2.f, m_fFarShadowFrustum / 2.f - 500.f);
+	}
+#endif // LIGHT_SUN
+}
+
 void  CScene::RenderScene()
 {
 	if (m_oCameraManager.GetActiveCamera()) {
@@ -449,21 +440,25 @@ void  CScene::RenderScene()
 	}
 	UpdateState();
 
-	CNode::Update();	
+	CNode::Update();
 
 	if (m_pEntityManager->IsUsingInstancing()) {
 		RenderInstances();
 		m_pEntityManager->ClearRenderQueue();
 	}
 
-	m_oRenderer.SetModelMatrix(m_oWorldMatrix);
-	if (m_pRessource && !m_bHidden) {
+	if (m_pRessource && !m_bHidden) {			
+		for (CLightEntity* pLightEntity : m_vShadowLights) {
+			pLightEntity->RenderSecondShadowPass(m_pGroundShader, nullptr);
+		}
+		
 		if (m_pHeightMaptexture) {
 			m_pHeightMaptexture->SetShader(m_pGroundShader);
 			m_pGroundShader->SendUniformValues("groundHeight", m_fMapHeight);
 			m_pGroundShader->SendUniformValues("tiling", m_fTiling);
 			m_pHeightMaptexture->Update();
 		}
+		m_oRenderer.SetModelMatrix(m_oWorldMatrix);
 		m_pRessource->Update();
 	}
 }
@@ -475,35 +470,9 @@ void CScene::RenderMinimap()
 	DisplayEntitiesForMiniMap(m_vMiniMapEntities);
 }
 
-void CScene::RenderMinimap2()
-{
-	// first pass
-	m_oRenderer.SetCurrentFBO(m_pMinimapTexture2->GetFrameBufferObjectId());
-	DisplayEntitiesForMiniMap2(m_vMiniMapEntities);
-}
-
-void CScene::RenderShadowMap()
-{
-	int shadowWidth, shadowHeight;
-	m_pShadowMapTexture->GetDimension(shadowWidth, shadowHeight);
-	m_oRenderer.SetViewPort(shadowWidth, shadowHeight);
-	// first pass
-	m_oRenderer.SetCurrentFBO(m_pShadowMapTexture->GetFrameBufferObjectId());
-	m_oRenderer.ClearDepthBuffer();
-	// m_oRenderer.SetCurrentFBO(m_pMinimapTexture->GetFrameBufferObjectId());
-	DisplayEntitiesForShadowMap(m_vShadowMapEntities);
-	m_oRenderer.SetCurrentFBO(0);
-	m_oRenderer.SetViewPort(shadowWidth, shadowHeight);
-	unsigned int nScreenWidth, nScreenHeight;
-	m_oRenderer.GetResolution(nScreenWidth, nScreenHeight);
-	m_oRenderer.SetViewPort(nScreenWidth, nScreenHeight);
-	m_oRenderer.ClearFrameBuffer();
-	m_pShadowMapTexture->SetUnitName("shadowMap");
-	m_pShadowMapTexture->Update();
-}
-
 void CScene::CollectMinimapEntities(vector<IEntity*>& entities)
 {
+	entities.clear();
 	for (int i = 0; i < GetChildCount(); i++) {
 		CEntity* pEntity = dynamic_cast<CEntity*>(GetChild(i));
 		if (pEntity) {
@@ -511,12 +480,12 @@ void CScene::CollectMinimapEntities(vector<IEntity*>& entities)
 				IPlayer* pPlayer = dynamic_cast<IPlayer*>(pEntity);
 				if (pPlayer)
 					m_pPlayer = pEntity;
-				CCharacter* pMobile = dynamic_cast<CCharacter*>(pEntity);
-				if (!pMobile) {
-					CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pEntity);
-					if (!pLightEntity) {
-						CMinimapEntity* pMapEntity = dynamic_cast<CMinimapEntity*>(pEntity);
-						if (!pMapEntity)
+				CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pEntity);
+				if (!pLightEntity) {
+					CMinimapEntity* pMapEntity = dynamic_cast<CMinimapEntity*>(pEntity);
+					if (!pMapEntity) {
+						CCamera* pCamera = dynamic_cast<CCamera*>(pEntity);
+						if(!pCamera)
 							entities.push_back(pEntity);
 					}
 				}
@@ -528,10 +497,6 @@ void CScene::CollectMinimapEntities(vector<IEntity*>& entities)
 void CScene::CollectShadowMapEntities(vector<IEntity*>& entities)
 {
 	CollectMinimapEntities(entities);
-#if 0
-	if(m_pPlayer)
-		entities.push_back(m_pPlayer);
-#endif // 0
 }
 
 void CScene::OnChangeSector()
@@ -677,160 +642,48 @@ void CScene::DisplayEntitiesForMiniMap(const vector<IEntity*>& entities)
 #endif // 0
 }
 
-void CScene::DisplayEntitiesForMiniMap2(const vector<IEntity*>& entities)
+void CScene::RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection)
 {
-	if (m_pPlayer) {
-		ICamera* pActiveCamera = m_oCameraManager.GetActiveCamera();
-		CMatrix oCamMatrix;
-		pActiveCamera->GetWorldMatrix(oCamMatrix);
-		//oCamMatrix = m_oCameraTM;
-		CMatrix oBackupInvCameraMatrix;
-		m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
-		m_oRenderer.SetCameraMatrix(oCamMatrix);
-		m_oRenderer.ClearFrameBuffer();
-		IShader* pBackupShader = NULL;
-		IShader* pFirstPassShader = m_oRenderer.GetShader(m_sMiniMap2FirstPassShaderName);
+	CMatrix oBackupInvCameraMatrix;
+	m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
+	m_oRenderer.SetInvCameraMatrix(lightView);
+	CMatrix backupProjection;
+	m_oRenderer.GetProjectionMatrix(backupProjection);
+	m_oRenderer.SetProjectionMatrix(lightProjection);
+	m_oRenderer.ClearFrameBuffer();
+	IShader* pBackupShader = NULL;
+	IShader* pFirstPassShader = m_oRenderer.GetShader(m_sShadowMapFirstPassShaderName);
+	IShader* pFirstPassSkinningShader = m_oRenderer.GetShader(m_sShadowMapFirstPassSkinningShaderName);
 
-		CMatrix m;
-		m_oRenderer.SetModelMatrix(m);
-		IMesh* pGround = static_cast<IMesh*>(GetRessource());
-		pBackupShader = pGround->GetShader();
-		pGround->SetShader(pFirstPassShader);
-		pGround->Update();
-		pGround->SetShader(pBackupShader);
+	CMatrix m;
+	m_oRenderer.SetModelMatrix(m);
+	IMesh* pGround = static_cast<IMesh*>(GetRessource());
+	if (!pGround)
+		return;
+	pBackupShader = pGround->GetShader();
+	pGround->SetShader(pFirstPassShader);
+	pGround->SetShader(pBackupShader);
 
-		for (int i = 0; i < entities.size(); i++) {
-			CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-			IRessource* pRessource = pEntity->GetRessource();
-			if (pRessource) {
-				pBackupShader = pRessource->GetShader();
-				pEntity->SetShader(pFirstPassShader);
-				m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-				pEntity->UpdateRessource();
-				pEntity->SetShader(pBackupShader);
+	for (int i = 0; i < entities.size(); i++) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
+		IRessource* pRessource = pEntity->GetRessource();
+		if (pRessource) {
+			pBackupShader = pRessource->GetShader();
+			IShader* pShader = nullptr;
+			if (pBackupShader->GetName().find("Skinning") != -1) {
+				pShader = pFirstPassSkinningShader;
 			}
-		}
-		m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
-	}
-}
-
-void CScene::DisplayEntitiesForShadowMap(const vector<IEntity*>& entities)
-{
-#if 1
-	if (m_pPlayer) {
-		ICamera* pActiveCamera = m_oCameraManager.GetActiveCamera();
-		CMatrix oCamMatrix;
-		pActiveCamera->GetWorldMatrix(oCamMatrix);
-		CMatrix oBackupInvCameraMatrix;
-		m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
-		m_oRenderer.SetCameraMatrix(oCamMatrix);
-		//m_oCameraManager.SetActiveCamera(m_pMiniMapCamera);
-		m_oRenderer.ClearFrameBuffer();
-		IShader* pBackupShader = NULL;
-		IShader* pFirstPassShader = m_oRenderer.GetShader(m_sShadowMapFirstPassShaderName);
-
-		CMatrix m;
-		m_oRenderer.SetModelMatrix(m);
-		IMesh* pGround = static_cast<IMesh*>(GetRessource());
-		pBackupShader = pGround->GetShader();
-		pGround->SetShader(pFirstPassShader);
-		pGround->Update();
-		pGround->SetShader(pBackupShader);
-
-		for (int i = 0; i < entities.size(); i++) {
-			CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-			IRessource* pRessource = pEntity->GetRessource();
-			if (pRessource) {
-				pBackupShader = pRessource->GetShader();
-				pEntity->SetShader(pFirstPassShader);
-				m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-				pEntity->UpdateRessource();
-				pEntity->SetShader(pBackupShader);
+			else {
+				pShader = pFirstPassShader;
 			}
-		}
-
-		m_pPlayerMapSphere->SetLocalMatrix(m_pPlayer->GetWorldMatrix());
-		m_pPlayerMapSphere->Update();
-
-		//m_oCameraManager.SetActiveCamera(pActiveCamera);
-		m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
-	}
-
-#else
-	if (m_pPlayer) {
-		ICamera* pActiveCamera = m_oCameraManager.GetActiveCamera();
-		CMatrix oCamMatrix;
-		m_pShadowMapCamera->SetLocalMatrix(m_pCastedLight->GetLocalMatrix());
-		m_pShadowMapCamera->Update();
-		m_pShadowMapCamera->GetWorldMatrix(oCamMatrix);
-		CMatrix oBackupInvCameraMatrix;
-		m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
-		m_oRenderer.SetCameraMatrix(oCamMatrix);
-		m_oCameraManager.SetActiveCamera(m_pShadowMapCamera);
-		m_oRenderer.ClearFrameBuffer();
-		IShader* pBackupShader = NULL;
-		IShader* pFirstPassShader = m_oRenderer.GetShader(m_sMiniMapFirstPassShaderName);
-
-		CMatrix m;
-		m_oRenderer.SetModelMatrix(m);
-		IMesh* pGround = static_cast<IMesh*>(GetRessource());
-		pBackupShader = pGround->GetShader();
-		pGround->SetShader(pFirstPassShader);
-		pGround->Update();
-		pGround->SetShader(pBackupShader);
-
-		for (int i = 0; i < entities.size(); i++) {
-			CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-			IRessource* pRessource = pEntity->GetRessource();
-			if (pRessource) {
-				pBackupShader = pRessource->GetShader();
-				pEntity->SetShader(pFirstPassShader);
-				m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-				pEntity->UpdateRessource();
-				pEntity->SetShader(pBackupShader);
-			}
-		}
-
-		m_pPlayerMapSphere->SetLocalMatrix(m_pPlayer->GetWorldMatrix());
-		m_pPlayerMapSphere->Update();
-
-		m_oCameraManager.SetActiveCamera(pActiveCamera);
-		m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
-	}
-#endif // 0
-}
-
-void CScene::DisplayEntitiesForShadowMapTest(const vector<IEntity*>& entities)
-{
-	if (m_pPlayer) {
-		CMatrix oCamMatrix;
-		m_oCameraManager.GetActiveCamera()->Update();
-		m_oCameraManager.GetActiveCamera()->GetWorldMatrix(oCamMatrix);
-		m_oRenderer.SetCameraMatrix(oCamMatrix);
-		m_oRenderer.ClearFrameBuffer();
-		IShader* pBackupShader = NULL;
-		IShader* pFirstPassShader = m_oRenderer.GetShader(m_sShadowMapFirstPassShaderName);
-
-		CMatrix m;
-		m_oRenderer.SetModelMatrix(m);
-		IMesh* pGround = static_cast<IMesh*>(GetRessource());
-		pBackupShader = pGround->GetShader();
-		pGround->SetShader(pFirstPassShader);
-		pGround->Update();
-		pGround->SetShader(pBackupShader);
-
-		for (int i = 0; i < entities.size(); i++) {
-			CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-			IRessource* pRessource = pEntity->GetRessource();
-			if (pRessource) {
-				pBackupShader = pRessource->GetShader();
-				pEntity->SetShader(pFirstPassShader);
-				m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-				pEntity->UpdateRessource();
-				pEntity->SetShader(pBackupShader);
-			}
+			pEntity->SetShader(pShader);
+			m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
+			pEntity->Update();
+			pEntity->SetShader(pBackupShader);
 		}
 	}
+	m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
+	m_oRenderer.SetProjectionMatrix(backupProjection);
 }
 
 void CScene::GetInfos( ILoader::CSceneInfos& si )
@@ -949,6 +802,7 @@ void CScene::Clear()
 	pMapCamera->Link(this);
 	m_eSceneState = eStart;
 	m_vStateChangedCallback.clear();
+	m_vShadowLights.clear();
 }
 
 void CScene::ClearCharacters()

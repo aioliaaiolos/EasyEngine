@@ -63,8 +63,9 @@ void CObject::Update()
 	}
 
 	UpdateWorldMatrix();
+	SendShadowInfosToShader();
 	UpdateChildren();
-	SendBonesToShader();
+	SendBonesToShader();	
 
 	m_oWorldMatrix *= m_oScaleMatrix;
 	m_oRenderer.SetModelMatrix(m_oWorldMatrix);

@@ -11,7 +11,8 @@ using namespace std;
 CTextureBase::CDesc::CDesc( IRenderer& oRenderer, IShader* pShader, int nUnitTexture ):
 m_nUnitTexture( nUnitTexture ),
 m_pData( NULL ),
-m_oRenderer(oRenderer)
+m_oRenderer(oRenderer),
+m_pShader(pShader)
 {
 }
 

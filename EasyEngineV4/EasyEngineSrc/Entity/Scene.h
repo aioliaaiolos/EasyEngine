@@ -18,6 +18,7 @@ class IEntityManager;
 class ICollisionManager;
 class IPathFinder;
 class CSphereEntity;
+class CLightEntity;
 
 using namespace std;
 
@@ -60,17 +61,9 @@ public:
 	IGeometry*													GetBoundingGeometry();
 	void														RenderScene();
 	void														RenderMinimap();
-	void														RenderMinimap2();
-	void														RenderShadowMap();
 	ITexture*													CreateMinimapTexture();
-	ITexture*													CreateMinimap2Texture();
-	ITexture*													CreateShadowMapTexture();
 	ITexture*													GetMinimapTexture();
-	ITexture*													GetMinimapTexture2();
-	ITexture*													GetShadowMapTexture();
 	void														DisplayMinimap(bool display);
-	void														DisplayMinimap2(bool display);
-	void														DisplayShadowMap(bool display);
 	void														SetGroundMargin(float margin);
 	float														GetGroundMargin();
 	void														GetOriginalSceneFileName(string& sFileName);
@@ -84,6 +77,7 @@ public:
 	void														HandleStateChanged(StateChangedCallback callback, CPlugin* pPlugin) override;
 	void														UnhandleStateChanged(IScene::StateChangedCallback callback) override;
 	void														SetRessourceFileName(string sNewFileName) override;
+	vector<CLightEntity*>										getShadowLights();
 
 private:
 
@@ -96,14 +90,14 @@ private:
 	void														CollectMinimapEntities(vector<IEntity*>& entities);
 	void														CollectShadowMapEntities(vector<IEntity*>& entities);
 	void														DisplayEntitiesForMiniMap(const vector<IEntity*>& entities);
-	void														DisplayEntitiesForMiniMap2(const vector<IEntity*>& entities);
-	void														DisplayEntitiesForShadowMap(const vector<IEntity*>& entities);
-	void														DisplayEntitiesForShadowMapTest(const vector<IEntity*>& entities);
+	void														RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection);
 	void														OnChangeSector() override;
 	void														UpdateMapEntities();
 	bool														IsLoadingComplete();
 	void														RenderInstances();
 	void														UpdateState();
+	void														AddChild(INode* pNode) override;
+	void														RemoveAllLights();
 
 
 	ICameraManager&												m_oCameraManager;
@@ -118,20 +112,16 @@ private:
 	ICamera*													m_pMiniMapCamera = nullptr;
 	ICamera*													m_pShadowMapCamera = nullptr;
 	const string												m_sMiniMapFirstPassShaderName;
-	const string												m_sMiniMap2FirstPassShaderName;
 	const string												m_sMiniMapSecondPassShaderName;
 	const string												m_sShadowMapFirstPassShaderName;
-	const string												m_sShadowMapSecondPassShaderName;
+	const string												m_sShadowMapFirstPassSkinningShaderName;
 	ITexture*													m_pMinimapTexture;
-	ITexture*													m_pMinimapTexture2;
-	ITexture*													m_pShadowMapTexture;
+	ITexture*													m_pShadowTexture = nullptr;
 	vector<IEntity*>											m_vMiniMapEntities;
 	vector<IEntity*>											m_vShadowMapEntities;
 	CEntity*													m_pPlayer;
 	CEntity*													m_pPlayerMapSphere;
 	bool														m_bDisplayMinimap;
-	bool														m_bDisplayMinimap2 = false;
-	bool														m_bDisplayShadowMap = false;
 	float														m_fGroundMargin;
 	string														m_sOriginalSceneFileName;
 	ITexture*													m_pHeightMaptexture;
@@ -146,9 +136,7 @@ private:
 	vector<pair<StateChangedCallback, CPlugin*>>				m_vStateChangedCallback;
 	string														m_sCurrentLevelName;
 	TSceneState													m_eSceneState;
-	CEntity*													m_pCastedLight = nullptr;
-
-	CMatrix														m_oCameraTM;
+	vector<CLightEntity*>										m_vShadowLights;
 };
 
 #endif // SCENE_NODE_H
