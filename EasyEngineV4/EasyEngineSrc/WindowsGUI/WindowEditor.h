@@ -20,4 +20,9 @@ public:
 	CWindowEditor(const CWindowEditor::EditorDesc& desc);
 
 	static INT_PTR CALLBACK OnTopicCallback(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	static void FillFieldsFromType(HWND hWnd, int idcConditionType, EEInterface* pInterface);
+	static ITopicSystem* s_pTopicSystem;
+	static string s_LastSelectedTitle;
 };

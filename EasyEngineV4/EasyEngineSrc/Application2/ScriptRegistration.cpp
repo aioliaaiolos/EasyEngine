@@ -3585,7 +3585,7 @@ void SaveGame(IScriptState* pState)
 void LoadGame(IScriptState* pState)
 {
 	CValueString* pFileName = static_cast< CValueString* >(pState->GetArg(0));
-	m_pWorldEditor->Load(pFileName->m_sValue);
+	m_pWorldEditor->LoadGame(pFileName->m_sValue);
 }
 
 void Merge( IScriptState* pState )

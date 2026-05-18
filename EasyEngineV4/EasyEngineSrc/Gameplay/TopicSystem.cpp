@@ -3,7 +3,7 @@
 #include "IEntity.h"
 #include "IScriptManager.h"
 #include "Utils2/StringUtils.h"
-
+#include <rapidjson/prettywriter.h>
 
 using namespace rapidjson;
 
@@ -30,6 +30,27 @@ CCondition::TComp CCondition::GetComp()
 }
 
 
+string CCondition::GetCompStr()
+{
+	switch (m_eComp) {
+	case eEqual:
+		return "==";
+	case eDifferent:
+		return "!=";
+	case eSup:
+		return ">";
+	case eSupEqual:
+		return ">=";
+	case eInf:
+		return "<";
+	case eInfEqual:
+		return "<=";
+	case eIs:
+		return "is";
+	case eIsNot:
+		return "isNot";
+	}
+}
 
 CTopic::CTopic()
 {
@@ -111,6 +132,101 @@ bool CTopicSystem::ExecuteActions(ITopic* pTopic, string& error) const
 		return false;
 	}
 	return true;
+}
+
+void CTopicSystem::SaveTopics(const string& sFileName, map<string, vector<ITopic*>>& mTopics, vector<ITopic*>& vGreatings)
+{
+	string sJsonDirectory;
+	m_pFileSystem->GetLastDirectory(sJsonDirectory);
+	string sFilePath = sJsonDirectory + "\\" + sFileName;
+
+	ifstream ifs(sFilePath);
+	IStreamWrapper isw(ifs);
+	Document doc;
+
+	doc.ParseStream(isw);
+	if (!doc.IsObject())
+		doc.SetObject();
+	Value topics(kArrayType);
+
+	for (pair<const string, vector<ITopic*>>& titleTopic : mTopics) {
+		SaveJsonTopics(titleTopic.first, titleTopic.second, topics, doc);
+	}
+	Value greatings(kArrayType);
+	SaveJsonTopics("", vGreatings, greatings, doc);	
+
+	doc.AddMember("Topics", topics, doc.GetAllocator());
+	doc.AddMember("Greatings", greatings, doc.GetAllocator());
+
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	writer.SetIndent('\t', 1);
+	doc.Accept(writer);
+	std::ofstream ofs(sFilePath);
+	ofs << buffer.GetString();
+	ofs.close();
+}
+
+void CTopicSystem::SaveJsonTopics(string title, vector<ITopic*>& vTopic, Value& topics, Document& doc)
+{
+	for (ITopic* pTopic : vTopic) {
+		Value topic(kObjectType);
+		SaveJsonTopic(title, pTopic, doc, topic);
+		topics.PushBack(topic, doc.GetAllocator());
+	}
+}
+
+void CTopicSystem::SaveJsonTopic(string titleStr, ITopic* pTopic, Document& doc, rapidjson::Value& topic)
+{
+	if (!titleStr.empty()) {
+		Value title(kStringType);
+		title.SetString(titleStr.c_str(), doc.GetAllocator());
+		topic.AddMember("Title", title, doc.GetAllocator());
+	}
+	Value text(kStringType);
+	text.SetString(pTopic->GetText().c_str(), doc.GetAllocator());
+	topic.AddMember("Text", text, doc.GetAllocator());
+	Value conditions(kArrayType);
+	SaveJsonConditions(pTopic->GetConditions(), doc, conditions);
+	if (!conditions.Empty())
+		topic.AddMember("Conditions", conditions, doc.GetAllocator());
+	Value actions(kArrayType);
+	SaveJsonActions(pTopic->GetActions(), doc, actions);
+	if (!actions.Empty())
+		topic.AddMember("Actions", actions, doc.GetAllocator());
+}
+
+void CTopicSystem::SaveJsonConditions(const vector<ICondition*>& conditionArray, Document& doc, Value& conditions)
+{
+	for (ICondition* pCondition : conditionArray) {
+		Value condition(kObjectType);;
+		if (!pCondition->GetType().empty()) {
+			Value type(kStringType);
+			type.SetString(pCondition->GetType().c_str(), doc.GetAllocator());
+			condition.AddMember("Type", type, doc.GetAllocator());
+		}
+		Value name(kStringType);
+		name.SetString(pCondition->GetName().c_str(), doc.GetAllocator());
+		condition.AddMember("Name", name, doc.GetAllocator());
+
+		Value value(kStringType);
+		value.SetString(pCondition->GetValue().c_str(), doc.GetAllocator());
+		condition.AddMember("Value", value, doc.GetAllocator());
+
+		Value comp(kStringType);
+		comp.SetString(pCondition->GetCompStr().c_str(), doc.GetAllocator());
+		condition.AddMember("Comp", comp, doc.GetAllocator());
+		conditions.PushBack(condition, doc.GetAllocator());
+	}
+}
+
+void CTopicSystem::SaveJsonActions(const vector<string> actionArray, rapidjson::Document& doc, rapidjson::Value& actions)
+{
+	for (const string& actionStr : actionArray) {
+		Value action(kStringType);
+		action.SetString(actionStr.c_str(), doc.GetAllocator());
+		actions.PushBack(action, doc.GetAllocator());
+	}
 }
 
 void CTopicSystem::LoadTopics(string sFileName)
@@ -328,6 +444,11 @@ void CTopicSystem::GetCharacterTopics(string sCharacterID, vector<ITopic*>& topi
 map<string, vector<ITopic*>>& CTopicSystem::GetAllTopics()
 {
 	return m_mTopics;
+}
+
+vector<ITopic*>& CTopicSystem::GetAllGreatings()
+{
+	return m_vGreatings;
 }
 
 void CTopicSystem::Format(string sTopicText, string sSpeakerId, string& sFormatedText)

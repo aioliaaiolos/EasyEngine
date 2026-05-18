@@ -73,7 +73,7 @@ void CLight::Update()
 	{
 		if (m_Type == CLight::DIRECTIONAL)
 		{						
-			m_oRenderer.SetLightLocalPos(m_ID, 0.f, -1.f, 0.f, 0.f);
+			m_oRenderer.SetLightLocalPos(m_ID, 0.f, 0.0f, 1.f, 0.f);
 		}
 		if (m_Type == CLight::OMNI)
 		{

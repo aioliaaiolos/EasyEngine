@@ -25,6 +25,7 @@ public:
 	IEntity*												CreateEntity(string sFileName, bool bDuplicate = false );
 	IEntity*												CreateObject(string sFileName);
 	CEntity*												CreateEntityFromType(std::string sFileName, string sTypeName, string sID, bool bDuplicate = false);
+	map<string, IItem*> 									GetItems() override;
 	IEntity*												CreateEmptyEntity( string sName = "noname" );
 	CCollisionEntity*										CreateCollisionEntity(string sName = "noname");
 	IEntity*												CreateRepere( IRenderer& oRenderer );
@@ -78,9 +79,9 @@ public:
 	void													Kill(int entityId);
 	void													WearArmorToDummy(int entityId, string armorName) override;
 	void													SaveCharacterToDB(string sNPCID);
-	void													LoadCharacterInfos();
+	void													LoadCharacterInfos(string sSaveName, bool resetAllCharacters);
 	void													LoadCharacterInfoFromDB();
-	void													LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos);
+	void													LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos, string sSaveName);
 	void													SaveCharacterInfosToDB(const map<string, ILoader::CAnimatedEntityInfos>& characterInfos);
 	void													RemoveCharacterFromDB(string sID) override;
 	void													AddRenderQueue(INode* pEntity);

@@ -71,7 +71,7 @@
 				{"StrafeRight": "RightStrafe-f-mixamo"},
 				{"Sexy": "Standing-f-mixamo"},
 				{"Seat": "Standing-f-mixamo"},
-				{"Stand": "Standing-f-mixamo"},
+				{"Stand": "Standing2-f-mixamo"},
 				{"Walk": "Walking-f-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 1.0}
 			]
 		},
@@ -94,14 +94,14 @@
 				{"MoveToGuardWeaponPart2": "MoveToGuardWeaponPart2-m-mixamo"},
 				{"Original": "Original-m-mixamo"},
 				{"Punished": "Standing-m-mixamo"},
-				{"Run": "Running-m-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 10.0},
+				{"Run": "Running-m-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 5.0},
 				{"RunReverse": "Running-m-mixamo", "SpeedRelativeToAnimation": 5.0},
 				{"StrafeLeft": "LeftStrafe-m-mixamo"},
 				{"StrafeRight": "RightStrafe-m-mixamo"},
 				{"Sexy": "Standing-m-mixamo"},
 				{"Seat": "Standing-m-mixamo"},
 				{"Stand": "Standing-m-mixamo"},
-				{"Walk": "Walking-m-mixamo", "SpeedRelativeToAnimation": 3.0}
+				{"Walk": "Walking-m-mixamo", "SpeedRelativeToAnimation": 1.2}
 			]
 		},
 		{

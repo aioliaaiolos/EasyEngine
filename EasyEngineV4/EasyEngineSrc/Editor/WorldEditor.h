@@ -20,6 +20,7 @@ public:
 	int																	SpawnArea(string areaName) override;
 	int																	SpawnItem(string areaName) override;
 	void																LockEntity(string sEntityID) override;
+	void																LoadGame(string fileName) override;
 
 private:
 	void																ClearWorld();
@@ -31,8 +32,8 @@ private:
 	void																Save(string sFileName) override;
 	void																LoadFromDB(string fileName);
 	void																SaveToDB(string fileName);
-	void																LoadFromJson(string sFileName);
-	void																SaveToJson(string fileName);
+	void																LoadFromJson(string sFileName, bool isGameSave);
+	void																SaveToJson(string fileName, bool isGameSave);
 	void																Save();
 	void																SaveGame(string fileName) override;	
 	void																SpawnEntity(string sFileName) override;

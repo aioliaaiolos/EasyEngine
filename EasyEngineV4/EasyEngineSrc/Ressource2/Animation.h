@@ -48,6 +48,8 @@ public:
 	void			GetBoneKeysMap(map< int, vector< CKey > >& mBoneKeys);
 	void			SetBoneKeysMap(map< int, vector< CKey > >& mBoneKeys);
 	IAnimation*		CreateReversedAnimation();
+	void			Lock(bool lock) override;
+	bool			IsLocked() override;
 
 private:
 	map<int, IBone*>							m_mBones;
@@ -64,7 +66,8 @@ private:
 	int											m_nEndAnimationTime;
 	vector<TCallback>							m_vCallback;
 	EEInterface&								m_oInterface;
-	CTimeManager&								m_oTimeManager;
+	CTimeManager&								m_oTimeManager;	
+	bool										m_bLocked = false;
 
 	void										UpdateAnimationTime();
 	void										CallCallbacks( TEvent e );

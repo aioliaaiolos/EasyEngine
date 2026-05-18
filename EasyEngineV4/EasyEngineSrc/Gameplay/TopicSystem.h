@@ -16,18 +16,6 @@ class IFileSystem;
 
 struct CCondition : public ICondition
 {
-	enum TComp
-	{
-		eEqual = 0,
-		eDifferent,
-		eSup,
-		eSupEqual,
-		eInf,
-		eInfEqual,
-		eIs,
-		eIsNot
-	};
-
 	bool Evaluate(int val) const
 	{
 		int value = atoi(m_sValue.c_str());
@@ -109,8 +97,8 @@ struct CCondition : public ICondition
 	string GetType() override;
 	string GetName() override;
 	string GetValue() override;
-	TComp GetComp();
-
+	TComp GetComp() override;
+	string GetCompStr() override;
 
 	string	m_sType;
 	string	m_sName;
@@ -149,7 +137,8 @@ public:
 
 protected:
 	void										LoadTopics(string sFileName);
-	void										AddTopic(string sTopicName, string sText, vector<ICondition*>& conditions, const vector<string>& vAction);
+	void										SaveTopics(const string& sFileName, map<string, vector<ITopic*>>& mTopics, vector<ITopic*>& vGreatings) override;
+	void										AddTopic(string sTopicName, string sText, vector<ICondition*>& conditions, const vector<string>& vAction) override;
 	void										AddGreating(string sText, vector<ICondition*>& conditions, vector<string>& actions);
 	void										LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions, string sFileName);
 	int											SelectTopic(const vector<ITopic*>& topics, string sSpeakerId);
@@ -160,12 +149,19 @@ protected:
 	string										GetName() override;
 	void										GetCharacterTopics(string sCharacterID, vector<ITopic*>& topics) override;
 	//map<string, vector<CTopic>>&	GetAllTopics() override;
-	virtual map<string, vector<ITopic*>>&		GetAllTopics();
+	map<string, vector<ITopic*>>&				GetAllTopics() override;
+	vector<ITopic*>&							GetAllGreatings() override;
 	void										Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	void										GetVarValue(string sVarName, string sCharacterId, string& sValue);
 	bool										ExecuteActions(ITopic* pTopic, string& error) const;
 
 private:
+
+	void										SaveJsonTopics(string title, vector<ITopic*>& vTopic, rapidjson::Value& topics, rapidjson::Document& doc);
+	void										SaveJsonTopic(string titleStr, ITopic* pTopic, rapidjson::Document& doc, rapidjson::Value& topic);
+	void										SaveJsonConditions(const vector<ICondition*>& conditionArray, rapidjson::Document& doc, rapidjson::Value& conditions);
+	void										SaveJsonActions(const vector<string> actionArray, rapidjson::Document& doc, rapidjson::Value& actions);
+
 	map<string, vector<ITopic*>>				m_mTopics;
 	vector<ITopic*>								m_vGreatings;
 	IEntityManager*								m_pEntityManager = nullptr;

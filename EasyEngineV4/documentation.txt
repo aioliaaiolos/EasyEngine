@@ -1,0 +1,10 @@
+Exporter une animation depuis Mixamo :
+
+. Importer un mesh sous Mixamo
+. le rigger puis choisir une animation
+. Cocher "in place" si on veut que l'animation fasse du surplace
+. Exporter le personnage avec son animation dans \Data\Meshes\Bodies\mixamo\AnimatedMeshes\[type-de-corps]-[nom-de-l'animation]
+. Tourner le personnage de 90 degrés sur l'axe x, le déplacer au centre et le remonter sur l'axe y de la meme valeur qu'il était décentré (ses pieds doivent etre à)
+. Sous 3dsMax, ouvrir le script dans \Data\Max\maxScripts\convert_controllers_to_TCB.ms, s'assurer que tous les dummy sont sélectionnés puis l'exécuter (ctrl + E)
+. Exporter l'animation en format bke
+. Dans animation.json, modifier l'entrée correspondant au modele a qui l'on veut assigner l'animation ainsi que l'animation correspondante en mettant le nom de l'animation que l'on vient d'exporter

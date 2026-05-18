@@ -996,12 +996,12 @@ void CCharacter::RunAction( string sAction, bool bLoop )
 
 void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 {
-	IMesh* pMesh = static_cast< IMesh* >( m_pRessource );
+	IMesh* pMesh = static_cast<IMesh*>(m_pRessource);
 	map<string, string>::iterator itOverrideAnimation = m_mOverridenAnimation.find(s);
 	string sAnimationName; // = s_mBodiesAnimations[m_sCurrentBodyName][s].first;
 	sAnimationName = itOverrideAnimation != m_mOverridenAnimation.end() ? itOverrideAnimation->second : s_mBodyAnimations[m_sCurrentBodyName].m_mAnimationInfos[s].m_ActionToAnimation.second;
-	SetCurrentAnimation( sAnimationName );
-	if( !m_pCurrentAnimation )
+	SetCurrentAnimation(sAnimationName);
+	if (!m_pCurrentAnimation)
 	{
 		InitAnimations();
 		string sFileName;
@@ -1017,8 +1017,8 @@ void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 		}
 	}
 	m_pCurrentAnimation->SetAnimationTime(nFrameNumber);
-	m_pCurrentAnimation->Play( bLoop );
-	m_eCurrentAnimationType = s_mAnimationStringToType[ s ];
+	m_pCurrentAnimation->Play(bLoop);
+	m_eCurrentAnimationType = s_mAnimationStringToType[s];
 }
 
 void CCharacter::Walk( bool bLoop )
@@ -1141,6 +1141,7 @@ void CCharacter::PlayHitAnimation()
 				CBone* pSpine = static_cast<CBone*>(m_pSkeletonRoot->GetChildBoneByName(m_sSpineNode));
 				pSpine->SetKeys(m_mOriginalSpineKeys);
 				pSpine->SetLocalMatrix(m_oOriginalSpineLocalTM);
+				m_pCurrentAnimation->Lock(true);
 				m_pCurrentAnimation->AddCallback([this, alpha, pSpine, mult](IAnimation::TEvent e)
 				{
 					switch (e) {
@@ -1153,7 +1154,7 @@ void CCharacter::PlayHitAnimation()
 					{
 						m_pCurrentAnimation->RemoveAllCallback();
 						pSpine->SetKeys(m_mOriginalSpineKeys);
-						LockHit(false);
+						m_pCurrentAnimation->Lock(false);
 						break;
 					}
 					}
@@ -1479,12 +1480,12 @@ void CCharacter::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pPa
 	}
 }
 
-void CCharacter::Save()
+void CCharacter::Save(string gameName)
 {
-	SaveToJson();
+	SaveToJson(gameName);
 }
 
-void CCharacter::SaveToJson()
+void CCharacter::SaveToJson(string gameName)
 {
 	ILoader::CObjectInfos* pInfos = nullptr;
 	GetEntityInfos(pInfos);
@@ -1492,7 +1493,7 @@ void CCharacter::SaveToJson()
 
 	rapidjson::Document doc;
 
-	string sFileName = "characters.json";
+	string sFileName = string("characters") + gameName + ".json";
 	string root;
 	IFileSystem* pFileSystem = static_cast<IFileSystem*>(m_oInterface.GetPlugin("FileSystem"));
 	pFileSystem->GetLastDirectory(root);

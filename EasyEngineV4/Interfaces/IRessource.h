@@ -135,6 +135,8 @@ public:
 	virtual int			GetEndAnimationTime() = 0;
 	virtual void		GetBoneKeysMap( map< int, vector< CKey > >& mBoneKeys ) = 0;
 	virtual IAnimation*	CreateReversedAnimation() = 0;
+	virtual void		Lock(bool lock) = 0;
+	virtual bool		IsLocked() = 0;
 };
 
 class IMaterial : public IRessource

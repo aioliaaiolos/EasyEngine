@@ -116,8 +116,8 @@ void CCharacterEditor::Load(string sCharacterId)
 void CCharacterEditor::Save()
 {
 	if (m_bEditionMode && m_pCurrentCharacter) {
-		m_pCurrentCharacter->Save();
-		m_oEntityManager.LoadCharacterInfos();
+		m_pCurrentCharacter->Save("");
+		m_oEntityManager.LoadCharacterInfos("", true);
 	}
 }
 

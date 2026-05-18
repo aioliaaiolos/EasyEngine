@@ -214,7 +214,7 @@ public:
 	virtual void									UnWearItem(IItem* pItem) = 0;
 	virtual int										GetItemCount(string sItemID) = 0;
 	virtual const map<string, vector<IItem*>>&		GetItems() const = 0;
-	virtual void									Save() = 0;
+	virtual void									Save(string gameName) = 0;
 	virtual void									SetFightMode(bool fightMode) = 0;
 	virtual bool									GetFightMode() = 0;
 	virtual const string&							GetClass() = 0;
@@ -349,13 +349,14 @@ public:
 	virtual ICharacter*			BuildCharacterFromDatabase(string sCharacterId, IEntity* pParent) = 0;
 	virtual void				GetCharacterInfosFromDatabase(string sCharacterId, ILoader::CAnimatedEntityInfos& infos) = 0;
 	virtual void				NormalizeCharacterDatabase() = 0;
-	virtual void				LoadCharacterInfos() = 0;
 	virtual void				RemoveCharacterFromDB(string sID) = 0;
 	virtual void				EnableInstancing(bool enable) = 0;
 	virtual void				ChangeCharacterName(string sOldName, string sNewName) = 0;
 	virtual void				CloseArea(string sAreaID, bool bClose) = 0;
 	virtual void				EnableCollisions(bool bEnable) = 0;
 	virtual bool				AreCollisionsEnabled() = 0;
+	virtual map<string, IItem*> GetItems() = 0;
+	virtual void				LoadCharacterInfos(string sSaveName, bool resetAllCharacters) = 0;
 };
 
 class ISceneManager : public CPlugin

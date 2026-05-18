@@ -88,6 +88,7 @@ public:
 	virtual void		LockEntity(string sEntityID) = 0;
 	virtual void		RemoveCharacter(string sID) = 0;
 	virtual void		SaveGame(string fileName) = 0;
+	virtual void		LoadGame(string fileName) = 0;
 };
 
 

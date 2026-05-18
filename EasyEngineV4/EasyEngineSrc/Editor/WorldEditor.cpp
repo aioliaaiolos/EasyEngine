@@ -146,7 +146,12 @@ string CWorldEditor::GetName()
 
 void CWorldEditor::Load(string fileName)
 {
-	LoadFromJson(fileName);
+	LoadFromJson(fileName, false);
+}
+
+void CWorldEditor::LoadGame(string fileName)
+{
+	LoadFromJson(fileName, true);
 }
 
 void CWorldEditor::LoadFromDB(string fileName)
@@ -241,14 +246,15 @@ void CWorldEditor::SaveGame(string fileName)
 			else
 				m_oConsole.Println(string("CWorldEditor::SaveGame() : Erreur -> character '" + entityNameLower) + "' introuvable dans m_mCharacterMatrices");
 		}
-		Save(fileName);
+		//Save(fileName);
+		SaveToJson(fileName, true);
 		m_mCharacterMatrices = mBackupCharacterMatrices;
 	}
 }
 
 void CWorldEditor::Save(string fileName)
 {
-	SaveToJson(fileName);
+	SaveToJson(fileName, "");
 }
 
 void CWorldEditor::SaveToDB(string fileName)
@@ -320,7 +326,7 @@ void ConvertMatrixToJsonObject(rapidjson::Document& doc, const CMatrix& m, rapid
 	}
 }
 
-void CWorldEditor::LoadFromJson(string sFileName)
+void CWorldEditor::LoadFromJson(string sFileName, bool isGameSave)
 {
 	m_sCurrentWorldName = sFileName;
 	GetRelativeDatabasePath(sFileName, sFileName, "json");
@@ -480,14 +486,19 @@ void CWorldEditor::LoadFromJson(string sFileName)
 		}
 	}
 
+	if (isGameSave)
+		m_oEntityManager.LoadCharacterInfos(m_sCurrentWorldName, false);
+
 	m_pEditorCamera->Link(m_pScene);
 
 	if (m_bEditionMode)
 		InitCamera();
 }
 
-void CWorldEditor::SaveToJson(string sFileName)
+void CWorldEditor::SaveToJson(string sFileName, bool isGameSave)
 {
+	string gameName = isGameSave ? sFileName : "";
+
 	GetRelativeDatabasePath(sFileName, sFileName, "json");
 	CopyFile(sFileName.c_str(), (sFileName + ".bak").c_str(), FALSE);
 	rapidjson::Document doc;	
@@ -520,14 +531,14 @@ void CWorldEditor::SaveToJson(string sFileName)
 			}
 			world.AddMember("Variables", variables, doc.GetAllocator());
 
-			vector<IEntity*> characters;
-			m_pScene->GetCharactersInfos(characters);
-
-			for (IEntity* pEntity : characters) {
-				ICharacter* pCharacter = dynamic_cast<ICharacter*>(pEntity);
-				pCharacter->Save();
+			if (isGameSave) {
+				vector<IEntity*> characters;
+				m_pScene->GetCharactersInfos(characters);
+				for (IEntity* pEntity : characters) {
+					ICharacter* pCharacter = dynamic_cast<ICharacter*>(pEntity);
+					pCharacter->Save(gameName);
+				}
 			}
-
 		}
 
 		Value maps(kArrayType);
@@ -758,6 +769,7 @@ void CWorldEditor::LockEntity(string sEntityID)
 
 	}
 }
+
 
 void CWorldEditor::SetEditionMode(bool bEditionMode)
 {

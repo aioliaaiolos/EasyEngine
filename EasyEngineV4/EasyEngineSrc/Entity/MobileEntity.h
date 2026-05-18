@@ -55,7 +55,7 @@ public:
 	float													GetAnimationSpeed(IEntity::TAnimation eAnimationType);
 	void													GetEntityInfos(ILoader::CObjectInfos*& pInfos);
 	void													BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* pParent, bool bExcludeChildren = false) override;
-	void													Save();
+	void													Save(string gameName) override;
 	void													SetMovmentSpeed(TAnimation eAnimationType, float fSpeed) override;
 	TAnimation												GetCurrentAnimationType() const;
 	void													RunAction(string sAction, bool bLoop);
@@ -137,7 +137,7 @@ protected:
 	void													Wear(string sClothPath, string sDummyName);
 	void													Wear(CEntity* pEntity, string sDummyName);
 	void													UnWear(CEntity* pCloth);
-	void													SaveToJson();
+	void													SaveToJson(string gameName);
 	IAnimation*												CreateReverseAnimation(string sAnimationType);
 	const CMatrix&											GetWeaponTM() const override;
 	bool													GetFightMode() const override;

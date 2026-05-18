@@ -129,8 +129,8 @@ void CAnimation::Play( bool bLoop )
 	m_bStart = true;
 	m_bPause = false;
 	m_bLoop = bLoop;
-	m_pSkeletonRoot->SetCurrentAnimation( m_sName );
-	CallCallbacks( ePlay );
+	m_pSkeletonRoot->SetCurrentAnimation(m_sName);
+	CallCallbacks(ePlay);
 }
 
 bool CAnimation::GetPause()
@@ -234,4 +234,14 @@ IAnimation*	CAnimation::CreateReversedAnimation()
 		}
 	}
 	return pReversedAnimation;
+}
+
+void CAnimation::Lock(bool lock)
+{
+	m_bLocked = lock;
+}
+
+bool CAnimation::IsLocked()
+{
+	return m_bLocked;
 }

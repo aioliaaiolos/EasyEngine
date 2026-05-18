@@ -45,10 +45,11 @@ void IFighterEntity::OnHit()
 
 void IFighterEntity::MainHit()
 {
-	if (!m_bHitLocked && GetFightMode() && (GetLife() > 0)) {
-		LockHit(true);
-		PlayHitAnimation();
-		OnHit();
+	if (GetCurrentAnimation() && !GetCurrentAnimation()->IsLocked()) {
+		if (GetFightMode() && (GetLife() > 0)) {
+			PlayHitAnimation();
+			OnHit();
+		}
 	}
 }
 
@@ -138,9 +139,4 @@ void IFighterEntity::SetHitEnemySphereCallback(THitEnemyCallback callback)
 void IFighterEntity::SetHitEnemyBoxCallback(THitEnemyCallback callback)
 {
 	m_oHitEnemyBoxCallback = callback;
-}
-
-void IFighterEntity::LockHit(bool lock)
-{
-	m_bHitLocked = lock;
 }

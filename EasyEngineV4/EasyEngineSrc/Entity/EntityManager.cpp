@@ -55,7 +55,7 @@ m_bUseInstancing(true)
 	m_itCurrentParsedEntity = m_mCollideEntities.end();
 	m_itCurrentIAEntity = m_mIAEntities.end();
 	CCharacter::InitStatics(m_oFileSystem);
-	LoadCharacterInfos();
+	LoadCharacterInfos("", true);
 	oInterface.HandlePluginCreation("EditorManager", [this](CPlugin* plugin)
 	{
 		m_pEditorManager = static_cast<IEditorManager*>(m_oInterface.GetPlugin("EditorManager"));
@@ -277,6 +277,11 @@ void CEntityManager::LoadItems()
 	else {
 		throw CEException("Error in CEntityManager::LoadItems() : cannot load items.json");
 	}
+}
+
+map<string, IItem*> CEntityManager::GetItems()
+{
+	return map<string, IItem*>(m_mItems.begin(), m_mItems.end());
 }
 
 CEntity* CEntityManager::CreateEntityFromType(std::string sFileName, string sTypeName, string sID, bool bDuplicate )
@@ -818,7 +823,7 @@ void CEntityManager::SaveCharacterToDB(string sNPCID)
 	if (itNPC != m_mCharacters.end()) {
 		ILoader::CObjectInfos* pInfos = nullptr;
 		itNPC->second->GetEntityInfos(pInfos);
-		LoadCharacterInfos();
+		LoadCharacterInfos("", true);
 		ILoader::CAnimatedEntityInfos* pAnimatedEntity = static_cast<ILoader::CAnimatedEntityInfos*>(pInfos);
 		m_mCharacterInfos[sNPCIDLow] = *pAnimatedEntity;
 		SaveCharacterInfosToDB(m_mCharacterInfos);
@@ -829,9 +834,9 @@ void CEntityManager::SaveCharacterToDB(string sNPCID)
 	}
 }
 
-void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos)
+void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEntityInfos>& mCharacterInfos, string sSaveName)
 {
-	string sFileName = "characters.json";
+	string sFileName = string("characters") + sSaveName + ".json";
 	string root;
 	IFileSystem* pFileSystem = static_cast<IFileSystem*>(m_oInterface.GetPlugin("FileSystem"));
 	pFileSystem->GetLastDirectory(root);
@@ -917,10 +922,11 @@ void CEntityManager::LoadCharacterInfoFromJson(map<string, ILoader::CAnimatedEnt
 }
 
 
-void CEntityManager::LoadCharacterInfos()
+void CEntityManager::LoadCharacterInfos(string sSaveName, bool resetAllCharacters)
 {
-	m_mCharacterInfos.clear();
-	LoadCharacterInfoFromJson(m_mCharacterInfos);
+	if(resetAllCharacters)
+		m_mCharacterInfos.clear();
+	LoadCharacterInfoFromJson(m_mCharacterInfos, sSaveName);
 }
 
 void CEntityManager::LoadCharacterInfoFromDB()
@@ -964,7 +970,7 @@ void CEntityManager::SaveCharacterInfosToDB(const map<string, ILoader::CAnimated
 
 void CEntityManager::RemoveCharacterFromDB(string sID)
 {
-	LoadCharacterInfos();
+	LoadCharacterInfos("", true);
 	m_mCharacterInfos.erase(sID);
 }
 

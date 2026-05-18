@@ -33,7 +33,7 @@ void main()
 	for ( int i = 0; i < LightCount; i++ )
 		gl_FragColor += GetLightInfluence( gl_LightSource[i], vModelVertexPos, N, V, diffuseColor );
 	
-	float exposure = 1.0; 
+	float exposure = 4.0; 
 	vec3 color = gl_FragColor.xyz * exposure;
 	color = color / (color + vec3(1.0));
 	gl_FragColor = vec4(color, 1.0);
