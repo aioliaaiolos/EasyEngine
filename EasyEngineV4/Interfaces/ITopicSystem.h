@@ -32,6 +32,8 @@ public:
 	virtual const string& GetText() const = 0;
 	virtual vector<string>& GetActions() = 0;
 	virtual vector<ICondition*>& GetConditions() = 0;
+	virtual void SetName(const string& sName) = 0;
+	virtual void SetText(const string& sText) = 0;
 };
 
 class ITopicSystem : public CPlugin

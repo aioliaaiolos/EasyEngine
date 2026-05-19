@@ -109,7 +109,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>..\..\EasyEngine\$(ConfigurationName)\$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalDependencies>Utils2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utils2.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\x64\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -147,7 +147,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>..\..\EasyEngine\$(ConfigurationName)\$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalDependencies>Utils2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utils2.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\x64\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

@@ -74,7 +74,7 @@
 		},
 		{
 			"Title": "Bonjour",
-			"Text": "Bonjour, je m'appelle <var>CharacterName</var>."
+			"Text": "Bonjour, je m'appelle <var>CharacterName</var>, comment allez-vous ?"
 		},
 		{
 			"Title": "Bracelet de Namia",

@@ -25,6 +25,8 @@ public:
 	static void		ConvertWStringToString(const std::wstring& w, std::string& s);
 	static void		Truncate(string sText, int nMaxCharacterPerLine, vector<string>& vLines, bool bSkipSpace = true);
 	static void		DecodeString(string& sIn, string& sOut);
+	static string	AnsiToUtf8(const std::string& sIn);
+	static string	Utf8ToAnsi(const std::string& sIn);
 };
 
 

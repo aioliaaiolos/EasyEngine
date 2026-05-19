@@ -3,9 +3,16 @@
 #include "ITopicSystem.h"
 #include "IEntity.h"
 #include "IScriptManager.h"
+#include <commctrl.h>
 
 ITopicSystem* CWindowEditor::s_pTopicSystem = NULL;
-string CWindowEditor::s_LastSelectedTitle;
+IEntityManager* CWindowEditor::s_pEntityManager = NULL;
+EEInterface* CWindowEditor::s_pInterface = NULL;
+
+HWND CWindowEditor::s_hTitles;
+HWND CWindowEditor::s_hTopics;
+HWND CWindowEditor::s_hEditTopic;
+HWND CWindowEditor::s_hTabCategory;
 
 CWindowEditor::CWindowEditor(const CWindowEditor::EditorDesc& desc) : 
 	CWindow2(desc)
@@ -31,29 +38,81 @@ CWindowEditor::CWindowEditor(const CWindowEditor::EditorDesc& desc) :
 	};
 }
 
-void GetTitleSelection(HWND hDialog, ITopicSystem* pTopicSystem, string& item)
+void CWindowEditor::GetTitleSelection(HWND hWnd, string& item)
 {
-	HWND hTitles = GetDlgItem(hDialog, IDC_TOPICS_TITLE);
-	int selection = SendMessage(hTitles, CB_GETCURSEL, 0, (LPARAM)0);
-	map<string, vector<ITopic*>>& topicsMap = pTopicSystem->GetAllTopics();
-	int len = (int)SendMessage(hTitles, CB_GETLBTEXTLEN, selection, 0);
-	vector<char> buf(len + 1);
-	SendMessage(hTitles, CB_GETLBTEXT, selection, (LPARAM)buf.data());
-	item = buf.data();
+	int selection = ListView_GetNextItem(s_hTitles, -1, LVNI_SELECTED);
+	if (selection != -1) {
+		char buf[256];
+		ListView_GetItemText(s_hTitles, selection, 0, buf, sizeof(buf));
+		item = buf;
+	}
+}
+
+void CWindowEditor::InitTopicsWindow(HWND hWnd)
+{
+	LVCOLUMN col = { 0 };
+	col.mask = LVCF_WIDTH;
+	col.cx = 200;                       // largeur en pixels ; >= largeur visible suffit
+	ListView_InsertColumn(s_hTitles, 0, &col);
+
+	map<string, vector<ITopic*>>& topicsMap = s_pTopicSystem->GetAllTopics();
+	for (const pair<string, vector<ITopic*>>& topicPair : topicsMap) {
+		LVITEM item = { 0 };
+		item.mask = LVIF_TEXT;
+		item.iItem = ListView_GetItemCount(s_hTitles);
+		item.iSubItem = 0;
+		item.pszText = (LPSTR)topicPair.first.c_str();
+		ListView_InsertItem(s_hTitles, &item);
+	}
+
+	vector<string> characherNames;
+	s_pEntityManager->GetCharactersName(characherNames);
+
+	HWND hID = GetDlgItem(hWnd, IDC_COMBO_ID);
+	for (string& name : characherNames)
+		SendMessage(hID, CB_ADDSTRING, 0, (LPARAM)name.c_str());
+
+	int iConditionType = IDC_CONDITION_TYPE01;
+	int iConditionComp = IDC_CONDITION_COMP_01;
+
+	IScriptManager* pScriptManager = dynamic_cast<IScriptManager*>(s_pInterface->GetPlugin("ScriptManager"));
+	vector<string> varNames;
+	pScriptManager->GetVariableNames(varNames);
+	for (int iConditionName = IDC_CONDITION_NAME_01; iConditionName <= IDC_CONDITION_NAME_06; iConditionName++) {
+		HWND hConditionType = GetDlgItem(hWnd, iConditionType++);
+		SendMessage(hConditionType, CB_ADDSTRING, 0, (LPARAM)"Global");
+		SendMessage(hConditionType, CB_ADDSTRING, 0, (LPARAM)"PCItem");
+		HWND hConditionComp = GetDlgItem(hWnd, iConditionComp++);
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"==");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"!=");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"<=");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"<");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)">=");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)">");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"is");
+		SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"isNot");
+	}
 }
 
 INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int controlId = 0;
-	static EEInterface* pInterface = nullptr;
-
 	switch (msg) {
 	case WM_CONTEXTMENU:
 	{
-		HWND hTitles = GetDlgItem(hWnd, IDC_TOPICS_TITLE);
-		if ((HWND)wParam == hTitles) {
+		if ((HWND)wParam == s_hTitles) {
+			HMENU hMenu = CreatePopupMenu();
+			AppendMenuA(hMenu, MF_STRING, ID_TITLE_NEW, "New");
+			AppendMenuA(hMenu, MF_STRING, ID_TITLE_RENAME, "Rename");
+			AppendMenuA(hMenu, MF_STRING, ID_TITLE_DELETE, "Delete");
+			int x = LOWORD(lParam), y = HIWORD(lParam);
+			TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, 0, hWnd, nullptr);
+			DestroyMenu(hMenu);
+		}
+		else if ((HWND)wParam == s_hTopics) {
 			HMENU hMenu = CreatePopupMenu();
 			AppendMenuA(hMenu, MF_STRING, ID_TOPIC_NEW, "New");
+			AppendMenuA(hMenu, MF_STRING, ID_TOPIC_DELETE, "Delete");
 			int x = LOWORD(lParam), y = HIWORD(lParam);
 			TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, 0, hWnd, nullptr);
 			DestroyMenu(hMenu);
@@ -62,53 +121,137 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 	}
 	case WM_INITDIALOG:
 	{
-		pInterface = (EEInterface*)lParam;
-		s_pTopicSystem = dynamic_cast<ITopicSystem*>(pInterface->GetPlugin("TopicSystem"));
-		IEntityManager* pEntityManager = dynamic_cast<IEntityManager*>(pInterface->GetPlugin("EntityManager"));
+		INITCOMMONCONTROLSEX icc = { 0 };
+		icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+		icc.dwICC = ICC_LISTVIEW_CLASSES;
+		InitCommonControlsEx(&icc);
+
+		s_hTitles = GetDlgItem(hWnd, IDC_TOPICS_TITLE);
+		s_hTopics = GetDlgItem(hWnd, IDC_TOPICS);
+		s_hEditTopic = GetDlgItem(hWnd, IDC_EDIT_TOPIC);
+		s_hTabCategory = GetDlgItem(hWnd, IDC_TAB_CATEGORY);
+
+		TCITEM itemTopic = {0};
+		itemTopic.mask = TCIF_TEXT;
+		itemTopic.cchTextMax = 16;
+		itemTopic.pszText = "Topics";
+		TabCtrl_InsertItem(s_hTabCategory, 0, &itemTopic);
+
+		TCITEM itemGreetings = { 0 };
+		itemGreetings.mask = TCIF_TEXT;
+		itemGreetings.cchTextMax = 16;
+		itemGreetings.pszText = "Greetings";
+		TabCtrl_InsertItem(s_hTabCategory, 0, &itemGreetings);
+
+		ListView_SetExtendedListViewStyleEx(s_hTitles, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+		s_pInterface = (EEInterface*)lParam;
+		s_pTopicSystem = dynamic_cast<ITopicSystem*>(s_pInterface->GetPlugin("TopicSystem"));
+		s_pEntityManager = dynamic_cast<IEntityManager*>(s_pInterface->GetPlugin("EntityManager"));
 		if (!s_pTopicSystem)
 			s_pTopicSystem = (ITopicSystem*)lParam;
-		HWND hTitles = GetDlgItem(hWnd, IDC_TOPICS_TITLE);
-		if (hTitles)
-		{
-			map<string, vector<ITopic*>>& topicsMap = s_pTopicSystem->GetAllTopics();
-			for (const pair<string, vector<ITopic*>>& topicPair : topicsMap) {
-				SendMessage(hTitles, CB_ADDSTRING, 0, (LPARAM)topicPair.first.c_str());
-			}
-			// Optionally, select the first item
-			SendMessage(hTitles, CB_SETCURSEL, 0, 0);
-		}
-		vector<string> characherNames;
-		pEntityManager->GetCharactersName(characherNames);
-
-		HWND hID = GetDlgItem(hWnd, IDC_COMBO_ID);
-		for (string& name : characherNames)
-			SendMessage(hID, CB_ADDSTRING, 0, (LPARAM)name.c_str());
 		
-		int iConditionType = IDC_CONDITION_TYPE01;
-		int iConditionComp = IDC_CONDITION_COMP_01;
-		
-		IScriptManager* pScriptManager = dynamic_cast<IScriptManager*>(pInterface->GetPlugin("ScriptManager")); 
-		vector<string> varNames;
-		pScriptManager->GetVariableNames(varNames);
-		for (int iConditionName = IDC_CONDITION_NAME_01; iConditionName <= IDC_CONDITION_NAME_06; iConditionName++) {
-			HWND hConditionType = GetDlgItem(hWnd, iConditionType++);
-			SendMessage(hConditionType, CB_ADDSTRING, 0, (LPARAM)"Global");
-			SendMessage(hConditionType, CB_ADDSTRING, 0, (LPARAM)"PCItem");
-			HWND hConditionComp = GetDlgItem(hWnd, iConditionComp++);
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"==");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"!=");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"<=");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"<");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)">=");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)">");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"is");
-			SendMessage(hConditionComp, CB_ADDSTRING, 0, (LPARAM)"isNot");
-		}
+		if (s_hTitles)
+			InitTopicsWindow(hWnd);
 		return TRUE;
 		break;
 	}
+	case WM_NOTIFY:
+	{
+		LPNMHDR pnmh = (LPNMHDR)lParam;
+		if (pnmh->idFrom == IDC_TOPICS_TITLE) {
+			if (pnmh->code == LVN_ITEMCHANGED) {
+				LPNMLISTVIEW pnmlv = (LPNMLISTVIEW)lParam;
+				// ne réagir qu'au gain de l'état "sélectionné"
+				if ((pnmlv->uChanged & LVIF_STATE) && (pnmlv->uNewState & LVIS_SELECTED) && !(pnmlv->uOldState & LVIS_SELECTED)) {
+					int selection = pnmlv->iItem;
+					map<string, vector<ITopic*>>& topicsMap = s_pTopicSystem->GetAllTopics();
+					string sTitle;
+					GetTitleSelection(hWnd, sTitle);
+					map<string, vector<ITopic*>>::iterator itTopic = topicsMap.find(sTitle);
+					if (itTopic != topicsMap.end()) {
+						vector<ITopic*>& topics = topicsMap[sTitle];
+						SendMessage(s_hTopics, LB_RESETCONTENT, 0, (LPARAM)0);
+						for (ITopic* topic : topics) {
+							SendMessage(s_hTopics, LB_ADDSTRING, 0, (LPARAM)topic->GetText().c_str());
+						}
+					}
+				}
+			}
+			else if (pnmh->code == LVN_ENDLABELEDIT) {
+				NMLVDISPINFO* pdi = (NMLVDISPINFO*)lParam;
+				if (pdi->item.pszText == nullptr) {
+					// l'utilisateur a annulé (Échap) : ne rien faire, refuser
+					SetWindowLongPtr(hWnd, DWLP_MSGRESULT, FALSE);
+					return TRUE;
+				}
+				// pdi->item.pszText = nouveau nom ; pdi->item.iItem = index de la ligne
+				// ... ici tu mets à jour ta topicsMap avec le nouveau nom ...
+				SetWindowLongPtr(hWnd, DWLP_MSGRESULT, TRUE);  // TRUE = accepter le nom
+				return TRUE;
+			}
+			if (pnmh->code == NM_CUSTOMDRAW) {
+				LPNMLVCUSTOMDRAW pcd = (LPNMLVCUSTOMDRAW)lParam;
+				switch (pcd->nmcd.dwDrawStage) {
+					case CDDS_PREPAINT:
+						// on demande à être rappelé pour chaque élément
+						SetWindowLongPtr(hWnd, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+						return TRUE;
+
+					case CDDS_ITEMPREPAINT:
+					{
+						int iItem = (int)pcd->nmcd.dwItemSpec;
+						UINT state = ListView_GetItemState(pnmh->hwndFrom, iItem, LVIS_SELECTED);
+
+						if (state & LVIS_SELECTED) {
+							pcd->clrText = RGB(255, 255, 255);   // texte blanc
+							pcd->clrTextBk = RGB(0, 120, 215);     // fond bleu (bleu standard Windows)
+						}
+						SetWindowLongPtr(hWnd, DWLP_MSGRESULT, CDRF_DODEFAULT);
+						return TRUE;
+					}
+				}
+			}
+		}
+		else if (pnmh->idFrom == IDC_TAB_CATEGORY) {
+			if (pnmh->code == TCN_SELCHANGE) {
+				int sel = TabCtrl_GetCurSel(s_hTabCategory);
+				sel = sel;
+				if (sel) {
+
+				}
+			}
+		}
+		
+		break;
+	}
 	case WM_COMMAND:
-		if (wParam == ID_TOPIC_NEW) {
+		if (LOWORD(wParam) == IDC_EDIT_TOPIC) {
+			int hiword = HIWORD(wParam);
+			hiword = hiword;
+			if (hiword == 0x400) {
+				char buffer[2048];
+				GetWindowTextA(s_hEditTopic, buffer, 2048);
+				int topicIndex = SendMessageA(s_hTopics, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+				if (topicIndex >= 0) {
+					SendMessageA(s_hTopics, LB_DELETESTRING, (WPARAM)topicIndex, (LPARAM)0);
+					SendMessageA(s_hTopics, LB_INSERTSTRING, (WPARAM)topicIndex, (LPARAM)buffer);
+					SendMessageA(s_hTopics, LB_SETCURSEL, (WPARAM)topicIndex, (LPARAM)0);
+					int titleIndex = SendMessageA(s_hTitles, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+					string sTitle;
+					GetTitleSelection(hWnd, sTitle);
+					map<string, vector<ITopic*>>::iterator itTitle = s_pTopicSystem->GetAllTopics().find(sTitle);
+					if (itTitle != s_pTopicSystem->GetAllTopics().end()) {
+						if (itTitle->second.size() > titleIndex) {
+							string test = buffer;
+							ITopic* pTopic = itTitle->second[titleIndex];
+							pTopic->SetText(test);
+						}
+					}
+				}
+			}
+			break;
+		}
+		if (wParam == ID_TITLE_NEW) {
 			string newTopicPrefix = "New_Topic";
 			string newTopicName = newTopicPrefix;
 			int newNameIndex = 0;
@@ -118,12 +261,22 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 				itTopic = s_pTopicSystem->GetAllTopics().find(newTopicName);
 				newNameIndex++;
 			}
-			HWND hTitles = GetDlgItem(hWnd, IDC_TOPICS_TITLE);
-			SendMessage(hTitles, CB_ADDSTRING, 0, (LPARAM)newTopicName.c_str());
+			SendMessage(s_hTitles, CB_ADDSTRING, 0, (LPARAM)newTopicName.c_str());
 			vector<ICondition*> conditions;
 			vector<string> actions;
 			s_pTopicSystem->AddTopic(newTopicName, "", conditions, actions);
 			return TRUE;
+		}
+		if (wParam == ID_TITLE_RENAME) {
+			int sel = ListView_GetNextItem(s_hTitles, -1, LVNI_SELECTED);
+			if (sel != -1) {
+				SetFocus(s_hTitles);                  // le contrôle doit avoir le focus
+				ListView_EditLabel(s_hTitles, sel);   // ouvre le champ d'édition en place
+			}
+			break;
+		}
+		if (wParam == ID_TOPIC_NEW) {
+			SendMessage(s_hTopics, LB_ADDSTRING, 0, (LPARAM)"New topic");
 		}
 		if (LOWORD(wParam) == ID_OK) {
 			s_pTopicSystem->SaveTopics("Topics.json", s_pTopicSystem->GetAllTopics(), s_pTopicSystem->GetAllGreatings());
@@ -133,39 +286,17 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 		else if (LOWORD(wParam) == ID_CANCEL) {
 			EndDialog(hWnd, IDCANCEL);
 			return TRUE;
-		}
-		else if (LOWORD(wParam) == IDC_TOPICS_TITLE && HIWORD(wParam) == CBN_SELCHANGE) {
-			map<string, vector<ITopic*>>& topicsMap = s_pTopicSystem->GetAllTopics();
-			string sTitle;
-			GetTitleSelection(hWnd, s_pTopicSystem, sTitle);
-			if (sTitle == s_LastSelectedTitle) {
-				// rename
-			}
-			else {
-				s_LastSelectedTitle = sTitle;
-				map<string, vector<ITopic*>>::iterator itTopic = topicsMap.find(sTitle);
-				if (itTopic != topicsMap.end()) {
-					vector<ITopic*>& topics = topicsMap[sTitle];
-					HWND hText = GetDlgItem(hWnd, IDC_TOPICS);
-					SendMessage(hText, LB_RESETCONTENT, 0, (LPARAM)0);
-					for (ITopic* topic : topics) {
-						SendMessage(hText, LB_ADDSTRING, 0, (LPARAM)topic->GetText().c_str());
-					}
-				}
-			}
-		}
+		}		
 		else if (LOWORD(wParam) == IDC_TOPICS && HIWORD(wParam) == LBN_SELCHANGE) {
-			HWND hText = GetDlgItem(hWnd, IDC_TOPICS);
-			HWND hEdit = GetDlgItem(hWnd, IDC_EDIT_TOPIC);
-			int selectionText = SendMessage(hText, LB_GETCURSEL, 0, (LPARAM)0);
-			int len = SendMessage(hText, LB_GETTEXTLEN, selectionText, (LPARAM)0);
+			int selectionText = SendMessage(s_hTopics, LB_GETCURSEL, 0, (LPARAM)0);
+			int len = SendMessage(s_hTopics, LB_GETTEXTLEN, selectionText, (LPARAM)0);
 			string buf(len + 1, '\0');
-			SendMessage(hText, LB_GETTEXT, selectionText, (LPARAM)buf.data());
+			SendMessage(s_hTopics, LB_GETTEXT, selectionText, (LPARAM)buf.data());
 			string item(buf.data());
-			SetWindowTextA(hEdit, item.data());
+			SetWindowTextA(s_hEditTopic, item.data());
 
 			string sTitle;
-			GetTitleSelection(hWnd, s_pTopicSystem, sTitle);
+			GetTitleSelection(hWnd, sTitle);
 			map<string, vector<ITopic*>>& topicsMap = s_pTopicSystem->GetAllTopics();
 			ITopic* pSelectedTopic = nullptr;
 			for (ITopic* pTopic : topicsMap[sTitle]) {
@@ -203,7 +334,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 					else {
 						HWND hConditionType = GetDlgItem(hWnd, iConditionType);
 						SendMessage(hConditionType, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)pCondition->GetType().c_str());
-						FillFieldsFromType(hWnd, iConditionType++, pInterface);
+						FillFieldsFromType(hWnd, iConditionType++, s_pInterface);
 						HWND hConditionName = GetDlgItem(hWnd, iConditionName++);
 						SendMessage(hConditionName, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)pCondition->GetName().c_str());
 						HWND hConditionComp = GetDlgItem(hWnd, iConditionComp++);
@@ -218,7 +349,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			int idcConditionType = LOWORD(wParam);
 			int hiParam = HIWORD(wParam);
 			if (hiParam == CBN_SELCHANGE) {
-				FillFieldsFromType(hWnd, idcConditionType, pInterface);
+				FillFieldsFromType(hWnd, idcConditionType, s_pInterface);
 			}
 		}
 		break;

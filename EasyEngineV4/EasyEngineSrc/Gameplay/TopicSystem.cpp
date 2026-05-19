@@ -68,7 +68,7 @@ string& CTopic::GetName()
 	return m_sName;
 }
 
-void CTopic::SetName(string& sName)
+void CTopic::SetName(const string& sName)
 {
 	m_sName = sName;
 }
@@ -78,7 +78,7 @@ const string& CTopic::GetText() const
 	return m_sText;
 }
 
-void CTopic::SetText(string& sText)
+void CTopic::SetText(const string& sText)
 {
 	m_sText = sText;
 }
@@ -139,14 +139,9 @@ void CTopicSystem::SaveTopics(const string& sFileName, map<string, vector<ITopic
 	string sJsonDirectory;
 	m_pFileSystem->GetLastDirectory(sJsonDirectory);
 	string sFilePath = sJsonDirectory + "\\" + sFileName;
-
-	ifstream ifs(sFilePath);
-	IStreamWrapper isw(ifs);
-	Document doc;
-
-	doc.ParseStream(isw);
-	if (!doc.IsObject())
-		doc.SetObject();
+	
+	Document doc;	
+	doc.SetObject();
 	Value topics(kArrayType);
 
 	for (pair<const string, vector<ITopic*>>& titleTopic : mTopics) {
@@ -178,13 +173,14 @@ void CTopicSystem::SaveJsonTopics(string title, vector<ITopic*>& vTopic, Value& 
 
 void CTopicSystem::SaveJsonTopic(string titleStr, ITopic* pTopic, Document& doc, rapidjson::Value& topic)
 {
+	titleStr = CStringUtils::AnsiToUtf8(titleStr);
 	if (!titleStr.empty()) {
 		Value title(kStringType);
 		title.SetString(titleStr.c_str(), doc.GetAllocator());
 		topic.AddMember("Title", title, doc.GetAllocator());
 	}
 	Value text(kStringType);
-	text.SetString(pTopic->GetText().c_str(), doc.GetAllocator());
+	text.SetString(CStringUtils::AnsiToUtf8(pTopic->GetText()).c_str(), doc.GetAllocator());
 	topic.AddMember("Text", text, doc.GetAllocator());
 	Value conditions(kArrayType);
 	SaveJsonConditions(pTopic->GetConditions(), doc, conditions);
@@ -202,19 +198,19 @@ void CTopicSystem::SaveJsonConditions(const vector<ICondition*>& conditionArray,
 		Value condition(kObjectType);;
 		if (!pCondition->GetType().empty()) {
 			Value type(kStringType);
-			type.SetString(pCondition->GetType().c_str(), doc.GetAllocator());
+			type.SetString(CStringUtils::AnsiToUtf8(pCondition->GetType()).c_str(), doc.GetAllocator());
 			condition.AddMember("Type", type, doc.GetAllocator());
 		}
 		Value name(kStringType);
-		name.SetString(pCondition->GetName().c_str(), doc.GetAllocator());
+		name.SetString(CStringUtils::AnsiToUtf8(pCondition->GetName()).c_str(), doc.GetAllocator());
 		condition.AddMember("Name", name, doc.GetAllocator());
 
 		Value value(kStringType);
-		value.SetString(pCondition->GetValue().c_str(), doc.GetAllocator());
+		value.SetString(CStringUtils::AnsiToUtf8(pCondition->GetValue()).c_str(), doc.GetAllocator());
 		condition.AddMember("Value", value, doc.GetAllocator());
 
 		Value comp(kStringType);
-		comp.SetString(pCondition->GetCompStr().c_str(), doc.GetAllocator());
+		comp.SetString(CStringUtils::AnsiToUtf8(pCondition->GetCompStr()).c_str(), doc.GetAllocator());
 		condition.AddMember("Comp", comp, doc.GetAllocator());
 		conditions.PushBack(condition, doc.GetAllocator());
 	}
@@ -224,7 +220,7 @@ void CTopicSystem::SaveJsonActions(const vector<string> actionArray, rapidjson::
 {
 	for (const string& actionStr : actionArray) {
 		Value action(kStringType);
-		action.SetString(actionStr.c_str(), doc.GetAllocator());
+		action.SetString(CStringUtils::AnsiToUtf8(actionStr).c_str(), doc.GetAllocator());
 		actions.PushBack(action, doc.GetAllocator());
 	}
 }
@@ -277,8 +273,8 @@ void CTopicSystem::LoadTopics(string sFileName)
 					}
 					else if (topic.IsString()) {
 					}
-					CStringUtils::DecodeString(sTitle, sTitle);
-					CStringUtils::DecodeString(sText, sText);
+					sTitle = CStringUtils::Utf8ToAnsi(sTitle);
+					sText = CStringUtils::Utf8ToAnsi(sText);
 					AddTopic(sTitle, sText, vConditions, vAction);
 				}
 			}
@@ -308,7 +304,7 @@ void CTopicSystem::LoadTopics(string sFileName)
 						LoadJsonConditions(greating, vConditions, sFileName);
 						LoadJsonActions(greating, vAction);
 					}
-					CStringUtils::DecodeString(sText, sText);
+					sText = CStringUtils::Utf8ToAnsi(sText);
 					AddGreating(sText, vConditions, vAction);
 				}
 			}
@@ -494,7 +490,7 @@ void CTopicSystem::LoadJsonActions(rapidjson::Value& oParentNode, vector<string>
 				rapidjson::Value& action = actions[iAction];
 				if (action.IsString()) {
 					string sAction = action.GetString();
-					CStringUtils::DecodeString(sAction, sAction);
+					sAction = CStringUtils::Utf8ToAnsi(sAction);
 					vAction.push_back(sAction);
 				}
 			}

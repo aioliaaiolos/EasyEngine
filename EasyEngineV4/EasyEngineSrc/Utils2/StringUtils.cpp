@@ -3,6 +3,7 @@
 
 #include <codecvt>
 #include <regex>
+#include <windows.h>
 
 using namespace std;
 
@@ -20,6 +21,36 @@ void CStringUtils::DecodeString(string& sIn, string& sOut)
 		sOut = sIn.replace(sIn.begin() + idx, sIn.begin() + idx + 2, "à");
 		idx = sOut.find("Ã");
 	}
+}
+
+// Windows-1252  ->  UTF-8
+std::string CStringUtils::AnsiToUtf8(const std::string& sIn)
+{
+	if (sIn.empty()) return{};
+	// 1252 -> UTF-16
+	int wlen = MultiByteToWideChar(1252, 0, sIn.c_str(), -1, nullptr, 0);
+	std::wstring wbuf(wlen, 0);
+	MultiByteToWideChar(1252, 0, sIn.c_str(), -1, &wbuf[0], wlen);
+	// UTF-16 -> UTF-8
+	int u8len = WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	std::string out(u8len, 0);
+	WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), -1, &out[0], u8len, nullptr, nullptr);
+	out.resize(u8len - 1);  // retire le \0 final
+	return out;
+}
+
+// UTF-8  ->  Windows-1252
+std::string CStringUtils::Utf8ToAnsi(const std::string& sIn)
+{
+	if (sIn.empty()) return{};
+	int wlen = MultiByteToWideChar(CP_UTF8, 0, sIn.c_str(), -1, nullptr, 0);
+	std::wstring wbuf(wlen, 0);
+	MultiByteToWideChar(CP_UTF8, 0, sIn.c_str(), -1, &wbuf[0], wlen);
+	int alen = WideCharToMultiByte(1252, 0, wbuf.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	std::string out(alen, 0);
+	WideCharToMultiByte(1252, 0, wbuf.c_str(), -1, &out[0], alen, nullptr, nullptr);
+	out.resize(alen - 1);
+	return out;
 }
 
 void CStringUtils::ExtractFloatFromString( const string& sString, vector< float >& vFloat, unsigned int nCount )

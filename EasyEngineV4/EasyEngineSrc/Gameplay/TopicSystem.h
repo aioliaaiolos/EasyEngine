@@ -112,8 +112,8 @@ public:
 	CTopic();
 	CTopic(const string& sText, const vector<ICondition*>& conditions, const vector<string>& actions);
 	string& GetName() override;
-	void SetName(string& sName);
-	void SetText(string& sText);
+	void SetName(const string& sName) override;
+	void SetText(const string& sText) override;
 	const string& GetText() const override;	
 	vector<string>& GetActions() override;
 	void SetActions(const vector<string>& actions);

@@ -3,6 +3,7 @@
 
 
 class ITopicSystem;
+class IEntityManager;
 
 class CWindowEditor : public CWindow2
 {
@@ -23,6 +24,13 @@ public:
 
 private:
 	static void FillFieldsFromType(HWND hWnd, int idcConditionType, EEInterface* pInterface);
+	static void GetTitleSelection(HWND hWnd, string& item);
 	static ITopicSystem* s_pTopicSystem;
-	static string s_LastSelectedTitle;
+	static IEntityManager* s_pEntityManager;
+	static EEInterface* s_pInterface;
+	static void InitTopicsWindow(HWND hWnd);
+	static HWND s_hTitles;
+	static HWND s_hTopics;
+	static HWND s_hEditTopic;
+	static HWND s_hTabCategory;
 };
