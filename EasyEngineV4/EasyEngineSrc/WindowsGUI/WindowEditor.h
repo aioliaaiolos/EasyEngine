@@ -4,6 +4,7 @@
 
 class ITopicSystem;
 class IEntityManager;
+class ITopic;
 
 class CWindowEditor : public CWindow2
 {
@@ -23,14 +24,29 @@ public:
 	static INT_PTR CALLBACK OnTopicCallback(HWND, UINT, WPARAM, LPARAM);
 
 private:
-	static void FillFieldsFromType(HWND hWnd, int idcConditionType, EEInterface* pInterface);
-	static void GetTitleSelection(HWND hWnd, string& item);
+	static void FillConditionFromType(HWND hWnd, int idcConditionType, EEInterface* pInterface);
+	static string GetCurrentTitle(HWND hWnd);
+	static map<string, vector<ITopic*>>& GetCurrentTopics();
+	static void InitTopicsWindow(HWND hWnd, map<string, vector<ITopic*>>& topics);
+	static void ClearSpeakerConditions(HWND hWnd);
+	static void ClearAll(HWND hWnd);
+	static void ClearTopicWindow();
+	static void ClearEditTopicWindow();
+	static void RefreshTopics(string sTitle);
+	static void InsertNewTitle(string sTitleName, string sFirstTopicName = "");
+	static void SelectTitle(int index);
+	static int GetSeletedTitleIndex();
+	static int InsertNewTopic(string sTopicName);
+
 	static ITopicSystem* s_pTopicSystem;
 	static IEntityManager* s_pEntityManager;
 	static EEInterface* s_pInterface;
-	static void InitTopicsWindow(HWND hWnd);
 	static HWND s_hTitles;
 	static HWND s_hTopics;
 	static HWND s_hEditTopic;
 	static HWND s_hTabCategory;
+	static HWND s_hActions;
+	static int s_nCurrentTab;
+	static string s_sSelectedTitle;
+	
 };

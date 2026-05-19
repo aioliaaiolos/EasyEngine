@@ -137,25 +137,28 @@ public:
 
 protected:
 	void										LoadTopics(string sFileName);
-	void										SaveTopics(const string& sFileName, map<string, vector<ITopic*>>& mTopics, vector<ITopic*>& vGreatings) override;
-	void										AddTopic(string sTopicName, string sText, vector<ICondition*>& conditions, const vector<string>& vAction) override;
-	void										AddGreating(string sText, vector<ICondition*>& conditions, vector<string>& actions);
-	void										LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions, string sFileName);
+	void										SaveTopics(const string& sFileName) override;
+	void										AddTopic(string sTitleName, string topicName) override;
+	void										AddGreetingTopic(string sTitleName, string sTopicName) override;
+	void										DeleteTitle(string sTitleName) override;
+	void										DeleteTitleGreeting(string sTitleName) override;
+	void										LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions);
 	int											SelectTopic(const vector<ITopic*>& topics, string sSpeakerId);
-	ITopic*										SelectGreating(string sSpeakerId) override;
+	ITopic*										SelectGreeting(string sSpeakerId) override;
 	const ITopic*								SelectTopic(string sTopicName, string sSpeakerId) override;
 	void										LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction);
 	int											IsConditionChecked(const vector<ITopic*>& topics, string sSpeakerId);
 	string										GetName() override;
 	void										GetCharacterTopics(string sCharacterID, vector<ITopic*>& topics) override;
-	//map<string, vector<CTopic>>&	GetAllTopics() override;
 	map<string, vector<ITopic*>>&				GetAllTopics() override;
-	vector<ITopic*>&							GetAllGreatings() override;
+	map<string, vector<ITopic*>>&				GetAllGreetings() override;
 	void										Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	void										GetVarValue(string sVarName, string sCharacterId, string& sValue);
 	bool										ExecuteActions(ITopic* pTopic, string& error) const;
 
 private:
+
+	string										LoadTopic(rapidjson::Value& topic, CTopic* pTopic);
 
 	void										SaveJsonTopics(string title, vector<ITopic*>& vTopic, rapidjson::Value& topics, rapidjson::Document& doc);
 	void										SaveJsonTopic(string titleStr, ITopic* pTopic, rapidjson::Document& doc, rapidjson::Value& topic);
@@ -163,7 +166,7 @@ private:
 	void										SaveJsonActions(const vector<string> actionArray, rapidjson::Document& doc, rapidjson::Value& actions);
 
 	map<string, vector<ITopic*>>				m_mTopics;
-	vector<ITopic*>								m_vGreatings;
+	map<string, vector<ITopic*>>				m_mGreetings;
 	IEntityManager*								m_pEntityManager = nullptr;
 	IFileSystem*								m_pFileSystem = nullptr;
 	IScriptManager*								m_pScriptManager = nullptr;

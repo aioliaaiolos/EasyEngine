@@ -43,8 +43,6 @@ class CTopicsWindow : public CGUIWindow, public ITopicWindow
 public:
 	CTopicsWindow(EEInterface& oInterface, int width, int height);
 	virtual ~CTopicsWindow();
-	//void									AddTopic(string sTopicName, string sText, const vector<CCondition>& vConditions, const vector<string>& vAction);
-	//void									AddGreating(string sText, vector<CCondition>& conditions, vector<string>& actions);
 	void									AddTopicText(const string& sTopicText, bool bNewParagraph = true);
 	void									Display();
 	void									SetSpeakerId(string sId) override;
@@ -61,7 +59,7 @@ public:
 private:
 
 	void									OnShow(bool bShow) override;
-	void									DisplayGreating();
+	void									DisplayGreeting();
 	void									DestroyTopicsWidgets();
 	int										GetTopicTextLineCount();
 	void									OnChoiceCalled(string sChoices) override;

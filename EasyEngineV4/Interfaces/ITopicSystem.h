@@ -41,11 +41,14 @@ class ITopicSystem : public CPlugin
 public:
 	ITopicSystem(EEInterface& oInterface) : CPlugin(nullptr, "TopicSystem") {}
 	virtual const ITopic*	SelectTopic(string sTopicName, string sSpeakerId) = 0;
-	virtual ITopic*	SelectGreating(string sSpeakerId) = 0;
+	virtual ITopic*	SelectGreeting(string sSpeakerId) = 0;
 	virtual void GetCharacterTopics(string sCharacterID, vector<ITopic*>& topics) = 0;
 	virtual map<string, vector<ITopic*>>& GetAllTopics() = 0;
-	virtual vector<ITopic*>& GetAllGreatings() = 0;
+	virtual map<string, vector<ITopic*>>& GetAllGreetings() = 0;
 	virtual bool ExecuteActions(ITopic* pTopic, string& error) const = 0;
-	virtual void SaveTopics(const string& sFileName, map<string, vector<ITopic*>>& mTopics, vector<ITopic*>& vGreatings) = 0;
-	virtual void AddTopic(string sTopicName, string sText, vector<ICondition*>& conditions, const vector<string>& vAction) = 0;
+	virtual void SaveTopics(const string& sFileName) = 0;
+	virtual void AddTopic(string sTitleName, string topicName) = 0;
+	virtual void AddGreetingTopic(string sTitleName, string sTopicName) = 0;
+	virtual void DeleteTitle(string sTitleName) = 0;
+	virtual void DeleteTitleGreeting(string sTitleName) = 0;
 };

@@ -66,13 +66,13 @@ void CTopicsWindow::OnShow(bool bShow)
 	else {
 		m_bGoodbye = false;
 		m_pTopicFrame->UpdateTopics();
-		DisplayGreating();
+		DisplayGreeting();
 	}
 }
 
-void CTopicsWindow::DisplayGreating()
+void CTopicsWindow::DisplayGreeting()
 {
-	ITopic* pTopic = m_pTopicSystem->SelectGreating(m_sSpeakerId);
+	ITopic* pTopic = m_pTopicSystem->SelectGreeting(m_sSpeakerId);
 	if (pTopic) {
 		AddTopicText(pTopic->GetText());
 		string error;
@@ -464,7 +464,7 @@ void CTopicsWindow::OnChoiceClicked(CLink* pTopicLink)
 		if(!pTopicWindow->m_sCurrentTopicName.empty())
 			pTopicWindow->AddTopicTextFromTopicName(pTopicWindow->m_sCurrentTopicName);
 		else {
-			pTopicWindow->DisplayGreating();
+			pTopicWindow->DisplayGreeting();
 		}
 		pTopicWindow->m_pScriptManager->SetVariableValue("choice", 0);
 	}

@@ -134,7 +134,7 @@ bool CTopicSystem::ExecuteActions(ITopic* pTopic, string& error) const
 	return true;
 }
 
-void CTopicSystem::SaveTopics(const string& sFileName, map<string, vector<ITopic*>>& mTopics, vector<ITopic*>& vGreatings)
+void CTopicSystem::SaveTopics(const string& sFileName)
 {
 	string sJsonDirectory;
 	m_pFileSystem->GetLastDirectory(sJsonDirectory);
@@ -144,14 +144,14 @@ void CTopicSystem::SaveTopics(const string& sFileName, map<string, vector<ITopic
 	doc.SetObject();
 	Value topics(kArrayType);
 
-	for (pair<const string, vector<ITopic*>>& titleTopic : mTopics) {
+	for (pair<const string, vector<ITopic*>>& titleTopic : m_mTopics) {
 		SaveJsonTopics(titleTopic.first, titleTopic.second, topics, doc);
 	}
-	Value greatings(kArrayType);
-	SaveJsonTopics("", vGreatings, greatings, doc);	
+	Value greetings(kArrayType);
+	SaveJsonTopics("", m_mGreetings["Greeting0"], greetings, doc);
 
 	doc.AddMember("Topics", topics, doc.GetAllocator());
-	doc.AddMember("Greatings", greatings, doc.GetAllocator());
+	doc.AddMember("Greetings", greetings, doc.GetAllocator());
 
 	rapidjson::StringBuffer buffer;
 	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -169,6 +169,10 @@ void CTopicSystem::SaveJsonTopics(string title, vector<ITopic*>& vTopic, Value& 
 		SaveJsonTopic(title, pTopic, doc, topic);
 		topics.PushBack(topic, doc.GetAllocator());
 	}
+	if (vTopic.empty()) {
+		Value topic(kObjectType);
+		SaveJsonTopic(title, nullptr, doc, topic);
+	}
 }
 
 void CTopicSystem::SaveJsonTopic(string titleStr, ITopic* pTopic, Document& doc, rapidjson::Value& topic)
@@ -179,17 +183,19 @@ void CTopicSystem::SaveJsonTopic(string titleStr, ITopic* pTopic, Document& doc,
 		title.SetString(titleStr.c_str(), doc.GetAllocator());
 		topic.AddMember("Title", title, doc.GetAllocator());
 	}
-	Value text(kStringType);
-	text.SetString(CStringUtils::AnsiToUtf8(pTopic->GetText()).c_str(), doc.GetAllocator());
-	topic.AddMember("Text", text, doc.GetAllocator());
-	Value conditions(kArrayType);
-	SaveJsonConditions(pTopic->GetConditions(), doc, conditions);
-	if (!conditions.Empty())
-		topic.AddMember("Conditions", conditions, doc.GetAllocator());
-	Value actions(kArrayType);
-	SaveJsonActions(pTopic->GetActions(), doc, actions);
-	if (!actions.Empty())
-		topic.AddMember("Actions", actions, doc.GetAllocator());
+	if (pTopic) {
+		Value text(kStringType);
+		text.SetString(CStringUtils::AnsiToUtf8(pTopic->GetText()).c_str(), doc.GetAllocator());
+		topic.AddMember("Text", text, doc.GetAllocator());
+		Value conditions(kArrayType);
+		SaveJsonConditions(pTopic->GetConditions(), doc, conditions);
+		if (!conditions.Empty())
+			topic.AddMember("Conditions", conditions, doc.GetAllocator());
+		Value actions(kArrayType);
+		SaveJsonActions(pTopic->GetActions(), doc, actions);
+		if (!actions.Empty())
+			topic.AddMember("Actions", actions, doc.GetAllocator());
+	}
 }
 
 void CTopicSystem::SaveJsonConditions(const vector<ICondition*>& conditionArray, Document& doc, Value& conditions)
@@ -245,67 +251,26 @@ void CTopicSystem::LoadTopics(string sFileName)
 			if (topics.IsArray()) {
 				int count = topics.Size();
 				for (int iTopic = 0; iTopic < count; iTopic++) {
-					string sTitle;
-					string sText;
-					vector<ICondition*> vConditions;
-					vector<string> vAction;
 					rapidjson::Value& topic = topics[iTopic];
 					if (topic.IsObject()) {
-						if (topic.HasMember("Title")) {
-							rapidjson::Value& title = topic["Title"];
-							if (title.IsString())
-								sTitle = title.GetString();
-						}
-						if (topic.HasMember("Text")) {
-							rapidjson::Value& text = topic["Text"];
-							if (text.IsString())
-								sText += text.GetString();
-							else if (text.IsArray()) {
-								for (int iLine = 0; iLine < text.GetArray().Size(); iLine++) {
-									rapidjson::Value& line = text[iLine];
-									if (line.IsString())
-										sText += line.GetString();
-								}
-							}
-						}
-						LoadJsonConditions(topic, vConditions, sFileName);
-						LoadJsonActions(topic, vAction);
+						CTopic* pTopic = new CTopic;
+						string sTopicName = LoadTopic(topic, pTopic);
+						m_mTopics[sTopicName].push_back(pTopic);
 					}
-					else if (topic.IsString()) {
-					}
-					sTitle = CStringUtils::Utf8ToAnsi(sTitle);
-					sText = CStringUtils::Utf8ToAnsi(sText);
-					AddTopic(sTitle, sText, vConditions, vAction);
 				}
 			}
 		}
-		if (doc.HasMember("Greatings")) {
-			rapidjson::Value& greatings = doc["Greatings"];
-			if (greatings.IsArray()) {
-				int count = greatings.Size();
-				for (int iGreating = 0; iGreating < count; iGreating++) {
-					string sText;
-					vector<ICondition*> vConditions;
-					vector<string> vAction;
-					rapidjson::Value& greating = greatings[iGreating];
-					if (greating.IsObject()) {
-						if (greating.HasMember("Text")) {
-							rapidjson::Value& text = greating["Text"];
-							if (text.IsString())
-								sText += text.GetString();
-							else if (text.IsArray()) {
-								for (int iLine = 0; iLine < text.GetArray().Size(); iLine++) {
-									rapidjson::Value& line = text[iLine];
-									if (line.IsString())
-										sText += line.GetString();
-								}
-							}
-						}
-						LoadJsonConditions(greating, vConditions, sFileName);
-						LoadJsonActions(greating, vAction);
+		if (doc.HasMember("Greetings")) {
+			rapidjson::Value& greetings = doc["Greetings"];
+			if (greetings.IsArray()) {
+				int count = greetings.Size();
+				for (int iGreeting = 0; iGreeting < count; iGreeting++) {
+					rapidjson::Value& greeting = greetings[iGreeting];
+					if (greeting.IsObject()) {
+						CTopic* pGreeting = new CTopic;
+						LoadTopic(greeting, pGreeting);
+						m_mGreetings["Greeting0"].push_back(pGreeting);
 					}
-					sText = CStringUtils::Utf8ToAnsi(sText);
-					AddGreating(sText, vConditions, vAction);
 				}
 			}
 		}
@@ -317,23 +282,39 @@ void CTopicSystem::LoadTopics(string sFileName)
 	ifs.close();
 }
 
-
-void CTopicSystem::AddTopic(string sTopicName, string sText, vector<ICondition*>& conditions, const vector<string>& vAction)
+string CTopicSystem::LoadTopic(Value& topic, CTopic* pTopic)
 {
-	CTopic* topic = new CTopic;
-	topic->SetText(sText);
-	topic->SetConditions(conditions);
-	topic->SetActions(vAction);
-	m_mTopics[sTopicName].push_back(topic);
-}
-
-void CTopicSystem::AddGreating(string sText, vector<ICondition*>& conditions, vector<string>& actions)
-{
-	CTopic* greating = new CTopic;
-	greating->SetText(sText);
-	greating->SetConditions(conditions);
-	greating->SetActions(actions);
-	m_vGreatings.push_back(greating);
+	string sTitle;
+	string sText;
+	vector<ICondition*> vConditions;
+	vector<string> vAction;
+	if (topic.IsObject()) {
+		if (topic.HasMember("Title")) {
+			rapidjson::Value& title = topic["Title"];
+			if (title.IsString())
+				sTitle = title.GetString();
+		}
+		if (topic.HasMember("Text")) {
+			rapidjson::Value& text = topic["Text"];
+			if (text.IsString())
+				sText += text.GetString();
+			else if (text.IsArray()) {
+				for (int iLine = 0; iLine < text.GetArray().Size(); iLine++) {
+					rapidjson::Value& line = text[iLine];
+					if (line.IsString())
+						sText += line.GetString();
+				}
+			}
+		}
+		LoadJsonConditions(topic, vConditions);
+		LoadJsonActions(topic, vAction);
+	}
+	sTitle = CStringUtils::Utf8ToAnsi(sTitle);
+	sText = CStringUtils::Utf8ToAnsi(sText);
+	pTopic->SetText(sText);
+	pTopic->SetConditions(vConditions);
+	pTopic->SetActions(vAction);
+	return sTitle;
 }
 
 int CTopicSystem::IsConditionChecked(const vector<ITopic*>& topics, string sSpeakerId)
@@ -442,9 +423,9 @@ map<string, vector<ITopic*>>& CTopicSystem::GetAllTopics()
 	return m_mTopics;
 }
 
-vector<ITopic*>& CTopicSystem::GetAllGreatings()
+map<string, vector<ITopic*>>& CTopicSystem::GetAllGreetings()
 {
-	return m_vGreatings;
+	return m_mGreetings;
 }
 
 void CTopicSystem::Format(string sTopicText, string sSpeakerId, string& sFormatedText)
@@ -498,7 +479,36 @@ void CTopicSystem::LoadJsonActions(rapidjson::Value& oParentNode, vector<string>
 	}
 }
 
-void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions, string sFileName)
+void CTopicSystem::AddTopic(string sTitleName, string sTopicName)
+{
+	CTopic* pTopic = new CTopic;
+	pTopic->SetName(sTitleName);
+	pTopic->SetText(sTopicName);
+	m_mTopics[sTitleName].push_back(pTopic);
+}
+
+void CTopicSystem::AddGreetingTopic(string sTitleName, string sTopicName)
+{
+	CTopic* pTopic = new CTopic;
+	pTopic->SetName(sTopicName);
+	m_mGreetings[sTitleName].push_back(pTopic);
+}
+
+void CTopicSystem::DeleteTitle(string sTitleName)
+{
+	map<string, vector<ITopic*>>::iterator itTitle = m_mTopics.find(sTitleName);
+	if (itTitle != m_mTopics.end())
+		m_mTopics.erase(itTitle);
+}
+
+void CTopicSystem::DeleteTitleGreeting(string sTitleName)
+{
+	map<string, vector<ITopic*>>::iterator itTitle = m_mGreetings.find(sTitleName);
+	if (itTitle != m_mGreetings.end())
+		m_mGreetings.erase(itTitle);
+}
+
+void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions)
 {
 	if (oParentNode.HasMember("Conditions")) {
 		rapidjson::Value& conditions = oParentNode["Conditions"];
@@ -544,7 +554,7 @@ void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICon
 							}
 						}
 						else
-							throw CEException(string("Error during parsing '") + sFileName + "' : 'Comp' is missing in condition for topic '" + oParentNode.GetString());
+							throw CEException(string("Error during parsing topics file : 'Comp' is missing in condition for topic '") + oParentNode.GetString());
 					}
 				}
 				vConditions.push_back(pCondition);
@@ -562,10 +572,10 @@ const ITopic* CTopicSystem::SelectTopic(string sTopicName, string sSpeakerId)
 	return pTopic;
 }
 
-ITopic* CTopicSystem::SelectGreating(string sSpeakerId)
+ITopic* CTopicSystem::SelectGreeting(string sSpeakerId)
 {
-	int selectedTopicIndex = SelectTopic(m_vGreatings, sSpeakerId);
-	ITopic* pTopic = m_vGreatings.at(selectedTopicIndex);
+	int selectedTopicIndex = SelectTopic(m_mGreetings["Greeting0"], sSpeakerId);
+	ITopic* pTopic = m_mGreetings["Greeting0"].at(selectedTopicIndex);
 	return pTopic;
 }
 

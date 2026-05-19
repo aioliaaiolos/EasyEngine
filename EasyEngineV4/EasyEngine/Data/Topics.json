@@ -1242,9 +1242,17 @@
 		{
 			"Title": "République",
 			"Text": "La République est une et indivisible !"
+		},
+		{
+			"Title": "Wladimir",
+			"Text": "Bonjour, je m'appelle Wladimir Perrad"
+		},
+		{
+			"Title": "Wladimir",
+			"Text": "Bonjour, je m'appelle Wladimir Poutine"
 		}
 	],
-	"Greatings": [
+	"Greetings": [
 		{
 			"Text": "Bonjour étranger"
 		},
