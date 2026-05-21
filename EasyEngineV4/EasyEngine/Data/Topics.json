@@ -11,7 +11,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "geraldine",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -22,7 +23,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "mirabelle",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -31,15 +33,17 @@
 			"Text": "Une Erane un peu étrange, mais sympathique malgré tout. Un conseil, n'essayez pas de la contrarier si vous voulez obtenir quelque chose. Son lit est à coté de celui de Namia.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "13",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -53,7 +57,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "capitaine",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -68,7 +73,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "mirabelle",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -81,15 +87,17 @@
 			"Text": "Oui, un bracelet, et il appartient à Namia, la fille disgracieuse qui est arrivé récemment. Vous ne pouvez pas la rater, c'est celle qui est mal coiffée et mal habillée, elle est juste à coté de son lit. Ce n'est quand meme pas tres compliqué comme mission, etes-vous décidé à m'aider ou faut-il que j'y aille à votre place ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -101,15 +109,17 @@
 			"Text": "Oui en effet, je possede un bracelet, comment etes-vous au courant ? Et qu'attendez-vous de moi ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -121,21 +131,24 @@
 			"Text": "Ah, c'est donc elle qui vous envoie. En temps normal j'aurais refusé, mais je ne serais pas contre le fait de donner une <link>petite lecon</link> à cette écervelée.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -147,21 +160,24 @@
 			"Text": "Je suis désolée, vous m'etes sympathique mais ce bracelet est trop dangereux et je ne veux pas vous faire de mal.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -170,15 +186,17 @@
 			"Text": "Vous m'avez rapporté son bracelet ? Merveilleux ! Comment puis-je vous remercier ? Ah, je sais, voudriez-vous venir à ma prochaine soirée privée ? Par contre... il faudra vous habiller un peu mieux évidemment, ce sont des réunions entre personnes de gout...",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "PCItem",
 					"Name": "Armlet_EvilSpelled",
 					"Value": "0",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -193,15 +211,17 @@
 			"Text": "Equipement ! Equipement ! Gneuuu !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -213,15 +233,17 @@
 			"Text": "Je suis certaine de l'avoir posé ici, voudriez-vous <link>m'aider à le chercher</link> ? Je vous promet de m'occuper de vous des que j'aurai mis la main dessus.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -233,21 +255,24 @@
 			"Text": "Avez-vous trouvé mon flacon ? Non ? Ne me dérangez plus jusqu'à ce que vous ayez du nouveau.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "2",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "20",
-					"Comp": "<"
+					"Comp": "<",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -256,15 +281,17 @@
 			"Text": "Vous l'avez retrouvé ? Fantastique ! Je savais que je pouvais compter sur vous. Attendez, je dois d'abord vérifier quelques informations avant de signer votre bon de sortie... Hmm... il semblerait que le capitaine veuille s'entretenir avec vous, nous n'avons pas encore d'information suffisamment fiable concernant votre <link>identité</link>.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "20",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -279,7 +306,8 @@
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "2",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
 				}
 			]
 		},
@@ -288,15 +316,17 @@
 			"Text": "Je ne sais rien à propos de ce flacon, désolée. Essayez de voir avec les malades, peut-etre que l'un d'entre eux est au courant.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "geraldine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "geraldine",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -305,15 +335,17 @@
 			"Text": "Un flacon ? Hmm... qui me dit que ce n'est pas Ranja qui vous envoie ? Je ne sais pas, je vais y réfléchir... Mais peut etre que si vous me rendez un <link>petit service</link>, je serais dans de meilleures disposition pour vous aider... Qui sait ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -325,15 +357,17 @@
 			"Text": "Avez-vous récupéré le <link>bracelet de Namia</link> ? Non ? C'est bien ce qui me semblait. A l'avenir, je vous prie de ne vous adressez à moi qu'une fois que vous me l'aurez rapporté !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -345,15 +379,17 @@
 			"Text": "Hein ? Quel flacon ? Ah oui, le flacon... heu... c'est idiot, j'ai oublié de vous le préciser mais comme il dégageait une odeur bizarre je l'ai finalement échangé contre le charmant collier d'Hasna. Comprenez-moi, je ne pouvais tout de meme pas souiller ma noble peau avec un parfum frelaté ! Vous ne m'en voulez pas j'espere ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "8",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -365,21 +401,24 @@
 			"Text": "Oh vous savez, les promesses... Comme on dit, boule qui mousse n'amasse pas heu... Enfin bref, si vous alliez demander à <link>Hasna</link> plutot ? Il doit bien y avoir un moyen de le récupérer.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "8",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -391,15 +430,17 @@
 			"Text": "Je vous ai déjà dis d'aller voir Hasna... Cessez de m'importuner maintenant, je dois rester concentrée quand je met mes boucles d'oreilles, vous ne voudriez tout de meme pas que je me pique ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "8",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -408,15 +449,17 @@
 			"Text": "Un flacon ? Quel flacon ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "10",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -428,21 +471,24 @@
 			"Text": "Non mais pour qui vos prenez-vous, vous venez à peine d'arriver et vous me menacez déjà ? Allez voir Ranja si ca vous amuse, vous n'avez aucune preuve et vous ne trouverez aucun flacon dans mes affaires !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "10",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -455,21 +501,24 @@
 			"Text": "C'est ca, c'est ca... Je vous ai vu discuter avec Mirabelle tout à l'heure, qu'est que vous mijotez tous les deux ? ",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "10",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -482,15 +531,17 @@
 			"Text": "Hein ? Pourquoi faire ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "12",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -503,21 +554,24 @@
 			"Text": "Un faible ? Pour Géraldine ? Ce n'est pas un parfum qu'il vous faut mais un onguent pour les yeux.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "13",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -530,21 +584,24 @@
 			"Text": "Ai-je l'air d'etre née de la derniere pluie ? Ce n'est pas avec des flatteries que vous obtiendrez quelque chose de moi.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "13",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -557,21 +614,24 @@
 			"Text": "Bien, je vois. En effet, j'ai donné mon collier à Mirabelle l'autre jour en échange de son flacon d'opium, cette idiote pensait que c'était du parfum...Ce produit divin m'a fait passer de bons moments, mais je sors bientot et je ne peux pas prendre le risque de me faire attraper par un garde. C'est pourquoi je l'ai donné à <link>Aluyn</link>.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "13",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -583,15 +643,17 @@
 			"Text": "Je vous ai dit tout ce que je savais, allez voir <link>Aluyn</link> et ne me melez plus à vos affaires.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "hasna",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "14",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "hasna",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -600,15 +662,17 @@
 			"Text": "Pardon ? Est-ce que je vous connais ? Pourquoi me posez-vous des questions ? Je veux sortir d'ici !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "15",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -620,21 +684,24 @@
 			"Text": "Ce flacon, le flacon de l'espoir, de la fin de l'ennui apres ces nuits sans fin, qui m'a chauffé le coeur et donné un sens à ma vie. Pourquoi voudriez-vous que je m'en sépare ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "15",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -646,21 +713,24 @@
 			"Text": "Ce n'est pas grave, les araignées sont toujours là mais depuis qu'Hasna lui a donné le flacon du bonheur, Aluyn ne les voit plus.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "15",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -672,21 +742,24 @@
 			"Text": "Les cendres volent au gré du vent, puis disparaissent dans l'immensité de la mer, comme si elles n'avaient jamais existé. Le nectar coule dans les veines d'Aluyn, puis disparait à son tour. Le bien que vous cherchez est plus précieux encore, mais je ne peux vous aider que si vous acceptez de le partager avec moi.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "15",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -699,21 +772,24 @@
 			"Text": "Andaneo kat salabelos, belicandos tatem esrat",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "16",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -726,21 +802,24 @@
 			"Text": "Boue, gadoue, genou, hibou.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "16",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -754,21 +833,24 @@
 			"Text": "La <link>liberté</link>, cher Harmonie, la liberté.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "16",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -780,21 +862,24 @@
 			"Text": "C'est cela fuyez, loin.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "16",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "4",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -807,15 +892,17 @@
 			"Text": "L'homme endormi doit porter le flacon au peuple ancien.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "19",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -824,15 +911,17 @@
 			"Text": "Oui, Hasna, une fille assez vulgaire qui est arrivée récemment. Vous ne pouvez pas la rater, son lit est malheureusement juste à coté du mien, ses ronflements m'empechent de dormir la nuit.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "9",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -844,15 +933,17 @@
 			"Text": "Rassurez-vous, ce n'est sans doute qu'une formalité, mais pour le moment je ne peux vous délivrer qu'un laissez passer.Vous pouvez sortir de l'infirmerie mais vous devez rester dans l'enceinte de l'administration. Montrez ce papier à un garde chaque fois que l'on vous arretera, sinon vous serez conduit en prison.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "21",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -866,15 +957,17 @@
 			"Text": "Oui, vous avez bien compris, vous voulez des informations sur votre flacon oui ou non ? Alors vous savez ce qu'il vous reste à faire.Et puis, entre nous, je ne vois pas ce qu'une fille aussi... simple que Namia ferait avec un aussi beau bijou, je saurai le mettre en valeur en ce qui me concerne !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -883,15 +976,17 @@
 			"Text": "Il était une fois, dans un lointain pays, un homme merveilleux et une femme comblée. Un jour, la Republique les arreta pour trahison, envoya l'homme en prison et laissa la femme à l'abandon. Seule et désemparée, cherchant nourriture et pitié, sa femme fut conduite chez les aliénés. Les journées et les nuits, allongée dans son lit, elle sombra dans la folie.Un jour l'homme endormi arriva, vers Aluyne approcha, dans ses bras la serra et la liberté lui apporta.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "17",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -904,21 +999,24 @@
 			"Text": "Homme endormi, tu dois me faire sortir d'ici. Dans ce pays lointain, ou la nuit est notre matin, apres avoir parcouru un long chemin, tu trouveras un <link>peuple ancien</link>. Vas et raconte leur mon destin, il nous libéreront du joug républicain.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "18",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -927,15 +1025,17 @@
 			"Text": "Je n'ai malheureusement aucun indice pour le moment, allez voir avec les autres malades si vous pouvez tirer des informations, ils seront peut-etre plus bavards avec vous qu'avec moi.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -948,15 +1048,17 @@
 			"Text": "Je ne peux pas vous envoyer au combat démuni comme vous l'etes, allez d'abord voir Antil pour vous équiper",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -965,27 +1067,31 @@
 			"Text": "Bien, je vois que vous vous etes équipé",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "5",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "PCItem",
 					"Name": "Shield_Wood",
 					"Value": "0",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 1
 				},
 				{
 					"Type": "PCItem",
 					"Name": "Stick_Wood",
 					"Value": "0",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 2
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -997,15 +1103,17 @@
 			"Text": "Depuis qu'elle est arrivée, je ne peux m'empecher d'admirer le <link>bracelet de Namia</link>. Il brille tellement que l'on pourrait presque penser qu'il est magique ! Je sais qu'il n'y a pas plus de magie dans cet endroit que de sourire sur le visage de Ranja, mais il irait si bien à mon teint, vous ne trouvez-pas ? Allez, faites-moi plaisir, pourriez-vous... <link>l'emprunter pour moi</link> ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "mirabelle",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "4",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "mirabelle",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1017,15 +1125,17 @@
 			"Text": "Ce bracelet est en effet tres joli, je l'ai trouvé il y a quelques jours, avant mon arrivée, mais depuis il ne m'arrive que des problemes.Ca a commencé par de petits incidents, puis ces maux de tete qui m'ont conduite ici. Ca peut paraitre absurde mais je commence à croire qu'il a été enchanté par un maléfice et j'aimerais m'en débarrasser. Je comptais le garder avec moi jusqu'à ma sortie mais si cette peste de Mirabelle tient tellement à me le prendre, soit, je lui donne avec grand plaisir !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "6",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1037,21 +1147,24 @@
 			"Text": "Tres bien, votre droiture vous honore, revenez-me voir si vous changez d'avis.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "6",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -1060,21 +1173,24 @@
 			"Text": "Tenez, prenez le, au plaisir de vous rendre service.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "namia",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "6",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "namia",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1088,15 +1204,17 @@
 			"Text": "(sanglote) Je ne pourrais malheureusement vous aider, ils m'ont pris mon mari et mon esprit. Vous devez m'aider à sortir d'ici, grace à ce flacon que voici.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "18",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1110,21 +1228,24 @@
 			"Text": "Partez, aussi vite que le vent !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "19",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1138,21 +1259,24 @@
 			"Text": "Pas de flacon, pas d'évasion.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "aluyn",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "19",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "aluyn",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1165,15 +1289,17 @@
 			"Text": "Vous vous sentez mieux ? Tres bien, allez voir Ranja à l'accueil, elle s'occupera de tout.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "geraldine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "geraldine",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -1182,15 +1308,17 @@
 			"Text": "Revenez plus tard, je suis occupée pour le moment, un <link>flacon</link> important a disparu de la réserve, je dois d'abord le retrouver",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1202,15 +1330,17 @@
 			"Text": "Je n'ai pas le temps de m'occuper de vous, allez voir l'infirmiere, c'est elle qui est en charge des malades.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "ranja",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "0",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "ranja",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -1221,7 +1351,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "geraldine",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1235,21 +1366,14 @@
 				{
 					"Name": "CharacterId",
 					"Value": "mirabelle",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
 		{
 			"Title": "République",
 			"Text": "La République est une et indivisible !"
-		},
-		{
-			"Title": "Wladimir",
-			"Text": "Bonjour, je m'appelle Wladimir Perrad"
-		},
-		{
-			"Title": "Wladimir",
-			"Text": "Bonjour, je m'appelle Wladimir Poutine"
 		}
 	],
 	"Greetings": [
@@ -1260,15 +1384,17 @@
 			"Text": "Halte ! Vous devez retourner à l'infirmerie, restez-y tant que vous n'aurez pas obtenu le bon de sortie.",
 			"Conditions": [
 				{
-					"Name": "SpeakerClass",
-					"Value": "Guard",
-					"Comp": "=="
-				},
-				{
 					"Type": "SpeakerLocal",
 					"Name": "numberAdvertise",
 					"Value": "3",
-					"Comp": "<"
+					"Comp": "<",
+					"Num": 0
+				},
+				{
+					"Name": "SpeakerClass",
+					"Value": "Guard",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1281,21 +1407,24 @@
 			"Text": "Un laissez-passer ? Quel laissez-passer ? Retournez immédiatement à l'infirmerie et que je ne vous prenne plus à me mentir !",
 			"Conditions": [
 				{
-					"Name": "SpeakerClass",
-					"Value": "Guard",
-					"Comp": "=="
-				},
-				{
 					"Type": "PCItem",
 					"Name": "Pass-Hospital",
 					"Value": "0",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "SpeakerClass",
+					"Value": "Guard",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -1303,21 +1432,24 @@
 			"Text": "Tres bien, vous pouvez circuler.",
 			"Conditions": [
 				{
-					"Name": "SpeakerClass",
-					"Value": "Guard",
-					"Comp": "=="
-				},
-				{
 					"Type": "PCItem",
 					"Name": "Pass-Hospital",
 					"Value": "0",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "SpeakerClass",
+					"Value": "Guard",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1329,21 +1461,24 @@
 			"Text": "Que je ne vous y reprenne plus.",
 			"Conditions": [
 				{
-					"Name": "SpeakerClass",
-					"Value": "Guard",
-					"Comp": "=="
-				},
-				{
 					"Type": "PCItem",
 					"Name": "Pass-Hospital",
 					"Value": "0",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "SpeakerClass",
+					"Value": "Guard",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1354,15 +1489,17 @@
 			"Text": "Je vous avais prévenu de rester à l'infirmerie ! Votre désobéissance va vous couter cher !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "garde hopital",
-					"Comp": "=="
-				},
-				{
 					"Type": "SpeakerLocal",
 					"Name": "numberAdvertise",
 					"Value": "3",
-					"Comp": ">="
+					"Comp": ">=",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "garde hopital",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1376,7 +1513,8 @@
 				{
 					"Name": "CharacterId",
 					"Value": "hasna",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		},
@@ -1384,15 +1522,17 @@
 			"Text": "Bonjour étranger, que voulez-vous ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "21",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1403,21 +1543,24 @@
 			"Text": "Tres bien, montrez-moi votre laissez-passer... Voyons voir... Hmm tres bien, nous faisons toujours une vérification avant de laisser quelqu'un quitter l'hopital au cas ou il s'agirait d'une personne recherchée, mais d'apres ce que je vois vous n'etes pas inscrit dans nos registres. Vous etes libre de partir, je viens d'apposer mon sceau sur vos papiers. A moins que... souhaiteriez-vous intégrer l'armée républicaine ? Nous recrutons en ce moment et nous manquons cruellement de volontaires.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "21",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1430,21 +1573,24 @@
 			"Text": "Tres bien, nous allons démarrer une campagne de recrutement prochainement, encore une... Nous n'avons meme plus de lieu décent pour accueillir les prochaines recrues. Le batiment de gauche a été laissé à l'abandon pendant tres longtemps. Avec la chaleur qu'il fait ici de nombreux animaux dangereux s'y sont introduits, des scorpions, des lézards vénimeux, des rats vampires...",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1456,21 +1602,24 @@
 			"Text": "Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est. Je vais vous donner une avance sur votre solde pour le payer.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1483,21 +1632,24 @@
 			"Text": "Je dois vous laisser, j'ai du travail.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Infirmerie",
 					"Value": "21",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1508,21 +1660,24 @@
 			"Text": "Oui, des rats qui ont été sélectionnés pour leur agressivité. Nous les avons créé pour lutter contre l'ennemi mais... vous savez ce que c'est, tot ou tard certains d'entre eux finissent par s'échappent et ca nous fait un probleme de plus à régler.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1534,21 +1689,24 @@
 			"Text": "Je vous donnerai des bottes et des gants de cuir, ca devrait vous protéger contre les morsures et les piqures. J'ai également de petits boucliers de bois et des batons pour l'entrainement, ca suffira largement. Allez voir <link>Antil</link>, vous le reconnaitrez facilement, il doit faire semblant de balayer la cour à l'heure qu'il est. Je vais vous donner une avance sur votre solde pour le payer.",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "capitaine",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "3",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "capitaine",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1561,15 +1719,17 @@
 			"Text": "Heu ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "<"
+					"Comp": "<",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1581,21 +1741,24 @@
 			"Text": "Heu !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "<"
+					"Comp": "<",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1606,21 +1769,24 @@
 			"Text": "Ah...",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "<"
+					"Comp": "<",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1631,15 +1797,17 @@
 			"Text": "Heu ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1650,21 +1818,24 @@
 			"Text": "Gneu ! J'ai beaucoup <link>equipement</link> ! Gneuuuu !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "1",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1675,21 +1846,24 @@
 			"Text": "Heu !",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 0
 				},
 				{
 					"Type": "Global",
 					"Name": "choice",
 					"Value": "2",
-					"Comp": "=="
+					"Comp": "==",
+					"Num": 1
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			],
 			"Actions": [
@@ -1700,15 +1874,17 @@
 			"Text": "Heu ?",
 			"Conditions": [
 				{
-					"Name": "CharacterId",
-					"Value": "antil",
-					"Comp": "=="
-				},
-				{
 					"Type": "Global",
 					"Name": "Mission_Legion",
 					"Value": "4",
-					"Comp": ">"
+					"Comp": ">",
+					"Num": 0
+				},
+				{
+					"Name": "CharacterId",
+					"Value": "antil",
+					"Comp": "==",
+					"Num": 10
 				}
 			]
 		}

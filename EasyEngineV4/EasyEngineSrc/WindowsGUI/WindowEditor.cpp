@@ -5,6 +5,9 @@
 #include "IScriptManager.h"
 #include <commctrl.h>
 
+const int ACTIONS_BUFFER_SIZE = 8192;
+const int EDIT_TOPIC_BUFFER_SIZE = 8192;
+
 ITopicSystem* CWindowEditor::s_pTopicSystem = NULL;
 IEntityManager* CWindowEditor::s_pEntityManager = NULL;
 EEInterface* CWindowEditor::s_pInterface = NULL;
@@ -16,6 +19,12 @@ HWND CWindowEditor::s_hTopics;
 HWND CWindowEditor::s_hEditTopic;
 HWND CWindowEditor::s_hTabCategory;
 HWND CWindowEditor::s_hActions;
+HWND CWindowEditor::s_hCharacterId;
+
+HWND CWindowEditor::s_hConditionTypes[CWindowEditor::CONDITION_COUNT];
+HWND CWindowEditor::s_hConditionNames[CWindowEditor::CONDITION_COUNT];
+HWND CWindowEditor::s_hConditionComps[CWindowEditor::CONDITION_COUNT];
+HWND CWindowEditor::s_hConditionValues[CWindowEditor::CONDITION_COUNT];
 
 CWindowEditor::CWindowEditor(const CWindowEditor::EditorDesc& desc) : 
 	CWindow2(desc)
@@ -191,6 +200,14 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 		s_hEditTopic = GetDlgItem(hWnd, IDC_EDIT_TOPIC);
 		s_hTabCategory = GetDlgItem(hWnd, IDC_TAB_CATEGORY);
 		s_hActions = GetDlgItem(hWnd, IDC_EDIT_ACTIONS);
+		s_hCharacterId = GetDlgItem(hWnd, IDC_COMBO_ID);
+
+		for (int i = 0; i < CONDITION_COUNT; i++) {
+			s_hConditionTypes[i] = GetDlgItem(hWnd, IDC_CONDITION_TYPE01 + i);
+			s_hConditionNames[i] = GetDlgItem(hWnd, IDC_CONDITION_NAME_01 + i);
+			s_hConditionComps[i] = GetDlgItem(hWnd, IDC_CONDITION_COMP_01 + i);
+			s_hConditionValues[i] = GetDlgItem(hWnd, IDC_CONDITION_VALUE_01 + i);
+		}
 
 		TCITEM itemTopic = {0};
 		itemTopic.mask = TCIF_TEXT;
@@ -285,16 +302,40 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 				}
 			}
 		}
-		
 		break;
 	}
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDC_EDIT_TOPIC) {
+		if (LOWORD(wParam) == IDC_EDIT_ACTIONS) {
 			int hiword = HIWORD(wParam);
-			hiword = hiword;
+			if (HIWORD(wParam) == 1024) {
+				char buffer[ACTIONS_BUFFER_SIZE];
+				GetWindowText(s_hActions, buffer, ACTIONS_BUFFER_SIZE);
+				string topicText;
+				ITopic* pTopic = GetSelectedTopic(hWnd, topicText);
+				vector<string> actions;
+				GetActions(hWnd, actions);
+				pTopic->SetActions(actions);
+			}
+		}
+		else if (LOWORD(wParam) == IDC_COMBO_ID) {
+			string characterId;
+			GetCBSelection(s_hCharacterId, characterId);
+			if (!characterId.empty()) {
+				string itemName;
+				ITopic* pSelectedTopic = GetSelectedTopic(hWnd, itemName);
+				ICondition* pCondition = pSelectedTopic->GetCondition(10);
+				if (!pCondition)
+					pCondition = pSelectedTopic->AddCondition(10);
+				pCondition->SetName("CharacterId");
+				pCondition->SetComp("==");
+				pCondition->SetValue(characterId);
+			}
+		}
+		else if (LOWORD(wParam) == IDC_EDIT_TOPIC) {
+			int hiword = HIWORD(wParam);
 			if (hiword == 0x400) {
-				char buffer[2048];
-				GetWindowTextA(s_hEditTopic, buffer, 2048);
+				char buffer[EDIT_TOPIC_BUFFER_SIZE];
+				GetWindowTextA(s_hEditTopic, buffer, EDIT_TOPIC_BUFFER_SIZE);
 				int topicIndex = SendMessageA(s_hTopics, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 				if (topicIndex >= 0) {
 					SendMessageA(s_hTopics, LB_DELETESTRING, (WPARAM)topicIndex, (LPARAM)0);
@@ -313,7 +354,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			}
 			break;
 		}
-		if (wParam == ID_TITLE_NEW) {
+		else if (wParam == ID_TITLE_NEW) {
 			string newTitlePrefix = "New_Title";
 			string newTitleName = newTitlePrefix;
 			int newNameIndex = 0;
@@ -331,7 +372,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 				s_pTopicSystem->AddGreetingTopic(newTitleName, sNewTopicName);
 			return TRUE;
 		}
-		if (wParam == ID_TITLE_RENAME) {
+		else if (wParam == ID_TITLE_RENAME) {
 			int sel = GetSeletedTitleIndex();
 			if (sel != -1) {
 				SetFocus(s_hTitles);                  // le contrôle doit avoir le focus
@@ -339,7 +380,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			}
 			break;
 		}
-		if (wParam == ID_TITLE_DELETE) {
+		else if (wParam == ID_TITLE_DELETE) {
 			int sel = GetSeletedTitleIndex();
 			if (sel != -1) {
 				string sTitleName = GetCurrentTitle(hWnd);
@@ -353,7 +394,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			}
 			break;
 		}
-		if (wParam == ID_TOPIC_NEW) {
+		else if (wParam == ID_TOPIC_NEW) {
 			string sTopicName = "New topic";
 			int index = SendMessage(s_hTopics, LB_ADDSTRING, 0, (LPARAM)sTopicName.c_str());
 			string sCurrentTitle = CWindowEditor::GetCurrentTitle(hWnd);
@@ -364,7 +405,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 					s_pTopicSystem->AddGreetingTopic(sCurrentTitle, sTopicName);
 			}
 		}
-		if (wParam == ID_TOPIC_DELETE) {
+		else if (wParam == ID_TOPIC_DELETE) {
 			int sel = SendMessage(s_hTopics, LB_GETCURSEL, 0, 0);
 			string title = CWindowEditor::GetCurrentTitle(hWnd);
 			GetCurrentTopics()[title].erase(GetCurrentTopics()[title].begin() + sel);
@@ -375,7 +416,7 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			SendMessage(s_hTopics, LB_SETCURSEL, sel, 0);
 			return TRUE;
 		}
-		if (LOWORD(wParam) == ID_OK) {
+		else if (LOWORD(wParam) == ID_OK) {
 			s_pTopicSystem->SaveTopics("Topics.json");
 			EndDialog(hWnd, IDCANCEL);
 			return TRUE;
@@ -385,30 +426,15 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 			return TRUE;
 		}		
 		else if (LOWORD(wParam) == IDC_TOPICS && HIWORD(wParam) == LBN_SELCHANGE) {
-			int selectionText = SendMessage(s_hTopics, LB_GETCURSEL, 0, (LPARAM)0);
-			int len = SendMessage(s_hTopics, LB_GETTEXTLEN, selectionText, (LPARAM)0);
-			string buf(len + 1, '\0');
-			SendMessage(s_hTopics, LB_GETTEXT, selectionText, (LPARAM)buf.data());
-			string item(buf.data());
-			SetWindowTextA(s_hEditTopic, item.data());
-			string sTitle = GetCurrentTitle(hWnd);
-			map<string, vector<ITopic*>>& topicsMap = GetCurrentTopics();
-			ITopic* pSelectedTopic = nullptr;
-			for (ITopic* pTopic : topicsMap[sTitle]) {
-				if (pTopic->GetText() == item) {
-					pSelectedTopic = pTopic;
-					break;
-				}
-			}
+			string itemName;
+			ITopic* pSelectedTopic = GetSelectedTopic(hWnd, itemName);
+			SetWindowTextA(s_hEditTopic, itemName.data());
 			if (pSelectedTopic) {
 				ClearSpeakerConditions(hWnd);
 
-				vector<ICondition*> conditions = pSelectedTopic->GetConditions();
-				int iConditionType = IDC_CONDITION_TYPE01;
-				int iConditionName = IDC_CONDITION_NAME_01;
-				int iConditionComp = IDC_CONDITION_COMP_01;
-				int iConditionValue = IDC_CONDITION_VALUE_01;
-				for (ICondition* pCondition : conditions) {
+				map<int, ICondition*> conditions = pSelectedTopic->GetConditions();
+				for (pair<const int, ICondition*>& pairCondition : conditions) {
+					ICondition* pCondition = pairCondition.second;
 					if (pCondition->GetType().empty()) {
 						if (pCondition->GetName() == "CharacterId") {
 							HWND hID = GetDlgItem(hWnd, IDC_COMBO_ID);
@@ -416,14 +442,14 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 						}
 					}
 					else {
-						HWND hConditionType = GetDlgItem(hWnd, iConditionType);
+						HWND hConditionType = GetDlgItem(hWnd, IDC_CONDITION_TYPE01 + pairCondition.first);
 						SendMessage(hConditionType, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)pCondition->GetType().c_str());
-						FillConditionFromType(hWnd, iConditionType++, s_pInterface);
-						HWND hConditionName = GetDlgItem(hWnd, iConditionName++);
+						FillConditionFromType(hWnd, IDC_CONDITION_TYPE01 + pairCondition.first, s_pInterface);
+						HWND hConditionName = GetDlgItem(hWnd, IDC_CONDITION_NAME_01 + pairCondition.first);
 						SendMessage(hConditionName, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)pCondition->GetName().c_str());
-						HWND hConditionComp = GetDlgItem(hWnd, iConditionComp++);
+						HWND hConditionComp = GetDlgItem(hWnd, IDC_CONDITION_COMP_01 + pairCondition.first);
 						SendMessage(hConditionComp, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)pCondition->GetCompStr().c_str());
-						HWND hConditionValue = GetDlgItem(hWnd, iConditionValue++);
+						HWND hConditionValue = GetDlgItem(hWnd, IDC_CONDITION_VALUE_01 + pairCondition.first);
 						SendMessage(hConditionValue, WM_SETTEXT, 0, (LPARAM)pCondition->GetValue().c_str());
 					}
 				}
@@ -441,6 +467,54 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 				FillConditionFromType(hWnd, idcConditionType, s_pInterface);
 			}
 		}
+		else if (LOWORD(wParam) >= IDC_CONDITION_NAME_01 && LOWORD(wParam) <= IDC_CONDITION_NAME_06) {
+			int hiParam = HIWORD(wParam);
+			if (hiParam == CBN_SELCHANGE) {
+				string itemName;
+				ITopic* pSelectedTopic = GetSelectedTopic(hWnd, itemName);
+				int index = LOWORD(wParam) - IDC_CONDITION_NAME_01;
+				string type, name, comp, value;
+				GetConditionFromControls(index, type, name, comp, value);
+				if (!type.empty() && !name.empty() && !comp.empty() && !value.empty()) {
+					ICondition* pCondition = pSelectedTopic->GetCondition(index);
+					if (!pCondition)
+						pCondition = pSelectedTopic->AddCondition(index);
+					SetCondition(pCondition, type, name, comp, value);
+				}
+			}
+		}
+		else if (LOWORD(wParam) >= IDC_CONDITION_COMP_01 && LOWORD(wParam) <= IDC_CONDITION_COMP_06) {
+			int hiParam = HIWORD(wParam);
+			if (hiParam == CBN_SELCHANGE) {
+				string itemName;
+				ITopic* pSelectedTopic = GetSelectedTopic(hWnd, itemName);
+				int index = LOWORD(wParam) - IDC_CONDITION_COMP_01;
+				string type, name, comp, value;
+				GetConditionFromControls(index, type, name, comp, value);
+				if (!type.empty() && !name.empty() && !comp.empty() && !value.empty()) {
+					ICondition* pCondition = pSelectedTopic->GetCondition(index);
+					if (!pCondition)
+						pCondition = pSelectedTopic->AddCondition(index);
+					SetCondition(pCondition, type, name, comp, value);
+				}
+			}
+		}
+		else if (LOWORD(wParam) >= IDC_CONDITION_VALUE_01 && LOWORD(wParam) <= IDC_CONDITION_VALUE_06) {
+			string itemName;
+			ITopic* pSelectedTopic = GetSelectedTopic(hWnd, itemName);
+			if (pSelectedTopic) {
+				int hiParam = HIWORD(wParam);
+				int index = LOWORD(wParam) - IDC_CONDITION_VALUE_01;
+				string type, name, comp, value;
+				GetConditionFromControls(index, type, name, comp, value);
+				if (!type.empty() && !name.empty() && !comp.empty() && !value.empty()) {
+					ICondition* pCondition = pSelectedTopic->GetCondition(index);
+					if (!pCondition)
+						pCondition = pSelectedTopic->AddCondition(index);
+					SetCondition(pCondition, type, name, comp, value);
+				}
+			}
+		}
 		break;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xFFF0) == SC_CLOSE) {
@@ -450,6 +524,82 @@ INT_PTR CALLBACK CWindowEditor::OnTopicCallback(HWND hWnd, UINT msg, WPARAM wPar
 		break;
 	}
 	return 0;
+}
+
+void CWindowEditor::GetActions(HWND hWnd, vector<string>& actions)
+{
+	char buffer[ACTIONS_BUFFER_SIZE];
+	GetWindowText(s_hActions, buffer, ACTIONS_BUFFER_SIZE);
+	string actionsStr = buffer;
+	int nPos = 0;
+	while (nPos != -1) {
+		nPos = actionsStr.find("\r\n");
+		if (nPos != -1) {
+			string s = actionsStr.substr(0, nPos);
+			actions.push_back(s);
+			actionsStr = actionsStr.substr(nPos + 2);
+		}
+		else {
+			int sepPos = actionsStr.find("\t\n");
+			if (sepPos != -1) {
+				actionsStr = actionsStr.substr(0, sepPos);
+			}
+			if (!actionsStr.empty()) {
+				actions.push_back(actionsStr);
+			}
+		}
+	}
+}
+
+void CWindowEditor::GetConditionFromControls(int index, string& type, string& name, string& comp, string& value)
+{
+	GetCBSelection(s_hConditionTypes[index], type);
+	GetCBSelection(s_hConditionNames[index], name);
+	GetCBSelection(s_hConditionComps[index], comp);
+	char buffer[8];
+	GetWindowTextA(s_hConditionValues[index], buffer, 8);
+	value = buffer;
+}
+
+void CWindowEditor::SetCondition(ICondition* pCondition, string& type, string& name, string& comp, string& value)
+{
+	pCondition->SetType(type);
+	pCondition->SetName(name);
+	pCondition->SetComp(comp);
+	pCondition->SetValue(value);
+}
+
+void CWindowEditor::GetLBSelection(HWND hListBox, string& selectionText)
+{
+	int index = SendMessage(hListBox, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	int len = SendMessage(hListBox, LB_GETTEXTLEN, index, (LPARAM)0);
+	string buf(len + 1, '\0');
+	SendMessage(hListBox, LB_GETTEXT, index, (LPARAM)buf.data());
+	selectionText = buf.data();
+}
+
+void CWindowEditor::GetCBSelection(HWND hListBox, string& selectionText)
+{
+	int index = SendMessage(hListBox, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	int len = SendMessage(hListBox, CB_GETCOUNT, index, (LPARAM)0);
+	string buf(len + 1, '\0');
+	SendMessage(hListBox, CB_GETLBTEXT, index, (LPARAM)buf.data());
+	selectionText = buf.data();
+}
+
+ITopic* CWindowEditor::GetSelectedTopic(HWND hWnd, string& itemName)
+{
+	GetLBSelection(s_hTopics, itemName);
+	string sTitle = GetCurrentTitle(hWnd);
+	map<string, vector<ITopic*>>& topicsMap = GetCurrentTopics();
+	ITopic* pSelectedTopic = nullptr;
+	for (ITopic* pTopic : topicsMap[sTitle]) {
+		if (pTopic->GetText() == itemName) {
+			pSelectedTopic = pTopic;
+			break;
+		}
+	}
+	return pSelectedTopic;
 }
 
 void CWindowEditor::ClearTopicWindow()
@@ -482,7 +632,6 @@ void CWindowEditor::FillConditionFromType(HWND hWnd, int idcConditionType, EEInt
 	SendMessage(hConditionName, CB_RESETCONTENT, 0, 0);
 	HWND hConditionValue = GetDlgItem(hWnd, IDC_CONDITION_VALUE_01 + index);
 	SendMessage(hConditionValue, WM_SETTEXT, 0, (LPARAM)"");
-
 	
 	char buffer[256];
 	int selectionIndex = SendMessage(hConditionType, CB_GETCURSEL, 0, 0);

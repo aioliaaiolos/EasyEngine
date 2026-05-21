@@ -29,6 +29,30 @@ CCondition::TComp CCondition::GetComp()
 	return m_eComp;
 }
 
+void CCondition::SetType(const string& type)
+{
+	m_sType = type;
+}
+
+void CCondition::SetName(const string& name)
+{
+	m_sName = name;
+}
+
+void CCondition::SetValue(const string& value)
+{
+	m_sValue = value;
+}
+
+void CCondition::SetComp(TComp comp)
+{
+	m_eComp = comp;
+}
+
+void CCondition::SetComp(string comp)
+{
+	m_eComp = GetCompFromString(comp);
+}
 
 string CCondition::GetCompStr()
 {
@@ -52,13 +76,38 @@ string CCondition::GetCompStr()
 	}
 }
 
+CCondition::TComp CCondition::GetCompFromString(string comp)
+{
+	if (comp == "==")
+		return eEqual;
+	if (comp == "!=")
+		return eDifferent;
+	if (comp == ">")
+		return eSup;	
+	if (comp == ">=")
+		return eSupEqual;
+	if (comp == "<")
+		return eInf;	
+	if (comp == "<=")
+		return eInfEqual;		
+	if (comp == "is")
+		return eIs;		
+	if (comp == "isNot")
+		return eIsNot;
+}
+
+int CCondition::GetNum()
+{
+	return m_nNum;
+}
+
 CTopic::CTopic()
 {
 }
 
-CTopic::CTopic(const string& sText, const vector<ICondition*>& conditions, const vector<string>& actions) :
+CTopic::CTopic(const string& sText, const map<int, ICondition*>& conditions, const vector<string>& actions) :
 	m_sText(sText),
-	m_vConditions(conditions),
+	m_mConditions(conditions),
 	m_vAction(actions)
 {
 }
@@ -93,14 +142,34 @@ void CTopic::SetActions(const vector<string>& actions)
 	m_vAction = actions;
 }
 
-vector<ICondition*>& CTopic::GetConditions()
+map<int,ICondition*>& CTopic::GetConditions()
 {
-	return m_vConditions;
+	return m_mConditions;
 }
 
-void CTopic::SetConditions(vector<ICondition*>& conditions)
+ICondition* CTopic::GetCondition(int index)
 {
-	m_vConditions = conditions;
+	map<int, ICondition*>::iterator itCondition = m_mConditions.find(index);
+	if (itCondition != m_mConditions.end())
+		return itCondition->second;
+	return nullptr;
+}
+
+ICondition* CTopic::AddCondition(int conditionIndex)
+{
+	ICondition* pCondition = new CCondition;
+	m_mConditions[conditionIndex] = pCondition;
+	return pCondition;
+}
+
+void CTopic::SetConditions(map<int, ICondition*>& conditions)
+{
+	m_mConditions = conditions;
+}
+
+void CTopic::SetActions(vector<string>& actions)
+{
+	m_vAction = actions;
 }
 
 CTopicSystem::CTopicSystem(EEInterface& oInterface) : ITopicSystem(oInterface)
@@ -132,6 +201,30 @@ bool CTopicSystem::ExecuteActions(ITopic* pTopic, string& error) const
 		return false;
 	}
 	return true;
+}
+
+ITopic* CTopicSystem::GetTopic(string sTitle, string sText)
+{
+	ITopic* pSelectedTopic = nullptr;
+	for (ITopic* pTopic : m_mTopics[sTitle]) {
+		if (pTopic->GetText() == sText) {
+			pSelectedTopic = pTopic;
+			break;
+		}
+	}
+	return pSelectedTopic;
+}
+
+ITopic* CTopicSystem::GetGreeting(string sTitle, string sText)
+{
+	ITopic* pSelectedTopic = nullptr;
+	for (ITopic* pTopic : m_mGreetings[sTitle]) {
+		if (pTopic->GetText() == sText) {
+			pSelectedTopic = pTopic;
+			break;
+		}
+	}
+	return pSelectedTopic;
 }
 
 void CTopicSystem::SaveTopics(const string& sFileName)
@@ -198,15 +291,20 @@ void CTopicSystem::SaveJsonTopic(string titleStr, ITopic* pTopic, Document& doc,
 	}
 }
 
-void CTopicSystem::SaveJsonConditions(const vector<ICondition*>& conditionArray, Document& doc, Value& conditions)
+void CTopicSystem::SaveJsonConditions(const map<int, ICondition*>& conditionArray, Document& doc, Value& conditions)
 {
-	for (ICondition* pCondition : conditionArray) {
-		Value condition(kObjectType);;
+	//int number = 0;
+	for (const pair<int, ICondition*>& pairCondition : conditionArray) {
+		ICondition* pCondition = pairCondition.second;
+		Value condition(kObjectType);
+		Value num(kNumberType);
+		num.SetInt(pCondition->GetNum());
 		if (!pCondition->GetType().empty()) {
 			Value type(kStringType);
 			type.SetString(CStringUtils::AnsiToUtf8(pCondition->GetType()).c_str(), doc.GetAllocator());
 			condition.AddMember("Type", type, doc.GetAllocator());
 		}
+		
 		Value name(kStringType);
 		name.SetString(CStringUtils::AnsiToUtf8(pCondition->GetName()).c_str(), doc.GetAllocator());
 		condition.AddMember("Name", name, doc.GetAllocator());
@@ -218,6 +316,7 @@ void CTopicSystem::SaveJsonConditions(const vector<ICondition*>& conditionArray,
 		Value comp(kStringType);
 		comp.SetString(CStringUtils::AnsiToUtf8(pCondition->GetCompStr()).c_str(), doc.GetAllocator());
 		condition.AddMember("Comp", comp, doc.GetAllocator());
+		condition.AddMember("Num", num, doc.GetAllocator());
 		conditions.PushBack(condition, doc.GetAllocator());
 	}
 }
@@ -286,7 +385,7 @@ string CTopicSystem::LoadTopic(Value& topic, CTopic* pTopic)
 {
 	string sTitle;
 	string sText;
-	vector<ICondition*> vConditions;
+	map<int, ICondition*> mConditions;
 	vector<string> vAction;
 	if (topic.IsObject()) {
 		if (topic.HasMember("Title")) {
@@ -306,13 +405,13 @@ string CTopicSystem::LoadTopic(Value& topic, CTopic* pTopic)
 				}
 			}
 		}
-		LoadJsonConditions(topic, vConditions);
+		LoadJsonConditions(topic, mConditions);
 		LoadJsonActions(topic, vAction);
 	}
 	sTitle = CStringUtils::Utf8ToAnsi(sTitle);
 	sText = CStringUtils::Utf8ToAnsi(sText);
 	pTopic->SetText(sText);
-	pTopic->SetConditions(vConditions);
+	pTopic->SetConditions(mConditions);
 	pTopic->SetActions(vAction);
 	return sTitle;
 }
@@ -325,7 +424,8 @@ int CTopicSystem::IsConditionChecked(const vector<ITopic*>& topics, string sSpea
 	int i = 0;
 	for (ITopic* pTopic : topics) {
 		CTopic* topic = static_cast<CTopic*>(pTopic);
-		for (ICondition* pCondition : topic->GetConditions()) {
+		for (pair<const int, ICondition*>& pairCondition : topic->GetConditions()) {
+			ICondition* pCondition = pairCondition.second;
 			CCondition& condition = *static_cast<CCondition*>(pCondition);
 			if (condition.m_sName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
@@ -508,7 +608,7 @@ void CTopicSystem::DeleteTitleGreeting(string sTitleName)
 		m_mGreetings.erase(itTitle);
 }
 
-void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions)
+void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, map<int, ICondition*>& mConditions)
 {
 	if (oParentNode.HasMember("Conditions")) {
 		rapidjson::Value& conditions = oParentNode["Conditions"];
@@ -516,49 +616,59 @@ void CTopicSystem::LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICon
 			for (int iCondition = 0; iCondition < conditions.GetArray().Size(); iCondition++) {
 				rapidjson::Value& condition = conditions[iCondition];
 				CCondition* pCondition = new CCondition;
-				string sTestVariableName, sTestVariableValue;
-				if (condition.IsObject()) {
-					if (condition.HasMember("Name")) {
-						if (condition.HasMember("Type")) {
-							rapidjson::Value& type = condition["Type"];
-							if (type.IsString()) {
-								pCondition->m_sType = type.GetString();
-							}
-						}
-						rapidjson::Value& varName = condition["Name"];
-						if (varName.IsString())
-							pCondition->m_sName = varName.GetString();
-						rapidjson::Value& value = condition["Value"];
-						if (value.IsString())
-							pCondition->m_sValue = value.GetString();
-						if (condition.HasMember("Comp")) {
-							rapidjson::Value& comp = condition["Comp"];
-							if (value.IsString()) {
-								string sComp = comp.GetString();
-								if (sComp == "==")
-									pCondition->m_eComp = CCondition::eEqual;
-								else if (sComp == "!=")
-									pCondition->m_eComp = CCondition::eDifferent;
-								else if (sComp == "<")
-									pCondition->m_eComp = CCondition::eInf;
-								else if (sComp == "<=")
-									pCondition->m_eComp = CCondition::eInfEqual;
-								else if (sComp == ">")
-									pCondition->m_eComp = CCondition::eSup;
-								else if (sComp == ">=")
-									pCondition->m_eComp = CCondition::eSupEqual;
-								else if (sComp == "is")
-									pCondition->m_eComp = CCondition::eIs;
-								else if (sComp == "isNot")
-									pCondition->m_eComp = CCondition::eIsNot;
-							}
-						}
-						else
-							throw CEException(string("Error during parsing topics file : 'Comp' is missing in condition for topic '") + oParentNode.GetString());
-					}
-				}
-				vConditions.push_back(pCondition);
+				LoadJsonCondition(condition, pCondition);
+				mConditions[pCondition->GetNum()] = pCondition;
 			}
+		}
+	}
+}
+
+void CTopicSystem::LoadJsonCondition(Value& condition, CCondition* pCondition)
+{
+	if (condition.IsObject()) {
+		if (condition.HasMember("Name")) {
+			if (condition.HasMember("Type")) {
+				rapidjson::Value& type = condition["Type"];
+				if (type.IsString()) {
+					pCondition->m_sType = type.GetString();
+				}
+			}
+			rapidjson::Value& varName = condition["Name"];
+			if (varName.IsString())
+				pCondition->m_sName = varName.GetString();
+			rapidjson::Value& value = condition["Value"];
+			if (value.IsString())
+				pCondition->m_sValue = value.GetString();
+			if (condition.HasMember("Comp")) {
+				rapidjson::Value& comp = condition["Comp"];
+				if (value.IsString()) {
+					string sComp = comp.GetString();
+					if (sComp == "==")
+						pCondition->m_eComp = CCondition::eEqual;
+					else if (sComp == "!=")
+						pCondition->m_eComp = CCondition::eDifferent;
+					else if (sComp == "<")
+						pCondition->m_eComp = CCondition::eInf;
+					else if (sComp == "<=")
+						pCondition->m_eComp = CCondition::eInfEqual;
+					else if (sComp == ">")
+						pCondition->m_eComp = CCondition::eSup;
+					else if (sComp == ">=")
+						pCondition->m_eComp = CCondition::eSupEqual;
+					else if (sComp == "is")
+						pCondition->m_eComp = CCondition::eIs;
+					else if (sComp == "isNot")
+						pCondition->m_eComp = CCondition::eIsNot;
+				}
+			}
+			if (condition.HasMember("Num")) {
+				rapidjson::Value& num = condition["Num"];
+				if (num.IsNumber()) {
+					pCondition->m_nNum = num.GetInt();
+				}
+			}
+			else
+				throw CEException(string("Error during parsing topics file : 'Comp' is missing in condition for current topic '"));
 		}
 	}
 }
@@ -587,8 +697,8 @@ int CTopicSystem::SelectTopic(const vector<ITopic*>& topics, string sSpeakerId)
 	int i = 0;
 	for (ITopic* pTopic : topics) {
 		CTopic* topic = static_cast<CTopic*>(pTopic);
-		for (ICondition* pCondition : topic->GetConditions()) {
-			CCondition& condition = *static_cast<CCondition*>(pCondition);
+		for (pair<const int, ICondition*>& pairCondition : topic->GetConditions()) {
+			CCondition& condition = *static_cast<CCondition*>(pairCondition.second);
 			if (condition.m_sName == "CharacterId") {
 				if (condition.m_eComp == condition.eEqual) {
 					if (!condition.m_sValue.empty() && condition.m_sValue != sSpeakerId) {

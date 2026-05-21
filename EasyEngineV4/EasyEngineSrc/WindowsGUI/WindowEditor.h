@@ -5,6 +5,7 @@
 class ITopicSystem;
 class IEntityManager;
 class ITopic;
+class ICondition;
 
 class CWindowEditor : public CWindow2
 {
@@ -22,6 +23,7 @@ public:
 	CWindowEditor(const CWindowEditor::EditorDesc& desc);
 
 	static INT_PTR CALLBACK OnTopicCallback(HWND, UINT, WPARAM, LPARAM);
+	static const int CONDITION_COUNT = 6;;
 
 private:
 	static void FillConditionFromType(HWND hWnd, int idcConditionType, EEInterface* pInterface);
@@ -37,6 +39,12 @@ private:
 	static void SelectTitle(int index);
 	static int GetSeletedTitleIndex();
 	static int InsertNewTopic(string sTopicName);
+	static ITopic* GetSelectedTopic(HWND hWnd, string& itemName);
+	static void GetLBSelection(HWND hListBox, string& selectionText);
+	static void GetCBSelection(HWND hListBox, string& selectionText);
+	static void GetConditionFromControls(int index, string& type, string& name, string& comp, string& value);
+	static void SetCondition(ICondition* pCondition, string& type, string& name, string& comp, string& value);
+	static void GetActions(HWND hWnd, vector<string>& actions);
 
 	static ITopicSystem* s_pTopicSystem;
 	static IEntityManager* s_pEntityManager;
@@ -46,7 +54,14 @@ private:
 	static HWND s_hEditTopic;
 	static HWND s_hTabCategory;
 	static HWND s_hActions;
+	static HWND s_hCharacterId;
+	static HWND s_hConditionTypes[CONDITION_COUNT];
+	static HWND s_hConditionNames[CONDITION_COUNT];
+	static HWND s_hConditionComps[CONDITION_COUNT];
+	static HWND s_hConditionValues[CONDITION_COUNT];
+
 	static int s_nCurrentTab;
 	static string s_sSelectedTitle;
+	//static string s_sSelectedTopic;
 	
 };

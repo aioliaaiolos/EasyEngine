@@ -99,30 +99,42 @@ struct CCondition : public ICondition
 	string GetValue() override;
 	TComp GetComp() override;
 	string GetCompStr() override;
+	TComp GetCompFromString(string comp);
+	int GetNum() override;
+
+	void SetType(const string& type) override;
+	void SetName(const string& name) override;
+	void SetValue(const string& value) override;
+	void SetComp(TComp comp) override;
+	void SetComp(string comp) override;
 
 	string	m_sType;
 	string	m_sName;
 	string	m_sValue;
 	TComp	m_eComp;
+	int m_nNum = 0;
 };
 
 class CTopic : public ITopic
 {
 public:
 	CTopic();
-	CTopic(const string& sText, const vector<ICondition*>& conditions, const vector<string>& actions);
+	CTopic(const string& sText, const map<int, ICondition*>& conditions, const vector<string>& actions);
 	string& GetName() override;
 	void SetName(const string& sName) override;
 	void SetText(const string& sText) override;
 	const string& GetText() const override;	
 	vector<string>& GetActions() override;
 	void SetActions(const vector<string>& actions);
-	vector<ICondition*>& GetConditions() override;
-	void SetConditions(vector<ICondition*>& conditions);
+	map<int, ICondition*>& GetConditions() override;
+	ICondition* GetCondition(int index) override;
+	ICondition* AddCondition(int conditionIndex) override;
+	void SetConditions(map<int, ICondition*>& conditions);
+	void SetActions(vector<string>& actions) override;
 	
 
 private:
-	vector<ICondition*> m_vConditions;
+	map<int, ICondition*> m_mConditions;
 	vector<string> m_vAction;
 	string m_sName;
 	string m_sText;
@@ -142,10 +154,11 @@ protected:
 	void										AddGreetingTopic(string sTitleName, string sTopicName) override;
 	void										DeleteTitle(string sTitleName) override;
 	void										DeleteTitleGreeting(string sTitleName) override;
-	void										LoadJsonConditions(rapidjson::Value& oParentNode, vector<ICondition*>& vConditions);
+	void										LoadJsonConditions(rapidjson::Value& oParentNode, map<int, ICondition*>& vConditions);
+	void										LoadJsonCondition(rapidjson::Value& condition, CCondition* pCondition);
 	int											SelectTopic(const vector<ITopic*>& topics, string sSpeakerId);
 	ITopic*										SelectGreeting(string sSpeakerId) override;
-	const ITopic*								SelectTopic(string sTopicName, string sSpeakerId) override;
+	const ITopic*								SelectTopic(string sTopicName, string sSpeakerId);
 	void										LoadJsonActions(rapidjson::Value& oParentNode, vector<string>& vAction);
 	int											IsConditionChecked(const vector<ITopic*>& topics, string sSpeakerId);
 	string										GetName() override;
@@ -155,6 +168,8 @@ protected:
 	void										Format(string sTopicText, string sSpeakerId, string& sFormatedText);
 	void										GetVarValue(string sVarName, string sCharacterId, string& sValue);
 	bool										ExecuteActions(ITopic* pTopic, string& error) const;
+	ITopic*										GetTopic(string sTitle, string sText) override;
+	ITopic*										GetGreeting(string sTitle, string sText) override;
 
 private:
 
@@ -162,7 +177,7 @@ private:
 
 	void										SaveJsonTopics(string title, vector<ITopic*>& vTopic, rapidjson::Value& topics, rapidjson::Document& doc);
 	void										SaveJsonTopic(string titleStr, ITopic* pTopic, rapidjson::Document& doc, rapidjson::Value& topic);
-	void										SaveJsonConditions(const vector<ICondition*>& conditionArray, rapidjson::Document& doc, rapidjson::Value& conditions);
+	void										SaveJsonConditions(const map<int, ICondition*>& conditionArray, rapidjson::Document& doc, rapidjson::Value& conditions);
 	void										SaveJsonActions(const vector<string> actionArray, rapidjson::Document& doc, rapidjson::Value& actions);
 
 	map<string, vector<ITopic*>>				m_mTopics;

@@ -23,6 +23,14 @@ struct ICondition
 	virtual string GetValue() = 0;
 	virtual TComp GetComp() = 0;
 	virtual string GetCompStr() = 0;
+	virtual int GetNum() = 0;
+	virtual 
+
+	virtual void SetType(const string& type) = 0;
+	virtual void SetName(const string& name) = 0;
+	virtual void SetValue(const string& value) = 0;
+	virtual void SetComp(TComp comp) = 0;
+	virtual void SetComp(string comp) = 0;
 };
 
 class ITopic
@@ -31,16 +39,19 @@ public:
 	virtual string& GetName() = 0;
 	virtual const string& GetText() const = 0;
 	virtual vector<string>& GetActions() = 0;
-	virtual vector<ICondition*>& GetConditions() = 0;
+	virtual map<int, ICondition*>& GetConditions() = 0;
+	virtual ICondition* GetCondition(int index) = 0;
+	virtual ICondition* AddCondition(int conditionIndex) = 0;
 	virtual void SetName(const string& sName) = 0;
 	virtual void SetText(const string& sText) = 0;
+	virtual void SetActions(vector<string>& actions) = 0;
 };
 
 class ITopicSystem : public CPlugin
 {
 public:
 	ITopicSystem(EEInterface& oInterface) : CPlugin(nullptr, "TopicSystem") {}
-	virtual const ITopic*	SelectTopic(string sTopicName, string sSpeakerId) = 0;
+	//virtual const ITopic* SelectTopic(string sTopicName, string sSpeakerId) = 0;
 	virtual ITopic*	SelectGreeting(string sSpeakerId) = 0;
 	virtual void GetCharacterTopics(string sCharacterID, vector<ITopic*>& topics) = 0;
 	virtual map<string, vector<ITopic*>>& GetAllTopics() = 0;
@@ -51,4 +62,6 @@ public:
 	virtual void AddGreetingTopic(string sTitleName, string sTopicName) = 0;
 	virtual void DeleteTitle(string sTitleName) = 0;
 	virtual void DeleteTitleGreeting(string sTitleName) = 0;
+	virtual ITopic* GetTopic(string sTitle, string sText) = 0;
+	virtual ITopic* GetGreeting(string sTitle, string sText) = 0;
 };
