@@ -4,6 +4,8 @@
 #include "IGeometry.h"
 #include "Interface.h"
 
+#include <algorithm>
+
 extern IGeometryManager* m_pGeometryManager;
 
 CHeightMap::CHeightMap():
@@ -39,8 +41,8 @@ IBox* CHeightMap::GetModelBBox()
 
 void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector modelDim, float groundAdaptationHeight)
 {
-	float xMargin = modelDim.m_y / 2;
-	float zMargin = modelDim.m_y / 2;
+	float xMargin = 2 * modelDim.m_y;
+	float zMargin = 2 * modelDim.m_y;
 	
 	float x0, z0, x1, z1;
 	MapToModel(0, 0, x0, z0);
@@ -49,8 +51,8 @@ void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector mod
 	float bias = modelUnit / 2.f;
 	modelUnit -= bias;
 	CVector modelPos = modelTM.GetPosition();
-	int xModel = -modelDim.m_x / 2.f - xMargin;
-	int zModel = 0;
+	float xModel = -modelDim.m_x / 2.f - xMargin;
+	float zModel = 0.f;
 	float hMin = 99999999.f;
 	while (xModel < modelDim.m_x / 2.f + xMargin) {
 		zModel = -modelDim.m_z / 2.f - zMargin;
@@ -142,6 +144,11 @@ void CHeightMap::GetFileName(string& fileName)
 	fileName = m_sFileName;
 }
 
+void CHeightMap::SetSliceCount(int sliceCount)
+{
+	m_nSliceCount = sliceCount;
+}
+
 void CHeightMap::Load(string sFileName)
 {
 	ILoader::CTextureInfos ti;
@@ -209,73 +216,110 @@ float CHeightMap::GetHeight( const CVector& p )
 	return ret;
 }
 
+// Helper : reproduit exactement texture2D(heightMap, uv) avec GL_LINEAR
+float CHeightMap::SampleHeightmapBilinear(float xModel, float zModel)
+{
+	float dimx = m_pModelBox->GetDimension().m_x;
+	float dimz = m_pModelBox->GetDimension().m_z;
+
+	// UV dans [0, 1]
+	float u = (xModel + dimx / 2.f) / dimx;
+	float v = (zModel + dimz / 2.f) / dimz;
+
+	// Convention OpenGL pixel-center : le texel (i,j) est centré à UV ((i+0.5)/W, (j+0.5)/H)
+	// Donc UV * dim - 0.5 donne la position en "indices de texel" où les centres sont aux entiers
+	float px = u * m_nWidth - 0.5f;
+	float py = v * m_nHeight - 0.5f;
+
+	int ix = (int)floor(px);
+	int iy = (int)floor(py);
+	float fx = px - ix;
+	float fy = py - iy;
+
+	// Clamp aux bords (équivalent GL_CLAMP_TO_EDGE, qui est le défaut pour une heightmap)
+	auto clampX = [&](int i) { return (std::max)(0, (std::min)(m_nWidth - 1, i)); };
+	auto clampY = [&](int i) { return (std::max)(0, (std::min)(m_nHeight - 1, i)); };
+	int x0 = clampX(ix), x1 = clampX(ix + 1);
+	int y0 = clampY(iy), y1 = clampY(iy + 1);
+
+	CVector p00, p10, p01, p11;
+	GetPixel(x0, y0, p00);
+	GetPixel(x1, y0, p10);
+	GetPixel(x0, y1, p01);
+	GetPixel(x1, y1, p11);
+
+	float h00 = GetHeight(p00);
+	float h10 = GetHeight(p10);
+	float h01 = GetHeight(p01);
+	float h11 = GetHeight(p11);
+
+	// Bilinéaire pure (pas de triangle ici — la heightmap n'est pas triangulée)
+	float h = (1 - fx) * (1 - fy) * h00
+		+ fx       * (1 - fy) * h10
+		+ (1 - fx) * fy       * h01
+		+ fx       * fy       * h11;
+
+	return GetHeightFromPixelValue(h);
+}
+
 void CHeightMap::MapToModel(int xMap, int yMap, float& xModel, float& zModel)
 {
 	float dimx = m_pModelBox->GetDimension().m_x;
 	float dimz = m_pModelBox->GetDimension().m_z;
-	float h = m_pModelBox->GetDimension().m_y;
-
-	xModel = dimx - dimx / 2.f - (m_nWidth - xMap) * dimx / m_nWidth;
-	zModel = dimz - yMap * dimz / m_nHeight - dimz / 2.f;
+	xModel = xMap * dimx / (m_nWidth - 1) - dimx / 2.f;
+	zModel = yMap * dimz / (m_nHeight - 1) - dimz / 2.f;
 }
 
-
-void CHeightMap::ModelToMap( int xModel, int zModel, int& xMap, int& yMap )
-{
-	xMap = - m_nWidth * (( xModel - m_pModelBox->GetMinPoint().m_x - m_pModelBox->GetDimension().m_x ) / m_pModelBox->GetDimension().m_x) - 1;
-	yMap = - m_nHeight * (( zModel - m_pModelBox->GetMinPoint().m_z - m_pModelBox->GetDimension().m_z ) / m_pModelBox->GetDimension().m_z) - 1;
-}
-
-void CHeightMap::ModelToMap( int xModel, int zModel, float& xMap, float& yMap )
+void CHeightMap::ModelToMap( float xModel, float zModel, float& xMap, float& yMap )
 {
 	float dimx = m_pModelBox->GetDimension().m_x;
 	float dimz = m_pModelBox->GetDimension().m_z;
 	float h = m_pModelBox->GetDimension().m_y;
 
 	xMap = ((m_nWidth - 1) / 2.f) * (1 + 2 * xModel / dimx );
-	yMap = zModel * m_nHeight / dimz + m_nHeight / 2;
+	yMap = ((m_nHeight - 1) / 2.f) * (1 + 2 * zModel / dimz);
 }
 
-float CHeightMap::GetHeight( float xModel, float zModel )
+// Niveau mesh : reproduit la rasterisation des triangles
+float CHeightMap::GetHeight(float xModel, float zModel)
 {
-	float fxMap, fyMap;
-	ModelToMap( xModel, zModel, fxMap, fyMap );
+	float dimx = m_pModelBox->GetDimension().m_x;
+	float dimz = m_pModelBox->GetDimension().m_z;
 
-	if( fxMap >= 0 && fxMap < m_nWidth && fyMap >= 0 && fyMap < m_nHeight )
-	{
-		CVector p00, p01, p10, p11;
+	// ATTENTION : il faut que m_nSlices soit stocké dans la heightmap.
+	// Il faut donc le passer à LoadHeightMap au moment où tu génères le terrain.
+	float quadSizeX = dimx / m_nSliceCount;
+	float quadSizeZ = dimz / m_nSliceCount;
 
-		int xMap = (int)fxMap;
-		int yMap = (int)fyMap;
+	// Position dans la grille MESH
+	float fc = (xModel + dimx / 2.f) / quadSizeX;
+	float fl = (zModel + dimz / 2.f) / quadSizeZ;
 
-		float dx = fxMap - (float)xMap;
-		float dy = fyMap - (float)yMap;
+	if (fc < 0 || fc >= m_nSliceCount || fl < 0 || fl >= m_nSliceCount)
+		return -1e8f;
 
-		int xMapInc = xMap + 1;
-		int yMapInc = yMap + 1;
-		if( xMapInc == m_nWidth )
-			xMapInc--;
-		if( yMapInc == m_nHeight )
-			yMapInc--;
-		GetPixel( xMap, yMap, p00 );
-		GetPixel( xMapInc, yMap, p10 );
-		GetPixel( xMap, yMapInc, p01 );
-		GetPixel( xMapInc, yMapInc, p11 );
-		
-		float h00 = GetHeight( p00 );
-		float h10 = GetHeight( p10 );
-		float h01 = GetHeight( p01 );
-		float h11 = GetHeight( p11 );
+	int c = (int)fc;
+	int l = (int)fl;
+	float dx = fc - c;
+	float dy = fl - l;
 
-		float h = (1-dx)*(1-dy)*h00 + (1-dx)*dy*h01 + dx*(1-dy)*h10 + dx*dy*h11;
-		//h = h00;
+	// Positions monde des 4 vertices du quad (correspond exactement à CreatePlane2)
+	float x0 = c       * quadSizeX - dimx / 2.f;
+	float x1 = (c + 1) * quadSizeX - dimx / 2.f;
+	float z0 = l       * quadSizeZ - dimz / 2.f;
+	float z1 = (l + 1) * quadSizeZ - dimz / 2.f;
 
-		float fRet = GetHeightFromPixelValue(h);
-		
-		return fRet;
-	}
+	// Hauteur de chaque vertex = ce que le GPU calcule via texture2D bilinéaire
+	float h00 = SampleHeightmapBilinear(x0, z0);
+	float h10 = SampleHeightmapBilinear(x1, z0);
+	float h01 = SampleHeightmapBilinear(x0, z1);
+	float h11 = SampleHeightmapBilinear(x1, z1);
+
+	// Sélection du triangle (diagonale "/" — partagée entre v(c+1,l) et v(c,l+1))
+	if (dx + dy <= 1.0f)
+		return h00 + dx * (h10 - h00) + dy * (h01 - h00);
 	else
-		return -100000000.f;
+		return h11 + (1.f - dx) * (h01 - h11) + (1.f - dy) * (h10 - h11);
 }
 
 float CHeightMap::GetHeightFromPixelValue(float pixelValue)

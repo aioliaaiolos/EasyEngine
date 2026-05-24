@@ -94,7 +94,7 @@
 				{"MoveToGuardWeaponPart2": "MoveToGuardWeaponPart2-m-mixamo"},
 				{"Original": "Original-m-mixamo"},
 				{"Punished": "Standing-m-mixamo"},
-				{"Run": "Running-m-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 5.0},
+				{"Run": "Running-m-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 10.0},
 				{"RunReverse": "Running-m-mixamo", "SpeedRelativeToAnimation": 5.0},
 				{"StrafeLeft": "LeftStrafe-m-mixamo"},
 				{"StrafeRight": "RightStrafe-m-mixamo"},

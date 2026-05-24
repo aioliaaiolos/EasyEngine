@@ -126,9 +126,10 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 	bool forceReloadHeightMap = true;
 	int nDotPos = (int)sFileName.find('.');
 	string sLevelDirectory;
+	int sliceCount = 0;
 	if (m_bUseDisplacementMap) {
 		m_sHMFileName = sFileName;
-		int sliceCount = m_nMapLength / 500;
+		sliceCount = m_nMapLength / 500;
 		string prefix = "/HMA_";
 		int startIdx = m_sHMFileName.find("/HMA_");
 		string levelFileName;
@@ -183,6 +184,9 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 		IBox* pBox = m_pMesh->GetBBox();
 		m_nHeightMapID = m_oCollisionManager.LoadHeightMap(m_sHMFileName, pBox, forceReloadHeightMap);
 		m_oCollisionManager.SetGroundBoxHeight(m_nHeightMapID, m_fMapHeight);
+		IHeightMap* Heightmap = m_oCollisionManager.GetHeightMap(m_nHeightMapID);
+		if(sliceCount > 0)
+			Heightmap->SetSliceCount(sliceCount);
 	}
 	catch( CFileNotFoundException& )
 	{
@@ -428,6 +432,11 @@ void CScene::AddChild(INode* pNode)
 		m_pCastShadowLight->Follow(m_pPlayer, m_fFarShadowFrustum / 2.f, m_fFarShadowFrustum / 2.f - 500.f);
 	}
 #endif // LIGHT_SUN
+}
+
+void CScene::AddCastShadowLight(CLightEntity* pLightEntity)
+{
+	m_vShadowLights.push_back(pLightEntity);
 }
 
 void  CScene::RenderScene()

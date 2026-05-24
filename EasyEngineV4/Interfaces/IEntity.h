@@ -191,8 +191,8 @@ class ILightEntity : public virtual IEntity
 public:
 	virtual ILight*	GetLight() = 0;
 	virtual void CastShadow(bool castShadow) = 0;
-	virtual void SetShadowFrustumSize(float size) = 0;
-	virtual float GetShadowFrustumSize() = 0;
+	virtual void SetShadowFrustumSize(float width, float height, float fFar) = 0;
+	virtual void GetShadowFrustumSize(float& width, float& height, float& fFar) = 0;
 };
 
 class ICharacter : public virtual IEntity

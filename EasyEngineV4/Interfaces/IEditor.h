@@ -47,6 +47,7 @@ public:
 	virtual void	AdaptGroundToAllEntities() = 0;
 	virtual void	SetBias(float fBias) = 0;
 	virtual void	SetSceneMap(string sRessourceFileName, string sDiffuseFileName, int lengh, float fHeight) = 0;
+	virtual void	SaveToJson(string sMapName) = 0;
 };
 
 class ICharacterEditor : public IEditor

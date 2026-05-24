@@ -34,7 +34,8 @@ public:
 	CMapEditor(EEInterface& oInterface, ICameraManager::TCameraType cameraType);
 
 	void							SpawnEntity(string sEntityFileName);
-	void							Save(string fileName);
+	void							Save(string fileName) override;
+	void							SaveToJson(string fileName) override;
 	void							Load(string sFileName);
 	void							SetGroundAdaptationHeight(float fHeight);
 	string							GetName() override;

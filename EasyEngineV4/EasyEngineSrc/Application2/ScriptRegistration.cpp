@@ -2666,10 +2666,12 @@ void SetLightCastShadow(IScriptState* pState)
 void SetShadowFrustumSize(IScriptState* pState)
 {
 	CValueInt* pID = (CValueInt*)pState->GetArg(0);
-	CValueFloat* pLength = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pWidth = (CValueFloat*)pState->GetArg(1);
+	CValueFloat* pHeight = (CValueFloat*)pState->GetArg(2);
+	CValueFloat* pFar = (CValueFloat*)pState->GetArg(3);
 	ILightEntity* pLightEntity = dynamic_cast<ILightEntity*>(m_pEntityManager->GetEntity(pID->m_nValue));
 	if (pLightEntity) {
-		pLightEntity->SetShadowFrustumSize(pLength->m_fValue);
+		pLightEntity->SetShadowFrustumSize(pWidth->m_fValue, pHeight->m_fValue, pFar->m_fValue);
 	}
 }
 
@@ -3523,6 +3525,23 @@ void SaveMap(IScriptState* pState)
 	}
 }
 
+void SaveMapToJson(IScriptState* pState)
+{
+	CValueString* pName = static_cast< CValueString* >(pState->GetArg(0));
+	string sName = pName->m_sValue;
+	try
+	{
+		m_pMapEditor->SaveToJson(sName);
+		m_pConsole->Println("Map sauvegardée");
+	}
+	catch (CFileException& e) {
+		m_pConsole->Println(string("Erreur d'acces au fichier \"") + sName + "\", verifiez que vous disposez des droits suffisants et que votre antivirus ne bloque pas l'operation");
+	}
+	catch (CEException e) {
+		m_pConsole->Println(e.what());
+	}
+}
+
 void Advertise(IScriptState* pState)
 {
 	CValueString* pCharacterId = (CValueString*)pState->GetArg(0);
@@ -4278,6 +4297,8 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 
 	vType.clear();
 	vType.push_back(eInt);
+	vType.push_back(eFloat);
+	vType.push_back(eFloat);
 	vType.push_back(eFloat);
 	m_pScriptManager->RegisterFunction("SetShadowFrustumSize", SetShadowFrustumSize, vType, eVoid);
 

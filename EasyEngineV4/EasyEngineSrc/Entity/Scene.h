@@ -60,6 +60,7 @@ public:
 	void														SetRessource( string sFileName, bool bDuplicate = false );
 	IGeometry*													GetBoundingGeometry();
 	void														RenderScene();
+	void														AddCastShadowLight(CLightEntity* pLightEntity);
 	void														RenderMinimap();
 	ITexture*													CreateMinimapTexture();
 	ITexture*													GetMinimapTexture();

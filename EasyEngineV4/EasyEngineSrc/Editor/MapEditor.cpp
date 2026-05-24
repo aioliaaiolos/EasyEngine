@@ -288,6 +288,53 @@ void CMapEditor::Save(string mapName)
 	}
 }
 
+void CMapEditor::SaveToJson(string mapName)
+{
+	if (m_bEditionMode) {
+		m_sCurrentMapName = mapName;
+		string levelFolder;
+		if (CreateLevelFolderIfNotExists(mapName, levelFolder)) {
+			levelFolder += "/";
+			string originalRessourceName;
+			if (m_oAnimatableMeshData.m_vMeshes.size() > 0) {
+				string sFileName = mapName + ".json";
+				m_oLoaderManager.Export(sFileName, m_oAnimatableMeshData);
+				m_oCollisionManager.CreateHeightMap(sFileName);
+				m_pScene->GetOriginalSceneFileName(originalRessourceName);
+				m_pScene->SetOriginalSceneFileName(originalRessourceName);
+				m_pScene->SetRessource(sFileName);
+			}
+			else {
+				string root;
+				m_oFileSystem.GetLastDirectory(root);
+				string srcPath = root + m_sTmpAdaptedHeightMapFileName;
+				string newHMFile = "levels/" + mapName + "/HMA_" + mapName + ".bmp";
+				string destPath = levelFolder + "HMA_" + mapName + ".bmp";
+				m_pScene->SetHMFile("/" + newHMFile);
+				if (!MoveFileA(srcPath.c_str(), destPath.c_str())) {
+					if (!m_pHeightMap)
+						m_pHeightMap = m_oCollisionManager.GetHeightMap(m_pScene->GetCurrentHeightMapIndex());
+					m_pHeightMap->Save(newHMFile);
+				}
+				srcPath = root + "/" + m_sTmpFolder + "/ground.bme";;
+				destPath = levelFolder + "ground.bme";
+				if (!MoveFileA(srcPath.c_str(), destPath.c_str())) {
+					string sGroundFileName;
+					m_pScene->GetRessource()->GetFileName(sGroundFileName);
+					srcPath = root + sGroundFileName;
+					CopyFileA(srcPath.c_str(), destPath.c_str(), FALSE);
+				}
+				m_pScene->SetRessourceFileName(destPath);
+			}
+			SaveMap(levelFolder + mapName + ".bse", m_fBias);
+		}
+	}
+	else {
+		CEException e("You have to enable MapEditionMode to be able to save the map.");
+		throw e;
+	}
+}
+
 void CMapEditor::SaveMap(string sFileName, float fBias)
 {
 	ILoader::CSceneInfos si;

@@ -196,7 +196,7 @@ void CObject::UpdateCollision()
 		}
 		// Ground collision
 		if (m_pParent) {
-			const float margin = 10.f;
+			const float margin = 0.f;
 			CVector worldPos;
 			GetWorldPosition(worldPos);
 			float fWorldGroundHeight = m_pParent->GetGroundHeight(worldPos.m_x, worldPos.m_z) + margin;

@@ -42,11 +42,15 @@ void CLightEntity::Pitch(float angle)
 {
 	CNode::Pitch(angle);
 	Update();
-	if (m_pLight->GetType() == ILight::SPOT) {
+	if (!m_pLight) {
+		string message = string("Erreur, la light entity " + std::to_string(m_nID) + " n'a pas de light");
+		throw CEException(message);
+	}
+	if (m_pLight && m_pLight->GetType() == ILight::SPOT) {
 		CVector dir;
 		m_oWorldMatrix.GetxBase(dir);
 		m_pLight->SetSpotDirection(dir);
-	}	
+	}
 }
 
 void CLightEntity::Roll(float angle)
@@ -149,8 +153,8 @@ void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* p
 	default:
 		throw 1;
 	}
-	IRessource* pLight = m_oRessourceManager.CreateLight(pLightEntityInfos->m_oColor, type, pLightEntityInfos->m_fIntensity);
-	m_pRessource = pLight;
+	m_pRessource = m_oRessourceManager.CreateLight(pLightEntityInfos->m_oColor, type, pLightEntityInfos->m_fIntensity);
+	m_pLight = static_cast<ILight*>(m_pRessource);
 	SetLocalMatrix(infos.m_oXForm);
 }
 
@@ -158,7 +162,7 @@ void CLightEntity::RenderFirstShadowPass(vector<IEntity*>& entities)
 {
 	if (m_pLight && m_pLight->IsCastShadow()) {
 		m_oWorldMatrix.GetInverse(m_oLightViewMatrix);
-		m_oRenderer.CalcOrthoProjection(m_oLightProjection, -m_fShadowFrustumSize / 4.f, m_fShadowFrustumSize / 4.f, -m_fShadowFrustumSize / 4.f, m_fShadowFrustumSize / 4.f, 100, m_fShadowFrustumSize);		
+		m_oRenderer.CalcOrthoProjection(m_oLightProjection, -m_fShadowFrustumWidth / 2.f, m_fShadowFrustumWidth / 2.f, -m_fShadowFrustumHeight / 2.f, m_fShadowFrustumHeight / 2.f, 100, m_fShadowFrustumFar);
 
 		int shadowWidth, shadowHeight;
 		m_pShadowTexture->GetDimension(shadowWidth, shadowHeight);
@@ -234,14 +238,18 @@ void CLightEntity::RenderSecondShadowPass(IShader* pEntityShader, CEntity* pEnti
 	}
 }
 
-void CLightEntity::SetShadowFrustumSize(float size)
+void CLightEntity::SetShadowFrustumSize(float width, float height, float fFar)
 {
-	m_fShadowFrustumSize = size;
+	m_fShadowFrustumWidth = width;
+	m_fShadowFrustumHeight = height;
+	m_fShadowFrustumFar = fFar;
 }
 
-float CLightEntity::GetShadowFrustumSize()
+void CLightEntity::GetShadowFrustumSize(float& width, float& height, float& fFar)
 {
-	return m_fShadowFrustumSize;
+	width = m_fShadowFrustumWidth;
+	height = m_fShadowFrustumHeight;
+	fFar = m_fShadowFrustumFar;
 }
 
 void CLightEntity::RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection)
@@ -294,6 +302,10 @@ void CLightEntity::CastShadow(bool castShadow)
 	if(castShadow)
 		m_pShadowTexture = CreateShadowTexture();
 	GetLight()->CastShadow(castShadow);
+	m_pScene = GetParentScene();
+	if (m_pScene) {
+		m_pScene->AddCastShadowLight(this);
+	}
 }
 
 ITexture* CLightEntity::CreateShadowTexture()

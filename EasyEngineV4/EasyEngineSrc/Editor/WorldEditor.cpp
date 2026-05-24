@@ -467,9 +467,15 @@ void CWorldEditor::LoadFromJson(string sFileName, bool isGameSave)
 					CVector pos(position["x"].GetFloat(), position["y"].GetFloat(), position["z"].GetFloat());
 					oTM.SetPosition(pos.m_x, pos.m_y, pos.m_z);
 				}
-				float fShadowFrustumSize = 20000.f;
-				if (light.HasMember("ShadowFrustumSize"))
-					fShadowFrustumSize = light["ShadowFrustumSize"].GetFloat();
+				float fShadowFrustumWidth = 20000.f;
+				float fShadowFrustumHeight = 20000.f;
+				float fShadowFrustumFar = 20000.f;
+				if (light.HasMember("ShadowFrustumSize")) {
+					Value& shadowFrustumSize = light["ShadowFrustumSize"];
+					fShadowFrustumWidth = shadowFrustumSize["width"].GetFloat();
+					fShadowFrustumHeight = shadowFrustumSize["height"].GetFloat();
+					fShadowFrustumFar = shadowFrustumSize["far"].GetFloat();
+				}
 
 				map<string, ILight::Type> lightTypes = { {"omni", ILight::OMNI }, { "dir", ILight::DIRECTIONAL}, { "spot", ILight::SPOT} };
 				ILight* pLight = static_cast<ILight*>(m_oRessourceManager.CreateLight(CVector(1, 1, 1, 1), lightTypes[type], intensity.GetDouble()));
@@ -480,7 +486,7 @@ void CWorldEditor::LoadFromJson(string sFileName, bool isGameSave)
 				pLight->SetType(lightTypes[type]);
 				ILightEntity* pLightEntity = m_oEntityManager.CreateLightEntity(pLight);
 				pLightEntity->SetLocalMatrix(oTM);
-				pLightEntity->SetShadowFrustumSize(fShadowFrustumSize);
+				pLightEntity->SetShadowFrustumSize(fShadowFrustumWidth, fShadowFrustumHeight, fShadowFrustumFar);
 				m_vShadowLights.push_back(pLightEntity);
 			}
 		}
@@ -645,7 +651,13 @@ void CWorldEditor::SaveToJson(string sFileName, bool isGameSave)
 				light.AddMember("Ambient", ambient, doc.GetAllocator());
 				light.AddMember("CastShadow", pLight->IsCastShadow(), doc.GetAllocator());
 				light.AddMember("Sun", pLight->IsSun(), doc.GetAllocator());
-				light.AddMember("ShadowFrustumSize", pLightEntity->GetShadowFrustumSize(), doc.GetAllocator());
+				float width, height, fFar;
+				pLightEntity->GetShadowFrustumSize(width, height, fFar);
+				Value shadowFrustumSize(kObjectType);
+				shadowFrustumSize.AddMember("width", width, doc.GetAllocator());
+				shadowFrustumSize.AddMember("height", height, doc.GetAllocator());
+				shadowFrustumSize.AddMember("far", fFar, doc.GetAllocator());
+				light.AddMember("ShadowFrustumSize", shadowFrustumSize, doc.GetAllocator());
 				Value kType(kStringType);
 				string type = m_oRessourceManager.LightTypeToString(pLight->GetType());
 				kType.SetString(type.c_str(), doc.GetAllocator());

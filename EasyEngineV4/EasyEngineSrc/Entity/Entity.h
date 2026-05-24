@@ -116,6 +116,7 @@ public:
 	void							SetLocalVariableValue(string sVariableName, int nValue) override;
 	void							SetLocalVariableValue(string sVariableName, float fValue) override;
 	void							SetCullFace(bool culling);
+	CScene*							GetParentScene();
 	
 
 protected:

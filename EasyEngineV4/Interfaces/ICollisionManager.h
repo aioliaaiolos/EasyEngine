@@ -30,7 +30,7 @@ public:
 	virtual void	GetFileName(string& fileName) = 0;
 	virtual void	RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDim, string originalHeightMap) = 0;
 	virtual float	GetHeight(float xModel, float zModel) = 0;
-	virtual void	ModelToMap(int xModel, int zModel, int& xMap, int& yMap)  = 0;
+	virtual void	SetSliceCount(int sliceCount) = 0;
 };
 
 class ICollisionMap

@@ -29,8 +29,8 @@ public:
 	void				Pitch(float yaw);
 	void				Roll(float yaw);
 	ILight*				GetLight() override;
-	void				SetShadowFrustumSize(float size) override;
-	float				GetShadowFrustumSize() override;
+	void				SetShadowFrustumSize(float width, float height, float fFar) override;
+	void				GetShadowFrustumSize(float& width, float& height, float& fFar) override;
 	void				RenderFirstShadowPass(vector<IEntity*>& entities);
 	void				RenderSecondShadowPass(IShader* pEntityShader, CEntity* pEntity);
 	void				CastShadow(bool castShadow);
@@ -43,11 +43,16 @@ private:
 	CRepere*			m_pRepere = nullptr;
 	CMatrix				m_oLightViewMatrix;
 	CMatrix				m_oLightProjection;
-	float				m_fShadowFrustumSize = 20000.f;
+
+	float				m_fShadowFrustumWidth = 20000.f;
+	float				m_fShadowFrustumHeight = 20000.f;
+	float				m_fShadowFrustumFar = 20000.f;
+
 	string				m_sShadowMapFirstPassShaderName = "shadowMapFirstPass";
 	string				m_sShadowMapFirstPassSkinningShaderName = "shadowMapSkinningFirstPass";
 	string				m_sMiniMapSecondPassShaderName = "mapSecondPass2D";
 	ITexture*			m_pShadowTexture = nullptr;
+	CScene*				m_pScene = nullptr;
 };
 
 #endif // LIGHTENTITY_H

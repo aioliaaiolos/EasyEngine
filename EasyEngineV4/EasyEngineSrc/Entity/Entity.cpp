@@ -733,6 +733,17 @@ void CEntity::SetCullFace(bool culling)
 	m_bCullFace = culling;
 }
 
+CScene* CEntity::GetParentScene()
+{
+	INode* pParentNode = m_pParent;
+	while (pParentNode != nullptr) {
+		CScene* pScene = dynamic_cast<CScene*>(pParentNode);
+		if (pScene)
+			return pScene;
+		pParentNode = pParentNode->GetParent();
+	}
+}
+
 void CEntity::UpdateBoundingBox()
 {
 	IBox* pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
