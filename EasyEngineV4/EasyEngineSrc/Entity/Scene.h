@@ -127,6 +127,7 @@ private:
 	string														m_sOriginalSceneFileName;
 	ITexture*													m_pHeightMaptexture;
 	IShader*													m_pGroundShader;
+	IShader*													m_pSplashMap = nullptr;
 	bool														m_bUseDisplacementMap;
 	float														m_fDisplacementRatioHeightSize;
 	float														m_fTiling;
@@ -138,6 +139,14 @@ private:
 	string														m_sCurrentLevelName;
 	TSceneState													m_eSceneState;
 	vector<CLightEntity*>										m_vShadowLights;
+
+	struct CTerrain
+	{
+		ITexture*	m_pTerrainTexture = nullptr;
+		ITexture*	m_pSplatTexture = nullptr;
+	};
+
+	vector<CTerrain*>											m_terrains;
 };
 
 #endif // SCENE_NODE_H

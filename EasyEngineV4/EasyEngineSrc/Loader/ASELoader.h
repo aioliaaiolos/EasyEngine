@@ -22,7 +22,6 @@ class CAseLoader : public IMeshLoader
 public:
 						CAseLoader(void);								
 	virtual 			~CAseLoader(void);		
-	void				Export( const std::string& sFileName, const CChunk& chunk );
 	void				Load( string sFileName, ILoader::IRessourceInfos& ri, IFileSystem& ){throw 1;}
 	void				Export(string sFileName, ILoader::IRessourceInfos& ri);
 };

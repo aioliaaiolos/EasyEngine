@@ -85,6 +85,20 @@ CScene::CScene(EEInterface& oInterface, string ressourceFileName, string diffuse
 	m_pPlayerMapSphere = dynamic_cast<CEntity*>(m_pEntityManager->CreateEntity("playerPointer.bme"));
 	m_pPlayerMapSphere->SetShader(m_oRenderer.GetShader(m_sMiniMapFirstPassShaderName));
 	m_pPlayerMapSphere->SetName("PlayerPointer");
+
+	CTerrain* pTerrain = new CTerrain;
+	string root;
+	m_oFileSystem.GetLastDirectory(root);
+
+	pTerrain->m_pTerrainTexture = static_cast<ITexture*> (m_oRessourceManager.CreateTexture2D(root + "/Textures/road01.bmp", true));
+	pTerrain->m_pTerrainTexture->SetUnitTexture(5);
+	pTerrain->m_pTerrainTexture->SetUnitName("terrainMap01");
+
+	pTerrain->m_pSplatTexture = static_cast<ITexture*> (m_oRessourceManager.CreateTexture2D(root + "/Textures/splat01.bmp", false));
+	pTerrain->m_pSplatTexture->SetUnitTexture(6);
+	pTerrain->m_pSplatTexture->SetUnitName("splatMap01");
+
+	m_terrains.push_back(pTerrain);
 }
 
 CScene::~CScene()
@@ -467,6 +481,15 @@ void  CScene::RenderScene()
 			m_pGroundShader->SendUniformValues("tiling", m_fTiling);
 			m_pHeightMaptexture->Update();
 		}
+		
+		for (CScene::CTerrain* pTerrain : m_terrains) {
+			pTerrain->m_pTerrainTexture->SetShader(m_pGroundShader);
+			pTerrain->m_pTerrainTexture->Update();
+
+			pTerrain->m_pSplatTexture->SetShader(m_pGroundShader);
+			pTerrain->m_pSplatTexture->Update();
+		}
+		
 		m_oRenderer.SetModelMatrix(m_oWorldMatrix);
 		m_pRessource->Update();
 	}

@@ -2,6 +2,9 @@
 
 uniform sampler2D baseMap;
 uniform sampler2D shadowMap;
+uniform sampler2D terrainMap01;
+uniform sampler2D splatMap01;
+
 uniform int TextureCount;
 uniform int LightCount;
 uniform float tiling;
@@ -25,7 +28,21 @@ void main()
 	
 	vec4 diffuseColor;
 	if ( TextureCount > 0 ) {
-		diffuseColor = texture2D( baseMap, tiling * Texcoord );
+		vec4 splatColor = texture2D( splatMap01, Texcoord );
+		
+		vec4 groundColor = texture2D( baseMap, tiling * Texcoord );
+		vec4 roadColor = texture2D( terrainMap01, tiling * Texcoord );
+		//diffuseColor = mix(groundColor, roadColor, splatColor.r);
+		float diffuseMask = smoothstep(0.3, 0.7, splatColor.r);
+		diffuseColor = mix(groundColor, roadColor, diffuseMask);
+		
+		/*
+		if(splatColor.r == 0)
+			diffuseColor = texture2D( baseMap, tiling * Texcoord );
+		else
+			diffuseColor = texture2D( terrainMap01, tiling * Texcoord );
+		*/
+		
 	}
 	else
 		diffuseColor = gl_FrontMaterial.diffuse;	

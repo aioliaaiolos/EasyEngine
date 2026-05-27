@@ -100,6 +100,9 @@ void CBMPLoader::Load( string sFileName, IRessourceInfos& ri, IFileSystem& oFile
 		memcpy(&pTI->m_vTexels[0], &vData[0], size);
 		switch(nBitPerPixel)
 		{
+		case 8:
+			pTI->m_ePixelFormat = eGray;
+			break;
 		case 24:
 			pTI->m_ePixelFormat = eBGR;
 			break;

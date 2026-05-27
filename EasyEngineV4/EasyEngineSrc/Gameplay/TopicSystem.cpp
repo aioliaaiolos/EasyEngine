@@ -233,7 +233,7 @@ void CTopicSystem::SaveTopics(const string& sFileName)
 	m_pFileSystem->GetLastDirectory(sJsonDirectory);
 	string sFilePath = sJsonDirectory + "\\" + sFileName;
 	
-	Document doc;	
+	Document doc;
 	doc.SetObject();
 	Value topics(kArrayType);
 

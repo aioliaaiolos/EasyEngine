@@ -674,6 +674,9 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 	IRenderer::TPixelFormat format = IRenderer::T_FormatNone;
 	switch (ti.m_ePixelFormat)
 	{
+	case ILoader::eGray:
+		format = IRenderer::T_GRAY;
+		break;
 	case ILoader::eRGB:
 		format = IRenderer::T_RGB;
 		break;
@@ -804,6 +807,7 @@ IMesh* CRessourceManager::CreatePlane2(int slices, int size, float height, strin
 	pBox->Set(CVector(-size / 2.f, -height /2.f, -size / 2.f), CVector(size, height, size));
 	int hmID = m_pCollisionManager->LoadHeightMap(heightTexture, pBox);
 	IHeightMap* pHeightMap = m_pCollisionManager->GetHeightMap(hmID);
+	pHeightMap->SetSliceCount(slices);
 	ILoader::CMeshInfos mi;
 	float quadSize = (float)size / (float)slices;
 

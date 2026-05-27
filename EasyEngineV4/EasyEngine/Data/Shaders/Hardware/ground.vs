@@ -5,6 +5,7 @@ varying vec2 Texcoord;
 varying vec4 fragPosLightSpace;
 
 uniform sampler2D heightMap;
+
 uniform float groundHeight;
 uniform mat4 lightSpaceModelview;
 uniform mat4 lightSpaceProjection;
@@ -14,10 +15,7 @@ void main()
 {
 	Texcoord    = gl_MultiTexCoord0.xy;
 	vec4 tVertex = gl_Vertex;
-	
-	vec4 texel;
-	texel = texture2D( heightMap, gl_MultiTexCoord0.xy );
-	tVertex.y = groundHeight * (texture2D( heightMap, gl_MultiTexCoord0.xy )-0.5);
+	tVertex.y = groundHeight * (texture2D( heightMap, gl_MultiTexCoord0.xy ).r - 0.5);
 	
 	fragPosLightSpace = lightSpaceProjection * lightSpaceModelview * tVertex;
 	

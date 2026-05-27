@@ -6,6 +6,14 @@
 #include <map>
 #include <stdio.h>
 
+
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+#include <rapidjson/prettywriter.h>
+
+using namespace rapidjson;
 using namespace std;
 
 class IPersistantObject;
@@ -140,6 +148,33 @@ public:
 
 	IBaseStorage&	operator<<( const IPersistantObject& object ) override;
 	const IBaseStorage& operator>>( IPersistantObject& object ) const override;
+};
+
+class CJsonFileStorage : public IFileStorage
+{
+public:
+	bool OpenFile(string sFileName, TOpenMode mode);
+	void Close();
+	IBaseStorage& operator<<(int) override;
+	IBaseStorage& operator<<(bool b) override;
+	IBaseStorage& operator<<(unsigned int) override;
+	IBaseStorage& operator<<(float) override;
+	IBaseStorage& operator<<(string) override;
+	IBaseStorage& operator<<(char* sz) override;
+	const IBaseStorage& operator >> (char&) const override;
+	const IBaseStorage& operator >> (int&) const override;
+	const IBaseStorage& operator >> (bool&) const override;
+	IBaseStorage& operator >> (unsigned int&) override;
+	const IBaseStorage& operator >> (float&) const override;
+	const IBaseStorage& operator >> (string&) const override;
+	IBaseStorage& operator >> (char* sz) override;
+	IBaseStorage&	operator<<(const IPersistantObject& object) override;
+	const IBaseStorage& operator >> (IPersistantObject& object) const override;
+
+private:
+
+	Document m_doc;
+	string m_sFileName;
 };
 
 

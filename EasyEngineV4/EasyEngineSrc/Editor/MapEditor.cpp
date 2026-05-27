@@ -33,12 +33,28 @@ m_oLoaderManager(*static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManag
 m_oRessourceManager(*static_cast<IRessourceManager*>(oInterface.GetPlugin("RessourceManager"))),
 m_oFileSystem(*static_cast<IFileSystem*>(oInterface.GetPlugin("FileSystem"))),
 m_fPlanHeight(3000.f),
-m_fGroundAdaptationHeight(0.f),
 m_pHeightMap(nullptr),
 m_fBias(0.f)
 {
 	IEventDispatcher* pEventDispatcher = static_cast<IEventDispatcher*>(oInterface.GetPlugin("EventDispatcher"));
 	pEventDispatcher->AbonneToEntityEvent(this, OnSceneLoadRessource);
+
+	pEventDispatcher->AbonneToKeyEvent(this, [] (CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key) 
+	{
+		switch (e) {
+		case IEventDispatcher::TKeyEvent::T_KEYDOWN:
+			if (key == 'g' || key == 'G') {
+				CMapEditor* pMapEditor = dynamic_cast<CMapEditor*>(plugin);
+				if (pMapEditor) {
+					if (pMapEditor->m_pEditingEntity) {
+						pMapEditor->AdaptGroundToEntity(pMapEditor->m_pEditingEntity);
+					}
+				}
+			}
+			break;
+		}
+	});
+
 	string sSceneFileName;
 	ISceneManager* pSceneManager = static_cast<ISceneManager*>(oInterface.GetPlugin("SceneManager"));
 	m_pScene = pSceneManager->GetScene("Game");
@@ -48,7 +64,8 @@ m_fBias(0.f)
 
 void CMapEditor::OnEntityAdded()
 {
-	AdaptGroundToEntity(m_pEditingEntity);
+	if(m_bAdaptGroundAutomatically)
+		AdaptGroundToEntity(m_pEditingEntity);
 }
 
 void CMapEditor::AdaptGroundToAllEntities()
@@ -326,13 +343,23 @@ void CMapEditor::SaveToJson(string mapName)
 				}
 				m_pScene->SetRessourceFileName(destPath);
 			}
-			SaveMap(levelFolder + mapName + ".bse", m_fBias);
+			SaveMapToJson(levelFolder + mapName + ".ase", m_fBias);
 		}
 	}
 	else {
 		CEException e("You have to enable MapEditionMode to be able to save the map.");
 		throw e;
 	}
+}
+
+
+void CMapEditor::SaveMapToJson(string sFileName, float fBias)
+{
+	ILoader::CSceneInfos si;
+	m_pScene->GetInfos(si);
+	ClearCharacters(si.m_vObject);
+	m_oLoaderManager.Export(sFileName, si);
+	m_pScene->CreateCollisionMaps(fBias, 200);
 }
 
 void CMapEditor::SaveMap(string sFileName, float fBias)
@@ -426,24 +453,18 @@ void CMapEditor::OnEntitySelected()
 	IBox* pBox = dynamic_cast<IBox*>(m_pEditingEntity->GetBoundingGeometry());
 	string originalRessourceName;
 	m_pScene->GetOriginalSceneFileName(originalRessourceName);
-	if (!m_pHeightMap)
-		m_pHeightMap = m_oCollisionManager.GetHeightMap(m_pScene->GetCurrentHeightMapIndex());
-	m_pHeightMap->RestoreHeightMap(m_pEditingEntity->GetWorldMatrix(), pBox->GetDimension(), originalRessourceName);
-	UpdateGround();
-}
-
-float CMapEditor::GetPlanHeight()
-{
-	IBox* pSceneBox = static_cast<IBox*>(m_pScene->GetBoundingGeometry());
-	if (pSceneBox)
-		m_fPlanHeight = pSceneBox->GetDimension().m_y;
-	return m_fPlanHeight;
+	if (!originalRessourceName.empty()) {
+		if (!m_pHeightMap)
+			m_pHeightMap = m_oCollisionManager.GetHeightMap(m_pScene->GetCurrentHeightMapIndex());
+		m_pHeightMap->RestoreHeightMap(m_pEditingEntity->GetWorldMatrix(), pBox->GetDimension(), originalRessourceName);
+		UpdateGround();
+	}
 }
 
 void CMapEditor::SetEditionMode(bool bEditionMode)
 {
 	if (m_bEditionMode != bEditionMode) {
-		CEditor::SetEditionMode(bEditionMode);
+		CSpawnableEditor::SetEditionMode(bEditionMode);
 		if (bEditionMode) {
 			m_pScene->Clear();
 		}

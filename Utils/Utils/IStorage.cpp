@@ -231,6 +231,103 @@ double CAsciiFileStorage::GetCap()
 	return m_dCap;
 }
 
+/***************************************************************************************************************/
+
+bool CJsonFileStorage::OpenFile(string sFileName, TOpenMode mode)
+{
+	m_doc.SetObject();
+	m_sFileName = sFileName;
+	return true;
+}
+
+void CJsonFileStorage::Close()
+{
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	writer.SetIndent('\t', 1);
+	m_doc.Accept(writer);
+	std::ofstream ofs(m_sFileName);
+	ofs << buffer.GetString();
+	ofs.close();
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(int i)
+{
+
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(bool b)
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(unsigned int)
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(float)
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(string)
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator<<(char* sz)
+{
+	return *this;
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (char&) const
+{
+	return *this;
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (int&) const
+{
+	return *this;
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (bool&) const
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator >> (unsigned int&)
+{
+	return *this;
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (float&) const
+{
+	return *this;
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (string&) const
+{
+	return *this;
+}
+
+IBaseStorage& CJsonFileStorage::operator >> (char* sz)
+{
+	return *this;
+}
+
+IBaseStorage&	CJsonFileStorage::operator<<(const IPersistantObject& object)
+{
+	return *this;
+
+}
+
+const IBaseStorage& CJsonFileStorage::operator >> (IPersistantObject& object) const
+{
+	return *this;
+}
+
 IBaseStorage& CAsciiFileStorage::operator<<( int nVal )
 {
 	//ostringstream oss;

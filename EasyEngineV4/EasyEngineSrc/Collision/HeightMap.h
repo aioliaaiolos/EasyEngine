@@ -36,7 +36,7 @@ private:
 	float	GetHeight(const CVector& p);
 	float 	SampleHeightmapBilinear(float xModel, float zModel);
 	void	ModelToMap(float xModel, float zModel, float& xMap, float& yMap);
-	void	MapToModel(int xMap, int yMap, float& xModel, float& zModel);
+	void	MapToModel(float xMap, float yMap, float& xModel, float& zModel);
 	void	SetPixelValue(int x, int y, float value);
 	float	GetHeightFromPixelValue(float pixelValue);
 	float	GetPixelValueFromHeight(float height);

@@ -33,7 +33,8 @@ public:
 		eRGB = 0,
 		eRGBA,
 		eBGR,
-		eBGRA
+		eBGRA,
+		eGray
 	};
 
 	struct IRessourceInfos : public IPersistantObject

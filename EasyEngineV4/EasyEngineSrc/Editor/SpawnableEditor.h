@@ -47,7 +47,7 @@ protected:
 	void							InitCamera();
 	void							OnMouseMove(int x, int y);
 	virtual void					OnEntityAdded() = 0;
-	virtual float					GetPlanHeight() = 0;
+	float							GetPlanHeight();
 	virtual void					OnEntitySelected() = 0;
 	virtual void					OnEntityRemoved(IEntity* pEntity) = 0;
 	virtual void					CollectSelectableEntity(vector<IEntity*>& entities) = 0;

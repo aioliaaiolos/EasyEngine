@@ -49,6 +49,7 @@ public:
 		T_RGBA,
 		T_BGR,
 		T_BGRA,
+		T_GRAY,
 		T_FormatNone
 	};
 

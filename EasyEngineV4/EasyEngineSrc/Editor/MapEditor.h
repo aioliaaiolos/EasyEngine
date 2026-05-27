@@ -54,9 +54,9 @@ private:
 	void							UpdateGround();
 	bool							CreateLevelFolderIfNotExists(string levelName, string& levelFolder);
 	void							SaveMap(string sFileName, float fBias);
+	void							SaveMapToJson(string sFileName, float fBias);
 	void							ClearCharacters(vector<ILoader::CObjectInfos*>& objects);
 	void							OnEntitySelected() override;
-	float							GetPlanHeight() override;
 	void							SetEditionMode(bool bEditionMode) override;
 	void							CollectSelectableEntity(vector<IEntity*>& entities) override;
 	void							OnEntityRemoved(IEntity* pEntity) override;
@@ -79,12 +79,13 @@ private:
 	IFileSystem&					m_oFileSystem;
 	float							m_fPlanHeight;
 	ILoader::CAnimatableMeshData	m_oAnimatableMeshData;
-	float							m_fGroundAdaptationHeight;
+	float							m_fGroundAdaptationHeight = 0.f;
 	IHeightMap*						m_pHeightMap;
 	string							m_sTmpAdaptedHeightMapFileName;
 	string							m_sTmpFolder;
 	string							m_sCurrentMapName;
 	float							m_fBias;
+	bool							m_bAdaptGroundAutomatically = false;;
 
 	static void						SaveResponseCallback(string sResponse, void* pData);	
 

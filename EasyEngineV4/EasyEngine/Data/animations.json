@@ -71,7 +71,7 @@
 				{"StrafeRight": "RightStrafe-f-mixamo"},
 				{"Sexy": "Standing-f-mixamo"},
 				{"Seat": "Standing-f-mixamo"},
-				{"Stand": "Standing2-f-mixamo"},
+				{"Stand": "Standing-f-mixamo"},
 				{"Walk": "Walking-f-mixamo", "AnimationSpeed": 1.0, "SpeedRelativeToAnimation": 1.0}
 			]
 		},

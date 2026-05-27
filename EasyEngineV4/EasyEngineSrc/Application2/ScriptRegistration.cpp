@@ -267,8 +267,10 @@ void EnableCollisions(IScriptState* pState)
 void SetEditionSpeed(IScriptState* pState)
 {
 	CValueFloat* pSpeed = static_cast< CValueFloat* >(pState->GetArg(0));
-	IWorldEditor* pEditor = dynamic_cast<IWorldEditor*>(m_pEditorManager->GetEditor(IEditor::eWorld));
-	pEditor->SetEditionSpeed(pSpeed->m_fValue);
+	IWorldEditor* pWorldEditor = dynamic_cast<IWorldEditor*>(m_pEditorManager->GetEditor(IEditor::eWorld));
+	IMapEditor* pMapEditor = dynamic_cast<IMapEditor*>(m_pEditorManager->GetEditor(IEditor::eMap));
+	pWorldEditor->SetEditionSpeed(pSpeed->m_fValue);
+	pMapEditor->SetEditionSpeed(pSpeed->m_fValue);
 }
 
 void EditCharacter(IScriptState* pState)
@@ -4491,6 +4493,10 @@ void RegisterAllFunctions( IScriptManager* pScriptManager )
 	vType.clear();
 	vType.push_back( eString );
 	m_pScriptManager->RegisterFunction( "SaveMap", SaveMap, vType, eVoid);
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("SaveMapToJson", SaveMapToJson, vType, eVoid);
 
 	vType.clear();
 	vType.push_back(eString);

@@ -46,6 +46,19 @@ void CSpawnableEditor::SetEditionSpeed(float fSpeed)
 	m_fEditionSpeed = fSpeed;
 }
 
+float CSpawnableEditor::GetPlanHeight()
+{
+	if (m_pEditingEntity) {
+		ICamera* pCamera = m_oCameraManager.GetActiveCamera();
+		CVector camPos;
+		pCamera->GetWorldPosition(camPos);
+		IBox* pBox = dynamic_cast<IBox*>(m_pEditingEntity->GetBoundingGeometry());
+		if (pBox)
+			return camPos.m_y - 200.f;
+	}
+	return 0.f;
+}
+
 void CSpawnableEditor::OnKeyEventCallback(CPlugin* plugin, IEventDispatcher::TKeyEvent e, int key)
 {
 	CSpawnableEditor* pEditor = dynamic_cast<CSpawnableEditor*>(plugin);
@@ -300,6 +313,7 @@ void CSpawnableEditor::EnableDisplayPickingIntersectPlane(bool enable)
 
 void CSpawnableEditor::SetEditionMode(bool bEnable)
 {
+	CEditor::SetEditionMode(bEnable);
 	if(bEnable)
 		m_oEventDispatcher.AbonneToKeyEvent(this, OnKeyEventCallback);
 	else

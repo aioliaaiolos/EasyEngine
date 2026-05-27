@@ -25,7 +25,6 @@ public:
 private:
 	void																ClearWorld();
 	void																OnEntityAdded() override;
-	float																GetPlanHeight() override;
 	void																OnEntitySelected() override;
 	void																OnEntityRemoved(IEntity* pEntity) override;
 	string																GetName() override;

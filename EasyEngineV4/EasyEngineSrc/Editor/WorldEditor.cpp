@@ -67,19 +67,6 @@ void CWorldEditor::OnEntityAdded()
 	}
 }
 
-float CWorldEditor::GetPlanHeight()
-{
-	if (m_pEditingEntity) {
-		ICamera* pCamera = m_oCameraManager.GetActiveCamera();
-		CVector camPos;
-		pCamera->GetWorldPosition(camPos);
-		IBox* pBox = dynamic_cast<IBox*>(m_pEditingEntity->GetBoundingGeometry());
-		if (pBox)
-			return camPos.m_y - 200.f;
-	}
-	return 0.f;
-}
-
 void CWorldEditor::OnEntitySelected()
 {
 
@@ -785,16 +772,13 @@ void CWorldEditor::LockEntity(string sEntityID)
 
 void CWorldEditor::SetEditionMode(bool bEditionMode)
 {
-	//if (m_bEditionMode != bEditionMode) {
-		CEditor::SetEditionMode(bEditionMode);
-		if (bEditionMode) {
-			m_pScene->Clear();
-			Load(m_sCurrentWorldName);
-		}
-		else {
-			// Ask to save world
-		}
-	//}
+	if (bEditionMode) {
+		m_pScene->Clear();
+		Load(m_sCurrentWorldName);
+	}
+	else {
+		// Ask to save world
+	}
 }
 
 void CWorldEditor::CollectSelectableEntity(vector<IEntity*>& entities)

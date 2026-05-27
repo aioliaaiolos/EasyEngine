@@ -9,7 +9,13 @@
 #include "../Utils2/EasyFile.h"
 #include "../Utils2/StringUtils.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#include "rapidjson/filereadstream.h"
+#include <fstream>
+#include <rapidjson/prettywriter.h>
 
+using namespace rapidjson;
 
 
 using namespace std;
@@ -24,18 +30,9 @@ CAseLoader::~CAseLoader(void)
 {
 }
 
-
-
-
-
-
-void CAseLoader::Export( const string& sFileName, const CChunk& chunk )
-{
-	
-}
-
 void CAseLoader::Export(string sFileName, ILoader::IRessourceInfos& ri)
 {
+#ifdef OLD_VERSION
 	string sExt;
 	CStringUtils::GetExtension(sFileName, sExt);
 
@@ -44,6 +41,48 @@ void CAseLoader::Export(string sFileName, ILoader::IRessourceInfos& ri)
 	fs.OpenFile(sFileName, IFileStorage::TOpenMode::eWrite);
 	fs << *pInfos;
 	fs.CloseFile();
+#endif
+
+#if 0
+	const CSceneInfos* pInfos = static_cast< const CSceneInfos* >(&ri);
+
+	Document doc;
+	doc.SetObject();
+	Value topics(kArrayType);
+
+	Value header(kObjectType);
+	Value sceneFileName(kStringType);
+	sceneFileName.SetString(pInfos->m_sSceneFileName.c_str(), doc.GetAllocator());
+	header.AddMember("sceneFileName", sceneFileName, doc.GetAllocator());
+	Value originalSceneFileName(kStringType);
+	originalSceneFileName.SetString(pInfos->m_sOriginalSceneFileName.c_str(), doc.GetAllocator());
+	header.AddMember("originalSceneFileName", originalSceneFileName, doc.GetAllocator());
+	Value name(kStringType);
+	name.SetString(pInfos->m_sName.c_str(), doc.GetAllocator());
+	header.AddMember("name", name, doc.GetAllocator());
+	Value backgroundSolor(kStringType);
+	name.SetString(pInfos->m_oBackgroundColor, doc.GetAllocator());
+	header.AddMember("name", name, doc.GetAllocator());
+
+
+	int nObjectCount = (int)m_vObject.size();
+	store << m_sSceneFileName << m_sOriginalSceneFileName << m_sName << m_oBackgroundColor << m_bUseDisplacementMap << m_sDiffuseFileName << nObjectCount << m_nMapLength << m_fMapHeight;
+	for (int i = 0; i < nObjectCount; i++)
+		store << *m_vObject.at(i);
+	//store << m_vObject;
+	return *this;
+
+
+
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+	writer.SetIndent('\t', 1);
+	doc.Accept(writer);
+	std::ofstream ofs(sFileName);
+	ofs << buffer.GetString();
+	ofs.close();
+
+#endif
 }
 
 
