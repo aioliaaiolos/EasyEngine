@@ -132,6 +132,9 @@
     <ClInclude Include="..\..\Interfaces\ITopicSystem.h">
       <Filter>Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Interfaces\ILogger.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

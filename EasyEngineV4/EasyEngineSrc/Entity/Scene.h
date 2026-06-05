@@ -79,6 +79,7 @@ public:
 	void														UnhandleStateChanged(IScene::StateChangedCallback callback) override;
 	void														SetRessourceFileName(string sNewFileName) override;
 	vector<CLightEntity*>										getShadowLights();
+	IHeightMap*													GetCurrentHeightMap() override;
 
 private:
 

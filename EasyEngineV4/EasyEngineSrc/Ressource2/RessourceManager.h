@@ -38,6 +38,7 @@ class ICollisionManager;
 class IHeightMap;
 struct CMaterialInfos;
 class CTimeManager;
+class ILogger;
 
 typedef unsigned int uint;
 
@@ -99,7 +100,7 @@ private:
 	static void										CollectMaterials(EEInterface& oInterface, const ILoader::CMaterialInfos& oMaterialInfos, IShader* pShader, std::map< int, CMaterial* >& vMaterials);
 	static CMaterial*								CreateMaterial(EEInterface& oInterface, const ILoader::CMaterialInfos*, IShader* pShader);
 
-	ITexture*										CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface) override;
+	ITexture*										CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface, bool generateMipMap = true) override;
 	void											CreateTextureDesc(string sFileName, CTexture2D::CDesc& desc);
 	void											CreateTextureDesc(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, CTexture2D::CDesc& desc);
 	std::map< std::string, TRessourceCreation >		m_mRessourceCreation;
@@ -111,6 +112,7 @@ private:
 	map<string, ILight::Type>						m_LightStringToType = { { "omni", ILight::OMNI },{ "dir", ILight::DIRECTIONAL },{ "spot", ILight::SPOT } };
 	map<ILight::Type, string>						m_LightTypeToString = { { ILight::OMNI , "omni"},{ ILight::DIRECTIONAL, "dir"},{ ILight::SPOT, "spot", } };
 	IDrawTool*										m_pDrawTool;
+	ILogger*										m_pLogger =  nullptr;
 };
 
 

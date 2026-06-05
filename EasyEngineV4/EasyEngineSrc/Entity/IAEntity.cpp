@@ -2,7 +2,7 @@
 #include "Utils2/TimeManager.h"
 #include "ICollisionManager.h"
 #include "IGeometry.h"
-#include "Utils2/Logger.h"
+#include "ILogger.h"
 
 const float fRotateSpeed = 10.f;
 
@@ -22,6 +22,9 @@ m_oTalkToCallback(nullptr, nullptr),
 m_fForceDeltaRotation(0.),
 m_oTimeManager(static_cast<CTimeManager&>(*oInterface.GetPlugin("TimeManager")))
 {
+	oInterface.HandlePluginCreation("Logger", [&](CPlugin* pPlugin) {
+		m_pLogger = static_cast<ILogger*>(pPlugin);
+	});
 }
 
 void IAEntity::UpdateFightState()
@@ -219,7 +222,7 @@ void IAEntity::Goto( const CVector& oDestination, float fSpeed )
 	}
 	catch (CEException& e) {
 		m_vCurrentPath.push_back(oDestination);
-		CLogger::Log() << e.what();
+		m_pLogger->Log() << e.what();
 	}
 
 	if (!m_vCurrentPath.empty()) {

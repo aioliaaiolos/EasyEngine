@@ -28,6 +28,8 @@ class IGUIManager;
 class IPhysic;
 class ICharacter;
 class CTimeManager;
+class IHeightMap;
+class ILogger;
 struct IValue;
 
 using namespace std;
@@ -261,6 +263,7 @@ public:
 	virtual void				OnChangeSector() = 0;
 	virtual void				SetRessourceFileName(string sNewFileName) = 0;
 	virtual void				RemoveAllLights() = 0;
+	virtual IHeightMap*			GetCurrentHeightMap() = 0;
 };
 
 class IFighterEntityInterface
@@ -357,6 +360,7 @@ public:
 	virtual bool				AreCollisionsEnabled() = 0;
 	virtual map<string, IItem*> GetItems() = 0;
 	virtual void				LoadCharacterInfos(string sSaveName, bool resetAllCharacters) = 0;
+	virtual ILogger*			GetLogger() = 0;
 };
 
 class ISceneManager : public CPlugin

@@ -13,6 +13,7 @@ using namespace std;
 
 class IEntity;
 class INode;
+class ILogger;
 
 class CCollisionMap : public ICollisionMap
 {
@@ -62,4 +63,5 @@ private:
 	ILoader::CTextureInfos		m_oCollisionTexture;
 	IMesh*						m_pGround;
 	string						m_sFileName;
+	ILogger*					m_pLogger = nullptr;
 };

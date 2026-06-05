@@ -198,9 +198,9 @@ void CScene::SetRessource(string sFileName, bool bDuplicate)
 		IBox* pBox = m_pMesh->GetBBox();
 		m_nHeightMapID = m_oCollisionManager.LoadHeightMap(m_sHMFileName, pBox, forceReloadHeightMap);
 		m_oCollisionManager.SetGroundBoxHeight(m_nHeightMapID, m_fMapHeight);
-		IHeightMap* Heightmap = m_oCollisionManager.GetHeightMap(m_nHeightMapID);
+		IHeightMap* pHeightmap = m_oCollisionManager.GetHeightMap(m_nHeightMapID);
 		if(sliceCount > 0)
-			Heightmap->SetSliceCount(sliceCount);
+			pHeightmap->SetSliceCount(sliceCount);
 	}
 	catch( CFileNotFoundException& )
 	{
@@ -380,6 +380,11 @@ vector<CLightEntity*> CScene::getShadowLights()
 	return m_vShadowLights;
 }
 
+IHeightMap* CScene::GetCurrentHeightMap()
+{
+	return m_oCollisionManager.GetHeightMap(m_nHeightMapID);
+}
+
 void CScene::UpdateState()
 {
 	switch (m_eSceneState) {
@@ -432,6 +437,7 @@ void CScene::AddChild(INode* pNode)
 		if (pPlayer)
 			m_pPlayer = pPlayer;
 	}
+	CollectShadowMapEntities(m_vShadowMapEntities);
 	
 #ifdef LIGHT_SUN
 	if (m_pPlayer && m_pCastShadowLight && m_pCastShadowLight->GetLight()->IsSun()) {

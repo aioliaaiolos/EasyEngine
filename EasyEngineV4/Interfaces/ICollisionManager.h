@@ -31,6 +31,7 @@ public:
 	virtual void	RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDim, string originalHeightMap) = 0;
 	virtual float	GetHeight(float xModel, float zModel) = 0;
 	virtual void	SetSliceCount(int sliceCount) = 0;
+	virtual void	AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap) = 0;
 };
 
 class ICollisionMap

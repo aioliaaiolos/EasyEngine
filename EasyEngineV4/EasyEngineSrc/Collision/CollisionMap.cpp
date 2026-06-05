@@ -2,8 +2,8 @@
 #include "IGeometry.h"
 #include "IEntity.h"
 #include "IFileSystem.h"
-
 #include "Utils2/StringUtils.h"
+#include "ILogger.h"
 
 CCollisionMap::CCollisionMap(EEInterface& oInterface, IEntity* pScene) :
 	m_pScene(pScene),
@@ -26,6 +26,10 @@ CCollisionMap::CCollisionMap(EEInterface& oInterface, IEntity* pScene) :
 		CStringUtils::GetFileNameWithoutExtension(sSimpleFileName, sFileNameWithoutExtension);
 		m_sFileName = sFolderPath + "/" + sFileNameWithoutExtension + "-collision.bmp";
 	}
+
+	oInterface.HandlePluginCreation("Logger", [&](CPlugin* pPlugin) {
+		m_pLogger = static_cast<ILogger*>(pPlugin);
+	});
 }
 
 void CCollisionMap::SetFileName(string sFileName)
@@ -300,24 +304,29 @@ unsigned int CCollisionMap::GetHeight()
 
 void CCollisionMap::CreateTextureFromCollisionArray(string sFileName, const vector<vector<bool>>& vGrid)
 {
-	m_oCollisionTexture.m_ePixelFormat = ILoader::TPixelFormat::eRGB;
-	m_oCollisionTexture.m_nWidth = vGrid.size();
-	m_oCollisionTexture.m_nHeight = vGrid[0].size();
-
-	m_oCollisionTexture.m_nWidth = m_oCollisionTexture.m_nWidth % 4 ? (m_oCollisionTexture.m_nWidth >> 2) << 2 : m_oCollisionTexture.m_nWidth;
-	m_oCollisionTexture.m_nHeight = m_oCollisionTexture.m_nHeight % 2 ? (m_oCollisionTexture.m_nHeight >> 1) << 1 : m_oCollisionTexture.m_nHeight;
-
-	m_oCollisionTexture.m_sFileName = sFileName;
-	m_oCollisionTexture.m_vTexels.resize(m_oCollisionTexture.m_nWidth * m_oCollisionTexture.m_nHeight * 3);
-
-	for (int i = 0; i < m_oCollisionTexture.m_nWidth; i++) {
-		for (int j = 0; j < m_oCollisionTexture.m_nHeight; j++) {
-			unsigned char color = vGrid[i][j] ? 255 : 0;
-			for (int k = 0; k < 3; k++)
-				m_oCollisionTexture.m_vTexels[3 * (i + j * m_oCollisionTexture.m_nWidth) + k] = color;
-		}
+	if (vGrid.empty()) {
+		m_pLogger->Log() << "Erreur : CreateTextureFromCollisionArray() : vGrid est vide ";
 	}
+	else {
+		m_oCollisionTexture.m_ePixelFormat = ILoader::TPixelFormat::eRGB;
+		m_oCollisionTexture.m_nWidth = vGrid.size();
+		m_oCollisionTexture.m_nHeight = vGrid[0].size();
 
-	ILoaderManager* pLoaderManager = dynamic_cast<ILoaderManager*>(m_oInterface.GetPlugin("LoaderManager"));
-	pLoaderManager->Export(sFileName, m_oCollisionTexture);
+		m_oCollisionTexture.m_nWidth = m_oCollisionTexture.m_nWidth % 4 ? (m_oCollisionTexture.m_nWidth >> 2) << 2 : m_oCollisionTexture.m_nWidth;
+		m_oCollisionTexture.m_nHeight = m_oCollisionTexture.m_nHeight % 2 ? (m_oCollisionTexture.m_nHeight >> 1) << 1 : m_oCollisionTexture.m_nHeight;
+
+		m_oCollisionTexture.m_sFileName = sFileName;
+		m_oCollisionTexture.m_vTexels.resize(m_oCollisionTexture.m_nWidth * m_oCollisionTexture.m_nHeight * 3);
+
+		for (int i = 0; i < m_oCollisionTexture.m_nWidth; i++) {
+			for (int j = 0; j < m_oCollisionTexture.m_nHeight; j++) {
+				unsigned char color = vGrid[i][j] ? 255 : 0;
+				for (int k = 0; k < 3; k++)
+					m_oCollisionTexture.m_vTexels[3 * (i + j * m_oCollisionTexture.m_nWidth) + k] = color;
+			}
+		}
+
+		ILoaderManager* pLoaderManager = dynamic_cast<ILoaderManager*>(m_oInterface.GetPlugin("LoaderManager"));
+		pLoaderManager->Export(sFileName, m_oCollisionTexture);
+	}
 }

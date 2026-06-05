@@ -5,7 +5,6 @@ varying vec2 Texcoord;
 varying vec4 fragPosLightSpace;
 
 uniform sampler2D heightMap;
-
 uniform float groundHeight;
 uniform mat4 lightSpaceModelview;
 uniform mat4 lightSpaceProjection;

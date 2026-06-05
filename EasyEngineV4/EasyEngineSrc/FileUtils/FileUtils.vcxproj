@@ -103,13 +103,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;FILEUTILS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Interfaces</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Interfaces;..\..\..\utils\;..\..\..\SDKs\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Utils2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Utils.lib;Utils2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\x64\$(Configuration);..\..\..\utils\x64\$(Configuration)</AdditionalLibraryDirectories>
       <OutputFile>..\..\EasyEngine\$(ConfigurationName)\$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -139,24 +139,26 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;FILEUTILS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Interfaces</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Interfaces;..\..\..\utils\;..\..\..\SDKs\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Utils2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utils2.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\..\EasyEngine\$(ConfigurationName)\$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>..\x64\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\x64\$(Configuration);..\..\..\utils\x64\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="XMLParser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="XMLParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -38,6 +38,7 @@
 #include "Utils2/TimeManager.h"
 #include "Resource.h"
 #include "WindowsGUI/Menu2.h"
+#include "ILogger.h"
 
 // rapidjson
 #include "rapidjson/document.h"
@@ -81,6 +82,7 @@ IScriptManager* 		m_pScriptManager = nullptr;
 IGUIManager*			m_pGUIManager = nullptr;
 IHud*					m_pHud = nullptr;
 IFileSystem*			m_pFileSystem = nullptr;
+ILogger*				m_pLogger = nullptr;
 IConsole*				m_pConsole = nullptr;
 ISceneManager*			m_pSceneManager  = nullptr;
 IActionManager*			m_pActionManager = nullptr;
@@ -377,6 +379,8 @@ EEInterface* InitPlugins( string sCmdLine )
 	m_pFileSystem = static_cast< IFileSystem* > ( CPlugin::Create( *pInterface, sDirectoryName + "FileUtils.dll", "CreateFileSystem" ) );
 	m_pFileSystem->Mount( "..\\data" );
 	m_pFileSystem->Mount( "..\\..\\EasyEngine\\data" );
+
+	m_pLogger = static_cast< ILogger* > (CPlugin::Create(*pInterface, sDirectoryName + "FileUtils.dll", "CreateLogger"));
 
 	CGFXOption oOption;
 	GetConfig(oOption);

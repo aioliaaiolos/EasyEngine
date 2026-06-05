@@ -26,6 +26,10 @@
 #include "IGeometry.h"
 #include "ICollisionManager.h"
 #include "IFileSystem.h"
+#include "ILogger.h"
+
+// Utils
+#include "../Utils2/Logger.h"
 
 // stl
 #include <algorithm>
@@ -52,6 +56,10 @@ m_pCollisionManager(nullptr)
 	m_mRessourceCreation[ "tga" ] = CreateTexture;
 	m_mRessourceCreation[ "bmp" ] = CreateTexture;
 	m_mRessourceCreation[ "col" ] = CreateCollisionMesh;
+
+	m_oInterface.HandlePluginCreation("Logger", [&](CPlugin* pPlugin) {
+		m_pLogger = dynamic_cast<ILogger*>(pPlugin);
+	});
 }
 
 
@@ -712,17 +720,22 @@ void CRessourceManager::CreateTextureDesc(vector<unsigned char>& vTextels, int w
 
 IRessource* CRessourceManager::CreateTexture( string sFileName, EEInterface& oInterface)
 {
+	ILogger* pLogger = static_cast<ILogger*>(oInterface.GetPlugin("Logger"));
+	pLogger->Log() << "Chargement de la texture " << sFileName;
 	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	CTexture2D::CDesc desc(pRessourceManager->m_oRenderer, NULL, 0);
+	if (sFileName.find("Gui") != -1)
+		desc.m_bGenerateMipmaps = false;
 	pRessourceManager->CreateTextureDesc(sFileName, desc);
 	CTexture2D* pTexture = new CTexture2D( desc );
 	return static_cast< ITexture* > ( pTexture );
 }
 
-ITexture* CRessourceManager::CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface)
+ITexture* CRessourceManager::CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface, bool generateMipMap)
 {
 	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	CTexture2D::CDesc desc(pRessourceManager->m_oRenderer, NULL, 0);
+	desc.m_bGenerateMipmaps = generateMipMap;
 	pRessourceManager->CreateTextureDesc(vTextels, width, height, pixelFormat, desc);
 	CTexture2D* pTexture = new CTexture2D(desc);
 	return static_cast< ITexture* > (pTexture);

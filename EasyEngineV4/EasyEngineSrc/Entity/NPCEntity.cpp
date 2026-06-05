@@ -10,6 +10,7 @@
 #include "EntityManager.h"
 #include "Utils2/Logger.h"
 #include "IEditor.h"
+#include "ILogger.h"
 
 CNPCEntity::CNPCEntity(EEInterface& oInterface, string sFileName, string sID):
 IAEntity(oInterface),
@@ -300,7 +301,7 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& o
 		bPathFound = m_oPathFinder.FindPath(pGrid);
 	}
 	catch (CEException& e) {
-		CLogger::Log() << "Error : ComputePathFind2DAStar(" << oOrigin << "), " << oDestination << ") failed";
+		m_pEntityManager->GetLogger()->Log() << "Error : ComputePathFind2DAStar(" << oOrigin << "), " << oDestination << ") failed";
 	}
 	if (bPathFound) {
 		vector<IGrid::ICell*> path;

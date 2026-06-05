@@ -13,6 +13,7 @@
 #include "WorldEditor.h"
 #include "IConsole.h"
 #include "EditorManager.h"
+#include "IPhysic.h"
 
 #include <algorithm>
 
@@ -85,6 +86,20 @@ void CMapEditor::AdaptGroundToAllEntities()
 void CMapEditor::SetBias(float fBias)
 {
 	m_fBias = fBias;
+}
+
+void CMapEditor::AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap)
+{
+	if (!m_pHeightMap)
+		m_pHeightMap = m_oCollisionManager.GetHeightMap(m_pScene->GetCurrentHeightMapIndex());
+	if (m_pHeightMap) {
+		IPhysic* pPhysic = static_cast<IPhysic*>(m_oInterface.GetPlugin("Physic"));
+		float gravity = pPhysic->GetGravity();
+		pPhysic->SetGravity(0);
+		m_pHeightMap->AdaptGroundToSplatMap(splatMap);
+		UpdateGround();
+		pPhysic->SetGravity(gravity);
+	}
 }
 
 void CMapEditor::AdaptGroundToEntity(IEntity* pEntity)

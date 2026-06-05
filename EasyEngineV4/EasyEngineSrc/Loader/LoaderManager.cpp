@@ -76,6 +76,12 @@ void CLoaderManager::LoadTexture( string sFileName, ILoader::CTextureInfos& ti )
 		CBMPLoader* pLoader = static_cast< CBMPLoader* >(  m_mLoaderByExtension[ "bmp" ] );
 		pLoader->Load( sFileName, ti, m_oFileSystem );
 	}
+	else {
+		string sMessage = string("Erreur : fichier \"") + sFileName + "\" manquant";
+		CFileNotFoundException e(sMessage);
+		e.m_sFileName = sFileName;
+		throw e;
+	}
 }
 
 void CLoaderManager::Load( string sFileName, ILoader::IRessourceInfos& ri )

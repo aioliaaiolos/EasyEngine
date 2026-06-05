@@ -273,6 +273,18 @@ void SetEditionSpeed(IScriptState* pState)
 	pMapEditor->SetEditionSpeed(pSpeed->m_fValue);
 }
 
+void FlatRoads(IScriptState* pState)
+{
+	CValueString* pFileName = static_cast<CValueString*>(pState->GetArg(0));
+	ILoader::CTextureInfos ti;
+	m_pLoaderManager->LoadTexture(pFileName->m_sValue, ti);
+	//IHeightMap* pHeightMap = m_pScene->GetCurrentHeightMap();
+	m_pMapEditor->AdaptGroundToSplatMap(ti);
+
+
+	//ti.m_vTexels
+}
+
 void EditCharacter(IScriptState* pState)
 {
 	CValueString* pID = static_cast< CValueString* >(pState->GetArg(0));
@@ -3318,7 +3330,7 @@ void EntityCallback(CPlugin*, IEventDispatcher::TEntityEvent e, IEntity* pEntity
 		}
 		m_pHud->PrintInSlot(slot, 0, oss.str());
 		if (g_bEnableWatchLog) {
-			FILE* pFile = fopen("log.txt", "a");
+			FILE* pFile = fopen("log3.txt", "a");
 			if (pFile) {
 				oss << "\n";
 				fwrite(oss.str().c_str(), sizeof(char), oss.str().size(), pFile);
@@ -4024,6 +4036,10 @@ void DisplayLightInfos(IScriptState* pState)
 void RegisterAllFunctions( IScriptManager* pScriptManager )
 {
 	vector< TFuncArgType > vType;
+
+	vType.clear();
+	vType.push_back(eString);
+	m_pScriptManager->RegisterFunction("FlatRoads", FlatRoads, vType, eVoid);
 
 	vType.clear();
 	m_pScriptManager->RegisterFunction("DisplayLightInfos", DisplayLightInfos, vType, eVoid);

@@ -379,8 +379,10 @@ IBaseStorage& CAsciiFileStorage::operator<<( string s )
 
 IBaseStorage& CAsciiFileStorage::operator<<(char* sz)
 {
-	fwrite(sz, sizeof(char), strlen(sz), m_pFile);
-	return *this;
+	if (m_pFile) {
+		fwrite(sz, sizeof(char), strlen(sz), m_pFile);
+		return *this;
+	}
 }
 
 const IBaseStorage& CAsciiFileStorage::operator >> (char& c) const

@@ -120,6 +120,13 @@ public:
 		TPixelFormat					m_ePixelFormat;
 		bool							m_bFlip;
 		CTextureInfos() : m_bFlip( false ) {}
+		void GetPixel(int x, int y, CVector& pixel) const
+		{
+			int nPixelIndice = 3 * x + y * m_nWidth * 3;
+			pixel.m_x = m_vTexels[nPixelIndice];
+			pixel.m_y = m_vTexels[nPixelIndice + 1];
+			pixel.m_z = m_vTexels[nPixelIndice + 2];
+		}
 	};
 
 	struct CAnimationInfos : public IRessourceInfos
@@ -195,6 +202,8 @@ public:
 		const IPersistantObject& operator >> (CStringStorage& store) const override { return *this; }
 		IPersistantObject& operator << (const CStringStorage& store) override { return *this; }
 	};
+
+#include "ILoader.h"
 
 	struct CSceneInfos : public IRessourceInfos
 	{

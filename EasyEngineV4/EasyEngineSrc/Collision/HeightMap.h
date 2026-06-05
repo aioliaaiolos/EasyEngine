@@ -18,7 +18,6 @@ using namespace std;
 class CHeightMap : public IHeightMap
 {
 public:
-	CHeightMap();
 	CHeightMap(EEInterface& oInterface, string sFileName, const IBox& bbox);
 	~CHeightMap();
 	void	Load(string sFileName);
@@ -31,6 +30,7 @@ public:
 	void	RestoreHeightMap(const CMatrix& modelTM, const CVector& modelDim, string originalHeightMap) override;
 	void	GetFileName(string& fileName) override;
 	void	SetSliceCount(int sliceCount) override;
+	void	AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap) override;
 
 private:
 	float	GetHeight(const CVector& p);
@@ -53,6 +53,7 @@ private:
 	int m_nSliceCount = 0;
 	ILoaderManager* m_pLoaderManager;
 	IGeometryManager* m_pGeometryManager;
+	EEInterface& m_oInterface;
 };
 
 #endif // HEIGHTMAP_H

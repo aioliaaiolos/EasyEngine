@@ -100,6 +100,7 @@ public:
 	CItem*													GetItem(string sItemID);
 	void													EnableCollisions(bool bEnable) override;
 	bool													AreCollisionsEnabled() override;
+	ILogger*												GetLogger() override;
 
 private:
 
@@ -138,6 +139,7 @@ private:
 	map<string, CItem*>										m_mItems;
 	vector<ILight*>											m_vShadowLights;
 	bool													m_bAreCollisionsEnabled = true;
+	ILogger*												m_pLogger = nullptr;
 };
 
 extern "C" _declspec(dllexport) IEntityManager* CreateEntityManager(EEInterface& oInterface);

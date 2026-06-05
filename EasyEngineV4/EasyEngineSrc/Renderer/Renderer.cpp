@@ -927,12 +927,17 @@ int CRenderer::CreateTexture2D( vector< unsigned char>& vTexel, int nWidth, int 
 	return nTextureID;
 }
 
+bool isPowerOfTwo(unsigned int n)
+{
+	return n != 0 && (n & (n - 1)) == 0;
+}
+
 int CRenderer::CreateMipmaps2D(vector< unsigned char>& vTexel, int nWidth, int nHeight, IRenderer::TPixelFormat format)
 {
 	unsigned int nTextureID;
 	glGenTextures(1, &nTextureID);
 	glBindTexture(GL_TEXTURE_2D, nTextureID);
-	GLint nInternalFormat;
+	GLint nInternalFormat = 0;
 	if (format == T_RGB || format == T_BGR)
 		nInternalFormat = 3;
 	if (format == T_RGBA || format == T_BGRA)

@@ -49,6 +49,7 @@ private:
 		
 	static void						OnSceneLoadRessource(CPlugin*, IEventDispatcher::TEntityEvent, IEntity*);
 	
+	void							AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap);
 	void							AdaptGroundToEntity(IEntity* pEntity);
 	void							OnEntityAdded();
 	void							UpdateGround();

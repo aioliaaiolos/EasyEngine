@@ -8,15 +8,11 @@
 
 extern IGeometryManager* m_pGeometryManager;
 
-CHeightMap::CHeightMap():
-m_nPrecision(3)
-{
-}
-
 CHeightMap::CHeightMap(EEInterface& oInterface, string sFileName,  const IBox& bbox) :
 	m_nPrecision(3),
 	m_pLoaderManager(static_cast<ILoaderManager*>(oInterface.GetPlugin("LoaderManager"))),
-	m_pGeometryManager(static_cast<IGeometryManager*>(oInterface.GetPlugin("GeometryManager")))
+	m_pGeometryManager(static_cast<IGeometryManager*>(oInterface.GetPlugin("GeometryManager"))),
+	m_oInterface(oInterface)
 {
 	Load(sFileName);
 	m_pModelBox = m_pGeometryManager->CreateBox();
@@ -37,6 +33,100 @@ void CHeightMap::SetPrecision( int nPrecision )
 IBox* CHeightMap::GetModelBBox()
 {
 	return m_pModelBox;
+}
+
+#if 0
+void CHeightMap::AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap)
+{
+	float widthScale = (float)splatMap.m_nWidth / (float)m_nWidth;
+	float heightScale = (float)splatMap.m_nHeight / (float)m_nHeight;
+
+	const int WIDTH = 2;
+	const int NB_PASS = 1;
+	for (int k = 0; k < NB_PASS; k++) {
+		CHeightMap hmCopy = *this;;
+		for (int x = 0; x < splatMap.m_nWidth; x++) {
+			for (int y = 0; y < splatMap.m_nHeight; y++) {
+				CVector p;
+				splatMap.GetPixel(x, y, p);
+				if (p.m_x > 50) {
+					float average = 0.f;
+					int count = 0;
+					int xhm = (int)((float)x / widthScale);
+					int yhm = (int)((float)y / heightScale);
+					for (int i = xhm - WIDTH; i <= xhm + WIDTH; i++) {
+						if (i < 0 || i >= m_nWidth)
+							continue;
+						for (int j = yhm - WIDTH; j <= yhm + WIDTH; j++) {
+							if (j < 0 || j >= m_nHeight)
+								continue;
+							CVector m;
+							hmCopy.GetPixel(i, j, m);
+							average += m.m_x;
+							count++;
+						}
+					}
+					average /= count;
+					for (int i = xhm - WIDTH; i <= xhm + WIDTH; i++) {
+						if (i < 0 || i >= m_nWidth)
+							continue;
+						for (int j = yhm - WIDTH; j <= yhm + WIDTH; j++) {
+							if (j < 0 || j >= m_nHeight)
+								continue;
+							SetPixelValue(i, j, std::round(average));
+						}
+					}
+				}
+			}
+		}
+	}
+}
+#endif // 0
+
+void CHeightMap::AdaptGroundToSplatMap(const ILoader::CTextureInfos& splatMap)
+{
+	float widthScale = (float)splatMap.m_nWidth / (float)m_nWidth;
+	float heightScale = (float)splatMap.m_nHeight / (float)m_nHeight;
+
+	const int WIDTH = 2;
+	const int NB_PASS = 1;
+	for (int k = 0; k < NB_PASS; k++) {
+		CHeightMap hmCopy = *this;;
+		for (int x = 0; x < m_nWidth; x++) {
+			for (int y = 0; y < m_nHeight; y++) {
+				CVector p;
+				float sx = (float)x * widthScale;
+				float sy = (float)y * heightScale;
+				splatMap.GetPixel(sx, sy, p);
+				if (p.m_x > 50) {
+					float average = 0.f;
+					int count = 0;
+					for (int i = x - WIDTH; i <= x + WIDTH; i++) {
+						if (i < 0 || i >= m_nWidth)
+							continue;
+						for (int j = y - WIDTH; j <= y + WIDTH; j++) {
+							if (j < 0 || j >= m_nHeight)
+								continue;
+							CVector m;
+							hmCopy.GetPixel(i, j, m);
+							average += m.m_x;
+							count++;
+						}
+					}
+					average /= count;
+					for (int i = x - WIDTH; i <= x + WIDTH; i++) {
+						if (i < 0 || i >= m_nWidth)
+							continue;
+						for (int j = y - WIDTH; j <= y + WIDTH; j++) {
+							if (j < 0 || j >= m_nHeight)
+								continue;
+							SetPixelValue(i, j, std::round(average));
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void CHeightMap::AdaptGroundMapToModel(const CMatrix& modelTM, const CVector modelDim, float groundAdaptationHeight)
@@ -189,10 +279,13 @@ void CHeightMap::GetPixel( int x, int y, CVector& pixel )
 
 void CHeightMap::GetPixel(const ILoader::CTextureInfos& ti, int x, int y, CVector& pixel)
 {
+	/*
 	int nPixelIndice = 3 * x + y * ti.m_nWidth * 3;
 	pixel.m_x = ti.m_vTexels[nPixelIndice];
 	pixel.m_y = ti.m_vTexels[nPixelIndice + 1];
-	pixel.m_z = ti.m_vTexels[nPixelIndice + 2];
+	pixel.m_z = ti.m_vTexels[nPixelIndice + 2];*/
+
+	ti.GetPixel(x, y, pixel);
 }
 
 void CHeightMap::SetPixelValue(int x, int y, float value)

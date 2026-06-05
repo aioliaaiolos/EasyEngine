@@ -23,6 +23,7 @@
 #include "Bone.h"
 #include "Item.h"
 #include "LightEntity.h"
+#include "ILogger.h"
 
 // Utils
 #include "Utils2/TimeManager.h"
@@ -1110,7 +1111,7 @@ void CEntity::AddAnimation(string sAnimationName)
 			AddAnimation(sAnimationName, pAnimation);
 		}
 		catch (CEException) {
-			CLogger::Log() << "Error : Animation '" + sAnimationName + "' not found";
+			m_pEntityManager->GetLogger()->Log() << "Error : Animation '" + sAnimationName + "' not found";
 		}
 	}
 	else

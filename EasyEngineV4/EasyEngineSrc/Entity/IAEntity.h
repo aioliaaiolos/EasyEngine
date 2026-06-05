@@ -7,6 +7,7 @@ class IBone;
 class IMesh;
 class IAnimation;
 class IGeometryManager;
+class CEntityManager;
 
 class IAEntity : virtual public IFighterEntity, virtual public IAEntityInterface
 {
@@ -105,5 +106,6 @@ protected:
 	float						m_fWeaponRange = 115.f;
 	float						m_fDestinationDeltaRadius;
 	CTimeManager&				m_oTimeManager;
-	bool						m_bFightingIAEnabled = true;	
+	bool						m_bFightingIAEnabled = true;
+	ILogger*					m_pLogger = nullptr;
 };

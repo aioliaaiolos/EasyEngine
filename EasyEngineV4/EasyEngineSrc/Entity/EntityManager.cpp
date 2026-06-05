@@ -23,6 +23,7 @@
 #include "AreaEntity.h"
 #include "Item.h"
 #include "Weapon.h"
+#include "ILogger.h"
 
 #include <algorithm>
 
@@ -63,6 +64,10 @@ m_bUseInstancing(true)
 	oInterface.HandlePluginCreation("EntityManager", [this](CPlugin* plugin)
 	{
 		LoadItems();
+	});
+
+	oInterface.HandlePluginCreation("Logger", [&](CPlugin* pPlugin) {
+		m_pLogger = static_cast<ILogger*>(pPlugin);
 	});
 	
 }
@@ -142,6 +147,11 @@ void CEntityManager::EnableCollisions(bool bEnable)
 bool CEntityManager::AreCollisionsEnabled()
 {
 	return m_bAreCollisionsEnabled;
+}
+
+ILogger* CEntityManager::GetLogger()
+{
+	return m_pLogger;
 }
 
 IItem* CEntityManager::CreateItemEntity(string sItemID)

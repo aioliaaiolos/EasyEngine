@@ -97,7 +97,7 @@ void CGUIWidget::SetBackgroundAndBorder(int colorBackground, int nBorderWidth)
 		AddBorderToTexelArray(m_oDimension.GetWidth(), m_oDimension.GetHeight(), vTexels);
 	}
 	if (!vTexels.empty()) {
-		ITexture* pTexture = m_pRessourceManager->CreateTexture(vTexels, m_oDimension.GetWidth(), m_oDimension.GetHeight(), IRenderer::TPixelFormat::T_RGBA, m_oInterface);
+		ITexture* pTexture = m_pRessourceManager->CreateTexture(vTexels, m_oDimension.GetWidth(), m_oDimension.GetHeight(), IRenderer::TPixelFormat::T_RGBA, m_oInterface, false);
 		CreateWidgetFromTexture(pTexture);
 	}
 }

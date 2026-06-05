@@ -245,7 +245,7 @@ public:
 	virtual ITexture*			CreateTexture2D(string sFileName, bool bGenerateMipmaps) = 0;
 	virtual void				RemoveAllLights() = 0;
 	virtual void				Reset() = 0;
-	virtual ITexture*			CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface) = 0;
+	virtual ITexture*			CreateTexture(vector<unsigned char>& vTextels, int width, int height, IRenderer::TPixelFormat pixelFormat, EEInterface& oInterface, bool generateMipMap = true) = 0;
 	virtual ILight::Type		LightStringToType(string type) = 0;
 	virtual string				LightTypeToString(ILight::Type type) = 0;
 };
