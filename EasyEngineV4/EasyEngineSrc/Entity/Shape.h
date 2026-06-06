@@ -70,6 +70,7 @@ public:
 	void			SetLocalVariableValue(string sVariableName, float fValue) override {}
 	void			DetachScriptFunction(string sScript) override {}
 	void			SetCollidable(bool bCollidable) override { m_bIsCollidable = bCollidable; }
+	void			CollectMinimapEntities(vector<IEntity*>& entities) {}
 };
 
 #endif // SHAPE_H

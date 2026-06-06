@@ -10,11 +10,12 @@ class ILoaderManager;
 class IEntity;
 class IGUIManager;
 class EEInterface;
+class IShader;
 
 class CRenderUtils
 {
 public:
-	static void DrawBox( const CVector& oMinPoint, const CVector& oDimension, IRenderer& oRenderer  );
+	static void DrawBox( const CVector& oMinPoint, const CVector& oDimension, IRenderer& oRenderer, IShader* pCurrentShader);
 	static void ScreenCapture( string sFileName, EEInterface* pInterface, int x = 0, int y = 0, unsigned int h = -1, unsigned int w = -1);
 	static void DepthCapture(string sFileName, EEInterface* pInterface, int x = 0, int y = 0, unsigned int h = -1, unsigned int w = -1);
 	static void	IndexGeometry(	vector< unsigned int >& vIndexArray, vector< float >& vVertexArray, vector< unsigned int >& vUVIndexArray, 

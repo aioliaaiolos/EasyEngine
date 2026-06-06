@@ -24,6 +24,9 @@
 #include "Item.h"
 #include "LightEntity.h"
 #include "ILogger.h"
+#include "MapEntity.h"
+#include "Camera.h"
+#include "AreaEntity.h"
 
 // Utils
 #include "Utils2/TimeManager.h"
@@ -384,6 +387,12 @@ void CEntity::UpdateCollision()
 	}
 }
 
+void CEntity::UpdateAnimation()
+{
+	if (m_pCurrentAnimation)
+		m_pCurrentAnimation->Update();
+}
+
 bool CEntity::TestWorldCollision(INode* pEntity)
 {
 	bool ret = false;
@@ -461,7 +470,7 @@ bool CEntity::IsPassingDoor(INode* pWall, IGeometry* pThisBBox, IGeometry* pWall
 				continue;
 			CMatrix oDoorLocalTM, oDoorLocalTMInv; // , oEntityInvTM; // , oWallLocalTM;
 			pDoor->GetLocalMatrix(oDoorLocalTM);
-			oDoorLocalTM.GetInverse(oDoorLocalTMInv);
+			oDoorLocalTM.GetInverseOrthonormalAffine(oDoorLocalTMInv);
 			CMatrix oEntityTMInBoxBase = oDoorLocalTMInv * m_oLocalMatrix;
 
 			pThisBBox->SetTM(oEntityTMInBoxBase);
@@ -487,7 +496,7 @@ void CEntity::LinkAndUpdateMatrices(CEntity* pEntity)
 {
 	CMatrix tm, tmInv, tmThis;
 	pEntity->GetWorldMatrix(tm);
-	tm.GetInverse(tmInv);
+	tm.GetInverseOrthonormalAffine(tmInv);
 	GetWorldMatrix(tmThis);
 	SetLocalMatrix(tmInv * tmThis);
 	Link(pEntity);
@@ -589,32 +598,78 @@ void CEntity::UpdateRessource()
 	}
 }
 
-void CEntity::Update()
+void CEntity::UpdateSkinOffset()
 {
-	UpdateCollision();
-
-	if( m_pCurrentAnimation )
-		m_pCurrentAnimation->Update();
-
-	CNode::Update();
-	SendBonesToShader();
-	SendShadowInfosToShader();
-
 	if (m_oSkinOffset != CVector(0, 0, 0)) {
 		CMatrix offsetLocalMatrix = m_oLocalMatrix * CMatrix::GetTranslation(m_oSkinOffset.m_x, m_oSkinOffset.m_y, m_oSkinOffset.m_z);
 		m_oWorldMatrix = m_oWorldMatrix * offsetLocalMatrix;
 	}
+}
 
+void CEntity::UpdateScale()
+{
 	m_oWorldMatrix *= m_oScaleMatrix;
+}
+
+void CEntity::Render()
+{
 	if (!m_pEntityManager->IsUsingInstancing())
 	{
 		m_oRenderer.SetModelMatrix(m_oWorldMatrix);
 	}
 	UpdateRessource();
+}
 
+void CEntity::UpdateSuper()
+{
+	CNode::Update();
+}
+
+void CEntity::UpdateDrawBoundingBox()
+{
 	if (m_bDrawBoundingBox && m_pBoundingGeometry)
 		UpdateBoundingBox();
+}
 
+void CEntity::CollectMinimapEntities(vector<IEntity*>& entities)
+{
+	for (int i = 0; i < GetChildCount(); i++) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(GetChild(i));
+		if (pEntity) {
+			if (pEntity != this) {
+				CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pEntity);
+				if (!pLightEntity) {
+					CMinimapEntity* pMapEntity = dynamic_cast<CMinimapEntity*>(pEntity);
+					if (!pMapEntity) {
+						CCamera* pCamera = dynamic_cast<CCamera*>(pEntity);
+						if (!pCamera) {
+							CCollisionEntity* CollisionEntity = dynamic_cast<CCollisionEntity*>(pEntity);
+							if (!CollisionEntity) {
+								CAreaEntity* pAreaEntity = dynamic_cast<CAreaEntity*>(pEntity);
+								if (!pAreaEntity) {
+									entities.push_back(pEntity);
+									pEntity->CollectMinimapEntities(entities);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CEntity::Update()
+{
+	UpdateCollision();
+	UpdateAnimation();
+	UpdateSuper();
+	SendBonesToShader();
+	SendShadowInfosToShader();
+	UpdateSkinOffset();
+	UpdateScale();
+	Render();
+	UpdateDrawBoundingBox();
 	DispatchEntityEvent();
 	ExecuteScripts();
 }
@@ -748,8 +803,10 @@ CScene* CEntity::GetParentScene()
 void CEntity::UpdateBoundingBox()
 {
 	IBox* pBBox = dynamic_cast<IBox*>(m_pBoundingGeometry);
-	if(pBBox)
-		CRenderUtils::DrawBox(pBBox->GetMinPoint(), pBBox->GetDimension(), m_oRenderer);
+	if (pBBox) {
+		IShader* pShader = m_pMesh ? m_pMesh->GetShader() : nullptr;
+		CRenderUtils::DrawBox(pBBox->GetMinPoint(), pBBox->GetDimension(), m_oRenderer, pShader);
+	}
 }
 
 float CEntity::GetHeight()
@@ -896,7 +953,7 @@ void CEntity::LinkEntityToBone( IEntity* pChild, IBone* pParentBone, IEntity::TL
 	if( t == ePreserveChildRelativeTM )
 	{
 		CMatrix oParentWorldInv;
-		oParentWorld.GetInverse(oParentWorldInv);
+		oParentWorld.GetInverseOrthonormalAffine(oParentWorldInv);
 		pChild->SetLocalMatrix(oParentWorldInv);
 	}
 	else if (  t = eSetChildToParentTM )
@@ -1007,7 +1064,7 @@ void CEntity::GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& pa
 	CMatrix::GetPassage(m0, m1, passage);
 
 	CMatrix oWorldInverse;
-	m_oWorldMatrix.GetInverse(oWorldInverse);
+	m_oWorldMatrix.GetInverseOrthonormalAffine(oWorldInverse);
 	passage = oWorldInverse * passage;
 }
 
@@ -1137,7 +1194,7 @@ void CEntity::SetCurrentAnimation(std::string sAnimation)
 				IBone* pRoot = m_pSkeletonRoot;
 				CKey oKey;
 				pRoot->GetKeyByTime(GetCurrentAnimation()->GetStartAnimationTime(), oKey);
-				oKey.m_oLocalTM.GetInverse(m_oFirstAnimationFrameSkeletonMatrixInv);
+				oKey.m_oLocalTM.GetInverseOrthonormalAffine(m_oFirstAnimationFrameSkeletonMatrixInv);
 				break;
 			}
 		});

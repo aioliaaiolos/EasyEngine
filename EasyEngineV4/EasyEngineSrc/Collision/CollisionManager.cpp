@@ -329,7 +329,7 @@ bool CCollisionManager::IsIntersection( const IBox& b, const ISphere& s )
 {
 	CMatrix invBoxWorldMatrix, oWorldMatrix;
 	b.GetTM( oWorldMatrix );
-	oWorldMatrix.GetInverse( invBoxWorldMatrix );
+	oWorldMatrix.GetInverseOrthonormalAffine( invBoxWorldMatrix );
 	CVector vBoxBaseSphereCenter = invBoxWorldMatrix * s.GetCenter();
 	bool bInsideX = IsSegmentInsideSegment( 0, b.GetDimension().m_x / 2.f, vBoxBaseSphereCenter.m_x, s.GetRadius() ); //vBoxBaseSphereCenter.m_x - s.GetRadius() < b.GetDimension().m_x / 2.f && vBoxBaseSphereCenter.m_x + s.GetRadius() > - b.GetDimension().m_x / 2.f;
 	bool bInsideY = IsSegmentInsideSegment( 0, b.GetDimension().m_y / 2.f, vBoxBaseSphereCenter.m_y, s.GetRadius() );

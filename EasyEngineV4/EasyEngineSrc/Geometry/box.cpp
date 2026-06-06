@@ -147,7 +147,7 @@ bool CBox::TestBoxesCollisionIntoFirstBoxBase(const IBox& b1, const IBox& b2) co
 	b1.GetTM(b1Mat);
 	b2.GetTM(b2Mat);
 	CMatrix b1MatInv;
-	b1Mat.GetInverse(b1MatInv);
+	b1Mat.GetInverseOrthonormalAffine(b1MatInv);
 	CMatrix b2MatBaseB1 = b1MatInv * b2Mat;
 
 	CBox b2Temp;
@@ -205,7 +205,7 @@ float CBox::GetDistanceInBase(const IBox& oBox) const
 	GetTM(b1Mat);
 	oBox.GetTM(b2Mat);
 	CMatrix b1MatInv;
-	b1Mat.GetInverse(b1MatInv);
+	b1Mat.GetInverseOrthonormalAffine(b1MatInv);
 	CMatrix b2MatBaseB1 = b1MatInv * b2Mat;
 
 	CBox b2Temp;
@@ -455,7 +455,7 @@ IGeometry::TFace CBox::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeom
 	CBox& box1 = static_cast<CBox&>(firstPositionBox);
 	CBox& box2 = static_cast<CBox&>(lastPositionBox);
 	CMatrix oTMInv;
-	m_oTM.GetInverse(oTMInv);
+	m_oTM.GetInverseOrthonormalAffine(oTMInv);
 	CVector box1Position = oTMInv * box1.GetTM().GetPosition();
 	CVector box2Position = oTMInv * box2.GetTM().GetPosition();
 
@@ -609,7 +609,7 @@ IGeometry::TFace CBox::GetReactionYAlignedPlane(const CVector& firstPoint, const
 	CMatrix m;
 	temp.SetTM(m);
 	CMatrix oTMInv;
-	m_oTM.GetInverse(oTMInv);
+	m_oTM.GetInverseOrthonormalAffine(oTMInv);
 	//oTMInv = m_oBackupInvTM;
 	CVector O = oTMInv * firstPoint;
 	CVector P = oTMInv * lastPoint;

@@ -233,9 +233,9 @@ void CMesh::Update()
 		m_bFirstUpdate = false;
 
 	if( m_bDrawBoundingBox )
-		CRenderUtils::DrawBox( m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer);
+		CRenderUtils::DrawBox( m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer, m_pShader);
 	if( m_bDrawAnimationBoundingBox && m_pCurrentAnimationBoundingBox )
-		CRenderUtils::DrawBox( m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer);
+		CRenderUtils::DrawBox( m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer, m_pShader);
 	m_oRenderer.SetRenderType( IRenderer::eFill );
 }
 
@@ -315,9 +315,9 @@ void CMesh::UpdateInstances(int instanceCount)
 		m_bFirstUpdate = false;
 
 	if (m_bDrawBoundingBox)
-		CRenderUtils::DrawBox(m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer);
+		CRenderUtils::DrawBox(m_pBbox->GetMinPoint(), m_pBbox->GetDimension(), m_oRenderer, m_pShader);
 	if (m_bDrawAnimationBoundingBox && m_pCurrentAnimationBoundingBox)
-		CRenderUtils::DrawBox(m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer);
+		CRenderUtils::DrawBox(m_pCurrentAnimationBoundingBox->GetMinPoint(), m_pCurrentAnimationBoundingBox->GetDimension(), m_oRenderer, m_pShader);
 	m_oRenderer.SetRenderType(IRenderer::eFill);
 }
 

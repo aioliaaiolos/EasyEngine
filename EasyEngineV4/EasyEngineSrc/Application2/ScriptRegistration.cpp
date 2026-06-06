@@ -550,12 +550,12 @@ void RayTrace(IScriptState* pState)
 	CVector logicalP1(logicalx, logicaly, -1.f);
 	CVector logicalP2(logicalx, logicaly, 1.f);
 	CMatrix V, M, P;
-	m_pCameraManager->GetActiveCamera()->GetWorldMatrix().GetInverse(V);
+	m_pCameraManager->GetActiveCamera()->GetWorldMatrix().GetInverseOrthonormalAffine(V);
 	m_pRenderer->GetProjectionMatrix(P);
 
 	CMatrix PVM = P * V * M;
 	CMatrix PVMInv;
-	PVM.GetInverse(PVMInv);
+	PVM.GetInverseOrthonormalAffine(PVMInv);
 
 	CMatrix m;
 	CVector p1 = PVMInv * logicalP1;
@@ -584,7 +584,7 @@ void ChangeBase( IScriptState* pState )
 	IEntity* pEntity2 = static_cast< IEntity* >( m_pEntityManager->GetEntity( pEntity2ID->m_nValue ) );
 	CMatrix oWorld1, oWorld1Inv, oWorld2, oNewWorld2, id;
 	pEntity1->GetWorldMatrix( oWorld1 );
-	oWorld1.GetInverse( oWorld1Inv );
+	oWorld1.GetInverseOrthonormalAffine( oWorld1Inv );
 	pEntity2->GetWorldMatrix( oWorld2 );
 	oNewWorld2 = oWorld1Inv * oWorld2;
 	pEntity1->SetLocalMatrix( id );
@@ -831,7 +831,7 @@ void ComputeKeysBoundingBoxes( IScriptState* pState )
 					}
 					// On récupère la matrice de la 1ere clé :
 					oFirstKeyWorldTM = itBoneKey->second.at( 0 ).m_oWorldTM;
-					oFirstKeyWorldTM.GetInverse( oFirstKeyWorldTMInv );
+					oFirstKeyWorldTM.GetInverseOrthonormalAffine( oFirstKeyWorldTMInv );
 					oPassage = oCurrentKeyWorldTM * oFirstKeyWorldTMInv;
 				}
 				mPassage[ itBone->first ] = oPassage;

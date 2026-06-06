@@ -17,7 +17,7 @@ void CQuadEntity::Update()
 	if (!m_bHidden) {
 		CMatrix cam, camInv;
 		m_oRenderer.GetInvCameraMatrix(camInv);
-		camInv.GetInverse(cam);
+		camInv.GetInverseOrthonormalAffine(cam);
 		m_oRenderer.SetModelViewMatrix(cam);
 		m_oRenderer.SetColor3f(m_oColor.m_x, m_oColor.m_y, m_oColor.m_z);
 		m_oQuad.Draw(m_oRenderer);

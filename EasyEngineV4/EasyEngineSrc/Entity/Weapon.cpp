@@ -39,9 +39,9 @@ void CWeapon::Load()
 	}
 	if (m_pDummyHandle) {
 		m_pDummyHandle->Unlink();
-		m_pDummyHandle->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInHandleBase);
+		m_pDummyHandle->GetWorldMatrix().GetInverseOrthonormalAffine(m_oModelLocalMatrixInHandleBase);
 	}
-	m_pDummyWear->GetWorldMatrix().GetInverse(m_oModelLocalMatrixInWearBase);
+	m_pDummyWear->GetWorldMatrix().GetInverseOrthonormalAffine(m_oModelLocalMatrixInWearBase);
 
 	// box
 	/*

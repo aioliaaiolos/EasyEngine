@@ -722,7 +722,7 @@ void CRenderer::GetInvCameraMatrix(CMatrix& oMatrix) const
 void CRenderer::SetCameraMatrix( const CMatrix& oMatrix )
 {
 	if(!m_bCameraLocked)
-		oMatrix.GetInverse( m_oCameraMatrixInv );
+		oMatrix.GetInverseOrthonormalAffine(m_oCameraMatrixInv);
 }
 
 void CRenderer::SetInvCameraMatrix(const CMatrix& oMatrix)

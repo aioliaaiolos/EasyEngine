@@ -158,10 +158,10 @@ void CLightEntity::BuildFromInfos(const ILoader::CObjectInfos& infos, IEntity* p
 	SetLocalMatrix(infos.m_oXForm);
 }
 
-void CLightEntity::RenderFirstShadowPass(vector<IEntity*>& entities)
+void CLightEntity::RenderFirstShadowPass(vector<CEntity*>& entities)
 {
 	if (m_pLight && m_pLight->IsCastShadow()) {
-		m_oWorldMatrix.GetInverse(m_oLightViewMatrix);
+		m_oWorldMatrix.GetInverseOrthonormalAffine(m_oLightViewMatrix);
 		m_oRenderer.CalcOrthoProjection(m_oLightProjection, -m_fShadowFrustumWidth / 2.f, m_fShadowFrustumWidth / 2.f, -m_fShadowFrustumHeight / 2.f, m_fShadowFrustumHeight / 2.f, 100, m_fShadowFrustumFar);
 
 		int shadowWidth, shadowHeight;
@@ -194,7 +194,7 @@ void CLightEntity::RenderFirstShadowPass(vector<IEntity*>& entities)
 		pGround->SetShader(pBackupShader);
 
 		for (int i = 0; i < entities.size(); i++) {
-			CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
+			CEntity* pEntity = entities[i];
 			IRessource* pRessource = pEntity->GetRessource();
 			if (pRessource) {
 				pBackupShader = pRessource->GetShader();
@@ -207,7 +207,9 @@ void CLightEntity::RenderFirstShadowPass(vector<IEntity*>& entities)
 				}
 				pEntity->SetShader(pShader);
 				m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-				pEntity->Update();
+				pEntity->SendBonesToShader();
+				pEntity->SendShadowInfosToShader();
+				pEntity->Render();
 				pEntity->SetShader(pBackupShader);
 			}
 		}
@@ -250,49 +252,6 @@ void CLightEntity::GetShadowFrustumSize(float& width, float& height, float& fFar
 	width = m_fShadowFrustumWidth;
 	height = m_fShadowFrustumHeight;
 	fFar = m_fShadowFrustumFar;
-}
-
-void CLightEntity::RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection)
-{
-	CMatrix oBackupInvCameraMatrix;
-	m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
-	m_oRenderer.SetInvCameraMatrix(lightView);
-	CMatrix backupProjection;
-	m_oRenderer.GetProjectionMatrix(backupProjection);
-	m_oRenderer.SetProjectionMatrix(lightProjection);
-	m_oRenderer.ClearFrameBuffer();
-	IShader* pBackupShader = NULL;
-	IShader* pFirstPassShader = m_oRenderer.GetShader(m_sShadowMapFirstPassShaderName);
-	IShader* pFirstPassSkinningShader = m_oRenderer.GetShader(m_sShadowMapFirstPassSkinningShaderName);
-
-	CMatrix m;
-	m_oRenderer.SetModelMatrix(m);
-	IMesh* pGround = static_cast<IMesh*>(GetRessource());
-	pBackupShader = pGround->GetShader();
-	pGround->SetShader(pFirstPassShader);
-	//pGround->Update();
-	pGround->SetShader(pBackupShader);
-
-	for (int i = 0; i < entities.size(); i++) {
-		CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-		IRessource* pRessource = pEntity->GetRessource();
-		if (pRessource) {
-			pBackupShader = pRessource->GetShader();
-			IShader* pShader = nullptr;
-			if (pBackupShader->GetName().find("Skinning") != -1) {
-				pShader = pFirstPassSkinningShader;
-			}
-			else {
-				pShader = pFirstPassShader;
-			}
-			pEntity->SetShader(pShader);
-			m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-			pEntity->Update();
-			pEntity->SetShader(pBackupShader);
-		}
-	}
-	m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
-	m_oRenderer.SetProjectionMatrix(backupProjection);
 }
 
 

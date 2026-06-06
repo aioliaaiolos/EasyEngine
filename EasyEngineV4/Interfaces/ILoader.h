@@ -203,8 +203,6 @@ public:
 		IPersistantObject& operator << (const CStringStorage& store) override { return *this; }
 	};
 
-#include "ILoader.h"
-
 	struct CSceneInfos : public IRessourceInfos
 	{
 		vector< CObjectInfos* >		m_vObject;

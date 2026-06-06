@@ -493,6 +493,7 @@ void CMapEditor::SetEditionMode(bool bEditionMode)
 
 void CMapEditor::CollectSelectableEntity(vector<IEntity*>& entities)
 {
+	entities.clear();
 	m_pScene->CollectMinimapEntities(entities);
 }
 

@@ -221,7 +221,7 @@ void CNode::WorldTranslate( float dx , float dy , float dz )
 void CNode::WorldTranslate( const CVector& vTranslate )
 {
 	CMatrix localInv;
-	m_oLocalMatrix.GetInverse( localInv );
+	m_oLocalMatrix.GetInverseOrthonormalAffine(localInv);
 	localInv.m_03 = 0.f;
 	localInv.m_13 = 0.f;
 	localInv.m_23 = 0.f;
@@ -262,7 +262,7 @@ void CNode::SetWorldPosition( const CVector& vPos )
 {
 	CMatrix invParent;
 	if(m_pParent)
-		m_pParent->GetWorldMatrix().GetInverse(invParent);
+		m_pParent->GetWorldMatrix().GetInverseOrthonormalAffine(invParent);
 	CVector localPos = invParent * vPos;
 	m_oLocalMatrix.m_03 = localPos.m_x;
 	m_oLocalMatrix.m_13 = localPos.m_y;
@@ -342,7 +342,7 @@ void CNode::SetWorldMatrix( const CMatrix& oMat )
 {
 	if (m_pParent) {
 		CMatrix invParentWorld;
-		m_pParent->GetWorldMatrix().GetInverse(invParentWorld);
+		m_pParent->GetWorldMatrix().GetInverseOrthonormalAffine(invParentWorld);
 		m_oLocalMatrix = invParentWorld * oMat;
 	}
 	else
@@ -452,7 +452,7 @@ void CNode::SetLocalTMByWorldTM()
 	{
 		CMatrix oParentWorldTM, oInverseParentWorldTM, oLocalTM;
 		m_pParent->GetWorldMatrix( oParentWorldTM );
-		oParentWorldTM.GetInverse( oInverseParentWorldTM );
+		oParentWorldTM.GetInverseOrthonormalAffine(oInverseParentWorldTM);
 		oLocalTM = oInverseParentWorldTM * m_oWorldMatrix;
 		m_oLocalMatrix = oLocalTM;
 	}

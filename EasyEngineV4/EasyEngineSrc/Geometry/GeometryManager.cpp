@@ -98,7 +98,7 @@ string CGeometryManager::GetName()
 void CGeometryManager::RayCast(int x, int y, const CMatrix& oWorldMatrix, const CMatrix& projectionMatrix, int nScreenWidth, int nScreenHeight, CVector& origin, CVector& ray)
 {
 	CMatrix Pinv;
-	projectionMatrix.GetInverse(Pinv);
+	projectionMatrix.GetInverseOrthonormalAffine(Pinv);
 
 	float logicalx = (2.f * (float)x / (float)nScreenWidth) - 1.f;
 	float logicaly = 1.f - (2.f * (float)y / (float)nScreenHeight);

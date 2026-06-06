@@ -62,6 +62,7 @@ public:
 	void				GetSup(float& nSupx,float& nSupy,float& nSupz) const;
 	CMatrix				GetTranspose() const;
 	void				GetInverse( CMatrix& oMat ) const;
+	void				GetInverseOrthonormalAffine(CMatrix& oMat) const;
 	CMatrix				GetRotation() const;
 	CVector				GetPosition() const;
 	void				GetPosition(float &x, float &y, float &z) const;

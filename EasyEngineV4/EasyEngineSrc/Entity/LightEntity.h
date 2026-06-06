@@ -31,12 +31,11 @@ public:
 	ILight*				GetLight() override;
 	void				SetShadowFrustumSize(float width, float height, float fFar) override;
 	void				GetShadowFrustumSize(float& width, float& height, float& fFar) override;
-	void				RenderFirstShadowPass(vector<IEntity*>& entities);
+	void				RenderFirstShadowPass(vector<CEntity*>& entities);
 	void				RenderSecondShadowPass(IShader* pEntityShader, CEntity* pEntity);
 	void				CastShadow(bool castShadow);
 
 private:
-	void				RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection);
 	ITexture*			CreateShadowTexture();
 
 	ILight*				m_pLight;

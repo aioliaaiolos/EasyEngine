@@ -89,10 +89,8 @@ private:
 	void														Load(const ILoader::CSceneInfos& si);
 	void														LoadSceneObject(const ILoader::CObjectInfos* pSceneObjInfos, CEntity* pParent);
 	void														CreateHeightMap();
-	void														CollectMinimapEntities(vector<IEntity*>& entities);
-	void														CollectShadowMapEntities(vector<IEntity*>& entities);
+	void														CollectShadowMapEntities(vector<CEntity*>& entities);
 	void														DisplayEntitiesForMiniMap(const vector<IEntity*>& entities);
-	void														RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection);
 	void														OnChangeSector() override;
 	void														UpdateMapEntities();
 	bool														IsLoadingComplete();
@@ -120,7 +118,7 @@ private:
 	ITexture*													m_pMinimapTexture;
 	ITexture*													m_pShadowTexture = nullptr;
 	vector<IEntity*>											m_vMiniMapEntities;
-	vector<IEntity*>											m_vShadowMapEntities;
+	vector<CEntity*>											m_vShadowMapEntities;
 	CEntity*													m_pPlayer;
 	CEntity*													m_pPlayerMapSphere;
 	bool														m_bDisplayMinimap;

@@ -93,7 +93,7 @@ bool CCylinder::IsIntersect(const CBox& box) const
 	GetTM(cylMat);
 	box.GetTM(boxMat);
 	CMatrix cylMatInv;
-	cylMat.GetInverse(cylMatInv);
+	cylMat.GetInverseOrthonormalAffine(cylMatInv);
 	CMatrix boxMatInCylBase = cylMatInv * boxMat;
 
 	CBox boxTemp;
@@ -126,7 +126,7 @@ bool CCylinder::IsIntersect(const CBox& box) const
 	
 	//Faire la meme chose en faisant le changement de base dans la base de la boite
 	CMatrix boxMatInv;
-	boxMat.GetInverse(boxMatInv);
+	boxMat.GetInverseOrthonormalAffine(boxMatInv);
 	CMatrix cylMatInBoxBase = boxMatInv * cylMat;
 	CVector cylBase = cylMatInBoxBase * CVector(0, 0, 0, 1);
 	
@@ -276,7 +276,7 @@ IGeometry::TFace CCylinder::GetReactionYAlignedPlane(const CVector& firstPoint, 
 	OPBase.SetAffinePart(first);
 
 	CMatrix OPBaseInv;
-	OPBase.GetInverse(OPBaseInv);
+	OPBase.GetInverseOrthonormalAffine(OPBaseInv);
 
 	CVector C = OPBaseInv * center; // cylinder center into the new basis
 	CVector P = OPBaseInv * last; // lastPoint into the new basis
@@ -335,7 +335,7 @@ IGeometry::TFace CCylinder::GetReactionYAlignedBox(IGeometry& firstPositionBox, 
 	OPBase.SetAffinePart(first);
 
 	CMatrix OPBaseInv;
-	OPBase.GetInverse(OPBaseInv);
+	OPBase.GetInverseOrthonormalAffine(OPBaseInv);
 
 	CVector O = OPBaseInv * first;
 	CVector C = OPBaseInv * GetTM().GetPosition();

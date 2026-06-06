@@ -7,11 +7,13 @@
 #include "Interface.h"
 #include <algorithm>
 
-void CRenderUtils::DrawBox( const CVector& oMinPoint, const CVector& oDimension, IRenderer& oRenderer )
+void CRenderUtils::DrawBox( const CVector& oMinPoint, const CVector& oDimension, IRenderer& oRenderer, IShader* pCurrentShader)
 {
 	IShader* pShader = oRenderer.GetShader( "color" );
 	pShader->Enable( true );
 	oRenderer.DrawBox( oMinPoint, oDimension );
+	if(pCurrentShader)
+		pCurrentShader->Enable(true);
 }
 
 void CRenderUtils::ScreenCapture( string sFileName, EEInterface* pInterface, int x, int y, unsigned int w, unsigned int h )

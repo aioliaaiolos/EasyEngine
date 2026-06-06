@@ -283,7 +283,7 @@ void CNPCEntity::ComputePathFind2DAStar(const CVector& oOrigin, const CVector& o
 
 	// convert gobal to local coordinates
 	CMatrix oParentInv;
-	pParent->GetWorldMatrix().GetInverse(oParentInv);
+	pParent->GetWorldMatrix().GetInverseOrthonormalAffine(oParentInv);
 	CVector oLocalOrigin = oParentInv * oOrigin;
 	CVector oLocalDestination = oParentInv * oDestination;
 	m_pCollisionMap->GetCellCoordFromPosition(oLocalOrigin.m_x, oLocalOrigin.m_z, originx, originy);

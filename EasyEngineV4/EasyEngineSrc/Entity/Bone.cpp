@@ -127,7 +127,7 @@ void CBone::GetInterpolatedMatrix( float fTime )
 		CMatrix& Mf = oNextKey.m_oLocalTM;
 
 		CMatrix MsInv;
-		Ms.GetInverse( MsInv );
+		Ms.GetInverseOrthonormalAffine(MsInv);
 		CMatrix T = MsInv * Mf;
 		CMatrix MI;
 
@@ -154,7 +154,7 @@ void CBone::GetRelativeInterpolatedMatrix( float fTime )
 	CMatrix& Ms = m_mKeys[ m_sCurrentAnimation ][ m_nLastKeyValue ].m_oLocalTM;
 	CMatrix& Mf = m_mKeys[ m_sCurrentAnimation ][ m_nNextKeyValue ].m_oLocalTM;
 	CMatrix MsInv;
-	Ms.GetInverse( MsInv );
+	Ms.GetInverseOrthonormalAffine(MsInv);
 	CMatrix T = MsInv * Mf;
 	CQuaternion qr;
 	T.GetQuaternion(qr);
@@ -174,7 +174,7 @@ void CBone::GetRelativeInterpolatedMatrixSinceLastFrame( float fTime )
 	CMatrix& Ms = m_mKeys[ m_sCurrentAnimation ][ m_nLastKeyValue ].m_oLocalTM;
 	CMatrix& Mf = m_mKeys[ m_sCurrentAnimation ][ m_nNextKeyValue ].m_oLocalTM;
 	CMatrix MsInv;
-	Ms.GetInverse( MsInv );
+	Ms.GetInverseOrthonormalAffine(MsInv);
 	CMatrix T = MsInv * Mf;
 	CQuaternion qr;
 	T.GetQuaternion(qr);
@@ -225,7 +225,7 @@ void CBone::Roll( float fAngle )
 
 		CKey oFirstBakKey = vBakKeys[ 0 ];
 		CMatrix oFirstBakKeyInvTM;
-		oFirstBakKey.m_oLocalTM.GetInverse( oFirstBakKeyInvTM );
+		oFirstBakKey.m_oLocalTM.GetInverseOrthonormalAffine(oFirstBakKeyInvTM);
 		for( unsigned int iKey = 0; iKey < m_mKeys[ m_sCurrentAnimation ].size(); iKey++ )
 		{
 			CMatrix& oTM = m_mKeys[ m_sCurrentAnimation ][ iKey ].m_oLocalTM;

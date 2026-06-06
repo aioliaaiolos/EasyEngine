@@ -117,6 +117,22 @@ public:
 	void							SetLocalVariableValue(string sVariableName, float fValue) override;
 	void							SetCullFace(bool culling);
 	CScene*							GetParentScene();
+	virtual void					SendBonesToShader();
+	void							SendShadowInfosToShader();
+	void							Render();
+
+
+	// temp public
+	virtual void		UpdateCollision();
+	void				UpdateAnimation();
+	void				UpdateSkinOffset();
+	void				UpdateScale();
+	void				UpdateDrawBoundingBox();
+	void				DispatchEntityEvent();
+	void				ExecuteScripts();
+
+	// todelete
+	void				UpdateSuper();
 	
 
 protected:
@@ -181,7 +197,6 @@ protected:
 	
 	void				SetNewBonesMatrixArray(std::vector< CMatrix >& vMatBones);
 	void				GetBonesMatrix(INode* pInitRoot, INode* pCurrentRoot, std::vector< CMatrix >& vMatrix);
-	virtual void		UpdateCollision();
 	void				GetEntitiesCollision(vector<INode*>& entities);
 	void				CreateAndLinkCollisionChildren(string sFileName);
 	float				GetBoundingSphereDistance(INode* pEntity);
@@ -191,16 +206,13 @@ protected:
 	bool				TestWorldCollision(INode* pEntity);
 	bool				IsPassingDoor(INode* pWall, IGeometry* pBBox, IGeometry* pWallBBox);
 	bool				ManageBoxCollision(vector<INode*>& vCollideEntities, float dx, float dy, float dz, const CMatrix& oBackupMatrix);
-	virtual void		SendBonesToShader();
-	void				SendShadowInfosToShader();
-	void				DispatchEntityEvent();
 	void				LinkDoorsToWalls(const vector<CCollisionEntity*>& walls, const vector<CCollisionEntity*>& doors);
 	void				GetPassageMatrix(INode* pOrgNode, INode* pCurrentNode, CMatrix& passage);
 	virtual CEntity*	CreateEmptyEntity(string sName);
-	void				ExecuteScripts();
 	void				SetLocalVariableValue(string sVariableName, IValue* pValue);
 	IValue*				GetLocalVariableValue(string sVariableName);
 	string&				GetAnimationBoundingBox();
+	void				CollectMinimapEntities(vector<IEntity*>& entities);
 };
 
 class CCollisionEntity : public CEntity, public ICollisionEntity

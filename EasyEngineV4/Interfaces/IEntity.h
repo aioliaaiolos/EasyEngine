@@ -164,6 +164,7 @@ public:
 	virtual void						SetLocalVariableValue(string sVariableName, string sValue) = 0;
 	virtual void						SetLocalVariableValue(string sVariableName, int nValue) = 0;
 	virtual void						SetLocalVariableValue(string sVariableName, float fValue) = 0;
+	virtual void						CollectMinimapEntities(vector<IEntity*>& entities) = 0;
 };
 
 class IItem : public virtual IEntity
@@ -241,7 +242,6 @@ public:
 	virtual ITexture*			GetMinimapTexture() = 0;
 	virtual void				DisplayMinimap(bool display) = 0;
 	virtual void				UpdateMapEntities() = 0;
-	virtual void				CollectMinimapEntities(vector<IEntity*>& entities) = 0;
 	virtual void				SetGroundMargin(float margin) = 0;
 	virtual float				GetGroundMargin() = 0;
 	virtual void				GetInfos(ILoader::CSceneInfos& si) = 0;

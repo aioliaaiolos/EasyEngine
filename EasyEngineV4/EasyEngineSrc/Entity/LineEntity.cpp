@@ -19,7 +19,7 @@ void CLineEntity::Update()
 	if (!m_bHidden) {
 		CMatrix cam, camInv;
 		m_oRenderer.GetInvCameraMatrix(camInv);
-		camInv.GetInverse(cam);
+		camInv.GetInverseOrthonormalAffine(cam);
 		m_oRenderer.SetModelViewMatrix(cam);
 		m_oRenderer.DrawLine(m_oFirst, m_oLast, CVector(1.f, 1.f, 1.f));
 	}

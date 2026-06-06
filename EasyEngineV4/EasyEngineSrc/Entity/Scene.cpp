@@ -437,6 +437,7 @@ void CScene::AddChild(INode* pNode)
 		if (pPlayer)
 			m_pPlayer = pPlayer;
 	}
+	m_vShadowMapEntities.clear();
 	CollectShadowMapEntities(m_vShadowMapEntities);
 	
 #ifdef LIGHT_SUN
@@ -508,43 +509,31 @@ void CScene::RenderMinimap()
 	DisplayEntitiesForMiniMap(m_vMiniMapEntities);
 }
 
-void CScene::CollectMinimapEntities(vector<IEntity*>& entities)
+
+void CScene::CollectShadowMapEntities(vector<CEntity*>& entities)
 {
 	entities.clear();
-	for (int i = 0; i < GetChildCount(); i++) {
-		CEntity* pEntity = dynamic_cast<CEntity*>(GetChild(i));
-		if (pEntity) {
-			if (pEntity != this) {
-				IPlayer* pPlayer = dynamic_cast<IPlayer*>(pEntity);
-				if (pPlayer)
-					m_pPlayer = pEntity;
-				CLightEntity* pLightEntity = dynamic_cast<CLightEntity*>(pEntity);
-				if (!pLightEntity) {
-					CMinimapEntity* pMapEntity = dynamic_cast<CMinimapEntity*>(pEntity);
-					if (!pMapEntity) {
-						CCamera* pCamera = dynamic_cast<CCamera*>(pEntity);
-						if(!pCamera)
-							entities.push_back(pEntity);
-					}
-				}
-			}
-		}
-	}
-}
 
-void CScene::CollectShadowMapEntities(vector<IEntity*>& entities)
-{
-	CollectMinimapEntities(entities);
+	vector<IEntity*> abstractEntities;
+	CollectMinimapEntities(abstractEntities);
+	for (IEntity* pAbstractEntity : abstractEntities) {
+		CEntity* pEntity = dynamic_cast<CEntity*>(pAbstractEntity);
+		entities.push_back(pEntity);
+	}
 }
 
 void CScene::OnChangeSector()
 {
+	m_vMiniMapEntities.clear();
+	m_vShadowMapEntities.clear();
 	CollectMinimapEntities(m_vMiniMapEntities);
 	CollectShadowMapEntities(m_vShadowMapEntities);
 }
 
 void CScene::UpdateMapEntities()
 {
+	m_vMiniMapEntities.clear();
+	m_vShadowMapEntities.clear();
 	CollectMinimapEntities(m_vMiniMapEntities);
 	CollectShadowMapEntities(m_vShadowMapEntities);
 }
@@ -680,49 +669,6 @@ void CScene::DisplayEntitiesForMiniMap(const vector<IEntity*>& entities)
 #endif // 0
 }
 
-void CScene::RenderShadowMap(const vector<IEntity*>& entities, const CMatrix& lightView, const CMatrix& lightProjection)
-{
-	CMatrix oBackupInvCameraMatrix;
-	m_oRenderer.GetInvCameraMatrix(oBackupInvCameraMatrix);
-	m_oRenderer.SetInvCameraMatrix(lightView);
-	CMatrix backupProjection;
-	m_oRenderer.GetProjectionMatrix(backupProjection);
-	m_oRenderer.SetProjectionMatrix(lightProjection);
-	m_oRenderer.ClearFrameBuffer();
-	IShader* pBackupShader = NULL;
-	IShader* pFirstPassShader = m_oRenderer.GetShader(m_sShadowMapFirstPassShaderName);
-	IShader* pFirstPassSkinningShader = m_oRenderer.GetShader(m_sShadowMapFirstPassSkinningShaderName);
-
-	CMatrix m;
-	m_oRenderer.SetModelMatrix(m);
-	IMesh* pGround = static_cast<IMesh*>(GetRessource());
-	if (!pGround)
-		return;
-	pBackupShader = pGround->GetShader();
-	pGround->SetShader(pFirstPassShader);
-	pGround->SetShader(pBackupShader);
-
-	for (int i = 0; i < entities.size(); i++) {
-		CEntity* pEntity = dynamic_cast<CEntity*>(entities[i]);
-		IRessource* pRessource = pEntity->GetRessource();
-		if (pRessource) {
-			pBackupShader = pRessource->GetShader();
-			IShader* pShader = nullptr;
-			if (pBackupShader->GetName().find("Skinning") != -1) {
-				pShader = pFirstPassSkinningShader;
-			}
-			else {
-				pShader = pFirstPassShader;
-			}
-			pEntity->SetShader(pShader);
-			m_oRenderer.SetModelMatrix(pEntity->GetWorldMatrix());
-			pEntity->Update();
-			pEntity->SetShader(pBackupShader);
-		}
-	}
-	m_oRenderer.SetInvCameraMatrix(oBackupInvCameraMatrix);
-	m_oRenderer.SetProjectionMatrix(backupProjection);
-}
 
 void CScene::GetInfos( ILoader::CSceneInfos& si )
 {

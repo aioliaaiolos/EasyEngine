@@ -240,6 +240,39 @@ void CMatrix::GetInverse( CMatrix& oMat ) const
 }
 
 
+void CMatrix::GetInverseOrthonormalAffine(CMatrix& oMat) const
+{
+	if (&oMat == this)
+	{ 
+		exception e("CMatrix::GetInverseOrthonormalAffine : Impossible de passer la matrice instance en argument");
+		throw e;
+	}
+
+	// Transpose de la partie 3x3
+	oMat.m_00 = m_00;
+	oMat.m_01 = m_10;
+	oMat.m_02 = m_20;
+
+	oMat.m_10 = m_01;
+	oMat.m_11 = m_11;
+	oMat.m_12 = m_21;
+
+	oMat.m_20 = m_02;
+	oMat.m_21 = m_12;
+	oMat.m_22 = m_22;
+
+	// Translation inverse : -R^T * P
+	oMat.m_03 = -(m_00 * m_03 + m_10 * m_13 + m_20 * m_23);
+	oMat.m_13 = -(m_01 * m_03 + m_11 * m_13 + m_21 * m_23);
+	oMat.m_23 = -(m_02 * m_03 + m_12 * m_13 + m_22 * m_23);
+
+	// Dernière ligne affine
+	oMat.m_30 = 0.0f;
+	oMat.m_31 = 0.0f;
+	oMat.m_32 = 0.0f;
+	oMat.m_33 = 1.0f;
+}
+
 //-----------------------------------------------------------------------------------------------------
 //											operator =
 //-----------------------------------------------------------------------------------------------------
