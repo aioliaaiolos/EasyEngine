@@ -363,7 +363,8 @@ void CEntity::UpdateCollision()
 			int nDelta = m_oTimeManager.GetTimeElapsedSinceLastUpdate();
 			const float margin = -20.;
 			float fGroundHeight = m_pScene->GetGroundHeight(x, z) + m_pScene->GetGroundMargin();
-			float fEntityZ = m_oLocalMatrix.m_13 + m_pBoundingGeometry->GetBase().m_y + m_pBody->m_oSpeed.m_y * (float)nDelta / 1000.f;
+			float fThisBaseY = (m_pBoundingGeometry ? m_pBoundingGeometry->GetBase().m_y : 0.f);
+			float fEntityZ = m_oLocalMatrix.m_13 + fThisBaseY + m_pBody->m_oSpeed.m_y * (float)nDelta / 1000.f;
 			if( fEntityZ > fGroundHeight + m_pPhysic->GetEpsilonError() )
 			{
 				m_bIsOnTheGround = false;
@@ -379,7 +380,7 @@ void CEntity::UpdateCollision()
 				m_pBody->m_oSpeed.m_y = 0;
 				m_pBody->m_oSpeed.m_z = 0;
 				if (fEntityZ < fGroundHeight + m_pPhysic->GetEpsilonError()) {
-					SetLocalPosition(m_oLocalMatrix.m_03, fGroundHeight - m_pBoundingGeometry->GetBase().m_y, m_oLocalMatrix.m_23);
+					SetLocalPosition(m_oLocalMatrix.m_03, fGroundHeight - fThisBaseY, m_oLocalMatrix.m_23);
 					m_bIsOnTheGround = true;
 				}
 			}

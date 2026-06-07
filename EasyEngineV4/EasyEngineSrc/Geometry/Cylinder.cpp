@@ -302,7 +302,7 @@ IGeometry::TFace CCylinder::GetReactionYAlignedPlane(const CVector& firstPoint, 
 }
 
 
-IGeometry::TFace CCylinder::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
+IGeometry::TFace CCylinder::ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
 {
 	CVector first = firstPositionBox.GetTM().GetPosition();
 	CVector last = lastPositionBox.GetTM().GetPosition();

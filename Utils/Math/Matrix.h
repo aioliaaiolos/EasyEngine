@@ -78,6 +78,7 @@ public:
 	bool				IsIdentity() const;
 	void				SetIdentity();
 	void				SetPosition( float x, float y, float z );
+	void				SetPosition(CVector& pos);
 	void				SetAffinePart( const CMatrix& mat );
 	void				SetAffinePart( float x, float y, float z );
 	void				SetAffinePart( const CVector& v );

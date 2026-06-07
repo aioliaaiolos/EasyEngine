@@ -9,6 +9,7 @@
 using namespace std;
 
 class IRenderer;
+class CollisionInfo;
 
 class IWeightTable
 {
@@ -57,7 +58,8 @@ public:
 	virtual float				GetDistance(const IGeometry& oGeometry) const = 0;
 	virtual void				Draw(IRenderer& oRenderer) const = 0;
 	virtual TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R) = 0;
-	virtual TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R) = 0;
+	virtual TFace				ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R) = 0;
+	virtual void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info) = 0;
 	virtual bool				IsIncludedInto(const IGeometry& oGeometry) = 0;
 	virtual void				GetBBoxDimension(CVector& dim) = 0;
 	virtual const CVector&		GetBBoxDimension() const = 0;

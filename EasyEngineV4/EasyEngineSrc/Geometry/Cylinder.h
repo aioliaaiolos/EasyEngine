@@ -34,10 +34,11 @@ public:
 	float				GetDistance(const ICylinder& oBox) const;
 	void				Draw(IRenderer& oRenderer) const;
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
-	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	void				GetBBoxDimension(CVector& dim) override;
 	const CVector&		GetBBoxDimension() const override;
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CCylinder::GetBBoxDimension()"); }
+	void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info) override { throw CMethodNotImplementedException("ComputeCollisionYAlignedBox"); }
 	void				GetCenter(CVector& oCenter) const override;
 	
 

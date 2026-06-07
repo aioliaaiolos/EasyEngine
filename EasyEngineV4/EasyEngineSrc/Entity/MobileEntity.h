@@ -25,6 +25,11 @@ protected:
 	bool						m_bCollideOnObstacle;
 
 	static void 				OnCollision(CEntity* pThis, vector<INode*> entities);
+	void						ManagerEntityCollision_Old(CMatrix& firstLocalTM, CMatrix& nextLocalTM, CVector& nextPos, float& fMaxHeight, INode* pObstacle, bool& isCollision);
+	void						ManageEntityCollision(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision);
+	void						ManageEntityCollisionNormals(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision);
+
+	const float					MAX_HEIGHT_ABLE_TO_CLIMB = 50.f;
 
 private:
 	CVector						m_vNextLocalTranslate;
@@ -59,6 +64,7 @@ public:
 	void													SetMovmentSpeed(TAnimation eAnimationType, float fSpeed) override;
 	TAnimation												GetCurrentAnimationType() const;
 	void													RunAction(string sAction, bool bLoop);
+	const string&											GetCurrentAction() const;
 	void													Die();
 	void													WearArmorToDummy(string armorName);
 	void													WearShoes(string shoesName) override;
@@ -183,6 +189,7 @@ protected:
 	string													m_sSpineNode;
 	bool													m_bUnique = true;
 	int														m_nGoldAmount = 0;
+	string													m_sCurrentAction;
 
 	static map< string, TAction >							s_mActions;
 	static map< string, TAnimation >						s_mAnimationStringToType;

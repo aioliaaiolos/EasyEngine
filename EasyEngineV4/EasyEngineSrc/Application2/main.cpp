@@ -108,6 +108,7 @@ int m_nLastGameMousePosx, m_nLastGameMousePosy;
 CMatrix ident;
 bool m_bRenderScene = true;
 bool bCapture = false;
+bool s_bFirstPerson = false;
 
 void InitScene( ISceneManager* pSceneManager )
 {
@@ -203,6 +204,13 @@ void OnKeyAction( CPlugin* pPlugin, unsigned int key, IInputManager::KEY_STATE s
 				if (pPlayer)
 					pPlayer->SetFightMode(!pPlayer->GetFightMode());
 			}
+			else if (key == 'P') {
+				IPlayer* pPlayer = m_pEntityManager->GetPlayer();
+				if (pPlayer) {
+					s_bFirstPerson = !s_bFirstPerson;
+					pPlayer->SwitchToFirstPerson(s_bFirstPerson);
+				}
+			}
 		}
 	}
 }
@@ -242,10 +250,15 @@ void UpdatePerso()
 				pPlayer->RunAction("StrafeRight", true);
 				m_pActionManager->ForceActionState("StrafeRightPlayer", IInputManager::PRESSED);
 			}
-			if( eStateWalk == IInputManager::JUST_RELEASED)
+			if( (eStateWalk == IInputManager::JUST_RELEASED || eStateWalk == IInputManager::RELEASED) &&
+				(eStateMoveBack == IInputManager::JUST_RELEASED || eStateMoveBack == IInputManager::RELEASED) &&
+				(eStateStrafeLeft == IInputManager::JUST_RELEASED || eStateStrafeLeft == IInputManager::RELEASED) &&
+				(eStateStrafeRight == IInputManager::JUST_RELEASED || eStateStrafeRight == IInputManager::RELEASED))
 			{
-				pPlayer->RunAction( "StopRunning", true );
-				m_pActionManager->ForceActionState( "AvancerPlayer", IInputManager::RELEASED );
+				if (pPlayer->GetCurrentAction() != "StopRunning") {
+					pPlayer->RunAction("StopRunning", true);
+					m_pActionManager->ForceActionState("AvancerPlayer", IInputManager::RELEASED);
+				}
 			}
 			
 			if (eStateMoveBack == IInputManager::JUST_RELEASED)

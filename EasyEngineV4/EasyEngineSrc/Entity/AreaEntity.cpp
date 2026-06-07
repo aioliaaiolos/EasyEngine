@@ -8,7 +8,8 @@ CAreaEntity::CAreaEntity(string areaName, EEInterface& oInterface, IBox& oBox) :
 	m_oInitialMinPoint(oBox.GetMinPoint()),
 	m_oInitialDimension(oBox.GetDimension()),
 	m_oCurrentMinPoint(m_oInitialMinPoint),
-	m_oCurrentDimension(m_oInitialDimension)
+	m_oCurrentDimension(m_oInitialDimension),
+	m_oEntityManager(*dynamic_cast<IEntityManager*>(oInterface.GetPlugin("EntityManager")))
 {
 	m_sID = areaName;
 	GetWorldPosition(m_oLastPosition);
@@ -79,7 +80,7 @@ void CAreaEntity::UpdateCollision()
 		IGeometry* lastBox = GetBoundingGeometry();
 		lastBox->SetTM(oLocalMatrix);
 		IGeometry::TFace collisionFace = IGeometry::eNone;
-		collisionFace = pEntity->GetBoundingGeometry()->GetReactionYAlignedBox(*firstBox, *lastBox, R);
+		collisionFace = pEntity->GetBoundingGeometry()->ComputeCorrectedPositionYAlignedBox(*firstBox, *lastBox, R);
 		delete firstBox;
 		if (collisionFace != IBox::eNone) {
 			lastBottom = R;

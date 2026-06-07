@@ -36,8 +36,8 @@ void CLinkedCamera::GetEntityName(string& sName)
 
 void CLinkedCamera::Zoom(int value)
 {
-	float z = value * 20;
-	LocalTranslate(0, 0, z);
+	if (!m_bFirstPersonMode)
+		LocalTranslate(0, 0, value * 20);
 }
 
 IBone* CLinkedCamera::GetHeadNode(CCharacter* pPerso)
@@ -95,11 +95,13 @@ void CLinkedCamera::Update()
 	{
 		float lastHeight = m_oWorldMatrix.m_13;
 		CNode::Update();
-		float nextHeight = m_oWorldMatrix.m_13;
-		float ascendSpeed = nextHeight - lastHeight;
-		float maxAscendSpeed = ascendSpeed / 80.f;
-		if (nextHeight - lastHeight > maxAscendSpeed)
-			m_oWorldMatrix.m_13 = lastHeight + maxAscendSpeed;
+		if (!m_bFirstPersonMode) {
+			float nextHeight = m_oWorldMatrix.m_13;
+			float ascendSpeed = nextHeight - lastHeight;
+			float maxAscendSpeed = ascendSpeed / 80.f;
+			if (nextHeight - lastHeight > maxAscendSpeed)
+				m_oWorldMatrix.m_13 = lastHeight + maxAscendSpeed;
+		}
 	}
 	if (m_bDisplayViewCone) {
 		DisplayViewCone();
@@ -129,4 +131,20 @@ void CLinkedCamera::DisplayViewCone()
 void CLinkedCamera::GetEntityInfos(ILoader::CObjectInfos*& pInfos)
 {
 	
+}
+
+void CLinkedCamera::SwitchToFirstPerson(bool firstPerson)
+{
+	m_bFirstPersonMode = firstPerson;
+	if (m_bFirstPersonMode) {
+		static float yaw = 0, pitch = 0, roll = 0;
+		m_oLocalMatrix.SetIdentity();
+		Yaw(-180.f);
+		Pitch(10);
+		Roll(roll);
+		static float x = 0, y = 0, z = 0;
+		LocalTranslate(x, 75, -20);
+	}
+
+
 }

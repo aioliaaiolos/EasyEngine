@@ -21,6 +21,7 @@ public:
 	void				Update();
 	void				SetTradeMode(bool bInventoryMode) {}
 	void				GetEntityInfos(ILoader::CObjectInfos*& pInfos);
+	void				SwitchToFirstPerson(bool firstPerson);
 
 private:
 
@@ -34,6 +35,7 @@ private:
 	IEntity*			m_pNearSphere = nullptr;
 	IEntity*			m_pFarSphere = nullptr;
 	CNode*				m_pBehindNode = nullptr;
+	bool				m_bFirstPersonMode = false;
 };
 
 

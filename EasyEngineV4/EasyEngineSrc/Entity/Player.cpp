@@ -7,6 +7,7 @@
 #include "IGeometry.h"
 #include "Item.h"
 #include "Scene.h"
+#include "LinkedCamera.h"
 
 CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
 	CCharacter(oInterface, sFileName, "Player"),
@@ -17,7 +18,7 @@ CPlayer::CPlayer(EEInterface& oInterface, string sFileName) :
 	m_sName = "Player";
 	m_pPlayerWindow = m_oGUIManager.CreatePlayerWindow(600, 800);
 	ICameraManager& oCameraManager = static_cast<ICameraManager&>(*oInterface.GetPlugin("CameraManager"));
-	m_pLinkCamera = oCameraManager.CreateCamera(ICameraManager::TLinked, 60.f);
+	m_pLinkCamera = dynamic_cast<CLinkedCamera*>(oCameraManager.CreateCamera(ICameraManager::TLinked, 60.f));
 
 	unsigned int nWidth, nHeight;
 	m_oRenderer.GetResolution(nWidth, nHeight);
@@ -71,6 +72,18 @@ void CPlayer::Update()
 	m_pEntityInVisor = GetEntityInVisor(m_oVisorPos.GetX(), m_oVisorPos.GetY());
 	if(m_pEntityInVisor)
 		m_oGUIManager.Print(m_pEntityInVisor->GetIDStr(), m_oVisorPos.GetX(), m_oVisorPos.GetY(), IGUIManager::TFontColor::eWhite);
+}
+
+void CPlayer::SwitchToFirstPerson(bool firstPerson)
+{
+	m_pLinkCamera->SwitchToFirstPerson(firstPerson);
+	Hide(firstPerson);
+	for (map<string, vector<IItem*>>::const_iterator itItemList = GetItems().begin(); itItemList != GetItems().end(); itItemList++) {
+		for (IItem* pAbstractItem : itItemList->second) {
+			CItem* pItem = static_cast<CItem*>(pAbstractItem);
+			pItem->Hide(firstPerson);
+		}
+	}
 }
 
 void CPlayer::CollectSelectableEntity(vector<INode*>& entities)

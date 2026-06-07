@@ -25,4 +25,5 @@ protected:
 	CVector							m_oCurrentDimension;
 	CVector							m_oLastPosition;
 	bool							m_bClosed = false;
+	IEntityManager&					m_oEntityManager;
 };

@@ -3,7 +3,7 @@
 #include "Utils2\Position.h"
 
 class IGUIWindow;
-class ICamera;
+class CLinkedCamera;
 
 class CPlayer :	public CCharacter, public IPlayer
 {
@@ -11,9 +11,10 @@ public:
 	CPlayer(EEInterface& oInterface, string sFileName);
 	virtual ~CPlayer();
 
-	void	Action();
-	void	ToggleDisplayPlayerWindow();
+	void	Action() override;
+	void	ToggleDisplayPlayerWindow() override;
 	void	Update();
+	void	SwitchToFirstPerson(bool firstPerson) override;
 
 protected:
 	INode* 			GetEntityInVisor(int x, int y);
@@ -22,7 +23,7 @@ protected:
 
 	IGUIManager&	m_oGUIManager;
 	IGUIWindow*		m_pPlayerWindow;
-	ICamera*		m_pLinkCamera;
+	CLinkedCamera*	m_pLinkCamera;
 	CPosition		m_oVisorPos;
 	INode*			m_pEntityInVisor;
 };

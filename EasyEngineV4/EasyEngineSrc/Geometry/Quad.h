@@ -21,12 +21,13 @@ public :
 	float				GetDistance(const IGeometry& oGeometry) const;
 	void				Draw(IRenderer& oRenderer) const;
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
-	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
 	void				GetBBoxDimension(CVector& dim) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	const CVector&		GetBBoxDimension() const override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetCenter(CVector& oCenter) const override;
 	float				GetRadius() const override;
+	void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info) override { throw CMethodNotImplementedException("ComputeCollisionYAlignedBox"); }
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const override;
 	IPersistantObject& operator << (const CBinaryFileStorage& store) override;

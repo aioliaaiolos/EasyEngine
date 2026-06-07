@@ -487,6 +487,11 @@ void CMatrix::SetPosition( float x, float y, float z )
 	m_33 = 1.f;
 }
 
+void CMatrix::SetPosition(CVector& pos)
+{
+	SetPosition(pos.m_x, pos.m_y, pos.m_z);
+}
+
 void CMatrix::Get( float* arr ) const
 {
 	arr[ 0 ] 	= m_00; 	arr[ 1 ] 	= m_01; 	arr[ 2 ] 	= m_02; 	arr[ 3 ] 	= m_03;

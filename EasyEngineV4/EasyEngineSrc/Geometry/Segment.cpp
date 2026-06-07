@@ -115,7 +115,7 @@ IGeometry::TFace CSegment::GetReactionYAlignedPlane(const CVector& firstPoint, c
 {
 	return eNone;
 }
-IGeometry::TFace CSegment::GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
+IGeometry::TFace CSegment::ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R)
 {
 	return eNone;
 }

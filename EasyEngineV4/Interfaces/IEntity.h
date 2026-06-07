@@ -224,6 +224,7 @@ public:
 	virtual IBone*									GetHeadNode() = 0;
 	virtual int										GetGoldAmount() = 0;
 	virtual void									SetGoldAmount(int nGoldAmount) = 0;
+	virtual const string&							GetCurrentAction() const = 0;
 };
 
 class IScene : public virtual IEntity
@@ -282,6 +283,7 @@ class IPlayer : public virtual ICharacter, virtual public IFighterEntityInterfac
 public:
 	virtual void				Action() = 0;
 	virtual void				ToggleDisplayPlayerWindow() = 0;
+	virtual void				SwitchToFirstPerson(bool firstPerson) = 0;
 };
 
 class IAEntityInterface : virtual public IFighterEntityInterface

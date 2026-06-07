@@ -4,6 +4,7 @@
 #include "math/Vector.h"
 #include "math/Matrix.h"
 #include "IGeometry.h"
+#include "ICollisionManager.h"
 
 class IRenderer;
 
@@ -48,7 +49,9 @@ public:
 	bool				IsIntersect(const CBox& box) const;
 	void				Draw(IRenderer& oRenderer) const;
 	TFace				GetReactionYAlignedPlane(const CVector& firstPoint, const CVector& lastPoint, float planeHeight, CVector& R);
-	TFace				GetReactionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				ComputeCorrectedPositionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	TFace				ComputeCorrectedPositionYAlignedBox_New(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CVector& R);
+	void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info);
 	bool				IsIncludedInto(const IGeometry& oGeometry) override;
 	void				GetBBoxDimension(CVector& dim) override;
 	const CVector&		GetBBoxDimension() const override;

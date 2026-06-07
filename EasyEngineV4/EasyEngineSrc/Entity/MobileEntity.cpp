@@ -108,92 +108,210 @@ void CObject::ManageGravity()
 	}
 }
 
+void CObject::ManageEntityCollision(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision)
+{
+	float thisHeight = GetHeight();
+
+	CVector nextPos;
+	nextLocalTM.GetPosition(nextPos);
+
+	CVector backupNextPos = nextPos;
+	if (pObstacle->GetTypeName() == "Item")
+		return;
+	if (pObstacle->GetTypeName() == "AreaEntity") {
+		isCollision = true;
+		return;
+	}
+	pObstacle->GetBoundingGeometry()->SetTM(pObstacle->GetLocalMatrix());
+	IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
+	firstBox->SetTM(firstLocalTM);
+	IGeometry* nextBox = GetBoundingGeometry();
+	nextBox->SetTM(nextLocalTM);
+	IGeometry::TFace collisionFace = IGeometry::eNone;
+	CVector correctedPosition;
+	collisionFace = pObstacle->GetBoundingGeometry()->ComputeCorrectedPositionYAlignedBox(*firstBox, *nextBox, correctedPosition);
+	delete firstBox;
+	if (collisionFace != IBox::eNone) {
+		nextPos = correctedPosition;
+		isCollision = true;
+		if (collisionFace == IBox::eYPositive) {
+			nextPos.m_y += thisHeight / 2.f;
+			m_pBody->m_oSpeed.m_y = 0;
+			nextLocalTM.m_13 = nextPos.m_y;
+			GetBoundingGeometry()->SetTM(nextLocalTM);
+		}
+		else {
+			IBox* pBox = static_cast<IBox*>(pObstacle->GetBoundingGeometry());
+			float fObstacleHeight = pObstacle->GetLocalMatrix().m_13 + pObstacle->GetBoundingGeometry()->GetBBoxDimension().m_y / 2.f;
+			float height = m_oLocalMatrix.m_13 - thisHeight / 2.f;
+
+			//fObstacleHeight = pObstacle->GetBoundingGeometry()->GetBBoxDimension().m_y;
+			//height = 0;
+			if (fObstacleHeight > height + MAX_HEIGHT_ABLE_TO_CLIMB) {
+				nextLocalTM.m_03 = nextPos.m_x;
+				nextLocalTM.m_23 = nextPos.m_z;
+				GetBoundingGeometry()->SetTM(nextLocalTM);
+				m_bCollideOnObstacle = true;
+			}
+			else {
+				nextPos = backupNextPos;
+				static float test = 0.f;
+				nextPos.m_y = fObstacleHeight + thisHeight / 2.f;
+				m_bCollideOnObstacle = false;
+			}
+		}
+	}
+	else
+		isCollision = true;
+
+	nextLocalTM.SetPosition(nextPos);
+}
+
+
+void CObject::ManageEntityCollisionNormals(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision)
+{
+	float thisHeight = GetHeight();
+
+	CVector nextPos;
+	nextLocalTM.GetPosition(nextPos);
+
+	CVector backupNextPos = nextPos;
+	if (pObstacle->GetTypeName() == "Item")
+		return;
+	if (pObstacle->GetTypeName() == "AreaEntity") {
+		isCollision = true;
+		return;
+	}
+	pObstacle->GetBoundingGeometry()->SetTM(pObstacle->GetLocalMatrix());
+	IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
+	firstBox->SetTM(firstLocalTM);
+	IGeometry* nextBox = GetBoundingGeometry();
+	nextBox->SetTM(nextLocalTM);
+	CollisionInfo ci;
+	pObstacle->GetBoundingGeometry()->ComputeCollisionYAlignedBox(*firstBox, *nextBox, ci);
+	CVector correctedPosition;
+	delete firstBox;
+	if (ci.face != IBox::eNone) {
+		nextPos = correctedPosition;
+		isCollision = true;
+		if (ci.face == IBox::eYPositive) {
+			nextPos.m_y += thisHeight / 2.f;
+			m_pBody->m_oSpeed.m_y = 0;
+			nextLocalTM.m_13 = nextPos.m_y;
+			GetBoundingGeometry()->SetTM(nextLocalTM);
+		}
+		else {
+			IBox* pBox = static_cast<IBox*>(pObstacle->GetBoundingGeometry());
+			float fObstacleHeight = pObstacle->GetBoundingGeometry()->GetBBoxDimension().m_y;
+			if (fObstacleHeight > MAX_HEIGHT_ABLE_TO_CLIMB) {
+				nextLocalTM.m_03 = nextPos.m_x;
+				nextLocalTM.m_23 = nextPos.m_z;
+				GetBoundingGeometry()->SetTM(nextLocalTM);
+				m_bCollideOnObstacle = true;
+			}
+			else {
+				nextPos = backupNextPos;
+				static float test = 0.f;
+				nextPos.m_y = pObstacle->GetLocalMatrix().m_13 + thisHeight / 2.f;
+				m_bCollideOnObstacle = false;
+			}
+		}
+	}
+	else
+		isCollision = true;
+
+	nextLocalTM.SetPosition(nextPos);
+}
+
+void CObject::ManagerEntityCollision_Old(CMatrix& firstLocalTM, CMatrix& nextLocalTM, CVector& nextPos, float& fMaxHeight, INode* pObstacle, bool& isCollision)
+{
+	float thisHeight = GetHeight();
+
+	CVector backupNextPos = nextPos;
+	if (pObstacle->GetTypeName() == "Item")
+		return;
+	if (pObstacle->GetTypeName() == "AreaEntity") {
+		isCollision = true;
+		return;
+	}
+	pObstacle->GetBoundingGeometry()->SetTM(pObstacle->GetLocalMatrix());
+	IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
+	firstBox->SetTM(firstLocalTM);
+	IGeometry* nextBox = GetBoundingGeometry();
+	nextBox->SetTM(nextLocalTM);
+	IGeometry::TFace collisionFace = IGeometry::eNone;
+	CVector correctedPosition;
+	collisionFace = pObstacle->GetBoundingGeometry()->ComputeCorrectedPositionYAlignedBox(*firstBox, *nextBox, correctedPosition);
+	delete firstBox;
+	if (collisionFace != IBox::eNone) {
+		nextPos = correctedPosition;
+		if (nextPos.m_y < fMaxHeight)
+			nextPos.m_y = fMaxHeight;
+		isCollision = true;
+		if (collisionFace == IBox::eYPositive) {
+			if (fMaxHeight < nextPos.m_y)
+				fMaxHeight = nextPos.m_y;
+			else
+				nextPos.m_y = fMaxHeight;
+			nextPos.m_y += thisHeight / 2.f;
+			m_pBody->m_oSpeed.m_y = 0;
+			nextLocalTM.m_13 = nextPos.m_y;
+			GetBoundingGeometry()->SetTM(nextLocalTM);
+		}
+		else {
+			IBox* pBox = static_cast<IBox*>(pObstacle->GetBoundingGeometry());
+			float fObstacleHeight = pObstacle->GetBoundingGeometry()->GetBBoxDimension().m_y;
+			if (fObstacleHeight > MAX_HEIGHT_ABLE_TO_CLIMB) {
+				nextLocalTM.m_03 = nextPos.m_x;
+				nextLocalTM.m_23 = nextPos.m_z;
+				GetBoundingGeometry()->SetTM(nextLocalTM);
+				m_bCollideOnObstacle = true;
+			}
+			else {
+				m_bCollideOnObstacle = false;
+				nextPos = backupNextPos;
+				nextPos.m_y += fObstacleHeight - thisHeight / 2.f;
+				if (fMaxHeight < nextPos.m_y)
+					fMaxHeight = nextPos.m_y;
+			}
+		}
+	}
+	else
+		isCollision = true;
+}
+
 void CObject::UpdateCollision()
 {
 	if (!m_pEntityManager->AreCollisionsEnabled())
 		return;
-	const float MAX_HEIGHT_ABLE_TO_CLIMB = 50.f;
 	if (GetWeight() > 0) {
-		float h = GetHeight();
+		float zBefore = m_oLocalMatrix.m_13;
+		CMatrix backupLocal = m_oLocalMatrix;
+
+		float thisHeight = GetHeight();
 
 		m_vNextLocalTranslate += m_vConstantLocalTranslate;
 
-		CMatrix backupLocal = m_oLocalMatrix;
+		CMatrix firstLocalTM = m_oLocalMatrix;
 
 		CNode::LocalTranslate(m_vNextLocalTranslate.m_x, m_vNextLocalTranslate.m_y, m_vNextLocalTranslate.m_z);
 		CNode::UpdateWorldMatrix();
-		CMatrix oLocalMatrix = m_oLocalMatrix;
+		CMatrix nextLocalTM = m_oLocalMatrix;
 
-		vector<INode*> entities;
-		GetEntitiesCollision(entities);
+		vector<INode*> obstacles;
+		GetEntitiesCollision(obstacles);
 
-		CVector localPos;
-		oLocalMatrix.GetPosition(localPos);
-
-		CVector directriceLine = m_vNextLocalTranslate;
-		CVector first = backupLocal.GetPosition();
-		CVector last = localPos;
-		CVector firstBottom = first;
-		CVector lastBottom = last;
-		CVector R = last;
-		bool bCollision = false;
+		CVector nextPos;
+		nextLocalTM.GetPosition(nextPos);
+		CVector firstLocalPosition = firstLocalTM.GetPosition();		
+		
+		bool isCollision = false;
 		m_bCollideOnObstacle = false;
-		float fMaxHeight = -999999.f;
-		if (m_pPhysic->GetGravity() > 0.f) {
-			for (int i = 0; i < entities.size(); i++) {
-				INode* pEntity = entities[i];
-				if (pEntity->GetTypeName() == "Item")
-					continue;
-				if (pEntity->GetTypeName() == "AreaEntity") {
-					bCollision = true;
-					continue;
-				}
-				pEntity->GetBoundingGeometry()->SetTM(pEntity->GetLocalMatrix());
-				IGeometry* firstBox = GetBoundingGeometry()->Duplicate();
-				firstBox->SetTM(backupLocal);
-				IGeometry* lastBox = GetBoundingGeometry();
-				lastBox->SetTM(oLocalMatrix);
-				IGeometry::TFace collisionFace = IGeometry::eNone;
-				collisionFace = pEntity->GetBoundingGeometry()->GetReactionYAlignedBox(*firstBox, *lastBox, R);
-				delete firstBox;
-				if (collisionFace != IBox::eNone) {
-					lastBottom = R;
-					last = R;
-					if (last.m_y < fMaxHeight)
-						last.m_y = fMaxHeight;
-					bCollision = true;
-					if (collisionFace == IBox::eYPositive) {
-						if (fMaxHeight < last.m_y)
-							fMaxHeight = last.m_y;
-						else
-							last.m_y = fMaxHeight;
-						last.m_y += h / 2.f;
-						m_pBody->m_oSpeed.m_y = 0;
-						oLocalMatrix.m_13 = last.m_y;
-						GetBoundingGeometry()->SetTM(oLocalMatrix);
-					}
-					else {
-						IBox* pBox = static_cast<IBox*>(pEntity->GetBoundingGeometry());
-						float fObstacleHeight = pEntity->GetBoundingGeometry()->GetBBoxDimension().m_y;
-						if (fObstacleHeight > MAX_HEIGHT_ABLE_TO_CLIMB) {
-							oLocalMatrix.m_03 = last.m_x;
-							oLocalMatrix.m_23 = last.m_z;
-							GetBoundingGeometry()->SetTM(oLocalMatrix);
-							m_bCollideOnObstacle = true;
-						}
-						else {
-							m_bCollideOnObstacle = false;
-							last = localPos;
-							last.m_y += fObstacleHeight - h / 2.f;
-							if (fMaxHeight < last.m_y)
-								fMaxHeight = last.m_y;
-						}
-					}
-				}
-				else
-					bCollision = true;
-			}
-		}
+		if (m_pPhysic->GetGravity() > 0.f)
+			for (INode* pObstacle : obstacles)
+				ManageEntityCollision(firstLocalTM, nextLocalTM, pObstacle, isCollision);
+
+		nextLocalTM.GetPosition(nextPos);
 		// Ground collision
 		if (m_pParent) {
 			const float margin = 0.f;
@@ -203,16 +321,16 @@ void CObject::UpdateCollision()
 			CVector oParentWorldPosition;
 			m_pParent->GetWorldPosition(oParentWorldPosition);
 			float fLocalGroundHeight = fWorldGroundHeight - oParentWorldPosition.m_y;
-			float fEntityY = last.m_y - h / 2.f;
+			float fEntityY = nextPos.m_y - thisHeight / 2.f;
 			if (fEntityY <= fLocalGroundHeight + m_pPhysic->GetEpsilonError()) {
 				m_pBody->m_oSpeed.m_x = 0;
 				m_pBody->m_oSpeed.m_y = 0;
 				m_pBody->m_oSpeed.m_z = 0;
-				float newY = fLocalGroundHeight + h / 2.f;
-				last.m_y = newY;
+				float newY = fLocalGroundHeight + thisHeight / 2.f;
+				nextPos.m_y = newY;
 			}
 		}
-		SetLocalPosition(last);
+		SetLocalPosition(nextPos);
 
 		// Still into parent ?	
 		if (m_pParent && !TestWorldCollision(m_pParent)) {
@@ -221,8 +339,8 @@ void CObject::UpdateCollision()
 				LinkAndUpdateMatrices(pEntity);
 		}
 
-		if ((bCollision || !m_pPhysic->GetGravity()) && m_pfnCollisionCallback) {
-			m_pfnCollisionCallback(this, entities);
+		if ((isCollision || !m_pPhysic->GetGravity()) && m_pfnCollisionCallback) {
+			m_pfnCollisionCallback(this, obstacles);
 		}
 	}
 }
@@ -714,7 +832,7 @@ void CCharacter::WearShoes(string shoesPath)
 	string shoesName = shoesPath.substr(shoesPath.find_last_of("/") + 1);
 	CEntity* Lshoes = new CEntity(m_oInterface, string("clothes/shoes/") + sPrefix + "L" + shoesName + ".bme");
 	Lshoes->LinkDummyParentToDummyEntity(this, "BodyDummyLFoot");
-	CEntity* Rshoes = new CEntity(m_oInterface, string("clothes/shoes/") + sPrefix + "R" + shoesName + ".bme");
+	CEntity* Rshoes = new CEntity(m_oInterface, string("clothes/shoes/") + sPrefix + "correctedPosition" + shoesName + ".bme");
 	Rshoes->LinkDummyParentToDummyEntity(this, "BodyDummyRFoot");
 }
 
@@ -990,15 +1108,22 @@ bool CCharacter::IsUnique()
 void CCharacter::RunAction( string sAction, bool bLoop )
 {
 	map<string, CCharacter::TAction>::iterator itAction = s_mActions.find(sAction);
-	if (itAction != s_mActions.end())
+	if (itAction != s_mActions.end()) {
+		m_sCurrentAction = sAction;
 		itAction->second(this, bLoop);
+	}
+}
+
+const string& CCharacter::GetCurrentAction() const
+{
+	return m_sCurrentAction;
 }
 
 void CCharacter::SetPredefinedAnimation( string s, bool bLoop, int nFrameNumber)
 {
 	IMesh* pMesh = static_cast<IMesh*>(m_pRessource);
 	map<string, string>::iterator itOverrideAnimation = m_mOverridenAnimation.find(s);
-	string sAnimationName; // = s_mBodiesAnimations[m_sCurrentBodyName][s].first;
+	string sAnimationName;
 	sAnimationName = itOverrideAnimation != m_mOverridenAnimation.end() ? itOverrideAnimation->second : s_mBodyAnimations[m_sCurrentBodyName].m_mAnimationInfos[s].m_ActionToAnimation.second;
 	SetCurrentAnimation(sAnimationName);
 	if (!m_pCurrentAnimation)
@@ -1086,7 +1211,7 @@ void CCharacter::Jump(bool bLoop)
 		//SetPredefinedAnimation("jump", bLoop);
 		//if (!m_bUsePositionKeys)
 		//ConstantLocalTranslate(CVector(0.f, m_mAnimationSpeedByType[eJump], 0.f));
-		m_pBody->m_oSpeed.m_y = 2000;
+		m_pBody->m_oSpeed.m_y = 600;
 	}
 }
 

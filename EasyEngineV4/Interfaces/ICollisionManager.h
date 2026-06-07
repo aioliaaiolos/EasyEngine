@@ -4,6 +4,7 @@
 #include "EEPlugin.h"
 #include "IRenderer.h"
 #include "ILoader.h"
+#include "IGeometry.h"
 #include "../Utils2/Dimension.h"
 
 // stl
@@ -21,6 +22,14 @@ class ISegment2D;
 class ISegment;
 class IEntity;
 class IEntityManager;
+
+struct CollisionInfo
+{
+	float t;
+	bool collision;
+	CVector reaction;
+	IGeometry::TFace face;
+};
 
 class IHeightMap
 {
