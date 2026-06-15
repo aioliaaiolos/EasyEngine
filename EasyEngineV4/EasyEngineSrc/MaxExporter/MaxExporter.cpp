@@ -13,6 +13,8 @@
 #include "IFileSystem.h"
 #include "IGeometry.h"
 
+#include <set>
+
 using namespace std;
 
 HINSTANCE hInstance;
@@ -375,17 +377,37 @@ void CMaxExporter::StoreMaxMaterialToMaterialInfos(Mtl* pMaterial, ILoader::CMat
 	string sName(wName.begin(), wName.end());
 	mi.m_sName = sName;
 	GetMaterialTextureName(pMaterial, mi.m_sDiffuseMapName, 1);
-	int nMtlCount = 0, iMtl = 0;
+	int nMtlCount = 0, materialId = 0;
 	Mtl* pSubMtl = NULL;
-	while (pSubMtl = pMaterial->GetSubMtl(iMtl++))nMtlCount++;
-	mi.m_vSubMaterials.resize(nMtlCount);
-	for (iMtl = 0; iMtl < nMtlCount; iMtl++)
+	int consecutiveNullMaterialCount = 0;
+	set<int> materialIds;
+	while (consecutiveNullMaterialCount < 10) {
+		pSubMtl = pMaterial->GetSubMtl(materialId);
+		if (pSubMtl) {
+			materialIds.insert(materialId);
+			nMtlCount++;
+			consecutiveNullMaterialCount = 0;
+		}
+		else
+			consecutiveNullMaterialCount++;
+		materialId++;
+	}
+	
+	set<string> materialNames;
+	for(set<int>::iterator itMat = materialIds.begin(); itMat != materialIds.end(); itMat++)
 	{
-		MSTR sSlotName = pMaterial->GetSubMtlSlotName(iMtl);
+		int matId = *itMat;
+		MSTR sSlotName = pMaterial->GetSubMtlSlotName(matId);
 		int nID = (int)(sSlotName[1] - '0');
-		pSubMtl = pMaterial->GetSubMtl(iMtl);
-		StoreMaxMaterialToMaterialInfos(pSubMtl, mi.m_vSubMaterials[iMtl]);
-		mi.m_vSubMaterials[iMtl].m_nID = iMtl;
+		pSubMtl = pMaterial->GetSubMtl(matId);
+		ILoader::CMaterialInfos matInfo;
+		StoreMaxMaterialToMaterialInfos(pSubMtl, matInfo);
+		set<string>::iterator itMaterialName = materialNames.find(matInfo.m_sName);
+		if (itMaterialName == materialNames.end()) {
+			matInfo.m_nID = matId;
+			mi.m_mSubMaterials[matId] = matInfo;
+		}
+		materialNames.insert(matInfo.m_sName);
 	}
 }
 
@@ -494,7 +516,9 @@ bool CMaxExporter::IsCollisionMesh(string sObjectName)
 		(sObjectName.find("Roof") == -1) &&
 		(sObjectName.find("Floor") == -1) &&
 		(sObjectName.find("Ground") == -1) &&
-		(sObjectName.find("Column") == -1) )
+		(sObjectName.find("Column") == -1) && 
+		(sObjectName.find("Stairs") == -1)
+		)
 		return false;
 	return true;
 }

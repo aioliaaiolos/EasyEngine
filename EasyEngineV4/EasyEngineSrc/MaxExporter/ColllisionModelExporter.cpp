@@ -171,15 +171,11 @@ bool CollisionModelExporter::StoreMeshInfos(INode* pMesh, IBox& box)
 	const wchar_t* wName = pMesh->GetName();
 	string sName;
 	CStringUtils::ConvertWStringToString(wName, sName);
-	if ( (sName.find("Wall") == -1) && 
-		(sName.find("Door") == -1) && 
-		(sName.find("Roof") == -1) && 
-		(sName.find("Floor") == -1) && 
-		(sName.find("Ground") == -1) &&
-		(sName.find("Column") == -1) )
+	if (!IsCollisionMesh(sName)) {
 		return false;
+	}
+	
 	box.SetName(sName);
-
 	Mesh& mesh = GetMeshFromNode(pMesh);
 	Box3 bbox = mesh.getBoundingBox();
 	CMatrix tm;

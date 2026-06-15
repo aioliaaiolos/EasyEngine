@@ -213,11 +213,11 @@ void CBMELoader::LoadMaterial( CBinaryFileStorage& fs, CMaterialInfos& mi )
 
 		unsigned int nSubMaterialSize;
 		fs >> nSubMaterialSize;
-		mi.m_vSubMaterials.resize( nSubMaterialSize );
 		for( unsigned int iSubMat = 0; iSubMat < nSubMaterialSize; iSubMat++ )
 		{
-			mi.m_vSubMaterials.resize( iSubMat + 1 );
-			LoadMaterial( fs, mi.m_vSubMaterials[ iSubMat ] );
+			ILoader::CMaterialInfos materialInfo;
+			LoadMaterial( fs, materialInfo);
+			mi.m_mSubMaterials[iSubMat] = materialInfo;
 		}
 	}
 	if ( mi.m_sDiffuseMapName.size() == 0 )
@@ -636,16 +636,15 @@ void CBMELoader::ExportMaterialInfos( const ILoader::CMaterialInfos& mi, CBinary
 	{
 		nMat = 1;
 		fs << nMat;
-		if( mi.m_vSubMaterials.size() > 0 )
+		if( mi.m_mSubMaterials.size() > 0 )
 			fs << 1 << mi.m_nID;
 		else
 			fs << 1 << mi.m_nID;
 		fs << mi.m_vAmbient << mi.m_vDiffuse << mi.m_vSpecular << mi.m_fShininess;
 		fs <<  mi.m_sName << mi.m_sDiffuseMapName;
-		fs << (unsigned int)mi.m_vSubMaterials.size();
-
-		for( unsigned int iMtl = 0; iMtl < mi.m_vSubMaterials.size(); iMtl++ )
-			ExportMaterialInfos( mi.m_vSubMaterials[ iMtl ], fs );
+		fs << (unsigned int)mi.m_mSubMaterials.size();
+		for(map<const int, ILoader::CMaterialInfos>::const_iterator itMaterial = mi.m_mSubMaterials.begin(); itMaterial != mi.m_mSubMaterials.end(); itMaterial++)
+			ExportMaterialInfos(itMaterial->second, fs );
 	}
 }
 

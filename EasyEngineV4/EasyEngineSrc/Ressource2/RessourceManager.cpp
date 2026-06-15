@@ -27,6 +27,7 @@
 #include "ICollisionManager.h"
 #include "IFileSystem.h"
 #include "ILogger.h"
+#include "IConsole.h"
 
 // Utils
 #include "../Utils2/Logger.h"
@@ -59,6 +60,10 @@ m_pCollisionManager(nullptr)
 
 	m_oInterface.HandlePluginCreation("Logger", [&](CPlugin* pPlugin) {
 		m_pLogger = dynamic_cast<ILogger*>(pPlugin);
+	});
+
+	m_oInterface.HandlePluginCreation("Console", [&](CPlugin* pPlugin) {
+		m_pConsole = dynamic_cast<IConsole*>(pPlugin);
 	});
 }
 
@@ -237,7 +242,8 @@ IAnimatableMesh* CRessourceManager::CreateMesh( ILoader::CAnimatableMeshData& oD
 			oDesc.m_mMaterials[ 0 ] = static_cast< CMaterial* >( pMaterial );
 
 		if (oDesc.m_mMaterials.size() > 8) {
-			throw CEException("Error in IAnimatableMesh* CRessourceManager::CreateMesh() : material count cannot be higher than 8");
+			throw CEException(string("Error in IAnimatableMesh* CRessourceManager::CreateMesh() : material count is ") + 
+				std::to_string(oDesc.m_mMaterials.size()) + ", cannot be higher than 8");
 		}
 		if (pMaterial && !static_cast< CMaterial* >(pMaterial)->GetShader())
 			pMaterial->SetShader(pShader);
@@ -519,8 +525,8 @@ void CRessourceManager::CollectMaterials(EEInterface& oInterface, const ILoader:
 {
 	CRessourceManager* pRessourceManager = static_cast<CRessourceManager*>(oInterface.GetPlugin("RessourceManager"));
 	mMaterials[ oMaterialInfos.m_nID ] = CreateMaterial(oInterface, &oMaterialInfos, pShader);
-	for ( unsigned int i = 0; i < oMaterialInfos.m_vSubMaterials.size(); i++ )
-		CollectMaterials(oInterface, oMaterialInfos.m_vSubMaterials[ i ], pShader, mMaterials );
+	for ( unsigned int i = 0; i < oMaterialInfos.m_mSubMaterials.size(); i++ )
+		CollectMaterials(oInterface, oMaterialInfos.m_mSubMaterials.at( i ), pShader, mMaterials );
 
 }
 
@@ -672,6 +678,7 @@ void CRessourceManager::CreateTextureDesc(string sFileName, CTexture2D::CDesc& d
 			catch (CFileNotFoundException& e)
 			{
 				m_oLoaderManager.LoadTexture("Textures/Default.bmp", ti);
+				m_pConsole->Println("Erreur : texture '" + e.m_sFileName + "' manquante");
 			}
 		}
 		else {

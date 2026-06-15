@@ -14,26 +14,7 @@
 		"StaticEntities": [
 			{
 				"Name": "buildings/maison.bme",
-				"WorldTMs": [
-					[
-						1.0,
-						0.0,
-						0.0,
-						-39.648956298828125,
-						0.0,
-						1.0,
-						0.0,
-						682.2454223632813,
-						0.0,
-						0.0,
-						1.0,
-						-1292.6436767578125,
-						0.0,
-						0.0,
-						0.0,
-						1.0
-					]
-				]
+				"WorldTMs": []
 			}
 		],
 		"Areas": [],
@@ -62,6 +43,11 @@
 				"Ambient": 0.10000000149011612,
 				"CastShadow": true,
 				"Sun": false,
+				"ShadowFrustumSize": {
+					"width": 20000.0,
+					"height": 20000.0,
+					"far": 20000.0
+				},
 				"Type": "dir"
 			}
 		]

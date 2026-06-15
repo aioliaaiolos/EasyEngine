@@ -63,7 +63,7 @@ public:
 		std::vector< float >			m_vSpecular;
 		std::vector< float >			m_vEmissive;
 		float							m_fShininess;
-		std::vector< CMaterialInfos >	m_vSubMaterials;
+		std::map< int, CMaterialInfos >	m_mSubMaterials;
 		string							m_sShaderName;
 		bool							m_bExists;
 		CMaterialInfos():m_nID(-1), m_fShininess( 0 ), m_bExists(false){}

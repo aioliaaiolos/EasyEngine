@@ -39,6 +39,7 @@ class IHeightMap;
 struct CMaterialInfos;
 class CTimeManager;
 class ILogger;
+class IConsole;
 
 typedef unsigned int uint;
 
@@ -85,6 +86,7 @@ private:
 	IGeometryManager&								m_oGeometryManager;
 	ICollisionManager*								m_pCollisionManager;
 	IEntityManager*									m_pEntityManager;
+	IConsole*										m_pConsole = nullptr;
 
 	vector< string >								m_vErrorMessage;
 	IRessource*										GetRessourceByExtension(std::string sRessourceFileName);
