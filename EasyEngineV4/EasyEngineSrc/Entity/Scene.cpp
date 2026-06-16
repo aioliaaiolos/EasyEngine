@@ -457,7 +457,10 @@ void CScene::AddChild(INode* pNode)
 
 void CScene::AddCastShadowLight(CLightEntity* pLightEntity)
 {
-	m_vShadowLights.push_back(pLightEntity);
+	vector<CLightEntity*>::iterator itLightEntity = std::find(m_vShadowLights.begin(), m_vShadowLights.end(), pLightEntity);
+	if (itLightEntity == m_vShadowLights.end()) {
+		m_vShadowLights.push_back(pLightEntity);
+	}
 }
 
 void  CScene::RenderScene()

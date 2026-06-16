@@ -95,7 +95,7 @@ m_oRenderer(oDesc.m_oRenderer)
 		if (oDesc.m_vFaceMaterialID.size() > 0)
 		{
 			CMatrix m;
-			int nUnitTexture = 3;
+			int nUnitTexture = 1;
 			int nMaterialIndex = 0;
 			map<unsigned int, int> mMaterialIdToIndex;
 			for (map< int, CMaterial* >::const_iterator itMat = oDesc.m_mMaterials.begin(); itMat != oDesc.m_mMaterials.end(); ++itMat) {

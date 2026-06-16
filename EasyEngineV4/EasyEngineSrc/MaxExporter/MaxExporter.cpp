@@ -386,6 +386,14 @@ void CMaxExporter::StoreMaxMaterialToMaterialInfos(Mtl* pMaterial, ILoader::CMat
 		if (pSubMtl) {
 			materialIds.insert(materialId);
 			nMtlCount++;
+			if (consecutiveNullMaterialCount > 0) {
+				wstring wSubMatName(pSubMtl->GetName());
+				string sName(wSubMatName.begin(), wSubMatName.end());
+				string message = string("Attention, l'identifiant du matériau '") + sName + "' ne suit pas celui du materiau précédent, \n" +
+					"cela risque de causer des erreurs lors de l'importation dans EE.\n" + 
+					" Executez le script 'Compaction_Materiaux.ms' dans /Data/Max/MaxScript/ pour résoudre le probleme";
+				MessageBoxA(nullptr, message.c_str(), "IDs de Materiaux non contigus", MB_ICONEXCLAMATION);
+			}
 			consecutiveNullMaterialCount = 0;
 		}
 		else

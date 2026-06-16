@@ -722,7 +722,7 @@ void CRessourceManager::CreateTextureDesc(vector<unsigned char>& vTextels, int w
 	desc.m_nHeight = height;
 	desc.m_eFormat = pixelFormat;
 	desc.m_vTexels.swap(vTextels);
-	desc.m_nUnitTexture = 3;
+	desc.m_nUnitTexture = 1;
 }
 
 IRessource* CRessourceManager::CreateTexture( string sFileName, EEInterface& oInterface)
