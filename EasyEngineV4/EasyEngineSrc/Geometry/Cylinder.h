@@ -38,7 +38,7 @@ public:
 	void				GetBBoxDimension(CVector& dim) override;
 	const CVector&		GetBBoxDimension() const override;
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CCylinder::GetBBoxDimension()"); }
-	void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info) override { throw CMethodNotImplementedException("ComputeCollisionYAlignedBox"); }
+	void 				ComputeCollisionYAlignedBoxWithCylinder(CVector& firstPosition, CVector& nextPosition, float radius, float cylHeight, CollisionInfo& info) override;
 	void				GetCenter(CVector& oCenter) const override;
 	
 

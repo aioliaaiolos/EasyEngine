@@ -166,3 +166,8 @@ IPersistantObject& CQuad::operator << (const CStringStorage& store)
 	throw 1;
 	return *this;
 }
+
+void CQuad::ComputeCollisionYAlignedBoxWithCylinder(CVector& firstPosition, CVector& nextPosition, float radius, float cylHeight, CollisionInfo& info)
+{
+	throw CMethodNotImplementedException("ComputeCollisionYAlignedBoxWithCylinder");
+}

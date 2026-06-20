@@ -150,6 +150,11 @@ IPersistantObject& CSegment::operator << (const CStringStorage& store)
 	return *this;
 }
 
+void CSegment::ComputeCollisionYAlignedBoxWithCylinder(CVector& firstPosition, CVector& nextPosition, float radius, float cylHeight, CollisionInfo& info)
+{
+	throw CMethodNotImplementedException("ComputeCollisionYAlignedBoxWithCylinder");
+}
+
 CSegment2D::CSegment2D( const CVector2D& first, const CVector2D& last ):
 m_oFirst( first ),
 m_oLast( last )
@@ -185,3 +190,5 @@ void CSegment2D::GetPoints( CVector2D& p1, CVector2D& p2 ) const
 	p1 = m_oFirst;
 	p2 = m_oLast;
 }
+
+

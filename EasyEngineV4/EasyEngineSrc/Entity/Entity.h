@@ -218,7 +218,10 @@ protected:
 class CCollisionEntity : public CEntity, public ICollisionEntity
 {
 public:
-	CCollisionEntity(EEInterface& oInterface) : CEntity(oInterface) {}
+	CCollisionEntity(EEInterface& oInterface) : CEntity(oInterface) 
+	{
+		m_sTypeName = "CollisionEntity";
+	}
 private:
 };
 

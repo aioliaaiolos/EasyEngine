@@ -424,3 +424,8 @@ void CCylinder::GetCenter(CVector& oCenter) const
 {
 	m_oTM.GetAffinePart(oCenter);
 }
+
+void CCylinder::ComputeCollisionYAlignedBoxWithCylinder(CVector& firstPosition, CVector& nextPosition, float radius, float cylHeight, CollisionInfo& info)
+{
+	throw CMethodNotImplementedException("ComputeCollisionYAlignedBoxWithCylinder");
+}

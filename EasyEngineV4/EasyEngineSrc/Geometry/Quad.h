@@ -27,7 +27,7 @@ public :
 	void				GetBBoxPoints(vector< CVector >& vPoints) override { throw CMethodNotImplementedException("CQuad::GetBBoxDimension()"); }
 	void				GetCenter(CVector& oCenter) const override;
 	float				GetRadius() const override;
-	void				ComputeCollisionYAlignedBox(IGeometry& firstPositionBox, IGeometry& lastPositionBox, CollisionInfo& info) override { throw CMethodNotImplementedException("ComputeCollisionYAlignedBox"); }
+	void				ComputeCollisionYAlignedBoxWithCylinder(CVector& firstPosition, CVector& nextPosition, float radius, float cylHeight, CollisionInfo& info) override;
 
 	const IPersistantObject& operator >> (CBinaryFileStorage& store) const override;
 	IPersistantObject& operator << (const CBinaryFileStorage& store) override;

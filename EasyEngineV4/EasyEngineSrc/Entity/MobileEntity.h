@@ -7,6 +7,7 @@
 class IFileSystem;
 class CItem;
 class CWeapon;
+class CollisionInfo;
 
 // to delete
 class IHud;
@@ -25,9 +26,7 @@ protected:
 	bool						m_bCollideOnObstacle;
 
 	static void 				OnCollision(CEntity* pThis, vector<INode*> entities);
-	void						ManagerEntityCollision_Old(CMatrix& firstLocalTM, CMatrix& nextLocalTM, CVector& nextPos, float& fMaxHeight, INode* pObstacle, bool& isCollision);
-	void						ManageEntityCollision(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision);
-	void						ManageEntityCollisionNormals(CMatrix& firstLocalTM, CMatrix& nextLocalTM, INode* pObstacle, bool& isCollision);
+	void						ManageEntityCollisionNormals(CVector& firstPosition, CVector& nextPosition, INode* pObstacle, bool& isCollision, CollisionInfo& colInfo);
 
 	const float					MAX_HEIGHT_ABLE_TO_CLIMB = 50.f;
 
